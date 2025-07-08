@@ -122,3 +122,8 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 } 
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 6rem 0 3rem; /* 위에 공간 확보! */
+}

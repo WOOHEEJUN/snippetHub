@@ -1,0 +1,30 @@
+/* ProfileEdit.css */
+.profile-edit-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-edit-container h2 {
+  margin-bottom: 1.5rem;
+}
+
+.profile-edit-container label {
+  font-weight: bold;
+}
+
+.profile-edit-container input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.profile-edit-container .btn {
+  margin-right: 10px;
+}

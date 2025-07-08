@@ -1,0 +1,45 @@
+.snippet-write-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.snippet-write-container h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.snippet-form label {
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.snippet-form input,
+.snippet-form select,
+.snippet-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.snippet-form .submit-btn {
+  margin-top: 1.2rem;
+  padding: 10px 20px;
+  background: #6aa8ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.snippet-form .submit-btn:hover {
+  background: #4d93f0;
+}
