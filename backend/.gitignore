@@ -1,4 +1,9 @@
 
 .gradle/
 build/
-  bin/
+bin/
+out/
+*.log
+*.tmp
+*.class
+!.gitignore

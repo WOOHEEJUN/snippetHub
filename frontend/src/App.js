@@ -80,7 +80,6 @@ function App() {
   <Route path="/register" element={<Register />} />
   <Route path="/board" element={<Board />} />
   <Route path="/board/write" element={<BoardWrite />} />
-  <Route path="/board/:id" element={<BoardDetail />} />
   <Route path="/board/:postId" element={<BoardDetail />} />
   <Route path="/mypage" element={<Mypage />} />
   <Route path="/mypage/posts" element={<MyPosts />} />
@@ -90,7 +89,6 @@ function App() {
   <Route path="/snippets/:snippetId" element={<SnippetDetail />} />
   <Route path="/snippets/write" element={<SnippetWrite />} />
   <Route path="/code-test" element={<CodeTest />} />
-  <Route path="/board/:postId" element={<BoardDetail />} />
 </Routes>
 
         </div>
