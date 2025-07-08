@@ -29,10 +29,12 @@ public class SnippetService {
         return snippetRepository.findAll();
     }
 
+    @Transactional
     public Snippet save(Snippet snippet) {
         return snippetRepository.save(snippet);
     }
 
+    @Transactional
     public void delete(Long id) {
         snippetRepository.deleteById(id);
     }
