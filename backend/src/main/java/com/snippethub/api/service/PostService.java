@@ -29,10 +29,12 @@ public class PostService {
         return postRepository.findAll();
     }
 
+    @Transactional
     public Post save(Post post) {
         return postRepository.save(post);
     }
 
+    @Transactional
     public void delete(Long id) {
         postRepository.deleteById(id);
     }
