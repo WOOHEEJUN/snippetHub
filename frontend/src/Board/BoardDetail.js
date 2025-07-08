@@ -1,38 +1,44 @@
-// src/Board/BoardDetail.js
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import './BoardDetail.css';
 
 function BoardDetail() {
-  const { id } = useParams(); // URL의 게시글 ID 추출
+  const { postId } = useParams();
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    // 예시: API 또는 로컬 데이터 가져오기
-    const fetchPost = async () => {
-      // 여기서는 더미로 작성
-      const fakePost = {
-        id,
-        title: '게시글 제목',
-        content: '이건 게시글 내용입니다.',
-        author: '홍길동',
-        date: '2025-07-07',
-      };
-      setPost(fakePost);
-    };
+    const token = localStorage.getItem('token');
 
-    fetchPost();
-  }, [id]);
+    fetch(`/api/v1/posts/${postId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('게시글 불러오기 실패');
+        return res.json();
+      })
+      .then((data) => {
+        console.log('받아온 게시글 데이터:', data);
+        setPost(data);
+      })
+      .catch((err) => console.error('에러:', err));
+  }, [postId]);
 
-  if (!post) return <p>로딩 중...</p>;
+  if (!post) {
+    return <div style={{ padding: '2rem' }}>📄 게시글을 불러오는 중입니다...</div>;
+  }
 
   return (
-    <div className="container mt-5">
+    <div className="board-detail-container" style={{ padding: '2rem' }}>
       <h2>{post.title}</h2>
-      <p className="text-muted">
-        작성자: {post.author} | 날짜: {post.date}
-      </p>
+      <p><strong>작성자:</strong> {post.author?.nickname}</p>
+      <p><strong>작성일:</strong> {new Date(post.createdAt).toLocaleString()}</p>
+      <p><strong>추천수:</strong> {post.likes}</p>
       <hr />
-      <p>{post.content}</p>
+      <div className="post-content" style={{ whiteSpace: 'pre-line' }}>
+        {post.content}
+      </div>
     </div>
   );
 }

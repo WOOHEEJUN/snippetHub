@@ -1,113 +1,60 @@
+// src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // 컴포넌트 마운트 시 토큰 확인
+  // ✅ 컴포넌트 마운트 시 localStorage에서 토큰 불러오기
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // 토큰이 있으면 사용자 정보 가져오기
-      fetchUserInfo(token);
-    } else {
-      setLoading(false);
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+      fetchUser(storedToken);
     }
   }, []);
 
-  // 사용자 정보 가져오기
-  const fetchUserInfo = async (token) => {
+  const fetchUser = async (accessToken) => {
     try {
-      const response = await fetch('/api/v1/users/me', {
+      const res = await fetch('/api/v1/users/me', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        // 토큰이 유효하지 않으면 제거
-        localStorage.removeItem('token');
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-      localStorage.removeItem('token');
-      setUser(null);
-    } finally {
-      setLoading(false);
+      if (!res.ok) throw new Error('사용자 정보 불러오기 실패');
+
+      const userData = await res.json();
+      setUser(userData);
+    } catch (err) {
+      console.error('사용자 정보 오류:', err);
+      logout(); // 실패 시 로그아웃 처리
     }
   };
 
-  // 로그인 함수
-  const login = async (token) => {
-    localStorage.setItem('token', token);
-    await fetchUserInfo(token);
+  const login = async (accessToken) => {
+    localStorage.setItem('token', accessToken);
+    setToken(accessToken);
+    await fetchUser(accessToken);
   };
 
-  // 로그아웃 함수
-  const logout = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        // 서버에 로그아웃 요청
-        await fetch('/api/v1/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // 로컬에서 토큰 제거
-      localStorage.removeItem('token');
-      setUser(null);
-    }
+  const logout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setUser(null);
   };
 
-  // 토큰 가져오기
-  const getToken = () => {
-    return localStorage.getItem('token');
-  };
-
-  // 인증된 요청을 위한 헤더 가져오기
   const getAuthHeaders = () => {
-    const token = getToken();
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-  };
-
-  const value = {
-    user,
-    loading,
-    login,
-    logout,
-    getToken,
-    getAuthHeaders,
-    isAuthenticated: !!user,
+    return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ token, user, login, logout, getAuthHeaders }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

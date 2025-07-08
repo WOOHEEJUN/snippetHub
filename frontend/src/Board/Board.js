@@ -17,18 +17,25 @@ function Board() {
     }
   };
 
+  const handleRowClick = (postId) => {
+    navigate(`/board/${postId}`); // 게시글 상세 페이지로 이동
+  };
+
   useEffect(() => {
-  fetch('/api/v1/posts', {
-    headers: getAuthHeaders(),
-  })
-    .then(res => res.json())
-    .then(data => {
-      setPosts(data.content || []); // ✅ 중요!!
+    fetch('/api/v1/posts', {
+      headers: getAuthHeaders(),
     })
-    .catch(err => {
-      console.error('게시글 로드 실패:', err);
-    });
-}, []);
+      .then(res => res.json())
+      .then(data => {
+        console.log("서버에서 받아온 게시물 목록:", data);
+        const postsData = Array.isArray(data) ? data : data.content || [];
+        setPosts(postsData);
+      })
+      .catch(err => {
+        console.error('게시글 로드 실패:', err);
+      });
+  }, []);
+
   return (
     <div className="container mt-5 board-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -57,15 +64,20 @@ function Board() {
             </tr>
           ) : (
             posts.map((post, index) => (
-              <tr key={post.id}>
+              <tr
+        key={post.postId}
+        onClick={() => handleRowClick(post.postId)}  // ✅ 정확히 이렇게
+      >
                 <td>{index + 1}</td>
                 <td>{post.title}</td>
-                <td>{post.author.nickname}</td>
+                <td>{post.author?.nickname || '알 수 없음'}</td>
                 <td>{new Date(post.createdAt).toLocaleDateString()}</td>
                 <td>{post.likes}</td>
               </tr>
             ))
           )}
+
+          
         </tbody>
       </table>
     </div>
