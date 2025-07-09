@@ -18,10 +18,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklist tokenBlacklist;
 
-    public JwtRequestFilter(CustomUserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public JwtRequestFilter(CustomUserDetailsService userDetailsService, JwtUtil jwtUtil, TokenBlacklist tokenBlacklist) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklist = tokenBlacklist;
     }
 
     @Override
@@ -35,6 +37,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
+            
+            // 블랙리스트 체크 추가
+            if (tokenBlacklist.isBlacklisted(jwt)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\":\"Token has been blacklisted\"}");
+                return;
+            }
+            
             username = jwtUtil.extractUsername(jwt);
         }
 

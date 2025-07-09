@@ -7,6 +7,7 @@ import com.snippethub.api.dto.RegisterRequest;
 import com.snippethub.api.dto.UserDto;
 import com.snippethub.api.service.UserService;
 import com.snippethub.api.security.JwtUtil;
+import com.snippethub.api.security.TokenBlacklist;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,11 +26,13 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklist tokenBlacklist;
 
-    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil, TokenBlacklist tokenBlacklist) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklist = tokenBlacklist;
     }
 
     @PostMapping("/register")
@@ -55,8 +58,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        // 실제로는 토큰 블랙리스트 처리 등 필요
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            tokenBlacklist.blacklist(token);
+        }
         return ResponseEntity.noContent().build();
     }
 
