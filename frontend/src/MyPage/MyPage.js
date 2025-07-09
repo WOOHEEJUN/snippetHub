@@ -39,9 +39,21 @@ function MyPage() {
   }, []);
 
   const goToMyPosts = () => {
-    navigate('/mypage/posts', {
-      state: { token }, // 토큰을 다음 페이지에 넘김
-    });
+    navigate('/mypage/posts', { state: { token } });
+  };
+
+  const goToMySnippets = () => {
+    navigate('/mypage/snippets', { state: { token } });
+  };
+
+  const goToEditProfile = () => {
+    navigate('/mypage/edit', { state: { token } });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    alert('로그아웃 되었습니다.');
+    navigate('/login');
   };
 
   if (loading) return <p>로딩 중...</p>;
@@ -66,9 +78,18 @@ function MyPage() {
       )}
 
       <div className="mypage-actions">
+        <h2>
+          내가 쓴 전체 게시물  ({userActivity?.totalPostCount ?? 0}개)
+        </h2>
         <button className="btn btn-outline-primary" onClick={goToMyPosts}>
-          내가 쓴 게시물 보기 ({userActivity?.postCount ?? 0}개)
+          내가 쓴 게시물 보기 ({userActivity?.freePostCount ?? 0}개)
         </button>
+        <button className="btn btn-outline-primary" onClick={goToMySnippets}>
+          내가 작성한 스니펫 보기 ({userActivity?.snippetCount ?? 0}개)
+        </button>
+        <button className="btn btn-outline-secondary" onClick={goToEditProfile}>
+          개인정보 수정
+        </button>      
       </div>
     </div>
   );

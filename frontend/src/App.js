@@ -15,6 +15,8 @@ import SnippetBoard from './SnippetBoard/SnippetBoard';
 import SnippetDetail from './SnippetBoard/SnippetDetail';
 import SnippetWrite from './SnippetBoard/SnippetWrite';
 import CodeTest from './CodeTest/CodeTest';
+import MyPostDetail from './MyPage/MyPostDetail';
+import MySnippetDetail from './MyPage/MySnippetDetail';
 
 
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -43,7 +45,10 @@ const AuthStatus = () => {
       <span>안녕하세요, {user.nickname || user.email}님!</span>
       <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
        <Link to="/code-test" className="btn btn-outline-success">코드 테스트</Link>
-      <button onClick={() => logout()} className="btn btn-outline-danger">로그아웃</button>
+      <button onClick={() => {
+        logout();
+        navigate('/login');
+        }} className="btn btn-outline-danger">로그아웃</button>
     </div>
   );
 };
@@ -89,6 +94,8 @@ function App() {
   <Route path="/snippets/:snippetId" element={<SnippetDetail />} />
   <Route path="/snippets/write" element={<SnippetWrite />} />
   <Route path="/code-test" element={<CodeTest />} />
+  <Route path="/mypage/posts/:postId" element={<MyPostDetail />} />
+  <Route path="/mypage/snippets/:snippetId" element={<MySnippetDetail />} />
 </Routes>
 
         </div>

@@ -1,9 +1,10 @@
 // src/MyPage/MyPosts.js
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function MyPosts() {
   const location = useLocation();
+  const navigate = useNavigate();
   const token = location.state?.token || localStorage.getItem('token');
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,15 +18,15 @@ function MyPosts() {
     fetch('/api/v1/posts/users/me/posts', {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     })
       .then((res) => {
         if (!res.ok) throw new Error(`게시글 조회 실패: ${res.status}`);
-        return res.json(); // ✅ 여기서 JSON 파싱
+        return res.json();
       })
       .then((data) => {
-        setPosts(data|| []);
+        setPosts(data || []);
         setLoading(false);
       })
       .catch((err) => {
@@ -33,6 +34,10 @@ function MyPosts() {
         setLoading(false);
       });
   }, [token]);
+
+  const handlePostClick = (postId) => {
+    navigate(`/mypage/posts/${postId}`);
+  };
 
   if (loading) return <p>로딩 중...</p>;
 
@@ -44,7 +49,12 @@ function MyPosts() {
       ) : (
         <ul className="post-list">
           {posts.map((post) => (
-            <li key={post.postId} className="post-item">
+            <li
+              key={post.postId}
+              className="post-item"
+              onClick={() => handlePostClick(post.postId)}
+              style={{ cursor: 'pointer' }}
+            >
               <div style={{ fontWeight: 'bold', color: '#007bff' }}>
                 {post.title}
               </div>
