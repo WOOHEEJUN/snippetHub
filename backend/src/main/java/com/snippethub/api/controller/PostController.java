@@ -3,8 +3,10 @@ package com.snippethub.api.controller;
 import com.snippethub.api.domain.Post;
 import com.snippethub.api.domain.User;
 import com.snippethub.api.service.PostService;
+import com.snippethub.api.service.SnippetService;
 import com.snippethub.api.service.UserService;
 import com.snippethub.api.dto.PostDto;
+import com.snippethub.api.dto.PostCountDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +19,12 @@ import jakarta.validation.Valid;
 public class PostController {
     private final PostService postService;
     private final UserService userService;
+    private final SnippetService snippetService;
 
-    public PostController(PostService postService, UserService userService) {
+    public PostController(PostService postService, UserService userService, SnippetService snippetService) {
         this.postService = postService;
         this.userService = userService;
+        this.snippetService = snippetService;
     }
 
     @GetMapping
@@ -69,6 +73,18 @@ public class PostController {
         User user = getCurrentUser();
         List<Post> posts = postService.getPostsByUserId(user.getId());
         return ResponseEntity.ok(posts.stream().map(this::toPostDto).toList());
+    }
+    
+    @GetMapping("/users/me/posts/count")
+    public ResponseEntity<PostCountDto> getMyPostCount() {
+        User user = getCurrentUser();
+        long freePosts = postService.getPostCountByUserId(user.getId());
+        long snippetPosts = snippetService.getSnippetCountByUserId(user.getId());
+        PostCountDto countDto = new PostCountDto();
+        countDto.setFreePosts(freePosts);
+        countDto.setSnippetPosts(snippetPosts);
+        countDto.setTotalPosts(freePosts + snippetPosts);
+        return ResponseEntity.ok(countDto);
     }
 
     private User getCurrentUser() {

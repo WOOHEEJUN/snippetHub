@@ -18,7 +18,11 @@ public class PostService {
     }
 
     public List<Post> getPostsByUserId(Long userId) {
-        return postRepository.findAll().stream().filter(p -> p.getUser().getId().equals(userId)).toList();
+        return postRepository.findByUserId(userId);
+    }
+    
+    public long getPostCountByUserId(Long userId) {
+        return postRepository.countByUserId(userId);
     }
 
     public Post getPostById(Long id) {

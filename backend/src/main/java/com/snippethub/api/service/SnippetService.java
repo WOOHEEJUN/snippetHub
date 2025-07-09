@@ -21,6 +21,10 @@ public class SnippetService {
         return snippetRepository.findAll().stream().filter(s -> s.getUser().getId().equals(userId)).toList();
     }
 
+    public long getSnippetCountByUserId(Long userId) {
+        return snippetRepository.countByUserId(userId);
+    }
+
     public Snippet getSnippetById(Long id) {
         return snippetRepository.findById(id).orElseThrow(() -> new RuntimeException("Snippet not found"));
     }

@@ -24,10 +24,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PostService postService;
+    private final SnippetService snippetService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, 
+                      PostService postService, SnippetService snippetService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.postService = postService;
+        this.snippetService = snippetService;
     }
 
     @Transactional
@@ -47,13 +52,20 @@ public class UserService {
     }
 
     public Map<String, Object> getUserActivity(Long userId) {
-        // This is a placeholder. We will implement the actual logic later.
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 실제 게시글 수 계산 (자유게시글 + 스니펫)
+        long freePostCount = postService.getPostCountByUserId(userId);
+        long snippetCount = snippetService.getSnippetCountByUserId(userId);
+        long totalPostCount = freePostCount + snippetCount;
+        
         return Map.of(
             "grade", user.getGrade(),
-            "postCount", 0,
-            "commentCount", 0,
-            "likesReceived", 0
+            "freePostCount", freePostCount,    // 자유게시글 수
+            "snippetCount", snippetCount,      // 스니펫 수
+            "totalPostCount", totalPostCount,  // 전체 게시글 수
+            "commentCount", 0,  // TODO: CommentService 구현 후 실제 값으로 변경
+            "likesReceived", 0  // TODO: LikeService 구현 후 실제 값으로 변경
         );
     }
 

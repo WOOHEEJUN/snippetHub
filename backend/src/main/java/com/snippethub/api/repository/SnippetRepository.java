@@ -16,4 +16,6 @@ public interface SnippetRepository extends JpaRepository<Snippet, Long> {
     Optional<Snippet> findById(@Param("id") Long id);
 
     List<Snippet> findByUserId(Long userId);
+    
+    long countByUserId(Long userId);
 }
