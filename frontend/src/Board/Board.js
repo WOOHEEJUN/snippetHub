@@ -64,10 +64,7 @@ function Board() {
             </tr>
           ) : (
             posts.map((post, index) => (
-              <tr
-        key={post.postId}
-        onClick={() => handleRowClick(post.postId)}  // ✅ 정확히 이렇게
-      >
+              <tr key={post.id || `post-${index}`} onClick={() => handleRowClick(post.id)}>
                 <td>{index + 1}</td>
                 <td>{post.title}</td>
                 <td>{post.author?.nickname || '알 수 없음'}</td>

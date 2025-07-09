@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
 import './SnippetBoard.css';
+
+import '../css/SnippetDetail.css';
+
 
 function SnippetBoard() {
   const navigate = useNavigate();
@@ -26,20 +30,34 @@ function SnippetBoard() {
       headers: getAuthHeaders(),
     })
       .then(res => res.json())
+
       .then(data => {
         console.log("서버에서 받아온 스니펫 목록:", data);
         const snippetsData = Array.isArray(data) ? data : data.content || [];
         setSnippets(snippetsData);
       })
       .catch(err => {
+
+      .then((data) => {
+        const snippetData = Array.isArray(data) ? data : data.content || [];
+        setSnippets(snippetData);
+      })
+      .catch((err) => {
+
         console.error('스니펫 로드 실패:', err);
       });
   }, []);
 
   return (
+
     <div className="container mt-5 snippet-board-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>💻 코드 스니펫</h2>
+
+    <div className="container mt-5 board-container">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>💻 스니펫 게시판</h2>
+
         <button className="btn btn-primary" onClick={handleWrite}>
           스니펫 작성
         </button>
@@ -65,6 +83,7 @@ function SnippetBoard() {
           ) : (
             snippets.map((snippet, index) => (
               <tr
+
                 key={snippet.snippetId}
                 onClick={() => handleRowClick(snippet.snippetId)}
                 className="snippet-row"
@@ -87,6 +106,14 @@ function SnippetBoard() {
                     {snippet.language?.name || '기타'}
                   </span>
                 </td>
+
+                key={snippet.id || `snippet-${index}`}
+                onClick={() => handleRowClick(snippet.id)}
+              >
+                <td>{index + 1}</td>
+                <td>{snippet.title}</td>
+                <td>{snippet.language?.toUpperCase() || '-'}</td>
+
                 <td>{snippet.author?.nickname || '알 수 없음'}</td>
                 <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
               </tr>

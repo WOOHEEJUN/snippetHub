@@ -1,55 +1,106 @@
-// src/SnippetBoard/SnippetBoard.js
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../css/SnippetDetail.css'; // CSS 경로를 BoardDetail.css → SnippetDetail.css 로 명확히 분리
 
-function SnippetBoard() {
-  const [snippets, setSnippets] = useState([]);
-  const [loading, setLoading] = useState(true);
+function SnippetDetail() {
+  const { snippetId } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [snippet, setSnippet] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetch('/api/v1/snippets?page=0&size=10')
+    const token = localStorage.getItem('token');
+
+    fetch(`/api/v1/snippets/${snippetId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => {
-        if (!res.ok) throw new Error('스니펫 목록을 불러오는 데 실패했습니다.');
+        if (!res.ok) throw new Error('스니펫 불러오기 실패');
         return res.json();
       })
       .then((data) => {
-        setSnippets(data.content || []);
+        setSnippet(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('❌ 오류:', err);
-        alert(err.message);
+        console.error('에러:', err);
         setLoading(false);
       });
-  }, []);
+  }, [snippetId]);
 
-  if (loading) return <p>로딩 중...</p>;
+  const handleEdit = () => {
+    navigate(`/snippets/edit/${snippetId}`);
+  };
+
+  const handleDelete = () => {
+    if (!window.confirm('이 스니펫을 삭제하시겠습니까?')) return;
+
+    const token = localStorage.getItem('token');
+    fetch(`/api/v1/snippets/${snippetId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('삭제 실패');
+        alert('삭제되었습니다.');
+        navigate('/snippets');
+      })
+      .catch((err) => {
+        console.error('삭제 오류:', err);
+        alert('삭제 중 오류 발생');
+      });
+  };
+
+  if (loading) {
+    return <div className="snippet-detail-loading">💾 스니펫을 불러오는 중입니다...</div>;
+  }
+
+  if (!snippet) {
+    return <div className="snippet-detail-error">❌ 스니펫 정보를 찾을 수 없습니다.</div>;
+  }
+
+  const isAuthor = user?.nickname === snippet.author?.nickname;
 
   return (
-    <div className="snippet-board">
-      <h2>💾 전체 스니펫 게시판</h2>
-      {snippets.length === 0 ? (
-        <p>등록된 스니펫이 없습니다.</p>
-      ) : (
-        <ul className="snippet-list">
-          {snippets.map((snippet) => (
-            <li
-              key={snippet.snippetId}
-              className="snippet-card"
-              onClick={() => navigate(`/snippets/${snippet.snippetId}`)}
-              style={{ cursor: 'pointer' }}
-            >
-              <h4>{snippet.title}</h4>
-              <p>언어: {snippet.language}</p>
-              <p>좋아요: {snippet.likeCount}</p>
-              <small>{new Date(snippet.createdAt).toLocaleString()}</small>
-            </li>
-          ))}
-        </ul>
+    <div className="snippet-detail-container">
+      <h2>{snippet.title}</h2>
+      <p><strong>언어:</strong> {snippet.language?.toUpperCase()}</p>
+      <p><strong>작성자:</strong> {snippet.author?.nickname}</p>
+      <p><strong>작성일:</strong> {new Date(snippet.createdAt).toLocaleString()}</p>
+      <p><strong>좋아요:</strong> {snippet.likes ?? 0}</p>
+
+      {snippet.description && (
+        <>
+          <p><strong>설명:</strong></p>
+          <div className="snippet-description">
+            {snippet.description}
+          </div>
+        </>
+      )}
+
+      <hr />
+      <div className="snippet-code-section">
+        <h4>📄 코드</h4>
+        <pre className="snippet-code">
+          {snippet.content}
+        </pre>
+      </div>
+
+      {isAuthor && (
+        <div className="snippet-actions">
+          <button className="btn btn-outline-primary me-2" onClick={handleEdit}>수정</button>
+          <button className="btn btn-outline-danger" onClick={handleDelete}>삭제</button>
+        </div>
       )}
     </div>
   );
 }
 
-export default SnippetBoard;
+export default SnippetDetail;

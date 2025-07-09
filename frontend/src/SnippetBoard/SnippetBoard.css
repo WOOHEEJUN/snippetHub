@@ -1,64 +1,57 @@
-/* src/SnippetBoard/SnippetBoard.css */
-
 .snippet-board {
-  padding: 20px;
+  padding: 2rem;
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.write-button {
+  background-color: #a6d1ff;
+  border: none;
+  padding: 8px 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.write-button:hover {
+  background-color: #87c0ff;
 }
 
 .category-tabs {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+  margin-bottom: 1rem;
 }
-
 .category-btn {
-  padding: 8px 18px;
-  border: 1px solid #ccc;
-  border-radius: 999px;
-  background-color: #f5f5f5;
-  font-size: 14px;
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f0f0f0;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
 }
-
-.category-btn:hover {
-  background-color: #e0e0e0;
-}
-
 .category-btn.active {
-  background-color: #7faaff;
-  color: white;
-  border-color: #7faaff;
+  background-color: #cde6ff;
+  font-weight: bold;
 }
 
 .snippet-list {
   list-style: none;
   padding: 0;
 }
-
 .snippet-item {
-  background-color: white;
+  padding: 1rem;
+  margin-bottom: 10px;
   border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
-
-.snippet-item h4 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.snippet-item p {
-  margin: 6px 0 4px;
-  font-size: 14px;
-  color: #666;
-}
-
-.snippet-item small {
-  font-size: 12px;
-  color: #999;
+.snippet-item:hover {
+  background-color: #f7faff;
 }
 
 .snippet-board-container {

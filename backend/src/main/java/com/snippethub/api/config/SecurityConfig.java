@@ -30,6 +30,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/posts/**").permitAll() // 게시글 관련 API 비회원 허용
+                .requestMatchers("/api/v1/snippets/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
