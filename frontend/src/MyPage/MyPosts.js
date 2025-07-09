@@ -1,51 +1,38 @@
 // src/MyPage/MyPosts.js
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 function MyPosts() {
+  const location = useLocation();
+  const token = location.state?.token || localStorage.getItem('token');
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     if (!token) {
-      alert('로그인이 필요합니다.');
-      navigate('/login');
+      alert('토큰이 없습니다. 로그인하세요.');
       return;
     }
 
-    fetch('/api/v1/users/me/posts?page=0&size=10', {
-      method: 'GET',
+    fetch('/api/v1/posts/users/me/posts', {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       },
     })
-      .then(async res => {
-        console.log('📡 응답 상태 코드:', res.status);
-
-        if (res.status === 401) throw new Error('인증 실패: 로그인 다시 시도해주세요.');
-        if (res.status === 403) throw new Error('권한이 없습니다.');
-        if (res.status === 500) {
-          const errorText = await res.text();
-          console.error('🔥 서버 내부 오류:', errorText);
-          throw new Error('서버 오류가 발생했습니다.');
-        }
-        if (!res.ok) throw new Error('게시글 조회 실패');
-
-        return res.json();
+      .then((res) => {
+        if (!res.ok) throw new Error(`게시글 조회 실패: ${res.status}`);
+        return res.json(); // ✅ 여기서 JSON 파싱
       })
-      .then(data => {
-        console.log('✅ 게시글 데이터:', data);
-        setPosts(data.content || []);
+      .then((data) => {
+        setPosts(data|| []);
         setLoading(false);
       })
-      .catch(err => {
-        console.error('❌ 오류:', err);
-        alert(err.message || '알 수 없는 오류가 발생했습니다.');
+      .catch((err) => {
+        alert(err.message || '게시글 불러오기 실패');
         setLoading(false);
       });
-  }, [navigate]);
+  }, [token]);
 
   if (loading) return <p>로딩 중...</p>;
 
@@ -56,14 +43,11 @@ function MyPosts() {
         <p>작성한 게시물이 없습니다.</p>
       ) : (
         <ul className="post-list">
-          {posts.map(post => (
+          {posts.map((post) => (
             <li key={post.postId} className="post-item">
-              <h4
-                onClick={() => navigate(`/board/${post.postId}`)}
-                style={{ cursor: 'pointer', color: '#007bff' }}
-              >
+              <div style={{ fontWeight: 'bold', color: '#007bff' }}>
                 {post.title}
-              </h4>
+              </div>
               <small>{new Date(post.createdAt).toLocaleString()}</small>
             </li>
           ))}

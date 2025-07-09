@@ -1,16 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-import './SnippetBoard.css';
-
-import '../css/SnippetDetail.css';
-
+import '../css/Board.css'; // 자유게시판 스타일 재활용
 
 function SnippetBoard() {
   const navigate = useNavigate();
   const { user, getAuthHeaders } = useAuth();
   const [snippets, setSnippets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    fetch('/api/v1/snippets', {
+      headers: getAuthHeaders(),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`❌ 응답 실패: ${res.status}`);
+        }
+
+        const text = await res.text();
+        if (!text) {
+          console.warn('⚠️ 응답 본문이 없음');
+          return [];
+        }
+
+        return JSON.parse(text);
+      })
+      .then((data) => {
+        const snippetData = Array.isArray(data) ? data : data.content || [];
+        setSnippets(snippetData);
+      })
+      .catch((err) => {
+        console.error('스니펫 로드 실패:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const handleWrite = () => {
     if (!user) {
@@ -25,102 +53,52 @@ function SnippetBoard() {
     navigate(`/snippets/${snippetId}`);
   };
 
-  useEffect(() => {
-    fetch('/api/v1/snippets', {
-      headers: getAuthHeaders(),
-    })
-      .then(res => res.json())
-
-      .then(data => {
-        console.log("서버에서 받아온 스니펫 목록:", data);
-        const snippetsData = Array.isArray(data) ? data : data.content || [];
-        setSnippets(snippetsData);
-      })
-      .catch(err => {
-
-      .then((data) => {
-        const snippetData = Array.isArray(data) ? data : data.content || [];
-        setSnippets(snippetData);
-      })
-      .catch((err) => {
-
-        console.error('스니펫 로드 실패:', err);
-      });
-  }, []);
-
   return (
-
-    <div className="container mt-5 snippet-board-container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>💻 코드 스니펫</h2>
-
     <div className="container mt-5 board-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>💻 스니펫 게시판</h2>
-
         <button className="btn btn-primary" onClick={handleWrite}>
           스니펫 작성
         </button>
       </div>
 
-      <table className="table table-hover">
-        <thead className="table-light">
-          <tr>
-            <th scope="col">번호</th>
-            <th scope="col">제목</th>
-            <th scope="col">언어</th>
-            <th scope="col">작성자</th>
-            <th scope="col">작성일</th>
-          </tr>
-        </thead>
-        <tbody>
-          {snippets.length === 0 ? (
+      {loading ? (
+        <p>불러오는 중...</p>
+      ) : (
+        <table className="table table-hover">
+          <thead className="table-light">
             <tr>
-              <td colSpan="5" className="text-center text-muted">
-                등록된 스니펫이 없습니다.
-              </td>
+              <th scope="col">번호</th>
+              <th scope="col">제목</th>
+              <th scope="col">언어</th>
+              <th scope="col">작성자</th>
+              <th scope="col">작성일</th>
             </tr>
-          ) : (
-            snippets.map((snippet, index) => (
-              <tr
-
-                key={snippet.snippetId}
-                onClick={() => handleRowClick(snippet.snippetId)}
-                className="snippet-row"
-              >
-                <td>{index + 1}</td>
-                <td>
-                  <div>
-                    <strong>{snippet.title}</strong>
-                    {snippet.description && (
-                      <div className="text-muted small mt-1">
-                        {snippet.description.length > 50 
-                          ? snippet.description.substring(0, 50) + '...' 
-                          : snippet.description}
-                      </div>
-                    )}
-                  </div>
+          </thead>
+          <tbody>
+            {snippets.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center text-muted">
+                  등록된 스니펫이 없습니다.
                 </td>
-                <td>
-                  <span className="badge bg-secondary">
-                    {snippet.language?.name || '기타'}
-                  </span>
-                </td>
-
-                key={snippet.id || `snippet-${index}`}
-                onClick={() => handleRowClick(snippet.id)}
-              >
-                <td>{index + 1}</td>
-                <td>{snippet.title}</td>
-                <td>{snippet.language?.toUpperCase() || '-'}</td>
-
-                <td>{snippet.author?.nickname || '알 수 없음'}</td>
-                <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              snippets.map((snippet, index) => (
+                <tr
+                  key={snippet.snippetId || `snippet-${index}`}
+                  onClick={() => handleRowClick(snippet.snippetId)}
+                >
+                  <td>{index + 1}</td>
+                  <td>{snippet.title}</td>
+                  <td>{snippet.language?.toUpperCase() || '-'}</td>
+                  <td>{snippet.author?.nickname || '알 수 없음'}</td>
+                  <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

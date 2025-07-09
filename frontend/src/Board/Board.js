@@ -4,9 +4,19 @@ import { useAuth } from '../context/AuthContext';
 import '../css/Board.css';
 
 function Board() {
-  const navigate = useNavigate();
-  const { user, getAuthHeaders } = useAuth();
   const [posts, setPosts] = useState([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetch('/api/v1/posts')
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('📌 게시글 목록:', data); // 응답 구조 확인용
+        setPosts(data);
+      })
+      .catch((err) => console.error('게시글 불러오기 실패:', err));
+  }, []);
 
   const handleWrite = () => {
     if (!user) {
@@ -18,63 +28,42 @@ function Board() {
   };
 
   const handleRowClick = (postId) => {
-    navigate(`/board/${postId}`); // 게시글 상세 페이지로 이동
+    navigate(`/board/${postId}`);
   };
 
-  useEffect(() => {
-    fetch('/api/v1/posts', {
-      headers: getAuthHeaders(),
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log("서버에서 받아온 게시물 목록:", data);
-        const postsData = Array.isArray(data) ? data : data.content || [];
-        setPosts(postsData);
-      })
-      .catch(err => {
-        console.error('게시글 로드 실패:', err);
-      });
-  }, []);
-
   return (
-    <div className="container mt-5 board-container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>📋 자유 게시판</h2>
-        <button className="btn btn-success" onClick={handleWrite}>
-          게시물 작성
-        </button>
+    <div className="board-container">
+      <div className="board-header">
+        <h2>📌 자유 게시판</h2>
+        <button className="board-write-btn" onClick={handleWrite}>글쓰기</button>
       </div>
 
-      <table className="table table-hover">
-        <thead className="table-light">
+      <table className="board-table">
+        <thead>
           <tr>
-            <th scope="col">번호</th>
-            <th scope="col">제목</th>
-            <th scope="col">작성자</th>
-            <th scope="col">작성일</th>
-            <th scope="col">추천수</th>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
           </tr>
         </thead>
         <tbody>
-          {posts.length === 0 ? (
-            <tr>
-              <td colSpan="5" className="text-center text-muted">
-                등록된 게시물이 없습니다.
-              </td>
-            </tr>
-          ) : (
+          {posts.length > 0 ? (
             posts.map((post, index) => (
-              <tr key={post.id || `post-${index}`} onClick={() => handleRowClick(post.id)}>
+              <tr key={post.postId} onClick={() => handleRowClick(post.postId)}>
                 <td>{index + 1}</td>
                 <td>{post.title}</td>
-                <td>{post.author?.nickname || '알 수 없음'}</td>
+                <td>
+                  {post.authorNickname || post.author?.nickname || post.user?.nickname || '알 수 없음'}
+                </td>
                 <td>{new Date(post.createdAt).toLocaleDateString()}</td>
-                <td>{post.likes}</td>
               </tr>
             ))
+          ) : (
+            <tr>
+              <td colSpan="4">게시글이 없습니다.</td>
+            </tr>
           )}
-
-          
         </tbody>
       </table>
     </div>

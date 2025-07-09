@@ -1,62 +1,52 @@
+// ✅ src/Board/BoardDetail.js
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import './BoardDetail.css';
+import { useParams, useNavigate } from 'react-router-dom';
+import '../css/Board.css';
 
 function BoardDetail() {
-  const { postId } = useParams(); // URL에서 postId 추출
+  const { postId } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const url = `/api/v1/posts/${postId}`;
-
-    console.log('📡 요청 URL:', url);
-    console.log('🔑 토큰:', token);
-
-    fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`❌ 응답 실패: ${res.status}`);
-        const text = await res.text();
-
-        if (!text) {
-          console.warn('⚠️ 응답 본문이 비어 있습니다.');
-          return null;
-        }
-
-        const data = JSON.parse(text);
-        console.log('✅ 게시글 데이터:', data);
+    fetch(`/api/v1/posts/${postId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('응답 실패: ' + res.status);
+        return res.json();
+      })
+      .then((data) => {
+        console.log('📌 게시글 상세:', data);
         setPost(data);
       })
       .catch((err) => {
-        console.error('❌ 에러 발생:', err);
-      })
-      .finally(() => {
-        setLoading(false);
+        console.error('게시글 불러오기 실패:', err);
+        setError('게시글을 불러오는 중 오류가 발생했습니다.');
       });
   }, [postId]);
 
-  if (loading) {
-    return <div style={{ padding: '2rem' }}>📄 게시글을 불러오는 중입니다...</div>;
+  if (error) {
+    return <div className="board-container">{error}</div>;
   }
 
   if (!post) {
-    return <div style={{ padding: '2rem', color: 'gray' }}>❌ 게시글을 찾을 수 없습니다.</div>;
+    return <div className="board-container">⏳ 게시글을 불러오는 중...</div>;
   }
 
   return (
-    <div className="board-detail-container" style={{ padding: '2rem' }}>
-      <h2>{post.title}</h2>
-      <p><strong>작성자:</strong> {post.author?.nickname}</p>
-      <p><strong>작성일:</strong> {new Date(post.createdAt).toLocaleString()}</p>
-      <p><strong>추천수:</strong> {post.likes ?? 0}</p>
-      <hr />
-      <div className="post-content" style={{ whiteSpace: 'pre-line' }}>
+    <div className="board-container">
+      <div className="post-detail-header">
+        <h2>{post.title}</h2>
+        <div className="post-meta">
+          <span>작성자: {post.authorNickname || post.author?.nickname || post.user?.nickname || '알 수 없음'}</span>
+          <span>작성일: {new Date(post.createdAt).toLocaleDateString()}</span>
+        </div>
+      </div>
+      <div className="post-content">
         {post.content}
+      </div>
+      <div className="back-button-area">
+        <button onClick={() => navigate(-1)}>← 목록으로 돌아가기</button>
       </div>
     </div>
   );

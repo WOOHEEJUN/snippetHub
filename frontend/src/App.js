@@ -7,7 +7,7 @@ import Register from './pages/Register';
 import Board from './Board/Board';
 import BoardWrite from './Board/BoardWrite';
 import BoardDetail from './Board/BoardDetail';
-import Mypage from './MyPage/MyPage';
+import MyPage from './MyPage/MyPage';
 import MyPosts from './MyPage/MyPosts';
 import mysnippets from './MyPage/MySnippets';
 import ProfileEdit from './MyPage/ProfileEdit';
@@ -80,9 +80,9 @@ function App() {
   <Route path="/register" element={<Register />} />
   <Route path="/board" element={<Board />} />
   <Route path="/board/write" element={<BoardWrite />} />
-  <Route path="/board/:postId" element={<BoardDetail />} />
-  <Route path="/mypage" element={<Mypage />} />
-  <Route path="/mypage/posts" element={<MyPosts />} />
+ <Route path="/board/:postId" element={<BoardDetail />} />
+  <Route path="/mypage" element={<MyPage />} />
+<Route path="/mypage/posts" element={<MyPosts />} />
   <Route path="/mypage/snippets" element={<MySnippets />} />
   <Route path="/mypage/edit" element={<ProfileEdit />} />
   <Route path="/snippets" element={<SnippetBoard />} />
