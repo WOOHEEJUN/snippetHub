@@ -39,7 +39,7 @@ function MySnippets() {
   }, [navigate, token]);
 
   const handleSnippetClick = (snippetId) => {
-    navigate(`/mypage/snippets/${snippetId}`);
+    navigate(`/snippets/${snippetId}`); // ✅ 수정된 경로
   };
 
   if (loading) return <p>로딩 중...</p>;

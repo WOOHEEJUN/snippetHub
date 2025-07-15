@@ -1,30 +1,45 @@
-/* ProfileEdit.css */
 .profile-edit-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 0;
+}
+
+.profile-edit-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.profile-edit-container h2 {
-  margin-bottom: 1.5rem;
-}
-
-.profile-edit-container label {
-  font-weight: bold;
-}
-
-.profile-edit-container input {
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.075);
+  padding: 2.5rem;
   width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  margin-bottom: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  max-width: 600px;
+  border: 1px solid #e9ecef;
 }
 
-.profile-edit-container .btn {
-  margin-right: 10px;
+.profile-edit-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.profile-edit-header h1 {
+  font-weight: 700;
+  font-size: 2.25rem;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+.form-control:focus {
+  border-color: #957DAD; /* 연보라색 계열 */
+  box-shadow: 0 0 0 0.25rem rgba(149, 125, 173, 0.25);
+}
+
+.btn-primary {
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: #6A5ACD; /* 주요 색상 */
+  border-color: #6A5ACD;
+}
+
+.btn-primary:hover {
+  background-color: #483D8B; /* 더 진한 주요 색상 */
+  border-color: #483D8B;
 }

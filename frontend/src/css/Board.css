@@ -1,80 +1,158 @@
-/* Board.css */
-
 .board-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 3rem 0;
 }
 
 .board-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 2rem;
 }
 
-.board-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #333;
+.board-header h2 {
+  font-weight: 700;
 }
 
-.write-button {
-  background: linear-gradient(to right, #cde6ff, #ffe4ed);
-  border: none;
-  color: #333;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: 500;
+.table-hover tbody tr:hover {
+  background-color: rgba(106, 90, 205, 0.05); /* 주요 색상 계열 */
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
 }
 
-.write-button:hover {
-  background: linear-gradient(to right, #a5d8ff, #ffc9dc);
-  transform: translateY(-2px);
+.table th {
+  font-weight: 600;
 }
 
-.board-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+.table td {
+  vertical-align: middle;
 }
 
-.board-table th,
-.board-table td {
-  padding: 12px;
-  border-bottom: 1px solid #dee2e6;
-  text-align: left;
+.post-title {
+  font-weight: 500;
+  color: #212529;
+  text-decoration: none;
 }
 
-.board-table th {
-  background-color: #f7f9fc;
+.post-title:hover {
+  color: #6A5ACD; /* 주요 색상 */
+}
+
+.pagination .page-link {
+  color: #6A5ACD; /* 주요 색상 */
+}
+
+.pagination .page-item.active .page-link {
+  z-index: 3;
+  color: #fff;
+  background-color: #6A5ACD; /* 주요 색상 */
+  border-color: #6A5ACD;
+}
+
+.search-form .form-control {
+  margin-right: 0.5rem;
+}
+
+.board-write-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+}
+
+.board-write-container h2 {
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+/* BoardDetail.css styles merged below */
+.post-detail-container {
+  padding: 3rem 0;
+}
+
+.post-header {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.post-header h1 {
+  font-weight: 700;
+  font-size: 2.5rem;
+}
+
+.post-meta {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.post-meta .author {
+  font-weight: 500;
   color: #495057;
-  font-weight: bold;
 }
 
-.board-table tr:hover {
-  background-color: #f1f3f5;
-  transition: background 0.2s ease-in-out;
+.post-content {
+  min-height: 200px;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  white-space: pre-wrap;
+  padding: 2rem 0;
 }
 
-@media (max-width: 768px) {
-  .board-title {
-    font-size: 1.4rem;
-  }
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
 
-  .write-button {
-    padding: 8px 14px;
-    font-size: 0.9rem;
-  }
+.like-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+  margin: 2rem 0;
+}
 
-  .board-table th,
-  .board-table td {
-    font-size: 0.9rem;
-    padding: 8px;
-  }
+.like-button {
+  font-size: 2rem;
+  background: none;
+  border: none;
+  color: #6c757d;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.like-button.liked {
+  color: #DC3545;
+}
+
+.like-button:hover {
+  transform: scale(1.1);
+}
+
+.like-count {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.comment-section {
+  margin-top: 3rem;
+}
+
+.comment-section h4 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.comment-form textarea {
+  resize: none;
+  border-radius: 0.5rem;
+}
+
+.comment {
+  padding: 1.5rem;
+  background-color: #F0F8FF; /* 연한 하늘색 계열 */
+  border-radius: 0.5rem;
+  border: 1px solid #e9ecef;
 }

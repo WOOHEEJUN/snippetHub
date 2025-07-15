@@ -1,0 +1,64 @@
+
+.snippet-board-container {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.board-header {
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.board-header h2 {
+  font-weight: 700;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(106, 90, 205, 0.05); /* 주요 색상 계열 */
+  cursor: pointer;
+}
+
+.table th {
+  font-weight: 600;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.language-badge-board {
+  display: inline-block;
+  padding: 0.35em 0.65em;
+  font-size: .75em;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.375rem;
+}
+
+.badge-html { background-color: #e44d26; }
+.badge-css { background-color: #1572b6; }
+.badge-javascript { background-color: #f7df1e; color: black;}
+.badge-java { background-color: #007396; }
+.badge-python { background-color: #3776ab; }
+.badge-c { background-color: #a8b9cc; color: black;}
+.badge-default { background-color: #6c757d; }
+
+.pagination .page-link {
+  color: #6A5ACD; /* 주요 색상 */
+}
+
+.pagination .page-item.active .page-link {
+  z-index: 3;
+  color: #fff;
+  background-color: #6A5ACD; /* 주요 색상 */
+  border-color: #6A5ACD;
+}
+
+.search-form .form-control {
+  margin-right: 0.5rem;
+}

@@ -1,44 +1,63 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../css/Board.css'; // 자유게시판 스타일 재활용
+import '../css/SnippetBoard.css';
 
-function SnippetBoard() {
+const SnippetBoard = () => {
   const navigate = useNavigate();
-  const { user, getAuthHeaders } = useAuth();
+  const location = useLocation();
+  const { user } = useAuth();
+
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchLanguage, setSearchLanguage] = useState('');
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
+  const fetchSnippets = (page = 0, term = '', lang = '') => {
+    setLoading(true);
+    setError(null);
 
-    fetch('/api/v1/snippets', {
-      headers: getAuthHeaders(),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`❌ 응답 실패: ${res.status}`);
-        }
+    const params = new URLSearchParams({
+      page,
+      size: 10,
+      sort: 'createdAt,desc',
+      title: term,
+      language: lang,
+    });
 
-        const text = await res.text();
-        if (!text) {
-          console.warn('⚠️ 응답 본문이 없음');
-          return [];
-        }
-
-        return JSON.parse(text);
+    fetch(`/api/v1/snippets?${params.toString()}`)
+      .then(res => {
+        if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
+        return res.json();
       })
-      .then((data) => {
-        const snippetData = Array.isArray(data) ? data : data.content || [];
-        setSnippets(snippetData);
+      .then(data => {
+        setSnippets(data || []);
+        setCurrentPage(data.snippetId);
+        setTotalPages(data.totalPages);
       })
-      .catch((err) => {
+      .catch(err => {
+        setError(err.message);
         console.error('스니펫 로드 실패:', err);
       })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const term = params.get('search') || '';
+    const lang = params.get('language') || '';
+    setSearchTerm(term);
+    setSearchLanguage(lang);
+    fetchSnippets(0, term, lang);
+  }, [location.search]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchSnippets(0, searchTerm, searchLanguage);
+  };
 
   const handleWrite = () => {
     if (!user) {
@@ -49,58 +68,98 @@ function SnippetBoard() {
     }
   };
 
-  const handleRowClick = (snippetId) => {
-    navigate(`/snippets/${snippetId}`);
+  const getLanguageBadgeClass = (language) => {
+    const lang = language?.toLowerCase() || 'default';
+    return `language-badge-board badge-${lang}`;
   };
 
   return (
-    <div className="container mt-5 board-container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>💻 스니펫 게시판</h2>
-        <button className="btn btn-primary" onClick={handleWrite}>
-          스니펫 작성
-        </button>
+    <div className="container snippet-board-container">
+      <div className="board-header">
+        <h2 className="mb-3">스니펫 라이브러리</h2>
+        <p className="text-muted">다양한 코드 스니펫을 탐색하고 공유하세요.</p>
       </div>
 
-      {loading ? (
-        <p>불러오는 중...</p>
-      ) : (
-        <table className="table table-hover">
-          <thead className="table-light">
-            <tr>
-              <th scope="col">번호</th>
-              <th scope="col">제목</th>
-              <th scope="col">언어</th>
-              <th scope="col">작성자</th>
-              <th scope="col">작성일</th>
-            </tr>
-          </thead>
-          <tbody>
-            {snippets.length === 0 ? (
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <form className="d-flex search-form" onSubmit={handleSearch}>
+          <input 
+            type="text" 
+            className="form-control" 
+            placeholder="제목 검색..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+          <select 
+            className="form-select" 
+            style={{width: '150px'}}
+            value={searchLanguage}
+            onChange={e => setSearchLanguage(e.target.value)}
+          >
+            <option value="">모든 언어</option>
+            <option value="HTML">HTML</option>
+            <option value="CSS">CSS</option>
+            <option value="JAVASCRIPT">JavaScript</option>
+            <option value="JAVA">Java</option>
+            <option value="PYTHON">Python</option>
+            <option value="C">C</option>
+          </select>
+          <button className="btn btn-outline-secondary" type="submit">검색</button>
+        </form>
+        <button className="btn btn-primary" onClick={handleWrite}>스니펫 작성</button>
+      </div>
+
+      {loading && <div className="text-center"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+      {error && <div className="alert alert-danger">{error}</div>}
+      
+      {!loading && !error && (
+        <>
+          <table className="table table-hover align-middle">
+            <thead className="table-light">
               <tr>
-                <td colSpan="5" className="text-center text-muted">
-                  등록된 스니펫이 없습니다.
-                </td>
+                <th scope="col" style={{width: '10%'}}>번호</th>
+                <th scope="col" style={{width: '40%'}}>제목</th>
+                <th scope="col" style={{width: '15%'}}>언어</th>
+                <th scope="col" style={{width: '15%'}}>작성자</th>
+                <th scope="col" style={{width: '20%'}}>작성일</th>
               </tr>
-            ) : (
-              snippets.map((snippet, index) => (
-                <tr
-                  key={snippet.snippetId || `snippet-${index}`}
-                  onClick={() => handleRowClick(snippet.snippetId)}
-                >
-                  <td>{index + 1}</td>
-                  <td>{snippet.title}</td>
-                  <td>{snippet.language?.toUpperCase() || '-'}</td>
-                  <td>{snippet.author?.nickname || '알 수 없음'}</td>
-                  <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
+            </thead>
+            <tbody>
+              {snippets.length > 0 ? (
+                snippets.map((snippet, index) => (
+                  <tr key={snippet.snippetId} onClick={() => navigate(`/snippets/${snippet.snippetId}`)}>
+                    <td>{snippet.snippetId}</td>
+                    <td>{snippet.title}</td>
+                    <td><span className={getLanguageBadgeClass(snippet.language)}>{snippet.language}</span></td>
+                    <td>{snippet.author?.nickname || '-'}</td>
+                    <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center py-5 text-muted">
+                    <h5>검색 결과가 없습니다.</h5>
+                    <p>다른 키워드로 검색해보시거나, 첫 스니펫을 작성해보세요!</p>
+                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+
+          {totalPages > 1 && (
+            <nav className="d-flex justify-content-center">
+              <ul className="pagination">
+                {[...Array(totalPages).keys()].map(page => (
+                  <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                    <button className="page-link" onClick={() => fetchSnippets(page, searchTerm, searchLanguage)}>{page + 1}</button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+        </>
       )}
     </div>
   );
-}
+};
 
 export default SnippetBoard;

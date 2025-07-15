@@ -1,17 +1,41 @@
-/* src/css/Mypage.css */
+
 .mypage-container {
-  padding: 40px;
-  max-width: 800px;
-  margin: auto;
+  padding: 3rem 0;
 }
 
 .mypage-header {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 30px;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 2rem;
 }
 
-.mypage-info {
-  font-size: 18px;
-  margin-bottom: 15px;
+.mypage-header h1 {
+  font-weight: 700;
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.profile-icon {
+  font-size: 5rem;
+  color: #6c757d;
+}
+
+.section-card {
+  margin-top: 2rem;
+}
+
+.section-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.list-group-item a {
+  text-decoration: none;
+  color: #212529;
+}
+
+.list-group-item a:hover {
+  color: #6A5ACD; /* 주요 색상 */
 }

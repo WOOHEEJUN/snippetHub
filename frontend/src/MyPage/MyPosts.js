@@ -1,4 +1,3 @@
-// src/MyPage/MyPosts.js
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -36,7 +35,7 @@ function MyPosts() {
   }, [token]);
 
   const handlePostClick = (postId) => {
-    navigate(`/mypage/posts/${postId}`);
+    navigate(`/board/${postId}`); // ✅ 자유게시판 상세 페이지로 이동
   };
 
   if (loading) return <p>로딩 중...</p>;

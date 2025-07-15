@@ -1,0 +1,23 @@
+/* ✅ src/css/SnippetEdit.css */
+
+.snippet-edit-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.snippet-edit-container h2 {
+  margin-bottom: 20px;
+}
+
+.snippet-edit-container .form-control,
+.snippet-edit-container .form-select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
