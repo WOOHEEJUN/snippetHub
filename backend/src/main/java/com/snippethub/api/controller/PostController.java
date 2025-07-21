@@ -1,93 +1,93 @@
 package com.snippethub.api.controller;
 
 import com.snippethub.api.domain.Post;
-import com.snippethub.api.domain.User;
+import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.PageResponseDto;
+import com.snippethub.api.dto.post.PostCreateRequestDto;
+import com.snippethub.api.dto.post.PostResponseDto;
+import com.snippethub.api.dto.post.PostUpdateRequestDto;
 import com.snippethub.api.service.PostService;
-import com.snippethub.api.service.UserService;
-import com.snippethub.api.dto.PostDto;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/posts")
+@RequiredArgsConstructor
 public class PostController {
-    private final PostService postService;
-    private final UserService userService;
 
-    public PostController(PostService postService, UserService userService) {
-        this.postService = postService;
-        this.userService = userService;
+    private final PostService postService;
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
+            @Valid @RequestBody PostCreateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Post newPost = postService.createPost(requestDto, userDetails.getUsername());
+        PostResponseDto responseDto = new PostResponseDto(newPost);
+
+        return new ResponseEntity<>(ApiResponse.success("게시글이 성공적으로 작성되었습니다.", responseDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<ApiResponse<PostResponseDto>> getPost(@PathVariable Long postId) {
+        Post post = postService.getPost(postId);
+        PostResponseDto responseDto = new PostResponseDto(post);
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
     @GetMapping
-    public ResponseEntity<List<PostDto>> getAllPosts() {
-        List<Post> posts = postService.getAllPosts();
-        return ResponseEntity.ok(posts.stream().map(this::toPostDto).toList());
-    }
+    public ResponseEntity<ApiResponse<PageResponseDto<PostResponseDto>>> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "LATEST") String sort) {
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDto> getPost(@PathVariable Long id) {
-        return ResponseEntity.ok(toPostDto(postService.getPostById(id)));
-    }
+        Sort.Direction direction = Sort.Direction.DESC;
+        String sortProperty = "createdAt";
 
-    @PostMapping
-    public ResponseEntity<PostDto> createPost(@Valid @RequestBody Post post) {
-        User user = getCurrentUser();
-        post.setUser(user);
-        return ResponseEntity.ok(toPostDto(postService.save(post)));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<PostDto> updatePost(@PathVariable Long id, @Valid @RequestBody Post post) {
-        User user = getCurrentUser();
-        Post existing = postService.getPostById(id);
-        if (!existing.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
+        if ("POPULAR".equals(sort)) {
+            sortProperty = "likeCount";
+        } else if ("VIEWS".equals(sort)) {
+            sortProperty = "viewCount";
         }
-        post.setId(id);
-        post.setUser(user);
-        return ResponseEntity.ok(toPostDto(postService.save(post)));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty));
+        Page<Post> postsPage = postService.getPosts(pageable, category, search);
+
+        PageResponseDto<PostResponseDto> responseDto = new PageResponseDto<>(
+                postsPage.map(PostResponseDto::new)
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        User user = getCurrentUser();
-        Post existing = postService.getPostById(id);
-        if (!existing.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
-        }
-        postService.delete(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/{postId}")
+    public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
+            @PathVariable Long postId,
+            @Valid @RequestBody PostUpdateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Post updatedPost = postService.updatePost(postId, requestDto, userDetails.getUsername());
+        PostResponseDto responseDto = new PostResponseDto(updatedPost);
+        return ResponseEntity.ok(ApiResponse.success("게시글이 성공적으로 수정되었습니다.", responseDto));
     }
 
-    @GetMapping("/users/me/posts")
-    public ResponseEntity<List<PostDto>> getMyPosts() {
-        User user = getCurrentUser();
-        List<Post> posts = postService.getPostsByUserId(user.getId());
-        return ResponseEntity.ok(posts.stream().map(this::toPostDto).toList());
-    }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse<String>> deletePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        return userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    private PostDto toPostDto(Post post) {
-        PostDto dto = new PostDto();
-        dto.setPostId(post.getId());
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        PostDto.AuthorDto author = new PostDto.AuthorDto();
-        author.setUserId(post.getUser().getId());
-        author.setNickname(post.getUser().getNickname());
-        dto.setAuthor(author);
-        return dto;
+        postService.deletePost(postId, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("게시글이 성공적으로 삭제되었습니다."));
     }
 }

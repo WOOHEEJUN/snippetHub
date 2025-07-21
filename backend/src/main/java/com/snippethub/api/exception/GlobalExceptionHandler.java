@@ -1,42 +1,46 @@
 package com.snippethub.api.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Map;
-
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * javax.validation.Valid or @Validated 으로 binding error 발생시 발생한다.
+     * HttpMessageConverter 에서 등록한 HttpMessageConverter binding 못할경우 발생
+     * 주로 @RequestBody, @RequestPart 어노테이션에서 발생
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("handleMethodArgumentNotValidException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * 비즈니스 로직 수행 중 발생하는 예외를 처리한다.
+     */
+    @ExceptionHandler(BusinessException.class)
+    protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
+        log.error("handleBusinessException", e);
+        final ErrorCode errorCode = e.getErrorCode();
+        final ErrorResponse response = ErrorResponse.of(errorCode);
+        return new ResponseEntity<>(response, errorCode.getStatus());
+    }
+
+    /**
+     * 위에서 처리하지 못한 모든 예외를 처리한다.
+     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleException(Exception ex) {
-        ex.printStackTrace(); // 콘솔에 스택트레이스 출력
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("message", "서버 내부 오류가 발생했습니다.", "error", ex.getMessage()));
+    protected ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.error("handleException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
-        ex.printStackTrace();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "이메일 또는 비밀번호가 올바르지 않습니다."));
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleUsernameNotFound(UsernameNotFoundException ex) {
-        ex.printStackTrace();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "존재하지 않는 사용자입니다."));
-    }
-
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
-        ex.printStackTrace();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", ex.getMessage()));
-    }
-} 
+}

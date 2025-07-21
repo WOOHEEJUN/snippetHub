@@ -1,96 +1,104 @@
 package com.snippethub.api.controller;
 
-import com.snippethub.api.domain.User;
 import com.snippethub.api.domain.Snippet;
+import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.snippet.SnippetCreateRequestDto;
+import com.snippethub.api.dto.snippet.SnippetResponseDto;
 import com.snippethub.api.service.SnippetService;
-import com.snippethub.api.service.UserService;
-import com.snippethub.api.dto.SnippetDto;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import com.snippethub.api.domain.Snippet;
+import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.PageResponseDto;
+import com.snippethub.api.dto.snippet.SnippetCreateRequestDto;
+import com.snippethub.api.dto.snippet.SnippetResponseDto;
+import com.snippethub.api.dto.snippet.SnippetUpdateRequestDto;
+import com.snippethub.api.service.SnippetService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/snippets")
+@RequestMapping("/api/snippets")
+@RequiredArgsConstructor
 public class SnippetController {
 
     private final SnippetService snippetService;
-    private final UserService userService;
 
-    public SnippetController(SnippetService snippetService, UserService userService) {
-        this.snippetService = snippetService;
-        this.userService = userService;
+    @PostMapping
+    public ResponseEntity<ApiResponse<SnippetResponseDto>> createSnippet(
+            @Valid @RequestBody SnippetCreateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        Snippet newSnippet = snippetService.createSnippet(requestDto, userDetails.getUsername());
+        SnippetResponseDto responseDto = new SnippetResponseDto(newSnippet);
+
+        return new ResponseEntity<>(ApiResponse.success("스니펫이 성공적으로 생성되었습니다.", responseDto), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{snippetId}")
+    public ResponseEntity<ApiResponse<SnippetResponseDto>> getSnippet(@PathVariable Long snippetId) {
+        Snippet snippet = snippetService.getSnippet(snippetId);
+        SnippetResponseDto responseDto = new SnippetResponseDto(snippet);
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
     @GetMapping
-    public ResponseEntity<List<SnippetDto>> getAllSnippets() {
-        List<Snippet> snippets = snippetService.getAllSnippets();
-        return ResponseEntity.ok(snippets.stream().map(this::toSnippetDto).toList());
-    }
+    public ResponseEntity<ApiResponse<PageResponseDto<SnippetResponseDto>>> getSnippets(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "LATEST") String sort) {
 
-    @GetMapping("/{id}")
-    public ResponseEntity<SnippetDto> getSnippet(@PathVariable Long id) {
-        return ResponseEntity.ok(toSnippetDto(snippetService.getSnippetById(id)));
-    }
+        Sort.Direction direction = Sort.Direction.DESC;
+        String sortProperty = "createdAt";
 
-    @PostMapping
-    public ResponseEntity<SnippetDto> createSnippet(@Valid @RequestBody Snippet snippet) {
-        User user = getCurrentUser();
-        snippet.setUser(user);
-        return ResponseEntity.ok(toSnippetDto(snippetService.save(snippet)));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<SnippetDto> updateSnippet(@PathVariable Long id, @Valid @RequestBody Snippet snippet) {
-        User user = getCurrentUser();
-        Snippet existing = snippetService.getSnippetById(id);
-        if (!existing.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
+        if ("POPULAR".equals(sort)) {
+            sortProperty = "likeCount";
+        } else if ("RUNS".equals(sort)) {
+            sortProperty = "runCount";
         }
-        snippet.setId(id);
-        snippet.setUser(user);
-        return ResponseEntity.ok(toSnippetDto(snippetService.save(snippet)));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty));
+        Page<Snippet> snippetsPage = snippetService.getSnippets(pageable, language, search);
+
+        PageResponseDto<SnippetResponseDto> responseDto = new PageResponseDto<>(
+                snippetsPage.map(SnippetResponseDto::new)
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSnippet(@PathVariable Long id) {
-        User user = getCurrentUser();
-        Snippet existing = snippetService.getSnippetById(id);
-        if (!existing.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
-        }
-        snippetService.delete(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/{snippetId}")
+    public ResponseEntity<ApiResponse<SnippetResponseDto>> updateSnippet(
+            @PathVariable Long snippetId,
+            @Valid @RequestBody SnippetUpdateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Snippet updatedSnippet = snippetService.updateSnippet(snippetId, requestDto, userDetails.getUsername());
+        SnippetResponseDto responseDto = new SnippetResponseDto(updatedSnippet);
+        return ResponseEntity.ok(ApiResponse.success("스니펫이 성공적으로 수정되었습니다.", responseDto));
     }
 
-    @GetMapping("/users/me/snippets")
-    public ResponseEntity<List<SnippetDto>> getMySnippets() {
-        User user = getCurrentUser();
-        List<Snippet> snippets = snippetService.getSnippetsByUserId(user.getId());
-        return ResponseEntity.ok(snippets.stream().map(this::toSnippetDto).toList());
-    }
+    @DeleteMapping("/{snippetId}")
+    public ResponseEntity<ApiResponse<String>> deleteSnippet(
+            @PathVariable Long snippetId,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        return userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    private SnippetDto toSnippetDto(Snippet snippet) {
-        SnippetDto dto = new SnippetDto();
-        dto.setSnippetId(snippet.getId());
-        dto.setTitle(snippet.getTitle());
-        dto.setDescription(snippet.getDescription());
-        dto.setLanguage(snippet.getLanguage());
-        dto.setCode(snippet.getCode());
-        dto.setCreatedAt(snippet.getCreatedAt());
-        dto.setUpdatedAt(snippet.getUpdatedAt());
-        SnippetDto.AuthorDto author = new SnippetDto.AuthorDto();
-        author.setUserId(snippet.getUser().getId());
-        author.setNickname(snippet.getUser().getNickname());
-        dto.setAuthor(author);
-        return dto;
+        snippetService.deleteSnippet(snippetId, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("스니펫이 성공적으로 삭제되었습니다."));
     }
 }

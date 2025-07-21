@@ -1,82 +1,83 @@
 package com.snippethub.api.controller;
 
+import com.snippethub.api.domain.Post;
+import com.snippethub.api.domain.Snippet;
 import com.snippethub.api.domain.User;
+import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.PageResponseDto;
+import com.snippethub.api.dto.post.PostResponseDto;
+import com.snippethub.api.dto.snippet.SnippetResponseDto;
+import com.snippethub.api.dto.user.UserPasswordChangeRequestDto;
+import com.snippethub.api.dto.user.UserProfileResponseDto;
+import com.snippethub.api.dto.user.UserProfileResponseDto.UserStatsDto;
+import com.snippethub.api.dto.user.UserProfileUpdateRequestDto;
 import com.snippethub.api.service.UserService;
-import com.snippethub.api.dto.UpdateNicknameRequest;
-import com.snippethub.api.dto.UpdatePasswordRequest;
-import com.snippethub.api.dto.UserDto;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<UserProfileResponseDto>> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserProfile(userDetails.getUsername());
+        UserStatsDto stats = userService.getUserStats(user.getId());
+        UserProfileResponseDto responseDto = new UserProfileResponseDto(user, stats);
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
-    @GetMapping("/me/activity")
-    public ResponseEntity<Map<String, Object>> getUserActivity() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // This is the email
-        User user = userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
-        Map<String, Object> activityData = userService.getUserActivity(user.getId());
-        return ResponseEntity.ok(activityData);
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse<UserProfileResponseDto>> updateUserProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UserProfileUpdateRequestDto requestDto) {
+
+        User updatedUser = userService.updateUserProfile(userDetails.getUsername(), requestDto);
+        UserStatsDto stats = userService.getUserStats(updatedUser.getId());
+        UserProfileResponseDto responseDto = new UserProfileResponseDto(updatedUser, stats);
+        return ResponseEntity.ok(ApiResponse.success("프로필이 성공적으로 수정되었습니다.", responseDto));
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserDto> getUserProfile() {
-        User user = getCurrentUser();
-        return ResponseEntity.ok(toUserDto(user));
+    @PutMapping("/password")
+    public ResponseEntity<ApiResponse<String>> changeUserPassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UserPasswordChangeRequestDto requestDto) {
+
+        userService.changeUserPassword(userDetails.getUsername(), requestDto);
+        return ResponseEntity.ok(ApiResponse.success("비밀번호가 성공적으로 변경되었습니다."));
     }
 
-    @PatchMapping("/me/nickname")
-    public ResponseEntity<UserDto> updateNickname(@Valid @RequestBody UpdateNicknameRequest request) {
-        User user = getCurrentUser();
-        User updatedUser = userService.updateNickname(user.getId(), request.getNickname());
-        return ResponseEntity.ok(toUserDto(updatedUser));
+    @GetMapping("/snippets")
+    public ResponseEntity<ApiResponse<PageResponseDto<SnippetResponseDto>>> getMySnippets(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Pageable pageable,
+            @RequestParam(required = false, defaultValue = "ALL") String status) {
+
+        Page<Snippet> snippetsPage = userService.getMySnippets(userDetails.getUsername(), pageable, status);
+        PageResponseDto<SnippetResponseDto> responseDto = new PageResponseDto<>(
+                snippetsPage.map(SnippetResponseDto::new)
+        );
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
-    @PatchMapping("/me/password")
-    public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
-        userService.updatePassword(user.getId(), request.getCurrentPassword(), request.getNewPassword());
-        return ResponseEntity.noContent().build();
-    }
+    @GetMapping("/posts")
+    public ResponseEntity<ApiResponse<PageResponseDto<PostResponseDto>>> getMyPosts(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Pageable pageable) {
 
-    @DeleteMapping("/me")
-    public ResponseEntity<Void> deleteUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
-        userService.deleteUser(user.getId());
-        return ResponseEntity.noContent().build();
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        return userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    private UserDto toUserDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setUserId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setNickname(user.getNickname());
-        dto.setGrade(user.getGrade());
-        dto.setCreatedAt(user.getCreatedAt());
-        return dto;
+        Page<Post> postsPage = userService.getMyPosts(userDetails.getUsername(), pageable);
+        PageResponseDto<PostResponseDto> responseDto = new PageResponseDto<>(
+                postsPage.map(PostResponseDto::new)
+        );
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 }
-

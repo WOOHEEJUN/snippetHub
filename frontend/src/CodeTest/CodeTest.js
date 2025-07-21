@@ -1,11 +1,14 @@
 // src/pages/CodeTest.js
 import React, { useState, useRef } from 'react';
 import './CodeTest.css';
+import axios from 'axios';
 
 const LANGUAGES = [
   { label: 'HTML', value: 'html' },
   { label: 'CSS', value: 'css' },
   { label: 'JSP', value: 'jsp' },
+  { label: 'Java', value: 'java' },
+  { label: 'Python', value: 'python' },
 ];
 
 function CodeTest() {
@@ -14,8 +17,9 @@ function CodeTest() {
   const [output, setOutput] = useState('');
   const iframeRef = useRef(null);
 
-  const handleRun = () => {
+  const handleRun = async () => { // Added async
     setOutput('');
+    iframeRef.current.src = ''; // Clear iframe for server-side languages
 
     if (language === 'html') {
       const blob = new Blob([code], { type: 'text/html' });
@@ -31,11 +35,25 @@ function CodeTest() {
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       iframeRef.current.src = url;
+    } else if (language === 'java' || language === 'python') {
+      setOutput('코드 실행 중...');
+      try {
+        const response = await axios.post('/api/v1/execute', { language, code });
+        const data = response.data;
+        let result = '';
+        if (data.stdout) result += data.stdout;
+        if (data.stderr) result += `에러:\n${data.stderr}`;
+        if (data.error) result += `실행 오류:\n${data.error}`;
+        setOutput(result || '실행 결과 없음.');
+      } catch (error) {
+        console.error('코드 실행 오류:', error);
+        setOutput(`코드 실행 중 오류가 발생했습니다: ${error.response?.data?.message || error.message}`);
+      }
     } else {
-      iframeRef.current.src = '';
       setOutput('⚠️ JSP는 브라우저에서 직접 실행할 수 없습니다.');
     }
   };
+
 
   return (
     <div className="code-test-container">

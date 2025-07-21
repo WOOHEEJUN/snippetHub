@@ -1,64 +1,87 @@
 package com.snippethub.api.controller;
 
 import com.snippethub.api.domain.Comment;
-import com.snippethub.api.dto.CommentDto;
+import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.comment.CommentCreateRequestDto;
+import com.snippethub.api.dto.comment.CommentResponseDto;
+import com.snippethub.api.dto.comment.CommentUpdateRequestDto;
 import com.snippethub.api.service.CommentService;
-import com.snippethub.api.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequiredArgsConstructor
 public class CommentController {
+
     private final CommentService commentService;
-    private final UserService userService;
 
-    public CommentController(CommentService commentService, UserService userService) {
-        this.commentService = commentService;
-        this.userService = userService;
+    @PostMapping("/api/posts/{postId}/comments")
+    public ResponseEntity<ApiResponse<CommentResponseDto>> createCommentForPost(
+            @PathVariable Long postId,
+            @Valid @RequestBody CommentCreateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Comment newComment = commentService.createCommentForPost(postId, requestDto, userDetails.getUsername());
+        CommentResponseDto responseDto = new CommentResponseDto(newComment);
+
+        return new ResponseEntity<>(ApiResponse.success("댓글이 성공적으로 작성되었습니다.", responseDto), HttpStatus.CREATED);
     }
 
-    @PostMapping
-    public ResponseEntity<CommentDto> createComment(@RequestBody Comment comment) {
-        Comment saved = commentService.save(comment);
-        return ResponseEntity.ok(toCommentDto(saved));
+    @PostMapping("/api/snippets/{snippetId}/comments")
+    public ResponseEntity<ApiResponse<CommentResponseDto>> createCommentForSnippet(
+            @PathVariable Long snippetId,
+            @Valid @RequestBody CommentCreateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Comment newComment = commentService.createCommentForSnippet(snippetId, requestDto, userDetails.getUsername());
+        CommentResponseDto responseDto = new CommentResponseDto(newComment);
+
+        return new ResponseEntity<>(ApiResponse.success("댓글이 성공적으로 작성되었습니다.", responseDto), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
-        Comment comment = commentService.findById(commentId);
-        Long currentUserId = getCurrentUserId();
-        if (!comment.getUser().getId().equals(currentUserId)) {
-            return ResponseEntity.status(403).build();
-        }
-        commentService.delete(commentId);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/api/posts/{postId}/comments")
+    public ResponseEntity<ApiResponse<List<CommentResponseDto>>> getCommentsForPost(@PathVariable Long postId) {
+        List<Comment> comments = commentService.getCommentsForPost(postId);
+        List<CommentResponseDto> responseDtos = comments.stream()
+                .map(CommentResponseDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(responseDtos));
     }
 
-    @GetMapping
-    public ResponseEntity<List<CommentDto>> getAllComments() {
-        return ResponseEntity.ok(commentService.findAll().stream().map(this::toCommentDto).toList());
+    @GetMapping("/api/snippets/{snippetId}/comments")
+    public ResponseEntity<ApiResponse<List<CommentResponseDto>>> getCommentsForSnippet(@PathVariable Long snippetId) {
+        List<Comment> comments = commentService.getCommentsForSnippet(snippetId);
+        List<CommentResponseDto> responseDtos = comments.stream()
+                .map(CommentResponseDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(responseDtos));
     }
 
-    private CommentDto toCommentDto(Comment comment) {
-        CommentDto dto = new CommentDto();
-        dto.setCommentId(comment.getId());
-        dto.setUserId(comment.getUser() != null ? comment.getUser().getId() : null);
-        dto.setPostId(comment.getPost() != null ? comment.getPost().getId() : null);
-        dto.setSnippetId(comment.getSnippet() != null ? comment.getSnippet().getId() : null);
-        dto.setContent(comment.getContent());
-        dto.setCreatedAt(comment.getCreatedAt());
-        return dto;
+    @PutMapping("/api/comments/{commentId}")
+    public ResponseEntity<ApiResponse<CommentResponseDto>> updateComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentUpdateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Comment updatedComment = commentService.updateComment(commentId, requestDto, userDetails.getUsername());
+        CommentResponseDto responseDto = new CommentResponseDto(updatedComment);
+        return ResponseEntity.ok(ApiResponse.success("댓글이 성공적으로 수정되었습니다.", responseDto));
     }
 
-    private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        // userService를 주입받아 사용한다고 가정
-        return userService.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found")).getId();
+    @DeleteMapping("/api/comments/{commentId}")
+    public ResponseEntity<ApiResponse<String>> deleteComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        commentService.deleteComment(commentId, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("댓글이 성공적으로 삭제되었습니다."));
     }
-} 
+}
