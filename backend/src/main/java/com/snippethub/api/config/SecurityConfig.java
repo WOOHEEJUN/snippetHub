@@ -32,6 +32,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/posts/**").permitAll() // 게시글 관련 API 비회원 허용
                 .requestMatchers("/api/v1/snippets/**", "/api/v1/execute").permitAll()
+                .requestMatchers(
+    "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/swagger-resources/**",
+                "/swagger-ui.html"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
