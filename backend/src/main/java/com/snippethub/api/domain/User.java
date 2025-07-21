@@ -1,82 +1,93 @@
 package com.snippethub.api.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 
 @Entity
 @Table(name = "users")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class User implements UserDetails {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "nickname", nullable = false, unique = true, length = 50)
     private String nickname;
 
-    @Column(length = 20)
-    private String grade;
+    @Column(name = "profile_image", length = 500)
+    private String profileImage;
+
+    @Lob
+    @Column(name = "bio")
+    private String bio;
+
+    @Column(name = "level", length = 20)
+    private String level = "BRONZE";
+
+    @Column(name = "points")
+    private int points = 0;
+
+    @Column(name = "is_verified")
+    private boolean isVerified = false;
+
+    @Column(name = "is_active")
+    private boolean isActive = true;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.grade == null) {
-            this.grade = "Bronze";
-        }
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+    public void updateBio(String bio) {
+        this.bio = bio;
     }
 
-    @Override
-    public String getUsername() {
-        return this.email;
+    public void updatePassword(String password) {
+        this.password = password;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public void updateLastLoginAt() {
+        this.lastLoginAt = LocalDateTime.now();
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
+    public void setIsVerified(boolean isVerified) {
+        this.isVerified = isVerified;
     }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
+    public void updateProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
+    @Builder
+    public User(String email, String password, String nickname) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
     }
 }

@@ -1,98 +1,103 @@
 package com.snippethub.api.service;
 
+import com.snippethub.api.domain.Post;
+import com.snippethub.api.domain.Snippet;
 import com.snippethub.api.domain.User;
+import com.snippethub.api.dto.user.UserPasswordChangeRequestDto;
+import com.snippethub.api.dto.user.UserProfileUpdateRequestDto;
+import com.snippethub.api.dto.user.UserProfileResponseDto.UserStatsDto;
+import com.snippethub.api.exception.BusinessException;
+import com.snippethub.api.exception.ErrorCode;
+import com.snippethub.api.repository.PostRepository;
+import com.snippethub.api.repository.SnippetRepository;
 import com.snippethub.api.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.Map;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-import java.util.List;
-import com.snippethub.api.service.UserService;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.web.multipart.MultipartFile;
+import com.snippethub.api.service.FileService;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PostService postService;
-    private final SnippetService snippetService;
+    private final SnippetRepository snippetRepository;
+    private final PostRepository postRepository;
+    private final FileService fileService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, 
-                      PostService postService, SnippetService snippetService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.postService = postService;
-        this.snippetService = snippetService;
+    public User getUserProfile(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    public UserStatsDto getUserStats(Long userId) {
+        long totalSnippets = userRepository.countSnippetsByUserId(userId);
+        long totalPosts = userRepository.countPostsByUserId(userId);
+        long totalComments = userRepository.countCommentsByUserId(userId);
+        long totalLikes = userRepository.countLikesByUserId(userId);
+        long totalViews = (userRepository.sumSnippetViewCountsByUserId(userId) != null ? userRepository.sumSnippetViewCountsByUserId(userId) : 0) +
+                          (userRepository.sumPostViewCountsByUserId(userId) != null ? userRepository.sumPostViewCountsByUserId(userId) : 0);
+
+        return new UserStatsDto(totalSnippets, totalPosts, totalComments, totalLikes, totalViews);
     }
 
     @Transactional
-    public User registerUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new IllegalStateException("Email already in use.");
-        }
-        if (userRepository.findByNickname(user.getNickname()).isPresent()) {
-            throw new IllegalStateException("Nickname already in use.");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
+    public User updateUserProfile(String email, UserProfileUpdateRequestDto requestDto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+        if (requestDto.getNickname() != null && !requestDto.getNickname().isEmpty()) {
+            if (userRepository.existsByNickname(requestDto.getNickname()) && !user.getNickname().equals(requestDto.getNickname())) {
+                throw new BusinessException(ErrorCode.NICKNAME_DUPLICATION);
+            }
+            user.updateNickname(requestDto.getNickname());
+        }
 
-    public Map<String, Object> getUserActivity(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // 실제 게시글 수 계산 (자유게시글 + 스니펫)
-        long freePostCount = postService.getPostCountByUserId(userId);
-        long snippetCount = snippetService.getSnippetCountByUserId(userId);
-        long totalPostCount = freePostCount + snippetCount;
-        
-        return Map.of(
-            "grade", user.getGrade(),
-            "freePostCount", freePostCount,    // 자유게시글 수
-            "snippetCount", snippetCount,      // 스니펫 수
-            "totalPostCount", totalPostCount,  // 전체 게시글 수
-            "commentCount", 0,  // TODO: CommentService 구현 후 실제 값으로 변경
-            "likesReceived", 0  // TODO: LikeService 구현 후 실제 값으로 변경
-        );
+        if (requestDto.getBio() != null) {
+            user.updateBio(requestDto.getBio());
+        }
+
+        MultipartFile profileImage = requestDto.getProfileImage();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            com.snippethub.api.domain.File uploadedFile = fileService.uploadFile(profileImage, "PROFILE_IMAGE", user.getEmail());
+            user.updateProfileImage(uploadedFile.getFileUrl());
+        }
+
+        return user;
     }
 
     @Transactional
-    public User updateNickname(Long userId, String newNickname) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        if (userRepository.findByNickname(newNickname).isPresent() && !user.getNickname().equals(newNickname)) {
-            throw new IllegalStateException("Nickname already in use.");
+    public void changeUserPassword(String email, UserPasswordChangeRequestDto requestDto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
         }
-        user.setNickname(newNickname);
-        return userRepository.save(user);
+
+        if (!requestDto.getNewPassword().equals(requestDto.getConfirmNewPassword())) {
+            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        user.updatePassword(passwordEncoder.encode(requestDto.getNewPassword()));
     }
 
-    @Transactional
-    public void updatePassword(Long userId, String currentPassword, String newPassword) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new BadCredentialsException("Invalid current password.");
-        }
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+    public Page<Snippet> getMySnippets(String email, Pageable pageable, String status) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        // TODO: Implement status filtering (PUBLIC, PRIVATE, ALL)
+        return snippetRepository.findAll(pageable);
     }
 
-    @Transactional
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
+    public Page<Post> getMyPosts(String email, Pageable pageable) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        return postRepository.findAll(pageable);
     }
 }
-

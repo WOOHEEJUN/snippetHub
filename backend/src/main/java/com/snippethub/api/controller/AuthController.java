@@ -1,78 +1,87 @@
 package com.snippethub.api.controller;
 
 import com.snippethub.api.domain.User;
-import com.snippethub.api.dto.JwtResponse;
-import com.snippethub.api.dto.LoginRequest;
-import com.snippethub.api.dto.RegisterRequest;
-import com.snippethub.api.dto.UserDto;
-import com.snippethub.api.service.UserService;
-import com.snippethub.api.security.JwtUtil;
-import com.snippethub.api.security.TokenBlacklist;
+import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.token.TokenDto;
+import com.snippethub.api.dto.user.UserDto;
+import com.snippethub.api.dto.user.UserLoginRequestDto;
+import com.snippethub.api.dto.user.UserLoginResponseDto;
+import com.snippethub.api.dto.user.UserRegisterRequestDto;
+import com.snippethub.api.dto.user.UserRegisterResponseDto;
+import com.snippethub.api.exception.BusinessException;
+import com.snippethub.api.exception.ErrorCode;
+import com.snippethub.api.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
-import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    private final TokenBlacklist tokenBlacklist;
-
-    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil, TokenBlacklist tokenBlacklist) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.tokenBlacklist = tokenBlacklist;
-    }
+    private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterRequest request) {
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-        user.setNickname(request.getNickname());
-        User registeredUser = userService.registerUser(user);
-        return new ResponseEntity<>(toUserDto(registeredUser), HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<UserRegisterResponseDto>> register(@Valid @RequestBody UserRegisterRequestDto requestDto) {
+        if (!requestDto.getPassword().equals(requestDto.getConfirmPassword())) {
+            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
+        }
+        User newUser = authService.register(requestDto);
+        UserRegisterResponseDto responseDto = new UserRegisterResponseDto(newUser);
+        return new ResponseEntity<>(ApiResponse.success("회원가입이 완료되었습니다. 이메일 인증을 완료해주세요.", responseDto), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+    public ResponseEntity<ApiResponse<UserLoginResponseDto>> login(@Valid @RequestBody UserLoginRequestDto requestDto) {
+        Map.Entry<TokenDto, User> result = authService.login(requestDto);
+        TokenDto tokenDto = result.getKey();
+        User user = result.getValue();
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwt = jwtUtil.generateToken(userDetails);
+        UserDto userDto = new UserDto(user);
+        UserLoginResponseDto responseDto = UserLoginResponseDto.builder()
+                .token(tokenDto)
+                .user(userDto)
+                .build();
 
-        return ResponseEntity.ok(new JwtResponse(jwt));
+        return ResponseEntity.ok(ApiResponse.success("로그인 성공", responseDto));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader) {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            tokenBlacklist.blacklist(token);
+    @GetMapping("/verify")
+    public ResponseEntity<ApiResponse<String>> verifyEmail(@RequestParam("token") String token) {
+        authService.verifyUser(token);
+        return ResponseEntity.ok(ApiResponse.success("이메일 인증이 완료되었습니다. 이제 로그인할 수 있습니다."));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResponse<TokenDto>> reissue(@RequestHeader("Authorization") String refreshToken) {
+        TokenDto tokenDto = authService.reissue(refreshToken.substring(7)); // "Bearer " 제거
+        return ResponseEntity.ok(ApiResponse.success("토큰 재발급 성공", tokenDto));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        authService.forgotPassword(email);
+        return ResponseEntity.ok(ApiResponse.success("비밀번호 재설정 이메일이 발송되었습니다."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("newPassword");
+        String confirmNewPassword = request.get("confirmNewPassword");
+
+        if (!newPassword.equals(confirmNewPassword)) {
+            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
         }
-        return ResponseEntity.noContent().build();
-    }
 
-    private UserDto toUserDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setUserId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setNickname(user.getNickname());
-        dto.setGrade(user.getGrade());
-        dto.setCreatedAt(user.getCreatedAt());
-        return dto;
+        authService.resetPassword(token, newPassword);
+        return ResponseEntity.ok(ApiResponse.success("비밀번호가 성공적으로 재설정되었습니다."));
     }
 }
+

@@ -29,8 +29,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/posts/**").permitAll() // 게시글 관련 API 비회원 허용
-                .requestMatchers("/api/v1/snippets/**").permitAll()
+                .requestMatchers("/api/v1/snippets/**", "/api/v1/execute").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

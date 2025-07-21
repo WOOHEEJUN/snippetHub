@@ -1,30 +1,22 @@
 package com.snippethub.api.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "likes",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "post_id"}),
-        @UniqueConstraint(columnNames = {"user_id", "snippet_id"})
-    }
-)
+@Table(name = "likes")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Like {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "like_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,4 +34,11 @@ public class Like {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-} 
+
+    @Builder
+    public Like(User user, Post post, Snippet snippet) {
+        this.user = user;
+        this.post = post;
+        this.snippet = snippet;
+    }
+}
