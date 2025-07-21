@@ -46,19 +46,20 @@
 .like-section {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem; /* 여백 감소 */
 }
 
 .like-button {
-  font-size: 1.5rem;
+  font-size: 1rem; /* 아이콘 크기 조정 */
   background: none;
   border: none;
-  color: #6c757d;
-  transition: color 0.2s, transform 0.2s;
+  color: white; /* 아이콘 색상을 흰색으로 */
+  padding: 0 0.25rem 0 0; /* 오른쪽 여백 추가 */
+  transition: transform 0.2s;
 }
 
 .like-button.liked {
-  color: #DC3545; /* 빨간색 유지 */
+  color: #ffc107; /* 좋아요 눌렀을 때 노란색으로 */
 }
 
 .like-button:hover {

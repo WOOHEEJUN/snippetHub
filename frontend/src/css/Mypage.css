@@ -1,41 +1,136 @@
+/* src/css/Mypage.css */
 
+/* 전체 컨테이너 */
 .mypage-container {
-  padding: 3rem 0;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
 }
 
-.mypage-header {
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  margin-bottom: 2rem;
-}
-
-.mypage-header h1 {
+/* 페이지 제목 */
+.mypage-container h2 {
+  font-size: 1.8rem;
   font-weight: 700;
-}
-
-.profile-card {
+  color: #333;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
   text-align: center;
 }
 
-.profile-icon {
-  font-size: 5rem;
-  color: #6c757d;
+/* 카드 기본 스타일 */
+.mypage-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
 }
 
-.section-card {
+/* 사용자 정보 섹션 */
+.user-info-card .card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+.user-info-details p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.user-info-details p strong {
+  color: #333;
+  margin-right: 0.8rem;
+  min-width: 80px; /* 레이블 너비 고정 */
+}
+
+/* 활동 정보 섹션 */
+.activity-card .card-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+.activity-summary {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background-color: #f7f7f7;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.activity-summary strong {
+  color: #6A5ACD; /* 주요 색상 */
+}
+
+/* 버튼 그룹 */
+.mypage-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mypage-actions .btn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 주요 액션 버튼 */
+.btn-primary-custom {
+  background-color: #6A5ACD;
+  color: #fff;
+  border: 1px solid #6A5ACD;
+}
+
+.btn-primary-custom:hover {
+  background-color: #5a4cad;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(106, 90, 205, 0.2);
+}
+
+/* 보조 액션 버튼 (프로필 수정, 로그아웃) */
+.mypage-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
   margin-top: 2rem;
 }
 
-.section-title {
-  font-weight: 600;
-  margin-bottom: 1rem;
+.btn-secondary-custom {
+  background-color: transparent;
+  color: #6c757d;
+  border: 1px solid #ced4da;
 }
 
-.list-group-item a {
-  text-decoration: none;
-  color: #212529;
+.btn-secondary-custom:hover {
+  background-color: #f1f3f5;
+  border-color: #adb5bd;
 }
 
-.list-group-item a:hover {
-  color: #6A5ACD; /* 주요 색상 */
+/* 로딩 및 오류 메시지 */
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+  color: #777;
 }

@@ -1,6 +1,6 @@
-// src/MyPage/MySnippets.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../css/MyContentList.css'; // 공통 CSS 임포트
 
 function MySnippets() {
   const [snippets, setSnippets] = useState([]);
@@ -42,28 +42,29 @@ function MySnippets() {
     navigate(`/snippets/${snippetId}`); // ✅ 수정된 경로
   };
 
-  if (loading) return <p>로딩 중...</p>;
+  if (loading) return <p className="loading-message">로딩 중...</p>;
 
   return (
-    <div className="mysnippets-container">
+    <div className="my-content-container">
       <h2>💻 내가 작성한 스니펫</h2>
       {snippets.length === 0 ? (
-        <p>작성한 스니펫이 없습니다.</p>
+        <p className="empty-message">작성한 스니펫이 없습니다.</p>
       ) : (
-        <ul className="snippet-list">
+        <ul className="content-list">
           {snippets.map((snippet) => (
             <li
               key={snippet.snippetId}
-              className="snippet-item"
+              className="content-item"
               onClick={() => handleSnippetClick(snippet.snippetId)}
-              style={{ cursor: 'pointer' }}
             >
-              <div style={{ fontWeight: 'bold', color: '#007bff' }}>
-                {snippet.title}
+              <div className="item-title">{snippet.title}</div>
+              <div className="item-details">
+                <span className="language">{snippet.language}</span>
+                <span className="likes">
+                  <i className="bi bi-heart-fill"></i> {snippet.likeCount}
+                </span>
+                <span className="date">{new Date(snippet.createdAt).toLocaleDateString()}</span>
               </div>
-              <p><strong>언어:</strong> {snippet.language}</p>
-              <p><strong>좋아요:</strong> {snippet.likeCount}</p>
-              <small>{new Date(snippet.createdAt).toLocaleString()}</small>
             </li>
           ))}
         </ul>

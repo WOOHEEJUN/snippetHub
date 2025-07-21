@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import '../css/MyContentList.css'; // 공통 CSS 임포트
 
 function MyPosts() {
   const location = useLocation();
@@ -11,13 +12,13 @@ function MyPosts() {
   useEffect(() => {
     if (!token) {
       alert('토큰이 없습니다. 로그인하세요.');
+      setLoading(false);
       return;
     }
 
     fetch('/api/v1/posts/users/me/posts', {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
       },
     })
       .then((res) => {
@@ -26,38 +27,41 @@ function MyPosts() {
       })
       .then((data) => {
         setPosts(data || []);
-        setLoading(false);
       })
       .catch((err) => {
         alert(err.message || '게시글 불러오기 실패');
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [token]);
 
   const handlePostClick = (postId) => {
-    navigate(`/board/${postId}`); // ✅ 자유게시판 상세 페이지로 이동
+    navigate(`/board/${postId}`);
   };
 
-  if (loading) return <p>로딩 중...</p>;
+  if (loading) return <p className="loading-message">로딩 중...</p>;
 
   return (
-    <div className="myposts-container">
+    <div className="my-content-container">
       <h2>📝 내가 쓴 게시물</h2>
       {posts.length === 0 ? (
-        <p>작성한 게시물이 없습니다.</p>
+        <p className="empty-message">작성한 게시물이 없습니다.</p>
       ) : (
-        <ul className="post-list">
+        <ul className="content-list">
           {posts.map((post) => (
             <li
               key={post.postId}
-              className="post-item"
+              className="content-item"
               onClick={() => handlePostClick(post.postId)}
-              style={{ cursor: 'pointer' }}
             >
-              <div style={{ fontWeight: 'bold', color: '#007bff' }}>
-                {post.title}
+              <div className="item-title">{post.title}</div>
+              <div className="item-details">
+                <span className="date">{new Date(post.createdAt).toLocaleDateString()}</span>
+                {post.likeCount !== undefined && (
+                  <span className="likes">
+                    <i className="bi bi-heart-fill"></i> {post.likeCount}
+                  </span>
+                )}
               </div>
-              <small>{new Date(post.createdAt).toLocaleString()}</small>
             </li>
           ))}
         </ul>

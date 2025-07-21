@@ -24,7 +24,7 @@ const SnippetDetail = () => {
       const [snippetRes, commentsRes, likeRes] = await Promise.all([
         fetch(`/api/v1/snippets/${snippetId}`),
         fetch(`/api/v1/snippets/${snippetId}/comments`),
-        fetch(`/api/v1/snippets/${snippetId}/likes/status`, { headers: getAuthHeaders() })
+        fetch(`/api/v1/likes/snippets/${snippetId}/status`, { headers: getAuthHeaders() })
       ]);
 
       if (!snippetRes.ok) throw new Error('스니펫 정보를 불러올 수 없습니다.');
@@ -78,14 +78,16 @@ const SnippetDetail = () => {
   const handleLike = async () => {
     if (!user) return alert('로그인이 필요합니다.');
     try {
-      const response = await fetch(`/api/v1/snippets/${snippetId}/likes`, {
-        method: 'POST',
+      const response = await fetch(`/api/v1/likes/snippets/${snippetId}`, {
+        method: isLiked ? 'DELETE' : 'POST',
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error('요청 실패');
-      const result = await response.json();
-      setIsLiked(result.liked);
-      setLikeCount(result.likeCount);
+
+      // 성공 시 상태 업데이트
+      setIsLiked(!isLiked);
+      setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+
     } catch (err) {
       console.error(err);
     }
@@ -144,6 +146,13 @@ const SnippetDetail = () => {
               <i className="bi bi-clipboard"></i> 복사
             </button>
           </div>
+
+          <h5 className="mt-4 mb-3">설명</h5>
+          <div className="card description-card">
+            <div className="card-body">
+              <p className="card-text">{snippet.description || '설명이 없습니다.'}</p>
+            </div>
+          </div>
         </div>
         <div className="col-lg-4">
           <h5 className="mb-3">정보</h5>
@@ -155,20 +164,14 @@ const SnippetDetail = () => {
               </li>
               <li className="list-group-item d-flex justify-content-between align-items-center">
                 좋아요
-                <div className="like-section">
+                <span className="badge bg-primary rounded-pill d-flex align-items-center">
                   <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
                     <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
                   </button>
                   <span className="fw-bold">{likeCount}</span>
-                </div>
+                </span>
               </li>
             </ul>
-          </div>
-          <h5 className="mt-4 mb-3">설명</h5>
-          <div className="card description-card">
-            <div className="card-body">
-              <p className="card-text">{snippet.description || '설명이 없습니다.'}</p>
-            </div>
           </div>
         </div>
       </div>
