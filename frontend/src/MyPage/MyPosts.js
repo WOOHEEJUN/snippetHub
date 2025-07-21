@@ -42,7 +42,7 @@ function MyPosts() {
 
   return (
     <div className="my-content-container">
-      <h2>📝 내가 쓴 게시물</h2>
+      <h2> 내가 쓴 게시물</h2>
       {posts.length === 0 ? (
         <p className="empty-message">작성한 게시물이 없습니다.</p>
       ) : (

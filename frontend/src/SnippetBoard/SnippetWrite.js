@@ -41,35 +41,39 @@ const SnippetWrite = () => {
   const navigate = useNavigate();
   const { getAuthHeaders } = useAuth();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title || !language || !description || !code) {
-      setError('모든 필드를 채워주세요.');
-      return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!title || !language || !description || !code) {
+    setError('모든 필드를 채워주세요.');
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    const response = await fetch('/api/v1/snippets', {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title, description, code, language }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || '스니펫 생성에 실패했습니다.');
     }
-    setLoading(true);
-    setError(null);
 
-    try {
-      const response = await fetch('/api/v1/snippets', {
-        method: 'POST',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ title, description, code, language }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || '스니펫 생성에 실패했습니다.');
-      }
-
-      alert('스니펫이 성공적으로 생성되었습니다.');
-      navigate('/snippets');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    alert('스니펫이 성공적으로 생성되었습니다.');
+    navigate('/snippets');
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="container snippet-form-container">

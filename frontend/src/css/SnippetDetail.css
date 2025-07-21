@@ -46,7 +46,10 @@
 .like-section {
   display: flex;
   align-items: center;
-  gap: 0.25rem; /* 여백 감소 */
+  gap: 0.25rem;
+  padding: 0.35em 0.65em;
+  border: 1px solid #dee2e6;
+  border-radius: 50rem;
 }
 
 .like-button {
@@ -64,6 +67,12 @@
 
 .like-button:hover {
   transform: scale(1.1);
+}
+
+.like-count {
+  font-size: 1rem; /* 좋아요 수 폰트 크기 */
+  font-weight: 600;
+  color: #333;
 }
 
 .comment-section {

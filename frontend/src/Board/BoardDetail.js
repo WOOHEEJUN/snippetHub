@@ -6,17 +6,20 @@ import '../css/Board.css';
 function BoardDetail() {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { user, getAuthHeaders } = useAuth(); // 로그인 사용자 정보
+  const { user, getAuthHeaders } = useAuth();
   const [post, setPost] = useState(null);
   const [error, setError] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
 
   const fetchPostData = useCallback(async () => {
     try {
-      const [postRes, likeRes] = await Promise.all([
+      const [postRes, likeRes, commentsRes] = await Promise.all([
         fetch(`/api/v1/posts/${postId}`),
-        fetch(`/api/v1/posts/${postId}/likes/status`, { headers: getAuthHeaders() })
+        fetch(`/api/v1/posts/${postId}/likes/status`, { headers: getAuthHeaders() }),
+        fetch(`/api/v1/posts/${postId}/comments`)
       ]);
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
@@ -29,6 +32,10 @@ function BoardDetail() {
         setIsLiked(likeData.liked);
       }
 
+      if (commentsRes.ok) {
+        const commentsData = await commentsRes.json();
+        setComments(commentsData.content || []);
+      }
     } catch (err) {
       console.error('데이터 불러오기 실패:', err);
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
@@ -72,13 +79,30 @@ function BoardDetail() {
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error('요청 실패');
-      
-      // 성공 시 상태 업데이트
       setIsLiked(!isLiked);
       setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
-
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    try {
+      const response = await fetch(`/api/v1/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: newComment }),
+      });
+      if (!response.ok) throw new Error('댓글 작성 실패');
+      setNewComment('');
+      fetchPostData();
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -118,9 +142,9 @@ function BoardDetail() {
 
       <div className="like-section text-center my-4">
         <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
-            <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+          <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
         </button>
-        <span className="fw-bold ms-2">{likeCount}</span>
+        <span className="like-count">{likeCount}</span>
       </div>
 
       {isAuthor && (
@@ -135,12 +159,38 @@ function BoardDetail() {
       )}
 
       <div className="mt-5 text-center">
-        <button
-          className="btn btn-secondary px-4"
-          onClick={() => navigate(-1)}
-        >
+        <button className="btn btn-secondary px-4" onClick={() => navigate(-1)}>
           ← 목록으로 돌아가기
         </button>
+      </div>
+
+      <div className="comment-section mt-5">
+        <h4 className="mb-4">댓글 ({comments.length})</h4>
+        {user && (
+          <form onSubmit={handleCommentSubmit} className="mb-4">
+            <div className="input-group">
+              <textarea
+                className="form-control comment-form-textarea"
+                rows="3"
+                placeholder="댓글을 입력하세요..."
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+              ></textarea>
+              <button className="btn btn-primary" type="submit">등록</button>
+            </div>
+          </form>
+        )}
+        <div className="comment-list">
+          {comments.map(comment => (
+            <div key={comment.commentId} className="comment mb-3">
+              <div className="d-flex justify-content-between">
+                <span className="comment-author">{comment.author?.nickname}</span>
+                <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
+              </div>
+              <p className="mt-2 mb-0">{comment.content}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

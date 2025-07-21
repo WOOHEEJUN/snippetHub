@@ -46,7 +46,7 @@ function MySnippets() {
 
   return (
     <div className="my-content-container">
-      <h2>💻 내가 작성한 스니펫</h2>
+      <h2>내가 작성한 스니펫</h2>
       {snippets.length === 0 ? (
         <p className="empty-message">작성한 스니펫이 없습니다.</p>
       ) : (

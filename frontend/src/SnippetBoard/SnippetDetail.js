@@ -60,18 +60,17 @@ const SnippetDetail = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm('정말로 이 스니펫을 삭제하시겠습니까?')) {
-      try {
-        const response = await fetch(`/api/v1/snippets/${snippetId}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders(),
-        });
-        if (!response.ok) throw new Error('삭제에 실패했습니다.');
-        alert('스니펫이 삭제되었습니다.');
-        navigate('/snippets');
-      } catch (err) {
-        alert(err.message);
-      }
+    if (!window.confirm('정말로 이 스니펫을 삭제하시겠습니까?')) return;
+    try {
+      const response = await fetch(`/api/v1/snippets/${snippetId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (!response.ok) throw new Error('삭제에 실패했습니다.');
+      alert('스니펫이 삭제되었습니다.');
+      navigate('/snippets');
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -83,11 +82,8 @@ const SnippetDetail = () => {
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error('요청 실패');
-
-      // 성공 시 상태 업데이트
       setIsLiked(!isLiked);
       setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
-
     } catch (err) {
       console.error(err);
     }
@@ -99,12 +95,15 @@ const SnippetDetail = () => {
     try {
       const response = await fetch(`/api/v1/snippets/${snippetId}/comments`, {
         method: 'POST',
-        headers: getAuthHeaders({'Content-Type': 'application/json'}),
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ content: newComment }),
       });
       if (!response.ok) throw new Error('댓글 작성 실패');
       setNewComment('');
-      fetchSnippetData(); // Re-fetch all data to show new comment
+      fetchSnippetData();
     } catch (err) {
       alert(err.message);
     }
@@ -114,7 +113,7 @@ const SnippetDetail = () => {
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!snippet) return <div className="alert alert-warning">스니펫을 찾을 수 없습니다.</div>;
 
-  const isAuthor = user?.id === snippet.author?.userId;
+  const isAuthor = Number(user?.id) === Number(snippet.author?.id);
 
   return (
     <div className="container snippet-detail-container">
@@ -128,7 +127,7 @@ const SnippetDetail = () => {
           </div>
           {isAuthor && (
             <div className="snippet-actions">
-              <Link to={`/snippets/edit/${snippetId}`} className="btn btn-outline-secondary btn-sm me-2">수정</Link>
+              <button onClick={() => navigate(`/api/v1/snippets/${snippetId}`)} className="btn btn-outline-secondary btn-sm me-2">수정</button>
               <button onClick={handleDelete} className="btn btn-outline-danger btn-sm">삭제</button>
             </div>
           )}
@@ -154,6 +153,7 @@ const SnippetDetail = () => {
             </div>
           </div>
         </div>
+
         <div className="col-lg-4">
           <h5 className="mb-3">정보</h5>
           <div className="card">
@@ -164,7 +164,7 @@ const SnippetDetail = () => {
               </li>
               <li className="list-group-item d-flex justify-content-between align-items-center">
                 좋아요
-                <span className="badge bg-primary rounded-pill d-flex align-items-center">
+                <span className="badge rounded-pill d-flex align-items-center">
                   <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
                     <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
                   </button>
@@ -173,35 +173,35 @@ const SnippetDetail = () => {
               </li>
             </ul>
           </div>
-        </div>
-      </div>
 
-      <div className="comment-section">
-        <h4 className="mb-4">댓글 ({comments.length})</h4>
-        {user && (
-          <form onSubmit={handleCommentSubmit} className="mb-4">
-            <div className="input-group">
-              <textarea 
-                className="form-control comment-form-textarea" 
-                rows="3" 
-                placeholder="댓글을 입력하세요..."
-                value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-              ></textarea>
-              <button className="btn btn-primary" type="submit">등록</button>
+          <div className="comment-section mt-4">
+            <h4 className="mb-4">댓글 ({comments.length})</h4>
+            {user && (
+              <form onSubmit={handleCommentSubmit} className="mb-4">
+                <div className="input-group">
+                  <textarea
+                    className="form-control comment-form-textarea"
+                    rows="3"
+                    placeholder="댓글을 입력하세요..."
+                    value={newComment}
+                    onChange={e => setNewComment(e.target.value)}
+                  ></textarea>
+                  <button className="btn btn-primary" type="submit">등록</button>
+                </div>
+              </form>
+            )}
+            <div className="comment-list">
+              {comments.map(comment => (
+                <div key={comment.commentId} className="comment mb-3">
+                  <div className="d-flex justify-content-between">
+                    <span className="comment-author">{comment.author?.nickname}</span>
+                    <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p className="mt-2 mb-0">{comment.content}</p>
+                </div>
+              ))}
             </div>
-          </form>
-        )}
-        <div className="comment-list">
-          {comments.map(comment => (
-            <div key={comment.commentId} className="comment mb-3">
-              <div className="d-flex justify-content-between">
-                <span className="comment-author">{comment.author?.nickname}</span>
-                <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
-              </div>
-              <p className="mt-2 mb-0">{comment.content}</p>
-            </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>
