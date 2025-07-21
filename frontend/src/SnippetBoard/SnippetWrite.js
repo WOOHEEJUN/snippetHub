@@ -52,7 +52,7 @@ const handleSubmit = async (e) => {
   setError(null);
 
   try {
-    const response = await fetch('/api/v1/snippets', {
+    const response = await fetch('/api/snippets', {
       method: 'POST',
       headers: {
         ...getAuthHeaders(),

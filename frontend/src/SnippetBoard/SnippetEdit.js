@@ -46,12 +46,12 @@ const SnippetEdit = () => {
 
   const fetchSnippet = useCallback(async () => {
     try {
-      const response = await fetch(`/api/v1/snippets/${snippetId}`);
+      const response = await fetch(`/api/snippets/${snippetId}`);
       if (!response.ok) throw new Error('스니펫 정보를 불러올 수 없습니다.');
       const data = await response.json();
 
       // Check if the logged-in user is the author
-      if (user?.id !== data.author?.userId) {
+      if (user?.userId !== data.author?.userId) {
         alert('수정 권한이 없습니다.');
         navigate(`/snippets/${snippetId}`);
         return;
@@ -80,11 +80,15 @@ const SnippetEdit = () => {
     }
     setSubmitting(true);
     setError(null);
+    console.log(user);
 
     try {
-      const response = await fetch(`/api/v1/snippets/${snippetId}`, {
+      const response = await fetch(`/api/snippets/${snippetId}`, {
         method: 'PUT',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify({ title, description, code, language }),
       });
 

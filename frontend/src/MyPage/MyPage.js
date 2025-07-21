@@ -16,24 +16,17 @@ function MyPage() {
       return;
     }
 
-    fetch('/api/v1/users/me', {
+    fetch('/api/users/profile', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.ok ? res.json() : Promise.reject('유저 정보 불러오기 실패'))
-      .then(setUserInfo)
+      .then(data => {
+        setUserInfo(data.data.user); // user 필드에 실제 사용자 정보
+        setUserActivity(data.data.stats); // stats 필드에 활동 정보
+      })
       .catch((err) => {
         console.error(err);
         alert('유저 정보를 불러오는 데 실패했습니다.');
-      });
-
-    fetch('/api/v1/users/me/activity', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.ok ? res.json() : Promise.reject('활동 정보 불러오기 실패'))
-      .then(setUserActivity)
-      .catch((err) => {
-        console.error(err);
-        alert('활동 정보를 불러오는 데 실패했습니다.');
       })
       .finally(() => setLoading(false));
   }, []);

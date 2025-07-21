@@ -43,7 +43,7 @@ const Login = () => {
     setLoginError('');
 
     try {
-      const response = await fetch('/api/v1/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -56,8 +56,8 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem('token', data.accessToken);
-      await login(data.accessToken);
+      localStorage.setItem('token', data.data.token.accessToken); // accessToken 추출 수정
+      await login(data.data.token.accessToken); // login 함수 호출 시에도 수정
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);

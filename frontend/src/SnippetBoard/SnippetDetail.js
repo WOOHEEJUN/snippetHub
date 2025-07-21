@@ -21,10 +21,9 @@ const SnippetDetail = () => {
 
   const fetchSnippetData = useCallback(async () => {
     try {
-      const [snippetRes, commentsRes, likeRes] = await Promise.all([
-        fetch(`/api/v1/snippets/${snippetId}`),
-        fetch(`/api/v1/snippets/${snippetId}/comments`),
-        fetch(`/api/v1/likes/snippets/${snippetId}/status`, { headers: getAuthHeaders() })
+      const [snippetRes, commentsRes] = await Promise.all([
+        fetch(`/api/snippets/${snippetId}`),
+        fetch(`/api/snippets/${snippetId}/comments`)
       ]);
 
       if (!snippetRes.ok) throw new Error('스니펫 정보를 불러올 수 없습니다.');
@@ -32,14 +31,14 @@ const SnippetDetail = () => {
       setSnippet(snippetData);
       setLikeCount(snippetData.likeCount);
 
+      // isLiked 상태는 백엔드에서 직접 제공하지 않으므로, 초기에는 false로 설정하거나
+      // 사용자별 좋아요 여부를 가져오는 별도의 API가 필요합니다.
+      // 현재는 snippetData에 isLiked 정보가 없으므로, 좋아요 버튼 클릭 시 토글 로직만 구현합니다.
+      setIsLiked(false); // 초기 상태는 false로 설정
+
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
         setComments(commentsData.content || []);
-      }
-
-      if (likeRes.ok) {
-        const likeData = await likeRes.json();
-        setIsLiked(likeData.liked);
       }
 
     } catch (err) {
@@ -62,7 +61,7 @@ const SnippetDetail = () => {
   const handleDelete = async () => {
     if (!window.confirm('정말로 이 스니펫을 삭제하시겠습니까?')) return;
     try {
-      const response = await fetch(`/api/v1/snippets/${snippetId}`, {
+      const response = await fetch(`/api/snippets/${snippetId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -77,13 +76,17 @@ const SnippetDetail = () => {
   const handleLike = async () => {
     if (!user) return alert('로그인이 필요합니다.');
     try {
-      const response = await fetch(`/api/v1/likes/snippets/${snippetId}`, {
-        method: isLiked ? 'DELETE' : 'POST',
+      const response = await fetch(`/api/snippets/${snippetId}/like`, {
+        method: 'POST',
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error('요청 실패');
-      setIsLiked(!isLiked);
-      setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+      
+      // 백엔드에서 토글 결과를 반환한다고 가정
+      const result = await response.json();
+      setIsLiked(result.data); // 백엔드에서 isLiked 값을 반환한다고 가정
+      setLikeCount(prev => result.data ? prev + 1 : prev - 1); // 백엔드 결과에 따라 좋아요 수 업데이트
+
     } catch (err) {
       console.error(err);
     }
@@ -93,7 +96,7 @@ const SnippetDetail = () => {
     e.preventDefault();
     if (!newComment.trim()) return;
     try {
-      const response = await fetch(`/api/v1/snippets/${snippetId}/comments`, {
+      const response = await fetch(`/api/snippets/${snippetId}/comments`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -113,8 +116,8 @@ const SnippetDetail = () => {
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!snippet) return <div className="alert alert-warning">스니펫을 찾을 수 없습니다.</div>;
 
-  const isAuthor = Number(user?.id) === Number(snippet.author?.id);
-
+  const isAuthor = Number(user?.userId) === Number(snippet.author?.userId);
+/*console.log(user)*/
   return (
     <div className="container snippet-detail-container">
       <div className="snippet-header">
@@ -127,7 +130,7 @@ const SnippetDetail = () => {
           </div>
           {isAuthor && (
             <div className="snippet-actions">
-              <button onClick={() => navigate(`/api/v1/snippets/${snippetId}`)} className="btn btn-outline-secondary btn-sm me-2">수정</button>
+              <button onClick={() => navigate(`/snippets/edit/${snippetId}`)} className="btn btn-outline-secondary btn-sm me-2">수정</button>
               <button onClick={handleDelete} className="btn btn-outline-danger btn-sm">삭제</button>
             </div>
           )}

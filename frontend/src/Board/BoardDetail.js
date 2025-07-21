@@ -16,10 +16,9 @@ function BoardDetail() {
 
   const fetchPostData = useCallback(async () => {
     try {
-      const [postRes, likeRes, commentsRes] = await Promise.all([
-        fetch(`/api/v1/posts/${postId}`),
-        fetch(`/api/v1/posts/${postId}/likes/status`, { headers: getAuthHeaders() }),
-        fetch(`/api/v1/posts/${postId}/comments`)
+      const [postRes, commentsRes] = await Promise.all([
+        fetch(`/api/posts/${postId}`),
+        fetch(`/api/posts/${postId}/comments`)
       ]);
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
@@ -27,10 +26,10 @@ function BoardDetail() {
       setPost(postData);
       setLikeCount(postData.likeCount);
 
-      if (likeRes.ok) {
-        const likeData = await likeRes.json();
-        setIsLiked(likeData.liked);
-      }
+      // isLiked 상태는 백엔드에서 직접 제공하지 않으므로, 초기에는 false로 설정하거나
+      // 사용자별 좋아요 여부를 가져오는 별도의 API가 필요합니다.
+      // 현재는 postData에 isLiked 정보가 없으므로, 좋아요 버튼 클릭 시 토글 로직만 구현합니다.
+      setIsLiked(false); // 초기 상태는 false로 설정
 
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
@@ -54,7 +53,7 @@ function BoardDetail() {
     if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
 
     const token = localStorage.getItem('token');
-    fetch(`/api/v1/posts/${postId}`, {
+    fetch(`/api/posts/${postId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -74,13 +73,17 @@ function BoardDetail() {
   const handleLike = async () => {
     if (!user) return alert('로그인이 필요합니다.');
     try {
-      const response = await fetch(`/api/v1/likes/posts/${postId}`, {
-        method: isLiked ? 'DELETE' : 'POST',
+      const response = await fetch(`/api/posts/${postId}/like`, {
+        method: 'POST',
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error('요청 실패');
-      setIsLiked(!isLiked);
-      setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+      
+      // 백엔드에서 토글 결과를 반환한다고 가정
+      const result = await response.json();
+      setIsLiked(result.data); // 백엔드에서 isLiked 값을 반환한다고 가정
+      setLikeCount(prev => result.data ? prev + 1 : prev - 1); // 백엔드 결과에 따라 좋아요 수 업데이트
+
     } catch (err) {
       console.error(err);
     }
@@ -90,7 +93,7 @@ function BoardDetail() {
     e.preventDefault();
     if (!newComment.trim()) return;
     try {
-      const response = await fetch(`/api/v1/posts/${postId}/comments`, {
+      const response = await fetch(`/api/posts/${postId}/comments`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),

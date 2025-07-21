@@ -25,7 +25,7 @@ const Board = () => {
       title: term,
     });
 
-    fetch(`/api/v1/posts?${params.toString()}`)
+    fetch(`/api/posts?${params.toString()}`)
       .then(res => {
         if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
         return res.json();

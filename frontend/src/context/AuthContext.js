@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     // 새로운 요청 생성
     fetchUserPromise.current = (async () => {
       try {
-        const res = await fetch('/api/v1/users/me', {
+        const res = await fetch('/api/users/profile', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const userData = await res.json();
-        setUser(userData);
+        setUser(userData.data.user); // user 필드에 실제 사용자 정보
       } catch (err) {
         console.error('사용자 정보 오류:', err);
         // 네트워크 오류나 5xx 에러는 로그아웃하지 않음
@@ -75,16 +75,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // 로그아웃 시 서버에 토큰 무효화 요청
-    if (token) {
-      fetch('/api/v1/auth/logout', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }).catch(err => console.error('로그아웃 요청 실패:', err));
-    }
-    
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);

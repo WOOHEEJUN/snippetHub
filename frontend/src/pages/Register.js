@@ -6,7 +6,9 @@ const Register = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    nickname: ''
+    confirmPassword: '', // confirmPassword 상태 추가
+    nickname: '',
+    agreeToTerms: false, // agreeToTerms 상태 추가
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -15,8 +17,11 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -31,12 +36,22 @@ const Register = () => {
       newErrors.email = '올바른 이메일 형식이 아닙니다.';
     }
     if (!formData.password) {
-      newErrors.password = '비밀번호를 입력해주세요.';
-    } else if (formData.password.length < 6) {
-      newErrors.password = '비밀번호는 6자 이상이어야 합니다.';
+      newErrors.password = '비밀번호는 필수 입력 값입니다.';
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,20}$/.test(formData.password)) {
+      newErrors.password = '비밀번호는 8~20자 영문, 숫자, 특수문자를 사용하세요.';
+    }
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = '비밀번호 확인은 필수입니다.';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
     }
     if (!formData.nickname) {
       newErrors.nickname = '닉네임을 입력해주세요.';
+    } else if (!/^[가-힣a-zA-Z0-9]{2,20}$/.test(formData.nickname)) {
+      newErrors.nickname = '닉네임은 2~20자 한글, 영문, 숫자를 사용하세요.';
+    }
+    if (!formData.agreeToTerms) {
+      newErrors.agreeToTerms = '이용약관에 동의해야 합니다.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -51,7 +66,7 @@ const Register = () => {
     setRegisterSuccess(false);
 
     try {
-      const response = await fetch('/api/v1/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -115,10 +130,25 @@ const Register = () => {
               className={`form-control form-control-lg ${errors.password ? 'is-invalid' : ''}`}
               value={formData.password}
               onChange={handleChange}
-              placeholder="6자 이상 입력"
+              placeholder="8~20자 영문, 숫자, 특수문자"
               required
             />
             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="confirmPassword" className="form-label">비밀번호 확인</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              className={`form-control form-control-lg ${errors.confirmPassword ? 'is-invalid' : ''}`}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="비밀번호 재입력"
+              required
+            />
+            {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
           </div>
 
           <div className="mb-3">
@@ -134,6 +164,21 @@ const Register = () => {
               required
             />
             {errors.nickname && <div className="invalid-feedback">{errors.nickname}</div>}
+          </div>
+
+          <div className="form-check mb-4">
+            <input
+              className={`form-check-input ${errors.agreeToTerms ? 'is-invalid' : ''}`}
+              type="checkbox"
+              id="agreeToTerms"
+              name="agreeToTerms"
+              checked={formData.agreeToTerms}
+              onChange={handleChange}
+            />
+            <label className="form-check-label" htmlFor="agreeToTerms">
+              <Link to="/terms" target="_blank" rel="noopener noreferrer">이용약관</Link>에 동의합니다.
+            </label>
+            {errors.agreeToTerms && <div className="invalid-feedback">{errors.agreeToTerms}</div>}
           </div>
 
           <button type="submit" className="btn btn-primary w-100 btn-lg" disabled={isLoading || registerSuccess}>

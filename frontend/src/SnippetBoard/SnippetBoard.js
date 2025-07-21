@@ -28,14 +28,14 @@ const SnippetBoard = () => {
       language: lang,
     });
 
-    fetch(`/api/v1/snippets?${params.toString()}`)
+    fetch(`/api/snippets?${params.toString()}`)
       .then(res => {
         if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
         return res.json();
       })
       .then(data => {
-        setSnippets(data || []);
-        setCurrentPage(data.snippetId);
+        setSnippets(data.content || []);
+        setCurrentPage(data.number);
         setTotalPages(data.totalPages);
       })
       .catch(err => {

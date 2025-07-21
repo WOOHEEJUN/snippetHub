@@ -12,12 +12,18 @@ const Home = () => {
   const [searchLanguage, setSearchLanguage] = useState('');
 
   useEffect(() => {
-    fetch('/api/v1/snippets?page=0&size=6&sort=likeCount,desc')
+    fetch('/api/snippets?page=0&size=6&sort=likeCount,desc')
       .then((res) => res.json())
       .then((data) => setPopularSnippets(data.content || []))
       .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
 
-    fetch('/api/v1/posts?page=0&size=5&sort=createdAt,desc')
+    const postParams = new URLSearchParams({
+      page: 0,
+      size: 5,
+      sort: 'createdAt,desc',
+    });
+
+    fetch(`/api/posts?${postParams.toString()}`)
       .then((res) => res.json())
       .then((data) => setRecentPosts(data.content || []))
       .catch((err) => console.error('🔥 최신 게시글 로딩 실패:', err));
