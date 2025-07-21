@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import '../css/App.css'; // 스타일 적용
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import '../css/Header.css';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -14,34 +14,30 @@ const Header = () => {
 
   return (
     <header className="header">
-      <div className="container d-flex justify-content-between align-items-center">
-        {/* 왼쪽: 로고 + 메뉴 */}
-        <div className="d-flex align-items-center gap-4">
-          <Link to="/" className="logo">
-            <span>SNI</span><span>스니펫</span>
-          </Link>
-          <nav>
-            <ul className="nav-list">
-              <li><Link to="/snippets">스니펫</Link></li>
-              <li><Link to="/board">게시판</Link></li>
-            </ul>
-          </nav>
-        </div>
+      <div className="header-container">
+        <Link to="/" className="logo">
+          <span>SNI</span><span>PET</span>
+        </Link>
 
-        {/* 오른쪽: 로그인/회원가입 or 마이페이지/로그아웃 */}
+        <nav className="nav-list">
+  <NavLink to="/snippets" className="nav-link">스니펫</NavLink>
+  <NavLink to="/board" className="nav-link">게시판</NavLink>
+</nav>
+
+
         <div className="auth-buttons">
-          {!token ? (
-            <>
-              <Link to="/login" className="btn-login">로그인</Link>
-              <Link to="/register" className="btn-signup">회원가입</Link>
-            </>
-          ) : (
-            <>
-              <Link to="/mypage" className="btn-login">마이페이지</Link>
-              <button onClick={handleLogout} className="btn-signup">로그아웃</button>
-            </>
-          )}
-        </div>
+  {!token ? (
+    <>
+      <Link to="/login" className="btn btn-outline-primary">로그인</Link>
+      <Link to="/register" className="btn btn-primary">회원가입</Link>
+    </>
+  ) : (
+    <>
+      <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
+      <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
+    </>
+  )}
+</div>
       </div>
     </header>
   );

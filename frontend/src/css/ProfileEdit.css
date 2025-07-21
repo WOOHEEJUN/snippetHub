@@ -1,30 +1,126 @@
-/* ProfileEdit.css */
+/* src/css/ProfileEdit.css */
+
+/* 전체 컨테이너 */
 .profile-edit-container {
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: 2rem auto;
   padding: 2rem;
-  background: white;
+  background-color: #f9f9f9;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* 페이지 제목 */
 .profile-edit-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+  text-align: center;
+}
+
+/* 폼 섹션 카드 */
+.edit-form-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.edit-form-card h4 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #444;
   margin-bottom: 1.5rem;
 }
 
-.profile-edit-container label {
-  font-weight: bold;
+/* 입력 필드 */
+.form-group {
+  margin-bottom: 1.5rem;
 }
 
-.profile-edit-container input {
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
   width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  margin-bottom: 16px;
-  border: 1px solid #ccc;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ced4da;
   border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.profile-edit-container .btn {
-  margin-right: 10px;
+.form-group input:focus {
+  outline: none;
+  border-color: #6A5ACD;
+  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.15);
+}
+
+/* 버튼 스타일 */
+.btn-submit {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #6A5ACD;
+  color: #fff;
+  border: 1px solid #6A5ACD;
+}
+
+.btn-submit:hover {
+  background-color: #5a4cad;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(106, 90, 205, 0.2);
+}
+
+/* 회원 탈퇴 버튼 */
+.btn-delete {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #e74c3c;
+  color: #fff;
+  border: 1px solid #e74c3c;
+}
+
+.btn-delete:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
+}
+
+/* 뒤로가기 버튼 */
+.back-button-container {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.btn-back {
+  background-color: transparent;
+  color: #6c757d;
+  border: 1px solid #ced4da;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background-color: #f1f3f5;
+  border-color: #adb5bd;
 }

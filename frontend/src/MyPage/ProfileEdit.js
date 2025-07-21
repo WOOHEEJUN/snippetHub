@@ -1,3 +1,4 @@
+// src/ProfileEdit.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/ProfileEdit.css';
@@ -25,7 +26,7 @@ function ProfileEdit() {
         body: JSON.stringify({ nickname }),
       });
 
-      if (!res.ok) throw new Error('닉네임 변경에 실패했습니다.');
+      if (!res.ok) throw new Error('중복되는 닉네임 입니다.');
       const data = await res.json();
       alert(`닉네임이 "${data.nickname}"(으)로 변경되었습니다.`);
       navigate('/mypage');
@@ -88,41 +89,59 @@ function ProfileEdit() {
     <div className="profile-edit-container">
       <h2>⚙️ 개인정보 수정</h2>
 
-      <form onSubmit={handleNicknameSubmit} className="edit-form">
+      <form onSubmit={handleNicknameSubmit} className="edit-form-card">
         <h4>닉네임 변경</h4>
-        <input
-          type="text"
-          placeholder="새 닉네임"
-          value={nickname}
-          onChange={handleNicknameChange}
-          required
-        />
-        <button type="submit">닉네임 변경</button>
+        <div className="form-group">
+          <label htmlFor="nickname">새 닉네임</label>
+          <input
+            id="nickname"
+            type="text"
+            placeholder="새 닉네임을 입력하세요"
+            value={nickname}
+            onChange={handleNicknameChange}
+            required
+          />
+        </div>
+        <button type="submit" className="btn-submit">닉네임 변경</button>
       </form>
 
-      <form onSubmit={handlePasswordSubmit} className="edit-form">
+      <form onSubmit={handlePasswordSubmit} className="edit-form-card">
         <h4>비밀번호 변경</h4>
-        <input
-          type="password"
-          placeholder="현재 비밀번호"
-          value={currentPassword}
-          onChange={handleCurrentPasswordChange}
-          required
-        />
-        <input
-          type="password"
-          placeholder="새 비밀번호"
-          value={newPassword}
-          onChange={handleNewPasswordChange}
-          required
-        />
-        <button type="submit">비밀번호 변경</button>
+        <div className="form-group">
+          <label htmlFor="currentPassword">현재 비밀번호</label>
+          <input
+            id="currentPassword"
+            type="password"
+            placeholder="현재 비밀번호를 입력하세요"
+            value={currentPassword}
+            onChange={handleCurrentPasswordChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="newPassword">새 비밀번호</label>
+          <input
+            id="newPassword"
+            type="password"
+            placeholder="새 비밀번호를 입력하세요"
+            value={newPassword}
+            onChange={handleNewPasswordChange}
+            required
+          />
+        </div>
+        <button type="submit" className="btn-submit">비밀번호 변경</button>
       </form>
 
-      <div className="edit-form">
+      <div className="edit-form-card">
         <h4>회원 탈퇴</h4>
-        <button className="delete-btn" onClick={handleDeleteAccount}>
+        <button className="btn-delete" onClick={handleDeleteAccount}>
           회원 탈퇴하기
+        </button>
+      </div>
+
+      <div className="back-button-container">
+        <button className="btn-back" onClick={() => navigate('/mypage')}>
+          마이페이지로 돌아가기
         </button>
       </div>
     </div>

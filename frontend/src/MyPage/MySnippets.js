@@ -1,72 +1,70 @@
-// src/MyPage/MySnippets.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../css/MyContentList.css'; // 공통 CSS 임포트
 
 function MySnippets() {
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     if (!token) {
       alert('로그인이 필요합니다.');
       navigate('/login');
       return;
     }
 
-    fetch('/api/v1/users/me/snippets?page=0&size=10', {
-      method: 'GET',
+    fetch('/api/v1/snippets/users/me/snippets', {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
-      .then(async res => {
-        console.log('📡 응답 상태 코드:', res.status);
-
-        if (res.status === 401) throw new Error('인증 실패: 로그인 다시 시도해주세요.');
-        if (res.status === 403) throw new Error('권한이 없습니다.');
-        if (res.status === 500) {
+      .then(async (res) => {
+        if (!res.ok) {
           const errorText = await res.text();
-          console.error('🔥 서버 내부 오류:', errorText);
-          throw new Error('서버 오류가 발생했습니다.');
+          console.error('❌ 오류 응답:', errorText);
+          throw new Error(`스니펫 조회 실패: ${res.status}`);
         }
-        if (!res.ok) throw new Error('스니펫 조회 실패');
-
         return res.json();
       })
-      .then(data => {
-        console.log('✅ 스니펫 데이터:', data);
-        setSnippets(data.content || []);
+      .then((data) => {
+        setSnippets(data || []);
         setLoading(false);
       })
-      .catch(err => {
-        console.error('❌ 오류:', err);
-        alert(err.message || '알 수 없는 오류가 발생했습니다.');
+      .catch((err) => {
+        alert(err.message || '스니펫을 불러오는 중 오류가 발생했습니다.');
         setLoading(false);
       });
-  }, [navigate]);
+  }, [navigate, token]);
 
-  if (loading) return <p>로딩 중...</p>;
+  const handleSnippetClick = (snippetId) => {
+    navigate(`/snippets/${snippetId}`); // ✅ 수정된 경로
+  };
+
+  if (loading) return <p className="loading-message">로딩 중...</p>;
 
   return (
-    <div className="mysnippets-container">
+    <div className="my-content-container">
       <h2>💻 내가 작성한 스니펫</h2>
       {snippets.length === 0 ? (
-        <p>작성한 스니펫이 없습니다.</p>
+        <p className="empty-message">작성한 스니펫이 없습니다.</p>
       ) : (
-        <ul className="snippet-list">
-          {snippets.map(snippet => (
-            <li key={snippet.snippetId} className="snippet-item">
-              <h4
-                onClick={() => navigate(`/snippets/${snippet.snippetId}`)}
-                style={{ cursor: 'pointer', color: '#007bff' }}
-              >
-                {snippet.title}
-              </h4>
-              <p><strong>언어:</strong> {snippet.language}</p>
-              <p><strong>좋아요:</strong> {snippet.likeCount}</p>
-              <small>{new Date(snippet.createdAt).toLocaleString()}</small>
+        <ul className="content-list">
+          {snippets.map((snippet) => (
+            <li
+              key={snippet.snippetId}
+              className="content-item"
+              onClick={() => handleSnippetClick(snippet.snippetId)}
+            >
+              <div className="item-title">{snippet.title}</div>
+              <div className="item-details">
+                <span className="language">{snippet.language}</span>
+                <span className="likes">
+                  <i className="bi bi-heart-fill"></i> {snippet.likeCount}
+                </span>
+                <span className="date">{new Date(snippet.createdAt).toLocaleDateString()}</span>
+              </div>
             </li>
           ))}
         </ul>

@@ -1,6 +1,5 @@
-// src/pages/CodeTest.js
 import React, { useState, useRef } from 'react';
-import './CodeTest.css';
+import '../css/CodeTest.css';
 import axios from 'axios';
 
 const LANGUAGES = [
@@ -12,12 +11,15 @@ const LANGUAGES = [
 ];
 
 function CodeTest() {
-  const [language, setLanguage] = useState('html');
-  const [code, setCode] = useState('');
-  const [output, setOutput] = useState('');
+  const [htmlCode, setHtmlCode] = useState('');
+  const [cssCode, setCssCode] = useState('');
+  const [jsCode, setJsCode] = useState('');
+  const [output, setOutput] = useState(''); // Added for backend execution output
+  const [language, setLanguage] = useState('html'); // Added for language selection
+  const [code, setCode] = useState(''); // Added for current code in editor
   const iframeRef = useRef(null);
 
-  const handleRun = async () => { // Added async
+  const handleRun = async () => {
     setOutput('');
     iframeRef.current.src = ''; // Clear iframe for server-side languages
 
@@ -38,30 +40,63 @@ function CodeTest() {
     } else if (language === 'java' || language === 'python') {
       setOutput('코드 실행 중...');
       try {
-        const response = await axios.post('/api/v1/execute', { language, code });
-        const data = response.data;
+        const response = await axios.post('/api/code/execute', { language, code });
+        const data = response.data.data; // Access data property
         let result = '';
-        if (data.stdout) result += data.stdout;
-        if (data.stderr) result += `에러:\n${data.stderr}`;
-        if (data.error) result += `실행 오류:\n${data.error}`;
+        if (data.output) result += data.output;
+        if (data.error) result += `에러:
+${data.error}`;
         setOutput(result || '실행 결과 없음.');
       } catch (error) {
         console.error('코드 실행 오류:', error);
         setOutput(`코드 실행 중 오류가 발생했습니다: ${error.response?.data?.message || error.message}`);
       }
+    } else if (language === 'jsp') {
+      setOutput('⚠️ JSP는 브라우저에서 직접 실행할 수 없습니다. 백엔드 연동이 필요합니다.');
     } else {
-      setOutput('⚠️ JSP는 브라우저에서 직접 실행할 수 없습니다.');
+      // For HTML/CSS/JS combination (from original runCode)
+      const safeJsCode = jsCode.replace(/<\/script>/gi, '<\\/script>');
+      const combinedCode = `
+        <html>
+          <head>
+            <meta charset="UTF-8" />
+            <style>
+              ${cssCode}
+            </style>
+          </head>
+          <body>
+            ${htmlCode}
+            <script>
+              ${safeJsCode}
+            <\/script>
+          </body>
+        </html>
+      `;
+      const blob = new Blob([combinedCode], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      iframeRef.current.src = url;
     }
   };
 
+  const handleLanguageChange = (e) => {
+    setLanguage(e.target.value);
+    // Reset code based on language selection if needed
+    if (e.target.value === 'html' || e.target.value === 'css' || e.target.value === 'jsp') {
+      setCode(''); // Clear code for these languages as they use separate editors
+    } else {
+      setCode(''); // Clear code for other languages
+    }
+  };
+
+  const handleCodeChange = (e) => {
+    setCode(e.target.value);
+  };
 
   return (
     <div className="code-test-container">
-      <h2>💻 코드 테스트</h2>
-
-      <div className="language-select">
-        <label>언어 선택:</label>
-        <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+      <div className="code-test-header">
+        <h1>💻코드 테스트</h1>
+        <select onChange={handleLanguageChange} value={language}>
           {LANGUAGES.map((lang) => (
             <option key={lang.value} value={lang.value}>
               {lang.label}
@@ -70,24 +105,62 @@ function CodeTest() {
         </select>
       </div>
 
-      <textarea
-        className="code-input"
-        placeholder="여기에 코드를 작성하세요..."
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-      />
+      <div className="editor-grid">
+        {(language === 'html' || language === 'css' || language === 'jsp') ? (
+          <>
+            <div className="code-editor-block">
+              <h4>HTML</h4>
+              <textarea
+                placeholder="HTML 입력"
+                value={htmlCode}
+                onChange={(e) => setHtmlCode(e.target.value)}
+              />
+            </div>
+            <div className="code-editor-block">
+              <h4>CSS</h4>
+              <textarea
+                placeholder="CSS 입력"
+                value={cssCode}
+                onChange={(e) => setCssCode(e.target.value)}
+              />
+            </div>
+            <div className="code-editor-block">
+              <h4>JavaScript</h4>
+              <textarea
+                placeholder="JavaScript 입력"
+                value={jsCode}
+                onChange={(e) => setJsCode(e.target.value)}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="code-editor-block full-width">
+            <h4>{language.toUpperCase()} Code</h4>
+            <textarea
+              placeholder={`${language.toUpperCase()} 코드 입력`}
+              value={code}
+              onChange={handleCodeChange}
+            />
+          </div>
+        )}
+      </div>
 
-      <button className="run-btn" onClick={handleRun}>
-        실행하기
-      </button>
+      <button className="run-btn" onClick={handleRun}>🚀 실행</button>
 
-      {output && <div className="code-output">{output}</div>}
-
-      <div className="preview-frame">
-        <iframe title="미리보기" ref={iframeRef} sandbox="allow-scripts allow-same-origin" />
+      <div className="preview-pane">
+        {language === 'html' || language === 'css' ? (
+          <iframe
+            ref={iframeRef}
+            title="미리보기"
+            sandbox="allow-scripts"
+          />
+        ) : (
+          <pre className="output-pane">{output}</pre>
+        )}
       </div>
     </div>
   );
 }
 
 export default CodeTest;
+

@@ -1,61 +1,91 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../css/Home.css';
-// 필요시 import { useState, useEffect } from 'react';
-// import axios from 'axios';
 
-const Home = ({ popularSnippets = [], recentPosts = [] }) => {
-  // 언어별 배지 클래스 반환 함수
+const Home = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('token');
+
+  const [popularSnippets, setPopularSnippets] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchLanguage, setSearchLanguage] = useState('');
+
+  useEffect(() => {
+    fetch('/api/v1/snippets?page=0&size=6&sort=likeCount,desc')
+      .then((res) => res.json())
+      .then((data) => setPopularSnippets(data.content || []))
+      .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
+
+    fetch('/api/v1/posts?page=0&size=5&sort=createdAt,desc')
+      .then((res) => res.json())
+      .then((data) => setRecentPosts(data.content || []))
+      .catch((err) => console.error('🔥 최신 게시글 로딩 실패:', err));
+  }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    navigate(`/snippets?search=${searchTerm}&language=${searchLanguage}`);
+  };
+
   const getLanguageBadgeClass = (language) => {
-    const languageLower = language?.toLowerCase();
-    switch (languageLower) {
-      case 'html': return 'language-badge badge-html';
-      case 'css': return 'language-badge badge-css';
-      case 'javascript': return 'language-badge badge-javascript';
-      case 'java': return 'language-badge badge-java';
-      case 'python': return 'language-badge badge-python';
-      case 'c': return 'language-badge badge-c';
-      default: return 'language-badge badge-default';
-    }
+    const lang = language?.toLowerCase() || 'default';
+    return `language-badge badge-${lang}`;
   };
 
   return (
-    <div>
+    <div className="home-page">
       {/* Hero Section */}
-      <section className="hero-section">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6">
-              <h1 className="display-4 fw-bold mb-4">코드를 공유하고, 실행하고, 성장하세요</h1>
-              <p className="lead mb-4">SNI에서 다양한 프로그래밍 언어의 코드를 공유하고, 실시간으로 실행해보세요.</p>
-              <div className="d-flex gap-3">
-                <Link to="/snippets" className="btn btn-light btn-lg">스니펫 둘러보기</Link>
-                <Link to="/register" className="btn btn-outline-light btn-lg">회원가입</Link>
-              </div>
-            </div>
-            <div className="col-lg-6 text-center">
-              <i className="bi bi-code-square display-1"></i>
-            </div>
-          </div>
-        </div>
-      </section>
+      <section className="hero-section text-start">
+  <div className="container hero-container">
+    {/* 왼쪽 텍스트 영역 */}
+    <div className="hero-text">
+      <h1 className="display-4">코드를 공유하고, 함께 성장하세요</h1>
+      <p className="lead">
+        SNI는 개발자들을 위한 코드 공유 플랫폼입니다.<br />
+        자유롭게 코드를 올리고, 피드백을 받으며 실력을 향상시켜 보세요.
+      </p>
+      <div className="d-flex gap-3 mt-3">
+        <Link to="/snippets" className="btn btn-primary btn-lg">스니펫 둘러보기</Link>
+        {!isLoggedIn && (
+          <Link to="/register" className="btn btn-outline-secondary btn-lg">무료 회원가입</Link>
+        )}
+      </div>
+    </div>
+
+    {/* 오른쪽 로고 영역 */}
+    <div className="hero-visual">
+      <div className="code-logo">
+        <span>&lt;/&gt;</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* Search Section */}
       <section className="py-5">
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-md-8">
+            <div className="col-md-10 col-lg-8">
               <div className="card search-card">
-                <div className="card-body">
+                <div className="card-body p-4">
                   <h5 className="card-title text-center mb-4">스니펫 검색</h5>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    // 검색 로직 구현
-                    console.log('검색 실행');
-                  }}>
-                    <div className="input-group">
-                      <input type="text" className="form-control" name="search" placeholder="검색어를 입력하세요..." />
-                      <select className="form-select" name="language" style={{ maxWidth: 150 }}>
+                  <form onSubmit={handleSearch}>
+                    <div className="input-group input-group-lg">
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="키워드, 언어, 작성자 등..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <select 
+                        className="form-select" 
+                        style={{ maxWidth: 180 }}
+                        value={searchLanguage}
+                        onChange={(e) => setSearchLanguage(e.target.value)}
+                      >
                         <option value="">모든 언어</option>
                         <option value="HTML">HTML</option>
                         <option value="CSS">CSS</option>
@@ -65,7 +95,7 @@ const Home = ({ popularSnippets = [], recentPosts = [] }) => {
                         <option value="C">C</option>
                       </select>
                       <button className="btn btn-primary" type="submit">
-                        <i className="bi bi-search"></i> 검색
+                        <i className="bi bi-search"></i>
                       </button>
                     </div>
                   </form>
@@ -85,37 +115,33 @@ const Home = ({ popularSnippets = [], recentPosts = [] }) => {
               popularSnippets.map(snippet => (
                 <div className="col-md-6 col-lg-4 mb-4" key={snippet.snippetId}>
                   <div className="card h-100 snippet-card">
-                    <div className="card-body">
+                    <div className="card-body d-flex flex-column">
                       <div className="d-flex justify-content-between align-items-start mb-2">
-                        <span className={getLanguageBadgeClass(snippet.language)}>
-                          {snippet.language}
-                        </span>
-                        <small className="text-muted">{snippet.createdAt?.slice(0, 10)}</small>
+                        <span className={getLanguageBadgeClass(snippet.language)}>{snippet.language}</span>
+                        <small className="text-muted">{new Date(snippet.createdAt).toLocaleDateString()}</small>
                       </div>
-                      <h5 className="card-title">{snippet.title}</h5>
-                      <p className="card-text text-muted">{snippet.description?.slice(0, 100)}</p>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <small className="text-muted">{snippet.author?.nickname}</small>
-                        <div className="d-flex align-items-center gap-2">
-                          <i className="bi bi-heart-fill text-danger like-button"></i>
+                      <h5 className="card-title mt-2">{snippet.title}</h5>
+                      <p className="card-text text-muted flex-grow-1">{snippet.description?.slice(0, 100)}</p>
+                      <div className="d-flex justify-content-between align-items-center mt-auto">
+                        <small className="text-muted">by {snippet.author?.nickname}</small>
+                        <div className="d-flex align-items-center gap-2 text-danger">
+                          <i className="bi bi-heart-fill"></i>
                           <small>{snippet.likeCount}</small>
                         </div>
                       </div>
                     </div>
-                    <div className="card-footer bg-transparent">
+                    <div className="card-footer bg-transparent border-top-0">
                       <Link to={`/snippets/${snippet.snippetId}`} className="btn btn-outline-primary btn-sm w-100">자세히 보기</Link>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="col-12 text-center">
-                <div className="py-5">
-                  <i className="bi bi-code-square display-1 text-muted mb-3"></i>
-                  <h4 className="text-muted">아직 등록된 스니펫이 없습니다</h4>
-                  <p className="text-muted mb-4">첫 번째 스니펫을 등록해보세요!</p>
-                  <Link to="/snippets/create" className="btn btn-primary">스니펫 작성하기</Link>
-                </div>
+              <div className="col-12 text-center py-5">
+                <i className="bi bi-code-slash display-1 text-muted mb-3"></i>
+                <h4 className="text-muted">아직 스니펫이 없어요.</h4>
+                <p className="mb-4">가장 먼저 스니펫을 공유해보세요!</p>
+                <Link to="/snippets/write" className="btn btn-primary">스니펫 작성하기</Link>
               </div>
             )}
           </div>
@@ -130,57 +156,51 @@ const Home = ({ popularSnippets = [], recentPosts = [] }) => {
       {/* Recent Posts */}
       <section className="py-5">
         <div className="container">
-          <h2 className="text-center mb-5">최신 자유게시판 글</h2>
-          <div className="row">
-            <div className="col-lg-8 mx-auto">
-              {recentPosts.length > 0 ? (
-                <div className="list-group">
-                  {recentPosts.map(post => (
-                    <div className="list-group-item list-group-item-action" key={post.postId}>
-                      <div className="d-flex w-100 justify-content-between">
-                        <h5 className="mb-1">
-                          <Link to={`/board/${post.postId}`} className="text-decoration-none">{post.title}</Link>
-                        </h5>
-                        <small className="text-muted">{post.createdAt?.slice(0, 10)}</small>
-                      </div>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <small className="text-muted">{post.author?.nickname}</small>
-                        <div className="d-flex align-items-center gap-3">
-                          <small className="text-muted">
-                            <i className="bi bi-eye"></i> <span>{post.viewCount ?? 0}</span>
-                          </small>
-                          <small className="text-muted">
-                            <i className="bi bi-heart"></i> <span>{post.likeCount ?? 0}</span>
-                          </small>
-                        </div>
+          <h2 className="text-center mb-5">최신 게시글</h2>
+          <div className="col-lg-10 mx-auto">
+            {recentPosts.length > 0 ? (
+              <div className="list-group shadow-sm">
+                {recentPosts.map(post => (
+                  <Link to={`/board/${post.postId}`} className="list-group-item list-group-item-action" key={post.postId}>
+                    <div className="d-flex w-100 justify-content-between">
+                      <h5 className="mb-1">{post.title}</h5>
+                      <small className="text-muted">{new Date(post.createdAt).toLocaleDateString()}</small>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mt-2">
+                      <small className="text-muted">by {post.author?.nickname}</small>
+                      <div className="d-flex align-items-center gap-3 text-muted">
+                        <small><i className="bi bi-eye-fill me-1"></i>{post.viewCount ?? 0}</small>
+                        <small><i className="bi bi-heart-fill me-1"></i>{post.likeCount ?? 0}</small>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-5">
-                  <i className="bi bi-chat-square-text display-1 text-muted mb-3"></i>
-                  <h4 className="text-muted">아직 작성된 게시글이 없습니다</h4>
-                  <p className="text-muted mb-4">첫 번째 게시글을 작성해보세요!</p>
-                  <Link to="/board/create" className="btn btn-primary">게시글 작성하기</Link>
-                </div>
-              )}
-              {recentPosts.length > 0 && (
-                <div className="text-center mt-4">
-                  <Link to="/board" className="btn btn-outline-primary">게시판으로 이동</Link>
-                </div>
-              )}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-5">
+                <i className="bi bi-chat-dots display-1 text-muted mb-3"></i>
+                <h4 className="text-muted">아직 게시글이 없어요.</h4>
+                <p className="mb-4">자유롭게 이야기를 나눠보세요!</p>
+                <Link to="/board/write" className="btn btn-primary">게시글 작성하기</Link>
+              </div>
+            )}
+            {recentPosts.length > 0 && (
+              <div className="text-center mt-4">
+                <Link to="/board" className="btn btn-outline-primary">게시판으로 이동</Link>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="hero-section">
-        <div className="container text-center">
-          <h2 className="mb-4">지금 시작하세요!</h2>
-          <p className="lead mb-4">SNI에 가입하고 다양한 개발자들과 코드를 공유해보세요.</p>
-          <Link to="/register" className="btn btn-light btn-lg">무료 회원가입</Link>
+      <section className="cta-section text-center">
+        <div className="container">
+          <h2 className="display-5 mb-3">지금 바로 시작하세요!</h2>
+          <p className="lead mb-4">SNI에 가입하여 당신의 코드를 공유하고, 다른 개발자들과 함께 성장하세요.</p>
+          {!isLoggedIn && (
+            <Link to="/register" className="btn btn-light btn-lg">무료 회원가입</Link>
+          )}
         </div>
       </section>
     </div>

@@ -39,7 +39,7 @@ function BoardWrite() {
   };
 
   return (
-    <div className="container mt-5 board-container">
+    <div className="container mt-5 board-write-container">
       <h2 className="mb-4">📝 게시물 작성</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
