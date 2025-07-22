@@ -18,16 +18,16 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "nickname", nullable = false, unique = true, length = 50)
+    @Column(name = "nickname", nullable = false, unique = true, length = 50, columnDefinition = "VARCHAR(50) COLLATE utf8mb4_unicode_ci")
     private String nickname;
 
     @Column(name = "profile_image", length = 500)
@@ -48,6 +48,12 @@ public class User {
 
     @Column(name = "is_active")
     private boolean isActive = true;
+
+    @Column(name = "provider", length = 20)
+    private String provider; // 'kakao', 'google', 'naver', 'local' 등
+
+    @Column(name = "provider_id", length = 100)
+    private String providerId; // 소셜 서비스의 고유 ID
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -85,9 +91,11 @@ public class User {
     }
 
     @Builder
-    public User(String email, String password, String nickname) {
+    public User(String email, String password, String nickname, String provider, String providerId) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 }

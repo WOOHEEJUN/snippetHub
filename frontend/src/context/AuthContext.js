@@ -4,17 +4,20 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const fetchUserPromise = useRef(null);
 
   // ✅ 컴포넌트 마운트 시 localStorage에서 토큰 불러오기
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      fetchUser(storedToken);
+    const storedAccessToken = localStorage.getItem('accessToken');
+    const storedRefreshToken = localStorage.getItem('refreshToken');
+    if (storedAccessToken && storedRefreshToken) {
+      setAccessToken(storedAccessToken);
+      setRefreshToken(storedRefreshToken);
+      fetchUser(storedAccessToken);
     } else {
       setLoading(false);
     }
@@ -41,9 +44,15 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (res.status === 401) {
-          // 토큰이 유효하지 않은 경우에만 로그아웃
-          logout();
-          return;
+          try {
+            const newAccessToken = await reissueToken();
+            // 토큰 재발급 성공 시, 새로운 토큰으로 다시 fetchUser 호출
+            await fetchUser(newAccessToken);
+            return;
+          } catch (reissueError) {
+            // 토큰 재발급 실패 시 로그아웃은 reissueToken 함수에서 처리
+            return;
+          }
         }
 
         if (!res.ok) {
@@ -67,27 +76,76 @@ export const AuthProvider = ({ children }) => {
     fetchUserPromise.current = null;
   };
 
-  const login = async (accessToken) => {
-    localStorage.setItem('token', accessToken);
-    setToken(accessToken);
+  const reissueToken = async () => {
+    try {
+      const res = await fetch('/api/auth/reissue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to reissue token');
+      }
+
+      const data = await res.json();
+      const newAccessToken = data.data.accessToken;
+      const newRefreshToken = data.data.refreshToken;
+
+      localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      setAccessToken(newAccessToken);
+      setRefreshToken(newRefreshToken);
+      return newAccessToken;
+    } catch (error) {
+      console.error('토큰 재발급 실패:', error);
+      logout(); // 재발급 실패 시 로그아웃
+      throw error;
+    }
+  };
+
+  const login = async (tokens) => {
+    localStorage.setItem('accessToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
+    setAccessToken(tokens.accessToken);
+    setRefreshToken(tokens.refreshToken);
     setLoading(true);
-    await fetchUser(accessToken);
+    await fetchUser(tokens.accessToken);
   };
 
   const logout = () => {
+<<<<<<< HEAD
     localStorage.removeItem('token');
     setToken(null);
+=======
+    // 로그아웃 시 서버에 토큰 무효화 요청 (필요하다면)
+    if (accessToken) {
+      fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }).catch(err => console.error('로그아웃 요청 실패:', err));
+    }
+    
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setAccessToken(null);
+    setRefreshToken(null);
+>>>>>>> 387f373e5b4a08d9f9598696460734c06ffe2c72
     setUser(null);
     setLoading(false);
     fetchUserPromise.current = null;
   };
 
   const getAuthHeaders = () => {
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, getAuthHeaders, loading }}>
+    <AuthContext.Provider value={{ accessToken, refreshToken, user, login, logout, getAuthHeaders, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -20,6 +20,7 @@ public class Snippet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "snippet_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
