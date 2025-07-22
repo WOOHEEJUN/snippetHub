@@ -49,6 +49,12 @@ public class User {
     @Column(name = "is_active")
     private boolean isActive = true;
 
+    @Column(name = "provider", length = 20)
+    private String provider; // 'kakao', 'google', 'naver', 'local' 등
+
+    @Column(name = "provider_id", length = 100)
+    private String providerId; // 소셜 서비스의 고유 ID
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -85,9 +91,11 @@ public class User {
     }
 
     @Builder
-    public User(String email, String password, String nickname) {
+    public User(String email, String password, String nickname, String provider, String providerId) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 }

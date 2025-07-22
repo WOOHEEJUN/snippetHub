@@ -88,6 +88,21 @@ public class UserService {
         user.updatePassword(passwordEncoder.encode(requestDto.getNewPassword()));
     }
 
+    @Transactional
+    public User processOAuth2User(String provider, String providerId, String email, String nickname) {
+        return userRepository.findByProviderAndProviderId(provider, providerId)
+            .orElseGet(() -> {
+                User user = User.builder()
+                        .provider(provider)
+                        .providerId(providerId)
+                        .email(email)
+                        .password(null) // 소셜 로그인 사용자는 비밀번호 null
+                        .nickname(nickname)
+                        .build();
+                return userRepository.save(user);
+            });
+    }
+
     public Page<Snippet> getMySnippets(String email, Pageable pageable, String status) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));

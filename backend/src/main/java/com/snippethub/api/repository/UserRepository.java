@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String nickname);
 
+    Optional<User> findByProviderAndProviderId(String provider, String providerId);
+
     @Query("SELECT COUNT(s) FROM Snippet s WHERE s.author.id = :userId")
     long countSnippetsByUserId(@Param("userId") Long userId);
 

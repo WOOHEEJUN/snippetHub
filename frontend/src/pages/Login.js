@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Login.css';
+import KakaoLoginButton from '../components/KakaoLoginButton';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -110,6 +111,7 @@ const Login = () => {
               required
             />
             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+            <KakaoLoginButton />
           </div>
 
           <button type="submit" className="btn btn-primary w-100 btn-lg" disabled={isLoading}>
