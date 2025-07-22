@@ -49,9 +49,27 @@ public class TokenProvider {
 
         long now = (new Date()).getTime();
 
+        String email = null;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+        } else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+            org.springframework.security.oauth2.core.user.OAuth2User oAuth2User = (org.springframework.security.oauth2.core.user.OAuth2User) principal;
+            email = oAuth2User.getAttribute("email");
+            if (email == null && oAuth2User.getAttribute("kakao_account") != null) {
+                Object kakaoAccountObj = oAuth2User.getAttribute("kakao_account");
+                if (kakaoAccountObj instanceof java.util.Map) {
+                    email = (String) ((java.util.Map<?, ?>) kakaoAccountObj).get("email");
+                }
+            }
+        }
+        if (email == null) {
+            email = authentication.getName(); // fallback
+        }
+
         Date accessTokenExpiresIn = new Date(now + this.accessTokenValidityInMilliseconds);
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(email)
                 .claim(AUTHORITIES_KEY, authorities)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS512)

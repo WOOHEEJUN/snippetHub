@@ -19,16 +19,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByProviderAndProviderId(String provider, String providerId);
 
-    @Query("SELECT COUNT(s) FROM Snippet s WHERE s.author.id = :userId")
+    @Query("SELECT COUNT(s.id) FROM Snippet s WHERE s.author.id = :userId")
     long countSnippetsByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(p) FROM Post p WHERE p.author.id = :userId")
+    @Query("SELECT COUNT(p.id) FROM Post p WHERE p.author.id = :userId")
     long countPostsByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(c) FROM Comment c WHERE c.author.id = :userId")
+    @Query("SELECT COUNT(c.id) FROM Comment c WHERE c.author.id = :userId")
     long countCommentsByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(l) FROM Like l WHERE l.user.id = :userId")
+    @Query("SELECT COUNT(l.id) FROM Like l WHERE l.user.id = :userId")
     long countLikesByUserId(@Param("userId") Long userId);
 
     @Query("SELECT SUM(s.viewCount) FROM Snippet s WHERE s.author.id = :userId")

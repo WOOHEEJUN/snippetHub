@@ -37,20 +37,20 @@ export const AuthProvider = ({ children }) => {
     // 새로운 요청 생성
     fetchUserPromise.current = (async () => {
       try {
-        const res = await fetch('/api/v1/users/me', {
+        const res = await fetch('/api/users/profile', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
           },
+          credentials: 'include',
         });
 
         if (res.status === 401) {
           try {
             const newAccessToken = await reissueToken();
-            // 토큰 재발급 성공 시, 새로운 토큰으로 다시 fetchUser 호출
             await fetchUser(newAccessToken);
             return;
           } catch (reissueError) {
-            // 토큰 재발급 실패 시 로그아웃은 reissueToken 함수에서 처리
             return;
           }
         }
@@ -60,10 +60,9 @@ export const AuthProvider = ({ children }) => {
         }
 
         const userData = await res.json();
-        setUser(userData);
+        setUser(userData.data); // 응답 구조에 맞게 userData.data로 저장
       } catch (err) {
         console.error('사용자 정보 오류:', err);
-        // 네트워크 오류나 5xx 에러는 로그아웃하지 않음
         if (err.message.includes('401') || err.message.includes('403')) {
           logout();
         }
@@ -84,6 +83,7 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${refreshToken}`,
         },
+        credentials: 'include',
       });
 
       if (!res.ok) {
@@ -123,6 +123,7 @@ export const AuthProvider = ({ children }) => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        credentials: 'include',
       }).catch(err => console.error('로그아웃 요청 실패:', err));
     }
     

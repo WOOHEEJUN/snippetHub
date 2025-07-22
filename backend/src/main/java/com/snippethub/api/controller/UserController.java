@@ -29,8 +29,21 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<UserProfileResponseDto>> getUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserProfile(userDetails.getUsername());
+    public ResponseEntity<ApiResponse<UserProfileResponseDto>> getUserProfile(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new com.snippethub.api.exception.BusinessException(com.snippethub.api.exception.ErrorCode.LOGIN_INPUT_INVALID);
+        }
+        Object principal = authentication.getPrincipal();
+        String email = null;
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+        } else if (principal instanceof String) {
+            email = (String) principal;
+        }
+        if (email == null) {
+            throw new com.snippethub.api.exception.BusinessException(com.snippethub.api.exception.ErrorCode.LOGIN_INPUT_INVALID);
+        }
+        User user = userService.getUserProfile(email);
         UserStatsDto stats = userService.getUserStats(user.getId());
         UserProfileResponseDto responseDto = new UserProfileResponseDto(user, stats);
         return ResponseEntity.ok(ApiResponse.success(responseDto));

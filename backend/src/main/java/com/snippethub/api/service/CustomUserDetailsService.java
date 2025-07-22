@@ -38,9 +38,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserDetails createUserDetails(User user) {
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_USER"); // 기본 권한
 
+        // 소셜 로그인 사용자의 경우 password가 null일 수 있음
+        String password = user.getPassword() != null ? user.getPassword() : "";
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                user.getPassword(),
+                password,
                 Collections.singleton(grantedAuthority)
         );
     }

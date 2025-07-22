@@ -36,6 +36,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             providerId = String.valueOf(attributes.get("id"));
             email = (String) kakaoAccount.get("email");
             nickname = (String) profile.get("nickname");
+            
+            // 이메일이 없는 경우 providerId를 이메일로 사용 (임시)
+            if (email == null || email.isEmpty()) {
+                email = "kakao_" + providerId + "@kakao.com";
+            }
         } else if ("google".equals(provider)) {
             providerId = (String) attributes.get("sub");
             email = (String) attributes.get("email");
