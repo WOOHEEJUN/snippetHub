@@ -16,7 +16,7 @@ function MyPosts() {
       return;
     }
 
-    fetch('/api/users/posts', {
+    fetch(`/api/users/posts?page=0&size=10&sort=createdAt,desc`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

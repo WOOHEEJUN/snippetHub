@@ -57,8 +57,7 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem('token', data.data.token.accessToken); // accessToken 추출 수정
-      await login(data.data.token.accessToken); // login 함수 호출 시에도 수정
+      await login(data.data.token);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);

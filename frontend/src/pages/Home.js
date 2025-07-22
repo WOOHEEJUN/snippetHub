@@ -2,14 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/Home.css';
 
+import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
+
 const Home = () => {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem('token');
+  const { user } = useAuth(); // useAuth 훅을 사용하여 user 객체 가져오기
+  const isLoggedIn = !!user; // user 객체의 존재 여부로 로그인 상태 판단
 
   const [popularSnippets, setPopularSnippets] = useState([]);
   const [recentPosts, setRecentPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
+  console.log();
 
   useEffect(() => {
     fetch('/api/snippets?page=0&size=6&sort=likeCount,desc')

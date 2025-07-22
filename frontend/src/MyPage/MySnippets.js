@@ -15,7 +15,7 @@ function MySnippets() {
       return;
     }
 
-    fetch('/api/users/snippets', {
+    fetch(`/api/users/snippets?page=0&size=10&sort=createdAt,desc`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

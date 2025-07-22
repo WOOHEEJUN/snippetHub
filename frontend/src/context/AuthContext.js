@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const userData = await res.json();
-        setUser(userData.data.user); // user 필드에 실제 사용자 정보
+        setUser(userData);
       } catch (err) {
         console.error('사용자 정보 오류:', err);
         // 네트워크 오류나 5xx 에러는 로그아웃하지 않음
@@ -116,25 +116,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-<<<<<<< HEAD
-    localStorage.removeItem('token');
-    setToken(null);
-=======
     // 로그아웃 시 서버에 토큰 무효화 요청 (필요하다면)
+    
+    
     if (accessToken) {
-      fetch('/api/v1/auth/logout', {
+      fetch('/api/auth/logout', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       }).catch(err => console.error('로그아웃 요청 실패:', err));
     }
-    
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     setAccessToken(null);
     setRefreshToken(null);
->>>>>>> 387f373e5b4a08d9f9598696460734c06ffe2c72
     setUser(null);
     setLoading(false);
     fetchUserPromise.current = null;

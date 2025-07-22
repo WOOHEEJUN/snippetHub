@@ -40,6 +40,8 @@ const SnippetEdit = () => {
   const [language, setLanguage] = useState('');
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
+  const [tags, setTags] = useState([]);
+  const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -61,6 +63,8 @@ const SnippetEdit = () => {
       setLanguage(data.language);
       setDescription(data.description);
       setCode(data.code);
+      setTags(data.tags || []);
+      setIsPublic(data.public || false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -89,7 +93,7 @@ const SnippetEdit = () => {
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({ title, description, code, language }),
+        body: JSON.stringify({ title, description, code, language, tags, public: isPublic }),
       });
 
       if (!response.ok) {
@@ -167,6 +171,29 @@ const SnippetEdit = () => {
               className="code-editor"
             />
           </div>
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="tags" className="form-label">태그 (쉼표로 구분)</label>
+          <input
+            type="text"
+            id="tags"
+            className="form-control"
+            value={tags.join(', ')}
+            onChange={(e) => setTags(e.target.value.split(',').map(tag => tag.trim()))}
+            placeholder="예: java, spring, backend"
+          />
+        </div>
+
+        <div className="mb-3 form-check">
+          <input
+            type="checkbox"
+            id="isPublic"
+            className="form-check-input"
+            checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}
+          />
+          <label htmlFor="isPublic" className="form-check-label">공개 스니펫</label>
         </div>
 
         <div className="d-flex justify-content-end">
