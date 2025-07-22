@@ -36,6 +36,10 @@ public class UserService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
+    public java.util.Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public UserStatsDto getUserStats(Long userId) {
         long totalSnippets = userRepository.countSnippetsByUserId(userId);
         long totalPosts = userRepository.countPostsByUserId(userId);

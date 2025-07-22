@@ -17,6 +17,7 @@ import SnippetDetail from './SnippetBoard/SnippetDetail';
 import SnippetWrite from './SnippetBoard/SnippetWrite';
 import SnippetEdit from './SnippetBoard/SnippetEdit';
 import CodeTest from './CodeTest/CodeTest';
+import OAuth2Callback from './pages/OAuth2Callback';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './css/App.css';
 
@@ -93,6 +94,7 @@ function App() {
             <Route path="/snippets/:snippetId" element={<SnippetDetail />} />
             <Route path="/snippets/edit/:snippetId" element={<SnippetEdit />} />
             <Route path="/code-test" element={<CodeTest />} />
+            <Route path="/oauth2/callback" element={<OAuth2Callback />} />
           </Routes>
         </div>
       </AuthProvider>

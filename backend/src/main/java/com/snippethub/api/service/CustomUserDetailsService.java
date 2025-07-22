@@ -24,8 +24,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("[CustomUserDetailsService] email로 유저 조회 시도: " + username);
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_INPUT_INVALID));
+                .orElseThrow(() -> {
+                    System.out.println("[CustomUserDetailsService] 유저를 찾을 수 없음: " + username);
+                    return new BusinessException(ErrorCode.LOGIN_INPUT_INVALID);
+                });
+        System.out.println("[CustomUserDetailsService] 유저 조회 성공: " + user.getEmail());
 
         // if (!user.isVerified()) {
         //     throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED); // TODO: Add EMAIL_NOT_VERIFIED to ErrorCode
@@ -38,9 +43,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserDetails createUserDetails(User user) {
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_USER"); // 기본 권한
 
+        // 소셜 로그인 사용자의 경우 password가 null일 수 있음
+        String password = user.getPassword() != null ? user.getPassword() : "";
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                user.getPassword(),
+                password,
                 Collections.singleton(grantedAuthority)
         );
     }

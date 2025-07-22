@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Login.css';
 import KakaoLoginButton from '../components/KakaoLoginButton';
@@ -12,6 +12,7 @@ const Login = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,6 +36,25 @@ const Login = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // OAuth2 에러 메시지 처리
+  useEffect(() => {
+    const error = searchParams.get('error');
+    const message = searchParams.get('message');
+    
+    if (error === 'oauth2_failed' && message) {
+      // 영어 메시지를 한글로 변환
+      let koreanMessage = message;
+      if (message === 'Login failed') {
+        koreanMessage = '로그인에 실패했습니다.';
+      } else if (message === 'Email information required') {
+        koreanMessage = '이메일 정보가 필요합니다.';
+      } else if (message === 'Too many requests. Please try again later') {
+        koreanMessage = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+      }
+      setLoginError(koreanMessage);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,17 +130,17 @@ const Login = () => {
               required
             />
             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-            <KakaoLoginButton />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100 btn-lg" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span className="ms-2">로그인 중...</span>
-              </>
-            ) : '로그인'}
-          </button>
+          <div className="mb-3">
+            <button type="submit" className="btn btn-primary btn-lg w-100" disabled={isLoading}>
+              {isLoading ? '로그인 중...' : '로그인'}
+            </button>
+          </div>
+
+          <div className="mb-3">
+            <KakaoLoginButton />
+          </div>
         </form>
 
         <div className="login-footer mt-4">

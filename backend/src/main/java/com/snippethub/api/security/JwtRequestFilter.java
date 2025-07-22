@@ -47,19 +47,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
             
             username = jwtUtil.extractUsername(jwt);
+            System.out.println("[JwtRequestFilter] 추출된 username(email): " + username);
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
+        if (username != null) {
+            System.out.println("[JwtRequestFilter] SecurityContext 인증 객체와 무관하게 JWT 인증 시도: " + username);
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (jwtUtil.validateToken(jwt, userDetails)) {
-
+                System.out.println("[JwtRequestFilter] JWT 유효성 검증 성공. 인증 객체 세팅: " + username);
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            } else {
+                System.out.println("[JwtRequestFilter] JWT 유효성 검증 실패: " + username);
             }
         }
         chain.doFilter(request, response);
