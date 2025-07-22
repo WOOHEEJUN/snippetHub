@@ -17,6 +17,7 @@ public class File {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "file_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

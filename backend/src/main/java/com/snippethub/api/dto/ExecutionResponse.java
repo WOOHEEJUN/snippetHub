@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class ExecutionResponse {
-    private String executionId;
+    private Long executionId;
     private String language;
     private String code;
     private String input;

@@ -34,8 +34,15 @@ public class CommentService {
     public Comment createCommentForPost(Long postId, CommentCreateRequestDto requestDto, String email) {
         User author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // Retrieve a fresh, managed User entity by its ID to ensure proper Hibernate handling
+        User managedAuthor = userRepository.findById(author.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)); // Should not happen if author.getId() is valid
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
+
+        System.out.println("Comment author ID before save (Post): " + managedAuthor.getId());
 
         Comment parentComment = null;
         if (requestDto.getParentCommentId() != null) {
@@ -45,23 +52,25 @@ public class CommentService {
         }
 
         Comment comment = Comment.builder()
-                .author(author)
+                .author(managedAuthor)
                 .post(post)
                 .parent(parentComment)
                 .content(requestDto.getContent())
                 .build();
+
+        System.out.println("Comment author ID before save (Post): " + comment.getAuthor().getId());
 
         post.increaseCommentCount();
 
         Comment savedComment = commentRepository.save(comment);
 
         // 알림 생성
-        if (!post.getAuthor().getId().equals(author.getId())) { // 자신의 게시글에 댓글을 달면 알림 생성 안함
+        if (!post.getAuthor().getId().equals(managedAuthor.getId())) { // 자신의 게시글에 댓글을 달면 알림 생성 안함
             notificationService.createNotification(
                     post.getAuthor().getId(),
                     Notification.NotificationType.COMMENT,
                     "새로운 댓글",
-                    author.getNickname() + "님이 회원님의 게시글에 댓글을 남겼습니다: " + requestDto.getContent()
+                    managedAuthor.getNickname() + "님이 회원님의 게시글에 댓글을 남겼습니다: " + requestDto.getContent()
             );
         }
 
@@ -72,8 +81,15 @@ public class CommentService {
     public Comment createCommentForSnippet(Long snippetId, CommentCreateRequestDto requestDto, String email) {
         User author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // Retrieve a fresh, managed User entity by its ID to ensure proper Hibernate handling
+        User managedAuthor = userRepository.findById(author.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND)); // Should not happen if author.getId() is valid
+
         Snippet snippet = snippetRepository.findById(snippetId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SNIPPET_NOT_FOUND));
+
+        System.out.println("Comment author ID before save (Snippet): " + managedAuthor.getId());
 
         Comment parentComment = null;
         if (requestDto.getParentCommentId() != null) {
@@ -83,23 +99,25 @@ public class CommentService {
         }
 
         Comment comment = Comment.builder()
-                .author(author)
+                .author(managedAuthor)
                 .snippet(snippet)
                 .parent(parentComment)
                 .content(requestDto.getContent())
                 .build();
+
+        System.out.println("Comment author ID before save (Snippet): " + comment.getAuthor().getId());
 
         snippet.increaseCommentCount();
 
         Comment savedComment = commentRepository.save(comment);
 
         // 알림 생성
-        if (!snippet.getAuthor().getId().equals(author.getId())) { // 자신의 스니펫에 댓글을 달면 알림 생성 안함
+        if (!snippet.getAuthor().getId().equals(managedAuthor.getId())) { // 자신의 스니펫에 댓글을 달면 알림 생성 안함
             notificationService.createNotification(
                     snippet.getAuthor().getId(),
                     Notification.NotificationType.COMMENT,
                     "새로운 댓글",
-                    author.getNickname() + "님이 회원님의 스니펫에 댓글을 남겼습니다: " + requestDto.getContent()
+                    managedAuthor.getNickname() + "님이 회원님의 스니펫에 댓글을 남겼습니다: " + requestDto.getContent()
             );
         }
 
@@ -149,4 +167,3 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 }
-

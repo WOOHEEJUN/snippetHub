@@ -78,16 +78,16 @@ public class AuthService {
 
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         RefreshToken refreshToken = RefreshToken.builder()
-                .key(authentication.getName())
-                .value(tokenDto.getRefreshToken())
+                .user(user)
+                .token(tokenDto.getRefreshToken())
+                .expiryDate(tokenProvider.getRefreshTokenExpiryDate())
                 .build();
 
         refreshTokenRepository.save(refreshToken);
-
-        System.out.println("Authentication Name: " + authentication.getName()); // 디버그 로그 추가
-        User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return new AbstractMap.SimpleEntry<>(tokenDto, user);
     }
@@ -115,16 +115,16 @@ public class AuthService {
 
         Authentication authentication = tokenProvider.getAuthentication(refreshToken);
 
-        RefreshToken storedRefreshToken = refreshTokenRepository.findById(authentication.getName())
+        RefreshToken storedRefreshToken = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
-        if (!storedRefreshToken.getValue().equals(refreshToken)) {
+        if (!storedRefreshToken.getToken().equals(refreshToken)) {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
 
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
 
-        storedRefreshToken.updateValue(tokenDto.getRefreshToken());
+        storedRefreshToken.updateToken(tokenDto.getRefreshToken(), tokenProvider.getRefreshTokenExpiryDate());
         refreshTokenRepository.save(storedRefreshToken);
 
         return tokenDto;

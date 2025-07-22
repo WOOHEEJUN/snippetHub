@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "refresh_tokens")
 @Getter
@@ -13,20 +15,30 @@ import lombok.NoArgsConstructor;
 public class RefreshToken {
 
     @Id
-    @Column(name = "rt_key")
-    private String key;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "token_id")
+    private Long id;
 
-    @Column(name = "rt_value")
-    private String value;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false, unique = true)
+    private String token;
+
+    @Column(nullable = false)
+    private Instant expiryDate;
 
     @Builder
-    public RefreshToken(String key, String value) {
-        this.key = key;
-        this.value = value;
+    public RefreshToken(User user, String token, Instant expiryDate) {
+        this.user = user;
+        this.token = token;
+        this.expiryDate = expiryDate;
     }
 
-    public RefreshToken updateValue(String token) {
-        this.value = token;
+    public RefreshToken updateToken(String token, Instant expiryDate) {
+        this.token = token;
+        this.expiryDate = expiryDate;
         return this;
     }
 }
