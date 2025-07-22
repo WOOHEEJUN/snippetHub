@@ -18,16 +18,16 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "nickname", nullable = false, unique = true, length = 50)
+    @Column(name = "nickname", nullable = false, unique = true, length = 50, columnDefinition = "VARCHAR(50) COLLATE utf8mb4_unicode_ci")
     private String nickname;
 
     @Column(name = "profile_image", length = 500)

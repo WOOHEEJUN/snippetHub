@@ -111,4 +111,8 @@ public class TokenProvider {
             return e.getClaims();
         }
     }
+
+    public java.time.Instant getRefreshTokenExpiryDate() {
+        return new Date(System.currentTimeMillis() + refreshTokenValidityInMilliseconds).toInstant();
+    }
 }
