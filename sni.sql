@@ -1,5 +1,6 @@
-create database snippet;
-use snippet;
+DROP DATABASE IF EXISTS snippethub_db;
+CREATE DATABASE snippethub_db;
+use snippethub_db;
 
 
 
@@ -78,4 +79,3 @@ INSERT INTO languages (name, value) VALUES
 ('C++', 'cpp'),
 ('HTML', 'html'),
 ('CSS', 'css');
-
