@@ -25,7 +25,9 @@ function MyPage() {
         setUserActivity(data.data.stats); // stats 필드에 활동 정보
       })
       .catch((err) => {
+        
         console.error(err);
+        
         alert('유저 정보를 불러오는 데 실패했습니다.');
       })
       .finally(() => setLoading(false));
@@ -50,6 +52,7 @@ function MyPage() {
   };
 
   if (loading) return <p className="loading-message">로딩 중...</p>;
+  
 
   return (
     <div className="mypage-container">
