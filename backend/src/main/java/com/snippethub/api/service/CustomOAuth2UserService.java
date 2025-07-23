@@ -59,7 +59,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                                                 .getProviderDetails()
                                                 .getUserInfoEndpoint()
                                                 .getUserNameAttributeName();
-        // Spring Security 인증 객체 반환
+        // attributes.put("provider", registrationId); // 되돌림: provider를 attributes에 추가하지 않음
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes,

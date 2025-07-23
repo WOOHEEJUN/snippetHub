@@ -50,11 +50,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // 사용자 정보 조회
         final String finalEmail = email;
         User user = userService.findByEmail(email)
-                .orElseGet(() -> {
-                    // 사용자가 없으면 OAuth2 정보로 새로 생성
-                    log.info("새로운 OAuth2 사용자 생성: {}", finalEmail);
-                    return userService.processOAuth2User("kakao", oAuth2User.getName(), finalEmail, "카카오사용자");
-                });
+                .orElseThrow(() -> new RuntimeException("User not found after OAuth2 login"));
 
         // JWT 토큰 생성
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
@@ -70,7 +66,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 프론트엔드로 리다이렉트 (토큰을 URL 파라미터로 전달)
         String redirectUrl = UriComponentsBuilder
-                .fromUriString("http://localhost:3000/oauth2/callback")
+                .fromUriString("http://localhost:3000/oauth2/redirect")
                 .queryParam("accessToken", tokenDto.getAccessToken())
                 .queryParam("refreshToken", tokenDto.getRefreshToken())
                 .queryParam("user", objectMapper.writeValueAsString(userDto))

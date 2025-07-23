@@ -94,6 +94,15 @@ public class UserService {
 
     @Transactional
     public User processOAuth2User(String provider, String providerId, String email, String nickname) {
+        // 닉네임 중복 자동 처리
+        String baseNickname = nickname;
+        int count = 1;
+        while (userRepository.existsByNickname(nickname)) {
+            nickname = baseNickname + "_" + count;
+            count++;
+        }
+        final String finalNickname = nickname;
+
         return userRepository.findByProviderAndProviderId(provider, providerId)
             .orElseGet(() -> {
                 User user = User.builder()
@@ -101,7 +110,7 @@ public class UserService {
                         .providerId(providerId)
                         .email(email)
                         .password(null) // 소셜 로그인 사용자는 비밀번호 null
-                        .nickname(nickname)
+                        .nickname(finalNickname)
                         .build();
                 return userRepository.save(user);
             });

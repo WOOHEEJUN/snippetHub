@@ -95,6 +95,7 @@ function App() {
             <Route path="/snippets/edit/:snippetId" element={<SnippetEdit />} />
             <Route path="/code-test" element={<CodeTest />} />
             <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+            <Route path="/oauth2/redirect" element={<OAuth2Callback />} />
           </Routes>
         </div>
       </AuthProvider>

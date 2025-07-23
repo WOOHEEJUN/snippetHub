@@ -39,4 +39,28 @@ function KakaoLoginButton() {
   );
 }
 
-export default KakaoLoginButton;
+const GOOGLE_AUTH_URL = "http://localhost:8080/oauth2/authorization/google";
+
+function GoogleLoginButton() {
+  return (
+    <a
+      href={GOOGLE_AUTH_URL}
+      style={{
+        display: "inline-block",
+        background: "#fff",
+        color: "#444",
+        border: "1px solid #ddd",
+        padding: "10px 20px",
+        borderRadius: "4px",
+        cursor: "pointer",
+        textDecoration: "none",
+        fontWeight: "bold"
+      }}
+    >
+      <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" style={{ width: 20, marginRight: 8, verticalAlign: "middle" }} />
+      구글 계정으로 로그인
+    </a>
+  );
+}
+
+export { KakaoLoginButton, GoogleLoginButton };

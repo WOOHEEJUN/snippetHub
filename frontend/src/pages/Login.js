@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Login.css';
-import KakaoLoginButton from '../components/KakaoLoginButton';
+import { KakaoLoginButton, GoogleLoginButton } from '../components/LoginButton';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -43,16 +43,7 @@ const Login = () => {
     const message = searchParams.get('message');
     
     if (error === 'oauth2_failed' && message) {
-      // 영어 메시지를 한글로 변환
-      let koreanMessage = message;
-      if (message === 'Login failed') {
-        koreanMessage = '로그인에 실패했습니다.';
-      } else if (message === 'Email information required') {
-        koreanMessage = '이메일 정보가 필요합니다.';
-      } else if (message === 'Too many requests. Please try again later') {
-        koreanMessage = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-      }
-      setLoginError(koreanMessage);
+      setLoginError(message);
     }
   }, [searchParams]);
 
@@ -64,7 +55,7 @@ const Login = () => {
     setLoginError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -77,7 +68,8 @@ const Login = () => {
         return;
       }
 
-      await login(data.data.token);
+      localStorage.setItem('token', data.accessToken);
+      await login(data.accessToken);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
@@ -140,6 +132,7 @@ const Login = () => {
 
           <div className="mb-3">
             <KakaoLoginButton />
+            <GoogleLoginButton />
           </div>
         </form>
 
