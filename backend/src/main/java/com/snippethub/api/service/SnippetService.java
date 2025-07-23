@@ -69,15 +69,22 @@ public class SnippetService {
     }
 
     public Page<Snippet> getSnippets(Pageable pageable, String language, String search) {
+        // 검색어가 비어있거나 null인 경우 처리
+        if (search != null && search.trim().isEmpty()) {
+            search = null;
+        }
+        
         if (language != null && search != null) {
-            return snippetRepository.findByLanguageAndTitleContainingIgnoreCaseOrLanguageAndDescriptionContainingIgnoreCaseOrLanguageAndCodeContainingIgnoreCase(
-                    language, search, language, search, language, search, pageable);
+            // 언어 + 검색어 조합
+            return snippetRepository.findByLanguageAndTitleContainingIgnoreCase(language, search, pageable);
         } else if (language != null) {
+            // 언어별 필터링만
             return snippetRepository.findByLanguage(language, pageable);
         } else if (search != null) {
-            return snippetRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCodeContainingIgnoreCase(
-                    search, search, search, pageable);
+            // 검색어만 (제목에서만 검색)
+            return snippetRepository.findByTitleContainingIgnoreCase(search, pageable);
         } else {
+            // 전체 조회
             return snippetRepository.findAll(pageable);
         }
     }
