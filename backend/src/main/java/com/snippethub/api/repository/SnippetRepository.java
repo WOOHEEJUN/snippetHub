@@ -7,11 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SnippetRepository extends JpaRepository<Snippet, Long> {
 
-    Page<Snippet> findByLanguageAndTitleContainingIgnoreCaseOrLanguageAndDescriptionContainingIgnoreCaseOrLanguageAndCodeContainingIgnoreCase(
-            String language1, String search1, String language2, String search2, String language3, String search3, Pageable pageable);
-
-    Page<Snippet> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCodeContainingIgnoreCase(
-            String search1, String search2, String search3, Pageable pageable);
-
+    // 언어별 필터링
     Page<Snippet> findByLanguage(String language, Pageable pageable);
+    
+    // 제목에서 검색
+    Page<Snippet> findByTitleContainingIgnoreCase(String search, Pageable pageable);
+    
+    // 언어 + 제목 검색
+    Page<Snippet> findByLanguageAndTitleContainingIgnoreCase(String language, String search, Pageable pageable);
 }
