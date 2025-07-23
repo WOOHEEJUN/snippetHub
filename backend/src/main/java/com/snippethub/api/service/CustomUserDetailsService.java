@@ -32,8 +32,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 });
         System.out.println("[CustomUserDetailsService] 유저 조회 성공: " + user.getEmail());
 
+        // 개발 환경에서는 이메일 인증 체크를 비활성화
         // if (!user.isVerified()) {
-        //     throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED); // TODO: Add EMAIL_NOT_VERIFIED to ErrorCode
+        //     throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
         // }
 
         return createUserDetails(user);

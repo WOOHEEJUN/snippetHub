@@ -58,6 +58,9 @@ public class AuthService {
                 .password(encodedPassword)
                 .nickname(requestDto.getNickname())
                 .build();
+        
+        // 개발 환경에서는 자동으로 인증 완료
+        newUser.setIsVerified(true);
 
         User savedUser = userRepository.save(newUser);
 
@@ -81,12 +84,15 @@ public class AuthService {
         User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        RefreshToken refreshToken = RefreshToken.builder()
-                .user(user)
-                .token(tokenDto.getRefreshToken())
-                .expiryDate(tokenProvider.getRefreshTokenExpiryDate())
-                .build();
-
+        // 기존 refresh token이 있다면 업데이트, 없으면 새로 생성
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
+                .orElse(RefreshToken.builder()
+                        .user(user)
+                        .token("")
+                        .expiryDate(tokenProvider.getRefreshTokenExpiryDate())
+                        .build());
+        
+        refreshToken.updateToken(tokenDto.getRefreshToken(), tokenProvider.getRefreshTokenExpiryDate());
         refreshTokenRepository.save(refreshToken);
 
         return new AbstractMap.SimpleEntry<>(tokenDto, user);
