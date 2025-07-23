@@ -2,31 +2,28 @@
   padding: 3rem 0;
 }
 
-.snippet-header {
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  margin-bottom: 2rem;
-}
-
-.snippet-header h1 {
+/* Styles for title, author, date (consistent with BoardDetail) */
+.post-title {
   font-weight: 700;
+  margin-bottom: 1rem; /* Adjusted margin for consistency */
 }
 
-.snippet-meta {
+.post-meta {
   font-size: 0.9rem;
   color: #6c757d;
+  margin-bottom: 2rem; /* Adjusted margin for consistency */
 }
 
-.snippet-meta .author {
+.post-meta .post-author {
   font-weight: 500;
   color: #495057;
 }
 
+/* Existing snippet-specific styles */
 .code-container {
   position: relative;
 }
 
-/* react-syntax-highlighter 스타일 커스텀 */
 .code-container pre {
   border-radius: 0.5rem !important;
   border: 1px solid #dee2e6;
@@ -43,40 +40,57 @@
   background-color: #f8f9fa;
 }
 
+/* Like button styles */
 .like-section {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.35em 0.65em;
-  border: 1px solid #dee2e6;
-  border-radius: 50rem;
+  gap: 8px;
 }
 
 .like-button {
-  font-size: 1rem; /* 아이콘 크기 조정 */
-  background: none;
+  background: transparent;
   border: none;
-  color: white; /* 아이콘 색상을 흰색으로 */
-  padding: 0 0.25rem 0 0; /* 오른쪽 여백 추가 */
-  transition: transform 0.2s;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
 }
 
-.like-button.liked {
-  color: #ffc107; /* 좋아요 눌렀을 때 노란색으로 */
+.like-button:focus {
+  outline: none;
+  box-shadow: none;
 }
 
-.like-button:hover {
+.like-button i {
+  font-size: 1.5rem;
+  color: #6c757d;
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.like-button.liked i {
+  color: #DC3545;
+  transform: scale(1.2);
+}
+
+.like-button:hover i {
   transform: scale(1.1);
 }
 
 .like-count {
-  font-size: 1rem; /* 좋아요 수 폰트 크기 */
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
 }
 
+/* Comment section styles */
 .comment-section {
   margin-top: 3rem;
+}
+
+.comment-section h4 {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
 }
 
 .comment-form textarea {
@@ -85,7 +99,7 @@
 
 .comment {
   padding: 1rem;
-  background-color: #F0F8FF; /* 연한 하늘색 계열 */
+  background-color: #F0F8FF;
   border-radius: 0.5rem;
 }
 

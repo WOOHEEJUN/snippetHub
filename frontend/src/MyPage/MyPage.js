@@ -1,4 +1,3 @@
-// src/MyPage/MyPage.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/Mypage.css';
@@ -6,8 +5,10 @@ import '../css/Mypage.css';
 function MyPage() {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
-  const [userActivity, setUserActivity] = useState(null);
+  const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // ✅ accessToken으로 수정
   const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
@@ -17,42 +18,38 @@ function MyPage() {
     }
 
     fetch('/api/users/profile', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ 올바른 토큰 헤더로 수정
+      },
     })
-      .then((res) => res.ok ? res.json() : Promise.reject('유저 정보 불러오기 실패'))
-      .then(data => {
-        setUserInfo(data.data.user); // user 필드에 실제 사용자 정보
-        setUserActivity(data.data.stats); // stats 필드에 활동 정보
+      .then((res) => {
+        if (!res.ok) throw new Error('유저 정보 불러오기 실패');
+        return res.json();
+      })
+      .then((data) => {
+        console.log('📦 유저 응답:', data);
+        setUserInfo(data.data);         // ✅ 응답 구조에 맞게 data.data
+        setUserStats(data.data.stats);  // ✅ stats 분리
       })
       .catch((err) => {
-        
         console.error(err);
-        
         alert('유저 정보를 불러오는 데 실패했습니다.');
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
-  const goToMyPosts = () => {
-    navigate('/mypage/posts', { state: { accessToken: token } });
-  };
-
-  const goToMySnippets = () => {
-    navigate('/mypage/snippets', { state: { accessToken: token } });
-  };
-
-  const goToEditProfile = () => {
-    navigate('/mypage/edit', { state: { accessToken: token } });
-  };
+  const goToMyPosts = () => navigate('/mypage/posts');
+  const goToMySnippets = () => navigate('/mypage/snippets');
+  const goToEditProfile = () => navigate('/mypage/edit');
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     alert('로그아웃 되었습니다.');
     navigate('/login');
   };
 
   if (loading) return <p className="loading-message">로딩 중...</p>;
-  
 
   return (
     <div className="mypage-container">
@@ -64,12 +61,10 @@ function MyPage() {
           <div className="user-info-details">
             <p><strong>이메일:</strong> {userInfo.email}</p>
             <p><strong>닉네임:</strong> {userInfo.nickname}</p>
-            {userActivity?.grade && (
-              <p><strong>등급:</strong> {userActivity.grade}</p>
-            )}
-            {userInfo.created_at && (
-              <p><strong>가입일:</strong> {new Date(userInfo.created_at).toLocaleDateString()}</p>
-            )}
+            <p><strong>레벨:</strong> {userInfo.level}</p>
+            <p><strong>포인트:</strong> {userInfo.points}</p>
+            <p><strong>자기소개:</strong> {userInfo.bio || '자기소개가 없습니다.'}</p>
+            <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
           </div>
         </div>
       ) : (
@@ -80,26 +75,24 @@ function MyPage() {
         <h3 className="card-title">내 활동</h3>
         <div className="activity-summary">
           <p>
-            지금까지 총 <strong>{userActivity?.totalPostCount ?? 0}개</strong>의 게시물을 작성하셨습니다.
+            지금까지 총 <strong>{userStats?.totalPosts ?? 0}개</strong>의 게시글,
+            <strong> {userStats?.totalSnippets ?? 0}개</strong>의 스니펫을 작성했습니다.
+          </p>
+          <p>
+            댓글 <strong>{userStats?.totalComments ?? 0}개</strong>,
+            좋아요 <strong>{userStats?.totalLikes ?? 0}개</strong>,
+            조회수 <strong>{userStats?.totalViews ?? 0}회</strong>
           </p>
         </div>
         <div className="mypage-actions">
-          <button className="btn btn-primary-custom" onClick={goToMyPosts}>
-            일반 게시물 ({userActivity?.freePostCount ?? 0}개)
-          </button>
-          <button className="btn btn-primary-custom" onClick={goToMySnippets}>
-            코드 스니펫 ({userActivity?.snippetCount ?? 0}개)
-          </button>
+          <button className="btn btn-primary-custom" onClick={goToMyPosts}>게시글 보기</button>
+          <button className="btn btn-primary-custom" onClick={goToMySnippets}>스니펫 보기</button>
         </div>
       </div>
-      
+
       <div className="mypage-controls">
-        <button className="btn btn-secondary-custom" onClick={goToEditProfile}>
-          개인정보 수정
-        </button>
-        <button className="btn btn-secondary-custom" onClick={handleLogout}>
-          로그아웃
-        </button>
+        <button className="btn btn-secondary-custom" onClick={goToEditProfile}>개인정보 수정</button>
+        <button className="btn btn-secondary-custom" onClick={handleLogout}>로그아웃</button>
       </div>
     </div>
   );
