@@ -56,14 +56,15 @@ public class PostService {
     }
 
     public Page<Post> getPosts(Pageable pageable, String category, String search) {
+        if (search != null && search.trim().isEmpty()) {
+            search = null;
+        }
         if (category != null && search != null) {
-            return postRepository.findByCategoryAndTitleContainingIgnoreCaseOrCategoryAndContentContainingIgnoreCase(
-                    category, search, category, search, pageable);
+            return postRepository.findByCategoryAndTitleContainingIgnoreCase(category, search, pageable);
         } else if (category != null) {
             return postRepository.findByCategory(category, pageable);
         } else if (search != null) {
-            return postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                    search, search, pageable);
+            return postRepository.findByTitleContainingIgnoreCase(search, pageable);
         } else {
             return postRepository.findAll(pageable);
         }
