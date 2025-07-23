@@ -13,6 +13,8 @@ function BoardDetail() {
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentContent, setEditingCommentContent] = useState('');
 
   const fetchPostData = useCallback(async () => {
     try {
@@ -23,13 +25,15 @@ function BoardDetail() {
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
       const postData = await postRes.json();
-      setPost(postData);
-      setLikeCount(postData.likeCount || 0);
-      setIsLiked(postData.likedByCurrentUser || false); // 있으면 사용, 없으면 false
+
+      const actualPost = postData.data;
+      setPost(actualPost);
+      setLikeCount(actualPost.likeCount || 0);
+      setIsLiked(actualPost.likedByCurrentUser || false);
 
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
-        setComments(commentsData.content || commentsData || []);
+        setComments(commentsData.data && Array.isArray(commentsData.data) ? commentsData.data : []);
       }
     } catch (err) {
       console.error('데이터 불러오기 실패:', err);
@@ -73,8 +77,7 @@ function BoardDetail() {
       });
       if (!res.ok) throw new Error('좋아요 요청 실패');
       const result = await res.json();
-      const liked = result.isLiked ?? result.data ?? false; // 여러 형태 대응
-
+      const liked = result.isLiked ?? result.data ?? false;
       setIsLiked(liked);
       setLikeCount(prev => liked ? prev + 1 : prev - 1);
     } catch (err) {
@@ -102,6 +105,53 @@ function BoardDetail() {
     }
   };
 
+  const handleEditComment = (comment) => {
+    setEditingCommentId(comment.commentId);
+    setEditingCommentContent(comment.content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingCommentContent('');
+  };
+
+  const handleSaveComment = async (commentId) => {
+    if (!editingCommentContent.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: 'PUT',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: editingCommentContent }),
+      });
+      if (!res.ok) throw new Error('댓글 수정 실패');
+      setEditingCommentId(null);
+      setEditingCommentContent('');
+      fetchPostData(); // 댓글 목록 새로고침
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('정말 이 댓글을 삭제하시겠습니까?')) return;
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error('댓글 삭제 실패');
+      fetchPostData(); // 댓글 목록 새로고침
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   if (error)
     return (
       <div className="container text-center py-5">
@@ -122,14 +172,6 @@ function BoardDetail() {
 
   return (
     <div className="container post-detail-container col-lg-8 mx-auto p-4 shadow rounded-4 bg-white">
-      <div className="post-header mb-4 border-bottom pb-3">
-        <h2 className="fw-bold mb-3">{post.title}</h2>
-        <div className="post-meta d-flex flex-wrap gap-3 text-muted small">
-          <span>👤 {authorNickname}</span>
-          <span>🗓️ {new Date(post.createdAt).toLocaleDateString()}</span>
-        </div>
-      </div>
-
       <div className="post-content mb-4" style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem' }}>
         {post.content}
       </div>
@@ -171,11 +213,32 @@ function BoardDetail() {
         <div className="comment-list">
           {comments.map(comment => (
             <div key={comment.commentId} className="comment mb-3">
-              <div className="d-flex justify-content-between">
-                <span className="comment-author">{comment.author?.nickname}</span>
-                <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
-              </div>
-              <p className="mt-2 mb-0">{comment.content}</p>
+              {editingCommentId === comment.commentId ? (
+                <div className="input-group">
+                  <textarea
+                    className="form-control"
+                    rows="2"
+                    value={editingCommentContent}
+                    onChange={(e) => setEditingCommentContent(e.target.value)}
+                  ></textarea>
+                  <button className="btn btn-primary" onClick={() => handleSaveComment(comment.commentId)}>저장</button>
+                  <button className="btn btn-secondary" onClick={handleCancelEdit}>취소</button>
+                </div>
+              ) : (
+                <>
+                  <div className="d-flex justify-content-between">
+                    <span className="comment-author">{comment.author?.nickname}</span>
+                    <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p className="mt-2 mb-0">{comment.content}</p>
+                  {user && user.nickname === comment.author?.nickname && (
+                    <div className="comment-actions d-flex justify-content-end gap-2 mt-2">
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEditComment(comment)}>수정</button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteComment(comment.commentId)}>삭제</button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           ))}
         </div>

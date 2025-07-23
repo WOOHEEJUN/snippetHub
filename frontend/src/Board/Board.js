@@ -13,17 +13,20 @@ const Board = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('LATEST');
 
-  const fetchPosts = (page = 0, term = '') => {
+  const fetchPosts = (page = 0, term = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
 
     const params = new URLSearchParams({
       page,
       size: 10,
-      sort: 'createdAt,desc',
-      title: term,
+      sort,
     });
+    if (term) {
+      params.append('search', term);
+    }
 
 fetch(`/api/posts?${params.toString()}`)
   .then(res => {
@@ -44,12 +47,12 @@ fetch(`/api/posts?${params.toString()}`)
   };
 
   useEffect(() => {
-    fetchPosts(0, searchTerm);
-  }, []);
+    fetchPosts(0, searchTerm, sortOrder);
+  }, [searchTerm, sortOrder]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchPosts(0, searchTerm);
+    fetchPosts(0, searchTerm, sortOrder);
   };
 
   const handleWrite = () => {
@@ -77,6 +80,15 @@ fetch(`/api/posts?${params.toString()}`)
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
+          <select 
+            className="form-select" 
+            style={{width: '150px'}}
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value)}
+          >
+            <option value="LATEST">최신순</option>
+            <option value="POPULAR">인기순</option>
+          </select>
           <button className="btn btn-outline-secondary" type="submit">검색</button>
         </form>
         <button className="btn btn-primary" onClick={handleWrite}>글쓰기</button>
@@ -94,7 +106,6 @@ fetch(`/api/posts?${params.toString()}`)
                 <th style={{width: '50%'}}>제목</th>
                 <th style={{width: '15%'}}>작성자</th>
                 <th style={{width: '15%'}}>작성일</th>
-                <th style={{width: '10%'}}>조회수</th>
               </tr>
             </thead>
             <tbody>
@@ -109,12 +120,11 @@ fetch(`/api/posts?${params.toString()}`)
                     </td>
                     <td>{post.author?.nickname || '-'}</td>
                     <td>{new Date(post.createdAt).toLocaleDateString()}</td>
-                    <td>{post.viewCount || 0}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">
+                  <td colSpan="4" className="text-center py-5 text-muted">
                     <h5>게시글이 없습니다.</h5>
                     <p>첫 번째 게시글을 작성해보세요!</p>
                   </td>
@@ -128,7 +138,7 @@ fetch(`/api/posts?${params.toString()}`)
               <ul className="pagination">
                 {[...Array(totalPages).keys()].map(page => (
                   <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
-                    <button className="page-link" onClick={() => fetchPosts(page, searchTerm)}>{page + 1}</button>
+                    <button className="page-link" onClick={() => fetchPosts(page, searchTerm, sortOrder)}>{page + 1}</button>
                   </li>
                 ))}
               </ul>
