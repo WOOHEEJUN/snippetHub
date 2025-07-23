@@ -8,7 +8,7 @@ function MyPage() {
   const [userInfo, setUserInfo] = useState(null);
   const [userActivity, setUserActivity] = useState(null);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
     if (!token) {
@@ -34,19 +34,19 @@ function MyPage() {
   }, []);
 
   const goToMyPosts = () => {
-    navigate('/mypage/posts', { state: { token } });
+    navigate('/mypage/posts', { state: { accessToken: token } });
   };
 
   const goToMySnippets = () => {
-    navigate('/mypage/snippets', { state: { token } });
+    navigate('/mypage/snippets', { state: { accessToken: token } });
   };
 
   const goToEditProfile = () => {
-    navigate('/mypage/edit', { state: { token } });
+    navigate('/mypage/edit', { state: { accessToken: token } });
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     alert('로그아웃 되었습니다.');
     navigate('/login');
   };

@@ -15,18 +15,19 @@ const SnippetBoard = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
+  const [sortOrder, setSortOrder] = useState('LATEST');
 
-  const fetchSnippets = (page = 0, term = '', lang = '') => {
+  const fetchSnippets = (page = 0, term = '', lang = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
 
     const params = new URLSearchParams({
       page,
       size: 10,
-      sort: 'createdAt,desc',
-      title: term,
-      language: lang,
+      sort,
     });
+    if (term) params.append('search', term);
+    if (lang) params.append('language', lang);
 
     fetch(`/api/snippets?${params.toString()}`)
       .then(res => {
@@ -34,9 +35,10 @@ const SnippetBoard = () => {
         return res.json();
       })
       .then(data => {
-        setSnippets(data.content || []);
-        setCurrentPage(data.number);
-        setTotalPages(data.totalPages);
+        const pageData = data.data;
+        setSnippets(pageData.content || []);
+        setCurrentPage(pageData.currentPage);
+        setTotalPages(pageData.totalPages);
       })
       .catch(err => {
         setError(err.message);
@@ -49,14 +51,26 @@ const SnippetBoard = () => {
     const params = new URLSearchParams(location.search);
     const term = params.get('search') || '';
     const lang = params.get('language') || '';
+    const sort = params.get('sort') || 'LATEST';
+    const page = parseInt(params.get('page') || '0');
+
     setSearchTerm(term);
     setSearchLanguage(lang);
-    fetchSnippets(0, term, lang);
+    setSortOrder(sort);
+
+    fetchSnippets(page, term, lang, sort);
   }, [location.search]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchSnippets(0, searchTerm, searchLanguage);
+
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('search', searchTerm);
+    if (searchLanguage) params.set('language', searchLanguage);
+    if (sortOrder) params.set('sort', sortOrder);
+    params.set('page', 0); // 검색 시 항상 첫 페이지로
+
+    navigate(`/snippets?${params.toString()}`);
   };
 
   const handleWrite = () => {
@@ -85,13 +99,13 @@ const SnippetBoard = () => {
           <input 
             type="text" 
             className="form-control" 
-            placeholder="제목 검색..." 
+            placeholder="검색..." 
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
           <select 
             className="form-select" 
-            style={{width: '150px'}}
+            style={{ width: '150px' }}
             value={searchLanguage}
             onChange={e => setSearchLanguage(e.target.value)}
           >
@@ -103,12 +117,27 @@ const SnippetBoard = () => {
             <option value="PYTHON">Python</option>
             <option value="C">C</option>
           </select>
+          <select 
+            className="form-select" 
+            style={{ width: '150px' }}
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value)}
+          >
+            <option value="LATEST">최신순</option>
+            <option value="POPULAR">인기순</option>
+          </select>
           <button className="btn btn-outline-secondary" type="submit">검색</button>
         </form>
         <button className="btn btn-primary" onClick={handleWrite}>스니펫 작성</button>
       </div>
 
-      {loading && <div className="text-center"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+      {loading && (
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
       {error && <div className="alert alert-danger">{error}</div>}
       
       {!loading && !error && (
@@ -116,16 +145,16 @@ const SnippetBoard = () => {
           <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th scope="col" style={{width: '10%'}}>번호</th>
-                <th scope="col" style={{width: '40%'}}>제목</th>
-                <th scope="col" style={{width: '15%'}}>언어</th>
-                <th scope="col" style={{width: '15%'}}>작성자</th>
-                <th scope="col" style={{width: '20%'}}>작성일</th>
+                <th scope="col" style={{ width: '10%' }}>번호</th>
+                <th scope="col" style={{ width: '40%' }}>제목</th>
+                <th scope="col" style={{ width: '15%' }}>언어</th>
+                <th scope="col" style={{ width: '15%' }}>작성자</th>
+                <th scope="col" style={{ width: '20%' }}>작성일</th>
               </tr>
             </thead>
             <tbody>
               {snippets.length > 0 ? (
-                snippets.map((snippet, index) => (
+                snippets.map((snippet) => (
                   <tr key={snippet.snippetId} onClick={() => navigate(`/snippets/${snippet.snippetId}`)}>
                     <td>{snippet.snippetId}</td>
                     <td>{snippet.title}</td>
@@ -150,7 +179,19 @@ const SnippetBoard = () => {
               <ul className="pagination">
                 {[...Array(totalPages).keys()].map(page => (
                   <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
-                    <button className="page-link" onClick={() => fetchSnippets(page, searchTerm, searchLanguage)}>{page + 1}</button>
+                    <button
+                      className="page-link"
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        if (searchTerm) params.set('search', searchTerm);
+                        if (searchLanguage) params.set('language', searchLanguage);
+                        if (sortOrder) params.set('sort', sortOrder);
+                        params.set('page', page);
+                        navigate(`/snippets?${params.toString()}`);
+                      }}
+                    >
+                      {page + 1}
+                    </button>
                   </li>
                 ))}
               </ul>

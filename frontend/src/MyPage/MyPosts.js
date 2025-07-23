@@ -5,7 +5,7 @@ import '../css/MyContentList.css'; // 공통 CSS 임포트
 function MyPosts() {
   const location = useLocation();
   const navigate = useNavigate();
-  const token = location.state?.token || localStorage.getItem('token');
+  const token = location.state?.accessToken || localStorage.getItem('accessToken');
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 

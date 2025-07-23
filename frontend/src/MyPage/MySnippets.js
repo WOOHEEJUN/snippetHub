@@ -6,7 +6,7 @@ function MySnippets() {
   const [snippets, setSnippets] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
     if (!token) {

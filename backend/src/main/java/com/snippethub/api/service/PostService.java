@@ -51,7 +51,6 @@ public class PostService {
     public Post getPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.POST_NOT_FOUND));
-        post.increaseViewCount();
         return post;
     }
 
