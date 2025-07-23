@@ -9,7 +9,7 @@ import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-c';
-import 'prismjs/themes/prism.css'; // 기본 테마
+import 'prismjs/themes/prism.css';
 import '../css/SnippetWrite.css';
 
 const languageMap = {
@@ -35,45 +35,59 @@ const SnippetWrite = () => {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('');
   const [description, setDescription] = useState('');
+  const [tags, setTags] = useState(''); // 콤마로 구분된 문자열 입력
+  const [isPublic, setIsPublic] = useState(true);
   const [code, setCode] = useState('// 코드를 여기에 입력하세요');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { getAuthHeaders } = useAuth();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!title || !language || !description || !code) {
-    setError('모든 필드를 채워주세요.');
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-
-  try {
-    const response = await fetch('/api/snippets', {
-      method: 'POST',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, description, code, language }),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.message || '스니펫 생성에 실패했습니다.');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title || !language || !description || !code) {
+      setError('모든 필드를 채워주세요.');
+      return;
     }
 
-    alert('스니펫이 성공적으로 생성되었습니다.');
-    navigate('/snippets');
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    const tagsArray = tags
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/snippets', {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          description,
+          code,
+          language,
+          tags: tagsArray,
+          public: isPublic,
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || '스니펫 생성에 실패했습니다.');
+      }
+
+      alert('스니펫이 성공적으로 생성되었습니다.');
+      navigate('/snippets');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container snippet-form-container">
@@ -123,6 +137,31 @@ const handleSubmit = async (e) => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="코드에 대한 간단한 설명을 추가하세요"
           ></textarea>
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="tags" className="form-label">태그 (쉼표로 구분)</label>
+          <input
+            type="text"
+            id="tags"
+            className="form-control"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="예: 알고리즘, 정렬, 최적화"
+          />
+        </div>
+
+        <div className="form-check mb-3">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="public"
+            checked={isPublic}
+            onChange={() => setIsPublic(!isPublic)}
+          />
+          <label className="form-check-label" htmlFor="public">
+            공개 여부
+          </label>
         </div>
 
         <div className="mb-3">

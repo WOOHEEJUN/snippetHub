@@ -77,7 +77,7 @@ const Login = () => {
         return;
       }
 
-      await login(data.data.token);
+      await login(data.data);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);

@@ -1,89 +1,62 @@
-// src/Board/BoardWrite.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // useAuth 훅 임포트
+import { useAuth } from '../context/AuthContext';
 import '../css/Board.css';
 
 function BoardWrite() {
   const navigate = useNavigate();
-  const { getAuthHeaders } = useAuth(); // getAuthHeaders 훅 사용
+  const { getAuthHeaders } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [imageFile, setImageFile] = useState(null); // 이미지 파일 상태
-  const [imageUrl, setImageUrl] = useState(''); // 업로드된 이미지 URL 상태
+  const [imageFile, setImageFile] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
 
   const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
-      // 이미지 미리보기 (선택 사항)
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        setImageUrl(event.target.result); // 미리보기 URL 설정
+        setImageUrl(event.target.result);
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    alert('로그인이 필요합니다.');
+    return;
+  }
 
-      let finalImageUrl = '';
-      if (imageFile) {
-        // 1. S3 Pre-signed URL 요청
-        // const presignedUrlRes = await fetch('/api/v1/s3/presigned-url', {
-      //   method: 'POST',
-      //   headers: getAuthHeaders({'Content-Type': 'application/json'}),
-      //   body: JSON.stringify({ fileName: imageFile.name, fileType: imageFile.type }),
-      // });
+  try {
+    const response = await fetch('/api/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        title,
+        content,
+        category: '자유게시판',        
+        tags: [],                      
+      }),
+    });
 
-      // if (!presignedUrlRes.ok) {
-      //   throw new Error('Pre-signed URL 요청 실패');
-      // }
-      // const { url } = await presignedUrlRes.json();
+    if (!response.ok) throw new Error('게시물 등록 실패');
 
-      // // 2. S3에 이미지 업로드
-      // const uploadRes = await fetch(url, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': imageFile.type,
-      //   },
-      //   body: imageFile,
-      // });
-
-      // if (!uploadRes.ok) {
-      //   throw new Error('이미지 S3 업로드 실패');
-      // }
-      // finalImageUrl = url.split('?')[0]; // 쿼리 파라미터 제거한 실제 이미지 URL
-      }
-
-      // 3. 게시글 데이터와 함께 이미지 URL 전송
-      const response = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({ title, content, imageUrl: finalImageUrl }),
-      });
-
-      if (!response.ok) {
-        throw new Error('게시물 등록 실패');
-      }
-
-      alert('게시물이 등록되었습니다.');
-      navigate('/board');
-    } catch (error) {
-      alert('오류 발생: ' + error.message);
-    }
-  };
-
+    alert('게시물이 등록되었습니다.');
+    navigate('/board');
+  } catch (error) {
+    console.error('❌ 게시물 작성 오류:', error);
+    alert('오류 발생: ' + error.message);
+  }
+};
   return (
     <div className="container mt-5 board-write-container">
       <h2 className="mb-4">📝 게시물 작성</h2>
@@ -100,6 +73,7 @@ function BoardWrite() {
             required
           />
         </div>
+
         <div className="mb-4">
           <label htmlFor="content" className="form-label">내용</label>
           <textarea
@@ -124,14 +98,26 @@ function BoardWrite() {
           />
           {imageUrl && (
             <div className="mt-3">
-              <img src={imageUrl} alt="미리보기" style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} />
+              <img
+                src={imageUrl}
+                alt="미리보기"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: '8px',
+                }}
+              />
             </div>
           )}
         </div>
 
         <div className="d-flex justify-content-between">
           <button type="submit" className="btn btn-primary">작성</button>
-          <button type="button" className="btn btn-secondary" onClick={() => navigate('/board')}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => navigate('/board')}
+          >
             취소
           </button>
         </div>

@@ -16,34 +16,35 @@ const SnippetBoard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
 
-  const fetchSnippets = (page = 0, term = '', lang = '') => {
-    setLoading(true);
-    setError(null);
+ const fetchSnippets = (page = 0, term = '', lang = '') => {
+  setLoading(true);
+  setError(null);
 
-    const params = new URLSearchParams({
-      page,
-      size: 10,
-      sort: 'createdAt,desc',
-      title: term,
-      language: lang,
-    });
+  const params = new URLSearchParams({
+    page,
+    size: 10,
+    sort: 'createdAt,desc',
+    title: term,
+    language: lang,
+  });
 
-    fetch(`/api/snippets?${params.toString()}`)
-      .then(res => {
-        if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
-        return res.json();
-      })
-      .then(data => {
-        setSnippets(data.content || []);
-        setCurrentPage(data.number);
-        setTotalPages(data.totalPages);
-      })
-      .catch(err => {
-        setError(err.message);
-        console.error('스니펫 로드 실패:', err);
-      })
-      .finally(() => setLoading(false));
-  };
+ fetch(`/api/snippets?${params.toString()}`)
+  .then(res => {
+    if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
+    return res.json();
+  })
+  .then(data => {
+    const pageData = data.data;
+    setSnippets(pageData.content || []);
+    setCurrentPage(pageData.currentPage);
+    setTotalPages(pageData.totalPages);
+  })
+  .catch(err => {
+    setError(err.message);
+    console.error('스니펫 로드 실패:', err);
+  })
+  .finally(() => setLoading(false));
+};
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);

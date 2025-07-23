@@ -13,7 +13,7 @@ function BoardEdit() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     fetch(`/api/posts/${postId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -43,7 +43,7 @@ function BoardEdit() {
 
   const handleUpdate = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       if (!token) {
         alert('로그인이 필요합니다.');
         return;

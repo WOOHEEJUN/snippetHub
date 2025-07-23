@@ -25,21 +25,22 @@ const Board = () => {
       title: term,
     });
 
-    fetch(`/api/posts?${params.toString()}`)
-      .then(res => {
-        if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
-        return res.json();
-      })
-      .then(data => {
-        setPosts(data || []);
-        setCurrentPage(data.postIdId);
-        setTotalPages(data.totalPages);
-      })
-      .catch(err => {
-        setError(err.message);
-        console.error('게시글 로드 실패:', err);
-      })
-      .finally(() => setLoading(false));
+fetch(`/api/posts?${params.toString()}`)
+  .then(res => {
+    if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
+    return res.json();
+  })
+  .then(result => {
+    const { content, currentPage, totalPages } = result.data;
+    setPosts(content || []);
+    setCurrentPage(currentPage);
+    setTotalPages(totalPages);
+  })
+  .catch(err => {
+    setError(err.message);
+    console.error('게시글 로드 실패:', err);
+  })
+  .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -89,17 +90,17 @@ const Board = () => {
           <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th scope="col" style={{width: '10%'}}>번호</th>
-                <th scope="col" style={{width: '50%'}}>제목</th>
-                <th scope="col" style={{width: '15%'}}>작성자</th>
-                <th scope="col" style={{width: '15%'}}>작성일</th>
-                <th scope="col" style={{width: '10%'}}>조회수</th>
+                <th style={{width: '10%'}}>번호</th>
+                <th style={{width: '50%'}}>제목</th>
+                <th style={{width: '15%'}}>작성자</th>
+                <th style={{width: '15%'}}>작성일</th>
+                <th style={{width: '10%'}}>조회수</th>
               </tr>
             </thead>
             <tbody>
               {posts.length > 0 ? (
-                posts.map((post, index) => (
-                  <tr key={post.postId} onClick={() => navigate(`/board/${post.postId}`)}>
+                posts.map((post) => (
+                  <tr key={post.postId} onClick={() => navigate(`/board/${post.postId}`)} style={{ cursor: 'pointer' }}>
                     <td>{post.postId}</td>
                     <td>
                       <Link to={`/board/${post.postId}`} className="post-title">
