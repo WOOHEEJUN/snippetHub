@@ -7,11 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    Page<Post> findByCategoryAndTitleContainingIgnoreCaseOrCategoryAndContentContainingIgnoreCase(
-            String category1, String search1, String category2, String search2, Pageable pageable);
-
-    Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-            String search1, String search2, Pageable pageable);
-
     Page<Post> findByCategory(String category, Pageable pageable);
+    
+    Page<Post> findByTitleContainingIgnoreCase(String search, Pageable pageable);
+    
+    Page<Post> findByCategoryAndTitleContainingIgnoreCase(String category, String search, Pageable pageable);
 }
