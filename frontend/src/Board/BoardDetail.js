@@ -1,7 +1,8 @@
+// src/Board/BoardDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../css/Board.css';
+import '../css/BoardDetail.css';
 
 function BoardDetail() {
   const { postId } = useParams();
@@ -25,7 +26,6 @@ function BoardDetail() {
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
       const postData = await postRes.json();
-
       const actualPost = postData.data;
       setPost(actualPost);
       setLikeCount(actualPost.likeCount || 0);
@@ -33,7 +33,7 @@ function BoardDetail() {
 
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
-        setComments(commentsData.data && Array.isArray(commentsData.data) ? commentsData.data : []);
+        setComments(Array.isArray(commentsData.data) ? commentsData.data : []);
       }
     } catch (err) {
       console.error('데이터 불러오기 실패:', err);
@@ -45,9 +45,7 @@ function BoardDetail() {
     fetchPostData();
   }, [fetchPostData]);
 
-  const handleEdit = () => {
-    navigate(`/board/edit/${postId}`);
-  };
+  const handleEdit = () => navigate(`/board/edit/${postId}`);
 
   const handleDelete = async () => {
     if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
@@ -55,9 +53,7 @@ function BoardDetail() {
       const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/posts/${postId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('삭제 실패');
       alert('삭제되었습니다.');
@@ -75,7 +71,6 @@ function BoardDetail() {
         method: 'POST',
         headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error('좋아요 요청 실패');
       const result = await res.json();
       const liked = result.isLiked ?? result.data ?? false;
       setIsLiked(liked);
@@ -132,7 +127,7 @@ function BoardDetail() {
       if (!res.ok) throw new Error('댓글 수정 실패');
       setEditingCommentId(null);
       setEditingCommentContent('');
-      fetchPostData(); // 댓글 목록 새로고침
+      fetchPostData();
     } catch (err) {
       alert(err.message);
     }
@@ -146,41 +141,31 @@ function BoardDetail() {
         headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error('댓글 삭제 실패');
-      fetchPostData(); // 댓글 목록 새로고침
+      fetchPostData();
     } catch (err) {
       alert(err.message);
     }
   };
 
-  if (error)
-    return (
-      <div className="container text-center py-5">
-        <p className="text-danger">{error}</p>
-      </div>
-    );
+  if (error) return <div className="container text-center py-5 text-danger">{error}</div>;
+  if (!post) return (
+    <div className="container text-center py-5">
+      <div className="spinner-border text-secondary" role="status"></div>
+      <p className="mt-3">⏳ 게시글을 불러오는 중...</p>
+    </div>
+  );
 
-  if (!post)
-    return (
-      <div className="container text-center py-5">
-        <div className="spinner-border text-secondary" role="status"></div>
-        <p className="mt-3">⏳ 게시글을 불러오는 중...</p>
-      </div>
-    );
-
-  const authorNickname = post.author?.nickname || '알 수 없음';
-  const isAuthor = user?.nickname === authorNickname;
+  const isAuthor = user?.nickname === post.author?.nickname;
 
   return (
     <div className="container post-detail-container col-lg-8 mx-auto p-4 shadow rounded-4 bg-white">
+      <h2 className="post-title mb-3">{post.title}</h2>
+      <div className="post-meta d-flex justify-content-between align-items-center mb-4 text-muted">
+        <span className="post-author">작성자: {post.author?.nickname}</span>
+        <span className="post-date">작성일: {new Date(post.createdAt).toLocaleString()}</span>
+      </div>
       <div className="post-content mb-4" style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem' }}>
         {post.content}
-      </div>
-
-      <div className="like-section text-center my-4">
-        <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
-          <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
-        </button>
-        <span className="like-count">{likeCount}</span>
       </div>
 
       {isAuthor && (
@@ -190,8 +175,14 @@ function BoardDetail() {
         </div>
       )}
 
-      <div className="mt-5 text-center">
+      <div className="d-flex justify-content-center align-items-center gap-3 mb-5"> {/* 새로운 부모 div */}
         <button className="btn btn-secondary px-4" onClick={() => navigate(-1)}>← 목록으로 돌아가기</button>
+        <div className="like-section"> {/* 좋아요 섹션은 그대로 유지하되, 스타일은 부모 div에서 관리 */}
+          <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
+            <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+          </button>
+          <span className="like-count">{likeCount}</span>
+        </div>
       </div>
 
       <div className="comment-section mt-5">
@@ -231,7 +222,7 @@ function BoardDetail() {
                     <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
                   </div>
                   <p className="mt-2 mb-0">{comment.content}</p>
-                  {user && user.nickname === comment.author?.nickname && (
+                  {user?.nickname === comment.author?.nickname && (
                     <div className="comment-actions d-flex justify-content-end gap-2 mt-2">
                       <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEditComment(comment)}>수정</button>
                       <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteComment(comment.commentId)}>삭제</button>

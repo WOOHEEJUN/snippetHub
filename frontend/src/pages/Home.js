@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/Home.css';
-import { useAuth } from '../context/AuthContext';
+
+import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
 
 const Home = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const isLoggedIn = !!user;
+  const { user } = useAuth(); // useAuth 훅을 사용하여 user 객체 가져오기
+  const isLoggedIn = !!user; // user 객체의 존재 여부로 로그인 상태 판단
 
   const [popularSnippets, setPopularSnippets] = useState([]);
   const [recentPosts, setRecentPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
+  console.log();
 
   useEffect(() => {
     fetch('/api/snippets?page=0&size=6&sort=likeCount,desc')
@@ -45,27 +47,31 @@ const Home = () => {
     <div className="home-page">
       {/* Hero Section */}
       <section className="hero-section text-start">
-        <div className="container hero-container">
-          <div className="hero-text">
-            <h1 className="display-4">코드를 공유하고, 함께 성장하세요</h1>
-            <p className="lead">
-              SNI는 개발자들을 위한 코드 공유 플랫폼입니다.<br />
-              자유롭게 코드를 올리고, 피드백을 받으며 실력을 향상시켜 보세요.
-            </p>
-            <div className="d-flex gap-3 mt-3">
-              <Link to="/snippets" className="btn btn-primary btn-lg">스니펫 둘러보기</Link>
-              {!isLoggedIn && (
-                <Link to="/register" className="btn btn-outline-secondary btn-lg">무료 회원가입</Link>
-              )}
-            </div>
-          </div>
-          <div className="hero-visual">
-            <div className="code-logo">
-              <span>&lt;/&gt;</span>
-            </div>
-          </div>
-        </div>
-      </section>
+  <div className="container hero-container">
+    {/* 왼쪽 텍스트 영역 */}
+    <div className="hero-text">
+      <h1 className="display-4">코드를 공유하고, 함께 성장하세요</h1>
+      <p className="lead">
+        SNI는 개발자들을 위한 코드 공유 플랫폼입니다.<br />
+        자유롭게 코드를 올리고, 피드백을 받으며 실력을 향상시켜 보세요.
+      </p>
+      <div className="d-flex gap-3 mt-3">
+        <Link to="/snippets" className="btn btn-primary btn-lg">스니펫 둘러보기</Link>
+        {!isLoggedIn && (
+          <Link to="/register" className="btn btn-outline-secondary btn-lg">무료 회원가입</Link>
+        )}
+      </div>
+    </div>
+
+    {/* 오른쪽 로고 영역 */}
+    <div className="hero-visual">
+      <div className="code-logo">
+        <span>&lt;/&gt;</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* Search Section */}
       <section className="py-5">
@@ -110,13 +116,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Snippets (최신 3개만 표시) */}
+      {/* Popular Snippets */}
       <section className="py-5 bg-light">
         <div className="container">
           <h2 className="text-center mb-5">인기 스니펫</h2>
           <div className="row">
             {popularSnippets.length > 0 ? (
-              popularSnippets.slice(0, 3).map(snippet => (
+              popularSnippets.map(snippet => (
                 <div className="col-md-6 col-lg-4 mb-4" key={snippet.snippetId}>
                   <div className="card h-100 snippet-card">
                     <div className="card-body d-flex flex-column">
@@ -157,14 +163,14 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Recent Posts (최신 3개만 표시) */}
+      {/* Recent Posts */}
       <section className="py-5">
         <div className="container">
           <h2 className="text-center mb-5">최신 게시글</h2>
           <div className="col-lg-10 mx-auto">
             {recentPosts.length > 0 ? (
               <div className="list-group shadow-sm">
-                {recentPosts.slice(0, 3).map(post => (
+                {recentPosts.map(post => (
                   <Link to={`/board/${post.postId}`} className="list-group-item list-group-item-action" key={post.postId}>
                     <div className="d-flex w-100 justify-content-between">
                       <h5 className="mb-1">{post.title}</h5>
@@ -197,7 +203,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Call to Action */}
       <section className="cta-section text-center">
         <div className="container">
           <h2 className="display-5 mb-3">지금 바로 시작하세요!</h2>

@@ -1,34 +1,23 @@
-/* 좋아요 버튼과 텍스트를 수직으로 정렬 */
 .like-section {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.6rem; /* 간격 줄이기 */
-  padding: 2rem 0;
-  border-top: 1px solid #e9ecef;
-  border-bottom: 1px solid #e9ecef;
-  margin: 2.5rem 0;
-  flex-wrap: nowrap;
-  position: relative;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
 }
 
 .like-button {
-  font-size: 2rem;
-  background: none;
   border: none;
-  color: #adb5bd;
+  background: transparent;
+  font-size: 1.8rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #ccc;
 }
 
 .like-button.liked {
-  color: #ff4d6d;
+  color: red;
 }
 
 .like-count {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #343a40;
+  font-size: 1.2rem;
 }
