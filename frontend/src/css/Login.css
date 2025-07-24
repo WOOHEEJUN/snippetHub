@@ -4,17 +4,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #E0BBE4 0%, #A0E7E5 100%); /* 연보라-하늘 그라데이션 */
+  background: #333333; /* 어두운 회색 배경 */
 }
 
 .login-card {
-  background: white;
+  background: #222222;
   border-radius: 0.75rem;
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.075);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
   padding: 2.5rem;
   width: 100%;
   max-width: 420px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #444444;
 }
 
 .login-header {
@@ -25,32 +25,44 @@
 .login-header h1 {
   font-weight: 700;
   font-size: 2.25rem;
+  color: #e0e0e0;
 }
 
 .login-header p {
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .form-label {
   font-weight: 600;
+  color: #e0e0e0;
+}
+
+.form-control {
+  background-color: #333333;
+  border: 1px solid #555555;
+  color: #e0e0e0;
 }
 
 .form-control:focus {
-  border-color: #957DAD; /* 연보라색 계열 */
-  box-shadow: 0 0 0 0.25rem rgba(149, 125, 173, 0.25);
+  border-color: #888888; /* 회색 계열 */
+  box-shadow: 0 0 0 0.25rem rgba(136, 136, 136, 0.25);
+  background-color: #333333;
+  color: #e0e0e0;
 }
 
 .btn-primary {
   padding: 0.75rem;
   font-size: 1.1rem;
   font-weight: 600;
-  background-color: #6A5ACD; /* 주요 색상 */
-  border-color: #6A5ACD;
+  background-color: #e0e0e0; /* 밝은 회색 */
+  border-color: #e0e0e0;
+  color: #000000;
 }
 
 .btn-primary:hover {
-  background-color: #483D8B; /* 더 진한 주요 색상 */
-  border-color: #483D8B;
+  background-color: #ffffff; /* 더 밝은 회색 */
+  border-color: #ffffff;
+  color: #000000;
 }
 
 .login-footer {
@@ -59,7 +71,7 @@
 }
 
 .login-footer a {
-  color: #6A5ACD; /* 주요 색상 */
+  color: #e0e0e0; /* 밝은 회색 */
   text-decoration: none;
 }
 

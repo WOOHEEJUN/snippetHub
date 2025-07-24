@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../css/MyContentList.css'; // 공통 CSS 임포트
+import '../css/MyContentList.css';
 
 function MySnippets() {
   const [snippets, setSnippets] = useState([]);
@@ -29,17 +29,23 @@ function MySnippets() {
         return res.json();
       })
       .then((data) => {
-        setSnippets(data || []);
-        setLoading(false);
+        console.log('📦 받은 스니펫 응답:', data);
+        const result = data.data;
+        if (Array.isArray(result.content)) {
+          setSnippets(result.content);
+        } else {
+          console.error('❌ content가 배열이 아님:', result);
+          setSnippets([]);
+        }
       })
       .catch((err) => {
         alert(err.message || '스니펫을 불러오는 중 오류가 발생했습니다.');
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [navigate, token]);
 
   const handleSnippetClick = (snippetId) => {
-    navigate(`/snippets/${snippetId}`); // ✅ 수정된 경로
+    navigate(`/snippets/${snippetId}`);
   };
 
   if (loading) return <p className="loading-message">로딩 중...</p>;

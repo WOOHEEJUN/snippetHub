@@ -5,7 +5,7 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: #1a1a1a;
   border-radius: 12px;
 }
 
@@ -13,19 +13,19 @@
 .mypage-container h2 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #333;
+  color: #e0e0e0;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid #444;
   text-align: center;
 }
 
 /* 카드 기본 스타일 */
 .mypage-card {
-  background-color: #ffffff;
+  background-color: #222222;
   border-radius: 10px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem;
 }
 
@@ -33,20 +33,20 @@
 .user-info-card .card-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #444;
+  color: #e0e0e0;
   margin-bottom: 1.5rem;
 }
 
 .user-info-details p {
   font-size: 1rem;
-  color: #555;
+  color: #b0b0b0;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
 }
 
 .user-info-details p strong {
-  color: #333;
+  color: #e0e0e0;
   margin-right: 0.8rem;
   min-width: 80px; /* 레이블 너비 고정 */
 }
@@ -55,22 +55,36 @@
 .activity-card .card-title {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #444;
+  color: #e0e0e0;
   margin-bottom: 1.5rem;
 }
 
-.activity-summary {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 1.5rem;
+.activity-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
   text-align: center;
-  background-color: #f7f7f7;
+}
+
+.stat-item {
+  background-color: #333333;
   padding: 1rem;
   border-radius: 8px;
+  border: 1px solid #555555;
 }
 
-.activity-summary strong {
-  color: #6A5ACD; /* 주요 색상 */
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #b0b0b0;
+  margin-bottom: 0.3rem;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #99ccff; /* 밝은 파란색 */
 }
 
 /* 버튼 그룹 */
@@ -96,15 +110,15 @@
 
 /* 주요 액션 버튼 */
 .btn-primary-custom {
-  background-color: #6A5ACD;
-  color: #fff;
-  border: 1px solid #6A5ACD;
+  background-color: #e0e0e0;
+  color: #000000;
+  border: 1px solid #e0e0e0;
 }
 
 .btn-primary-custom:hover {
-  background-color: #5a4cad;
+  background-color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(106, 90, 205, 0.2);
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
 }
 
 /* 보조 액션 버튼 (프로필 수정, 로그아웃) */
@@ -117,13 +131,13 @@
 
 .btn-secondary-custom {
   background-color: transparent;
-  color: #6c757d;
-  border: 1px solid #ced4da;
+  color: #b0b0b0;
+  border: 1px solid #555555;
 }
 
 .btn-secondary-custom:hover {
-  background-color: #f1f3f5;
-  border-color: #adb5bd;
+  background-color: #333333;
+  border-color: #666666;
 }
 
 /* 로딩 및 오류 메시지 */
@@ -132,5 +146,5 @@
   text-align: center;
   padding: 2rem;
   font-size: 1.1rem;
-  color: #777;
+  color: #b0b0b0;
 }

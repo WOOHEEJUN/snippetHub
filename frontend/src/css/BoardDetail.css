@@ -1,95 +1,183 @@
-.snippet-detail-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 3rem 1rem;
-  font-family: 'Noto Sans KR', sans-serif;
-}
+/* frontend/src/css/BoardDetail.css */
 
-.snippet-meta {
+/* Page Layout */
+.board-detail-page {
   display: flex;
+  gap: 2.5rem;
+  padding: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #1a1a1a; /* 검은색 배경 */
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.post-main-content {
+  flex: 3;
+  min-width: 0;
+  background-color: #222222;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+}
+
+.post-sidebar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header */
+.post-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.post-header h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #e0e0e0;
+  margin-bottom: 0.75rem;
+  word-break: break-word;
+}
+
+.post-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  color: #b0b0b0;
   flex-wrap: wrap;
-  gap: 10px;
-  font-size: 0.9rem;
-  color: #6c757d;
-  margin-bottom: 1rem;
 }
 
-.snippet-meta span {
-  margin-right: 10px;
+.post-meta-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.code-block {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.5rem;
+.post-meta-info svg {
+  color: #999;
+}
+
+/* Top Action Buttons */
+.post-actions-top {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.post-actions-top .action-button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.post-actions-top .like-button {
+  background-color: #444444;
+  color: #e53935;
+  border: 1px solid #666666;
+}
+
+.post-actions-top .like-button.liked {
+  background-color: #e53935;
+  color: #fff;
+  border-color: #e53935;
+}
+
+.post-actions-top .like-button:hover {
+  background-color: #e53935;
+  color: #fff;
+}
+
+.post-actions-top .like-button.liked:hover {
+  background-color: #c62828;
+}
+
+.post-actions-top .comment-button {
+  background-color: #444444;
+  color: #99ccff;
+  border: 1px solid #666666;
+}
+
+.post-actions-top .comment-button:hover {
+  background-color: #99ccff;
+  color: #000000;
+}
+
+/* Post Content Body */
+.post-content-body {
+  background-color: #333333;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #555555;
+  line-height: 1.8;
+  color: #e0e0e0;
   white-space: pre-wrap;
   word-break: break-word;
-  margin-bottom: 1rem;
-  border: 1px solid #dee2e6;
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
 }
 
-.snippet-tags {
-  margin: 1rem 0;
+.post-image-container {
+  margin-top: 2rem;
+  text-align: center;
 }
 
-.tag {
-  display: inline-block;
-  background-color: #e9ecef;
-  border-radius: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  margin-right: 0.5rem;
-  font-size: 0.85rem;
+.post-image-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.snippet-actions {
-  margin-top: 1.5rem;
+/* Sidebar Cards */
+.sidebar-card {
+  background-color: #222222;
+  border: 1px solid #444444;
+  border-radius: 12px;
+  padding: 1.8rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.snippet-actions button {
-  margin-right: 0.5rem;
+.sidebar-card h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #e0e0e0;
 }
 
-.comment-section {
-  margin-top: 3rem;
+.author-card .author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
-.comment-form textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-  font-size: 1rem;
+.author-card img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #99ccff;
 }
 
-.comment-form .btn {
-  display: block;
-  margin-top: 0.5rem;
-  padding: 0.4rem 1.25rem;
-  font-size: 0.9rem;
+.author-card span {
+  font-weight: 600;
+  color: #e0e0e0;
+  font-size: 1.1rem;
 }
 
-.comment-list .comment {
-  background-color: #f1f9ff;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.comment-author {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.comment-date {
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-bottom: 0.5rem;
-}
-
-.comment-actions {
-  margin-top: 0.5rem;
-}
-
-.comment-actions button {
-  margin-right: 0.5rem;
-}
+/* ... rest unchanged ... */

@@ -1,3 +1,4 @@
+// src/MyPage/MyPosts.js
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../css/MyContentList.css'; // 공통 CSS 임포트
@@ -16,7 +17,7 @@ function MyPosts() {
       return;
     }
 
-    fetch(`/api/users/posts?page=0&size=10&sort=createdAt,desc`, {
+    fetch('/api/users/posts?page=0&size=10&sort=createdAt,desc', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -26,7 +27,13 @@ function MyPosts() {
         return res.json();
       })
       .then((data) => {
-        setPosts(data || []);
+        const content = data?.data?.content;
+        if (Array.isArray(content)) {
+          setPosts(content);
+        } else {
+          console.error('예상치 못한 데이터 구조:', data);
+          setPosts([]);
+        }
       })
       .catch((err) => {
         alert(err.message || '게시글 불러오기 실패');
@@ -42,7 +49,7 @@ function MyPosts() {
 
   return (
     <div className="my-content-container">
-      <h2> 내가 쓴 게시물</h2>
+      <h2>내가 쓴 게시물</h2>
       {posts.length === 0 ? (
         <p className="empty-message">작성한 게시물이 없습니다.</p>
       ) : (

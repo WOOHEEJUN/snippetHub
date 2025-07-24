@@ -5,7 +5,7 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: #1a1a1a;
   border-radius: 12px;
 }
 
@@ -13,26 +13,26 @@
 .profile-edit-container h2 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #333;
+  color: #e0e0e0;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid #444;
   text-align: center;
 }
 
 /* 폼 섹션 카드 */
 .edit-form-card {
-  background-color: #ffffff;
+  background-color: #222222;
   border-radius: 10px;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: 2rem;
 }
 
 .edit-form-card h4 {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #444;
+  color: #e0e0e0;
   margin-bottom: 1.5rem;
 }
 
@@ -44,7 +44,7 @@
 .form-group label {
   display: block;
   font-weight: 500;
-  color: #555;
+  color: #b0b0b0;
   margin-bottom: 0.5rem;
 }
 
@@ -52,15 +52,17 @@
   width: 100%;
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  border: 1px solid #ced4da;
+  border: 1px solid #555555;
   border-radius: 8px;
   transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #333333;
+  color: #e0e0e0;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #6A5ACD;
-  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.15);
+  border-color: #888888;
+  box-shadow: 0 0 0 3px rgba(136, 136, 136, 0.2);
 }
 
 /* 버튼 스타일 */
@@ -72,15 +74,15 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  background-color: #6A5ACD;
-  color: #fff;
-  border: 1px solid #6A5ACD;
+  background-color: #e0e0e0;
+  color: #000000;
+  border: 1px solid #e0e0e0;
 }
 
 .btn-submit:hover {
-  background-color: #5a4cad;
+  background-color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(106, 90, 205, 0.2);
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
 }
 
 /* 회원 탈퇴 버튼 */
@@ -111,8 +113,8 @@
 
 .btn-back {
   background-color: transparent;
-  color: #6c757d;
-  border: 1px solid #ced4da;
+  color: #b0b0b0;
+  border: 1px solid #555555;
   padding: 0.7rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
@@ -121,6 +123,6 @@
 }
 
 .btn-back:hover {
-  background-color: #f1f3f5;
-  border-color: #adb5bd;
+  background-color: #333333;
+  border-color: #666666;
 }

@@ -1,13 +1,11 @@
-/* Header.css */
-
+/* 공통 헤더 */
 .header {
-  background-color: #ffffff !important; /* ✅ 흰색으로 강제 적용 */
-  border-bottom: 1px solid #e9ecef;
+  background-color: #000000 !important;
+  border-bottom: 1px solid #222222;
   padding: 0.75rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* flexbox layout */
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -17,43 +15,47 @@
   align-items: center;
 }
 
-/* 로고 스타일 */
+/* 로고 */
 .logo {
   font-family: 'Poppins', sans-serif;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #6A5ACD;
+  color: #f0f0f0;
   text-decoration: none;
   display: flex;
   align-items: center;
 }
 
-/* 메뉴 */
+/* 내비게이션 */
 .nav-list {
   display: flex;
-  gap: 2rem;
-  list-style: none !important; /* ✅ 혹시 남아있는 점 제거 */
+  gap: 6rem;
+  list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* 메뉴 링크 */
+.nav-list li {
+  list-style: none;
+}
+
 .nav-link {
   font-size: 1.05rem;
   font-weight: 500;
-  color: #495057;
+  color: #cccccc;
   text-decoration: none;
   transition: color 0.2s ease-in-out, border-bottom 0.2s ease-in-out;
   padding-bottom: 0.25rem;
+  display: inline-block;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: #6A5ACD;
-  border-bottom: 2px solid #6A5ACD;
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
 }
 
-/* 로그인 / 회원가입 */
+/* 로그인/회원가입 버튼 */
 .auth-buttons {
   display: flex;
   gap: 1rem;
@@ -70,27 +72,23 @@
 }
 
 .btn-outline-primary {
-  color: #6A5ACD;
-  border: 1px solid #6A5ACD;
-  background-color: transparent;
+  background-color: #6c757d;
+  color: #ffffff;
+  border: 1px solid #6c757d;
 }
 
 .btn-outline-primary:hover {
-  background-color: #6A5ACD;
-  color: #fff;
+  background-color: #5a6268;
+  color: #ffffff;
 }
 
 .btn-primary {
-  background-color: #6A5ACD;
-  color: #fff;
-  border: 1px solid #6A5ACD;
+  background-color: #6c757d;
+  color: #ffffff;
+  border: 1px solid #6c757d;
 }
 
 .btn-primary:hover {
-  background-color: #483D8B;
-  border-color: #483D8B;
-}
-.auth-buttons {
-  display: flex;
-  gap: 1rem; /* 버튼 간 간격 확보 */
+  background-color: #5a6268;
+  border-color: #5a6268;
 }
