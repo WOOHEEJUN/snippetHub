@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../css/MyContentList.css';
+import '../css/MyContentList.css'; // 공통 CSS 임포트
 
 function MyPosts() {
   const location = useLocation();
   const navigate = useNavigate();
   const token = location.state?.accessToken || localStorage.getItem('accessToken');
-
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,13 +26,10 @@ function MyPosts() {
         return res.json();
       })
       .then((data) => {
-        console.log('📦 게시글 응답:', data);
-        setPosts(data.data.content || []); // ✅ 여기를 고침
+        setPosts(data || []);
       })
       .catch((err) => {
-        console.error('❌ 게시글 불러오기 오류:', err);
         alert(err.message || '게시글 불러오기 실패');
-        setPosts([]);
       })
       .finally(() => setLoading(false));
   }, [token]);
@@ -46,7 +42,7 @@ function MyPosts() {
 
   return (
     <div className="my-content-container">
-      <h2>내가 쓴 게시물</h2>
+      <h2> 내가 쓴 게시물</h2>
       {posts.length === 0 ? (
         <p className="empty-message">작성한 게시물이 없습니다.</p>
       ) : (

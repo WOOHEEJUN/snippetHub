@@ -14,54 +14,10 @@
   color: #ccc;
 }
 
-.like-button i {
-  font-size: 1.5rem; /* 아이콘 크기 */
-  color: #6c757d; /* 기본 색상 */
-  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out; /* 전환 효과 부드럽게 */
-}
-
 .like-button.liked {
   color: red;
 }
 
-.like-button.liked i {
-  color: #DC3545; /* 좋아요 눌렀을 때 빨간색 */
-  transform: scale(1.2); /* 좋아요 눌렀을 때 아이콘 확대 */
-}
-
 .like-count {
   font-size: 1.2rem;
-}
-
-.post-detail-container {
-  padding: 3rem 0;
-  position: relative; /* 좋아요 섹션의 기준점 */
-}
-
-.comment-section {
-  margin-top: 3rem;
-}
-
-.comment-section h4 {
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-}
-
-.comment-form textarea {
-  resize: none;
-}
-
-.comment {
-  padding: 1rem;
-  background-color: #F0F8FF; /* 연한 하늘색 계열 */
-  border-radius: 0.5rem;
-}
-
-.comment-author {
-  font-weight: 600;
-}
-
-.comment-date {
-  font-size: 0.85rem;
-  color: #6c757d;
 }

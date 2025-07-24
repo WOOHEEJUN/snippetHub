@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -14,51 +14,48 @@ const SnippetDetail = () => {
   const [snippet, setSnippet] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editingCommentContent, setEditingCommentContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
-  // 🔄 스니펫 정보만 불러오는 함수
   const fetchSnippetData = useCallback(async () => {
     try {
-      const snippetRes = await fetch(`/api/snippets/${snippetId}`);
+      const [snippetRes, commentsRes] = await Promise.all([
+        fetch(`/api/snippets/${snippetId}`),
+        fetch(`/api/snippets/${snippetId}/comments`)
+      ]);
+
       if (!snippetRes.ok) throw new Error('스니펫 정보를 불러올 수 없습니다.');
-      const snippetJson = await snippetRes.json();
-      setSnippet(snippetJson.data);
-      setLikeCount(Number(snippetJson.data.likeCount) || 0);
-      setIsLiked(false);
+      const snippetData = await snippetRes.json();
+      setSnippet(snippetData);
+      setLikeCount(snippetData.likeCount);
+
+      // isLiked 상태는 백엔드에서 직접 제공하지 않으므로, 초기에는 false로 설정하거나
+      // 사용자별 좋아요 여부를 가져오는 별도의 API가 필요합니다.
+      // 현재는 snippetData에 isLiked 정보가 없으므로, 좋아요 버튼 클릭 시 토글 로직만 구현합니다.
+      setIsLiked(false); // 초기 상태는 false로 설정
+
+      if (commentsRes.ok) {
+        const commentsData = await commentsRes.json();
+        setComments(commentsData.content || []);
+      }
+
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [snippetId]);
-
-  // 🔄 댓글만 불러오는 함수
-  const fetchComments = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/snippets/${snippetId}/comments`);
-      const json = await res.json();
-      setComments(json.data || []);
-    } catch (err) {
-      console.error('댓글 불러오기 실패:', err);
-    }
-  }, [snippetId]);
+  }, [snippetId, getAuthHeaders]);
 
   useEffect(() => {
     fetchSnippetData();
-    fetchComments();
-  }, [fetchSnippetData, fetchComments]);
+  }, [fetchSnippetData]);
 
   const handleCopyToClipboard = () => {
-    if (snippet?.code) {
-      copy(snippet.code).then(() => {
-        alert('코드가 클립보드에 복사되었습니다!');
-      });
-    }
+    copy(snippet.code).then(() => {
+      alert('코드가 클립보드에 복사되었습니다!');
+    });
   };
 
   const handleDelete = async () => {
@@ -84,9 +81,12 @@ const SnippetDetail = () => {
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error('요청 실패');
+      
+      // 백엔드에서 토글 결과를 반환한다고 가정
       const result = await response.json();
-      setIsLiked(result.data);
-      setLikeCount((prev) => result.data ? prev + 1 : prev - 1);
+      setIsLiked(result.data); // 백엔드에서 isLiked 값을 반환한다고 가정
+      setLikeCount(prev => result.data ? prev + 1 : prev - 1); // 백엔드 결과에 따라 좋아요 수 업데이트
+
     } catch (err) {
       console.error(err);
     }
@@ -106,84 +106,42 @@ const SnippetDetail = () => {
       });
       if (!response.ok) throw new Error('댓글 작성 실패');
       setNewComment('');
-      fetchComments();
+      fetchSnippetData();
     } catch (err) {
       alert(err.message);
     }
   };
 
-  const handleEditComment = (comment) => {
-    setEditingCommentId(comment.commentId);
-    setEditingCommentContent(comment.content);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditingCommentContent('');
-  };
-
-  const handleSaveComment = async (commentId) => {
-    if (!editingCommentContent.trim()) return alert('댓글 내용을 입력해주세요.');
-    try {
-      const res = await fetch(`/api/comments/${commentId}`, {
-        method: 'PUT',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: editingCommentContent }),
-      });
-      if (!res.ok) throw new Error('댓글 수정 실패');
-      setEditingCommentId(null);
-      setEditingCommentContent('');
-      fetchComments();
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm('정말 이 댓글을 삭제하시겠습니까?')) return;
-    try {
-      const res = await fetch(`/api/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('댓글 삭제 실패');
-      fetchComments();
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  if (loading) return <div className="text-center py-5">로딩 중...</div>;
+  if (loading) return <div className="text-center py-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!snippet) return <div className="alert alert-warning">스니펫을 찾을 수 없습니다.</div>;
 
   const isAuthor = Number(user?.userId) === Number(snippet.author?.userId);
-
+/*console.log(user)*/
   return (
     <div className="container snippet-detail-container">
-      <h2 className="post-title mb-3">{snippet.title || '제목 없음'}</h2>
-
-      <div className="post-meta d-flex justify-content-between align-items-center mb-4 text-muted">
-        <span className="post-author">작성자: {snippet.author?.nickname || '알 수 없음'}</span>
-        <span className="post-date">
-          작성일: {snippet.createdAt ? new Date(snippet.createdAt).toLocaleString() : '작성일 정보 없음'}
-        </span>
-        {isAuthor && (
-          <div className="snippet-actions">
-            <button onClick={() => navigate(`/snippets/edit/${snippetId}`)} className="btn btn-outline-secondary btn-sm me-2">수정</button>
-            <button onClick={handleDelete} className="btn btn-outline-danger btn-sm">삭제</button>
+      <div className="snippet-header">
+        <h1>{snippet.title}</h1>
+        <div className="d-flex justify-content-between align-items-center snippet-meta">
+          <div>
+            <span className="author">by {snippet.author?.nickname}</span>
+            <span className="mx-2">|</span>
+            <span>{new Date(snippet.createdAt).toLocaleDateString()}</span>
           </div>
-        )}
+          {isAuthor && (
+            <div className="snippet-actions">
+              <button onClick={() => navigate(`/snippets/edit/${snippetId}`)} className="btn btn-outline-secondary btn-sm me-2">수정</button>
+              <button onClick={handleDelete} className="btn btn-outline-danger btn-sm">삭제</button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="row">
         <div className="col-lg-8">
           <h5 className="mb-3">코드</h5>
           <div className="code-container">
-            <SyntaxHighlighter language={snippet.language?.toLowerCase() || 'text'} style={solarizedlight} showLineNumbers>
+            <SyntaxHighlighter language={snippet.language?.toLowerCase()} style={solarizedlight} showLineNumbers>
               {snippet.code || ''}
             </SyntaxHighlighter>
             <button onClick={handleCopyToClipboard} className="btn btn-sm btn-light copy-button">
@@ -205,19 +163,18 @@ const SnippetDetail = () => {
             <ul className="list-group list-group-flush">
               <li className="list-group-item d-flex justify-content-between align-items-center">
                 언어
-                <span className="badge bg-primary rounded-pill">{snippet.language || '알 수 없음'}</span>
+                <span className="badge bg-primary rounded-pill">{snippet.language}</span>
+              </li>
+              <li className="list-group-item d-flex justify-content-between align-items-center">
+                좋아요
+                <span className="badge rounded-pill d-flex align-items-center">
+                  <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
+                    <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+                  </button>
+                  <span className="fw-bold">{likeCount}</span>
+                </span>
               </li>
             </ul>
-          </div>
-
-          <div className="d-flex justify-content-center align-items-center gap-3 my-4">
-            <button className="btn btn-secondary px-4" onClick={() => navigate(-1)}>← 목록으로 돌아가기</button>
-            <div className="like-section">
-              <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
-                <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
-              </button>
-              <span className="like-count">{likeCount}</span>
-            </div>
           </div>
 
           <div className="comment-section mt-4">
@@ -230,7 +187,7 @@ const SnippetDetail = () => {
                     rows="3"
                     placeholder="댓글을 입력하세요..."
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
+                    onChange={e => setNewComment(e.target.value)}
                   ></textarea>
                   <button className="btn btn-primary" type="submit">등록</button>
                 </div>
@@ -239,32 +196,11 @@ const SnippetDetail = () => {
             <div className="comment-list">
               {comments.map(comment => (
                 <div key={comment.commentId} className="comment mb-3">
-                  {editingCommentId === comment.commentId ? (
-                    <div className="input-group">
-                      <textarea
-                        className="form-control"
-                        rows="2"
-                        value={editingCommentContent}
-                        onChange={(e) => setEditingCommentContent(e.target.value)}
-                      ></textarea>
-                      <button className="btn btn-primary" onClick={() => handleSaveComment(comment.commentId)}>저장</button>
-                      <button className="btn btn-secondary" onClick={handleCancelEdit}>취소</button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="d-flex justify-content-between">
-                        <span className="comment-author">{comment.author?.nickname || '익명'}</span>
-                        <span className="comment-date">{comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ''}</span>
-                      </div>
-                      <p className="mt-2 mb-0">{comment.content}</p>
-                      {user?.nickname === comment.author?.nickname && (
-                        <div className="comment-actions d-flex justify-content-end gap-2 mt-2">
-                          <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEditComment(comment)}>수정</button>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteComment(comment.commentId)}>삭제</button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                  <div className="d-flex justify-content-between">
+                    <span className="comment-author">{comment.author?.nickname}</span>
+                    <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
+                  </div>
+                  <p className="mt-2 mb-0">{comment.content}</p>
                 </div>
               ))}
             </div>
