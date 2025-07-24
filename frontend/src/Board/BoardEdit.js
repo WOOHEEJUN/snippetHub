@@ -52,31 +52,21 @@ function BoardEdit() {
       let finalImageUrl = post.imageUrl; // 기존 이미지 URL 유지
 
       if (imageFile) {
-        // 1. S3 Pre-signed URL 요청
-      //   const presignedUrlRes = await fetch('/api/v1/s3/presigned-url', {
-      //     method: 'POST',
-      //     headers: getAuthHeaders({'Content-Type': 'application/json'}),
-      //     body: JSON.stringify({ fileName: imageFile.name, fileType: imageFile.type }),
-      //   });
+        const formData = new FormData();
+        formData.append('file', imageFile);
 
-      //   if (!presignedUrlRes.ok) {
-      //     throw new Error('Pre-signed URL 요청 실패');
-      //   }
-      //   const { url } = await presignedUrlRes.json();
+        const uploadRes = await fetch('/api/files/upload', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: formData,
+        });
 
-      //   // 2. S3에 이미지 업로드
-      //   const uploadRes = await fetch(url, {
-      //     method: 'PUT',
-      //     headers: {
-      //       'Content-Type': imageFile.type,
-      //     },
-      //     body: imageFile,
-      //   });
+        if (!uploadRes.ok) {
+          throw new Error('이미지 업로드 실패');
+        }
 
-      //   if (!uploadRes.ok) {
-      //     throw new Error('이미지 S3 업로드 실패');
-      //   }
-      //   finalImageUrl = url.split('?')[0]; // 쿼리 파라미터 제거한 실제 이미지 URL
+        const uploadData = await uploadRes.json();
+        finalImageUrl = uploadData.url; // 서버에서 반환된 이미지 URL
       }
 
       // 3. 게시글 데이터와 함께 이미지 URL 전송

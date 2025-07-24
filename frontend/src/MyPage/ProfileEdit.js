@@ -6,7 +6,7 @@ import '../css/ProfileEdit.css';
 
 function ProfileEdit() {
   const navigate = useNavigate();
-  const { user, getAuthHeaders } = useAuth(); // user와 getAuthHeaders 훅 사용
+  const { user, getAuthHeaders, refetchUser } = useAuth(); // user와 getAuthHeaders 훅 사용
 
   const [nickname, setNickname] = useState('');
   const [bio, setBio] = useState(''); // bio 상태 추가
@@ -54,7 +54,7 @@ function ProfileEdit() {
       const res = await fetch('/api/users/profile', {
         method: 'PUT',
         headers: {
-          Authorization: getAuthHeaders().Authorization, // Content-Type은 FormData 사용 시 자동 설정
+          Authorization: getAuthHeaders().Authorization,
         },
         body: formData,
       });
@@ -65,7 +65,7 @@ function ProfileEdit() {
       }
       const data = await res.json();
       alert(`프로필이 성공적으로 변경되었습니다.`);
-      // user 정보 업데이트 로직 필요 (AuthContext의 user 상태를 업데이트하거나, 새로고침)
+      refetchUser(); // 사용자 정보 다시 불러오기
       navigate('/mypage');
     } catch (err) {
       alert(err.message);

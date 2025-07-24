@@ -1,4 +1,3 @@
-// src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext();
@@ -10,13 +9,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const fetchUserPromise = useRef(null);
 
-  // ✅ 컴포넌트 마운트 시 localStorage에서 토큰 불러오기
   useEffect(() => {
     const storedAccessToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
+    const storedUser = localStorage.getItem('user');
+
     if (storedAccessToken && storedRefreshToken) {
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
+      if (storedUser) setUser(JSON.parse(storedUser));
       fetchUser(storedAccessToken);
     } else {
       setLoading(false);
@@ -24,17 +25,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const fetchUser = async (accessToken) => {
-    // 이미 진행 중인 요청이 있으면 기존 요청을 기다림
     if (fetchUserPromise.current) {
       try {
         await fetchUserPromise.current;
         return;
-      } catch (error) {
-        // 기존 요청이 실패했으면 새로운 요청 진행
-      }
+      } catch {}
     }
 
-    // 새로운 요청 생성
     fetchUserPromise.current = (async () => {
       try {
         const res = await fetch('/api/users/profile', {
@@ -46,26 +43,19 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (res.status === 401) {
-          try {
-            const newAccessToken = await reissueToken();
-            await fetchUser(newAccessToken);
-            return;
-          } catch (reissueError) {
-            return;
-          }
+          const newAccessToken = await reissueToken();
+          await fetchUser(newAccessToken);
+          return;
         }
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
         const userData = await res.json();
-        setUser(userData.data); // 응답 구조에 맞게 userData.data로 저장
+        setUser(userData.data);
+        localStorage.setItem('user', JSON.stringify(userData.data));
       } catch (err) {
         console.error('사용자 정보 오류:', err);
-        if (err.message.includes('401') || err.message.includes('403')) {
-          logout();
-        }
+        logout();
       } finally {
         setLoading(false);
       }
@@ -81,14 +71,12 @@ export const AuthProvider = ({ children }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${refreshToken}`,
+          Authorization: `Bearer ${refreshToken}`,
         },
         credentials: 'include',
       });
 
-      if (!res.ok) {
-        throw new Error('Failed to reissue token');
-      }
+      if (!res.ok) throw new Error('Failed to reissue token');
 
       const data = await res.json();
       const newAccessToken = data.data.accessToken;
@@ -98,38 +86,37 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('refreshToken', newRefreshToken);
       setAccessToken(newAccessToken);
       setRefreshToken(newRefreshToken);
+
       return newAccessToken;
     } catch (error) {
       console.error('토큰 재발급 실패:', error);
-      logout(); // 재발급 실패 시 로그아웃
+      logout();
       throw error;
     }
   };
 
   const login = async (tokens) => {
+    if (!tokens || !tokens.accessToken || !tokens.refreshToken || !tokens.user) {
+      console.error('❌ login()에 전달된 토큰/유저 정보가 부족합니다:', tokens);
+      return;
+    }
+
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);
+    localStorage.setItem('user', JSON.stringify(tokens.user));
+
     setAccessToken(tokens.accessToken);
     setRefreshToken(tokens.refreshToken);
+    setUser(tokens.user);
+
     setLoading(true);
     await fetchUser(tokens.accessToken);
   };
 
   const logout = () => {
-    // 로그아웃 시 서버에 토큰 무효화 요청 (필요하다면)
-    
-    
-    if (accessToken) {
-      fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        credentials: 'include',
-      }).catch(err => console.error('로그아웃 요청 실패:', err));
-    }
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
@@ -141,8 +128,24 @@ export const AuthProvider = ({ children }) => {
     return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
   };
 
+  const refetchUser = async () => {
+    if (accessToken) {
+      setLoading(true);
+      await fetchUser(accessToken);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ accessToken, refreshToken, user, login, logout, getAuthHeaders, loading }}>
+    <AuthContext.Provider value={{
+      accessToken,
+      refreshToken,
+      user,
+      login,
+      logout,
+      getAuthHeaders,
+      loading,
+      refetchUser
+    }}>
       {children}
     </AuthContext.Provider>
   );
