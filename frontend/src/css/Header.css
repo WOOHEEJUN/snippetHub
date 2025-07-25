@@ -34,14 +34,14 @@
 /* 내비게이션 */
 .nav-list {
   display: flex;
-  gap: 2.5rem;
+  gap: 2.5rem; /* 내비게이션 항목 간 간격 조정 */
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-link {
-  font-size: 1.05rem;
+  font-size: 1.1rem; /* 폰트 크기 약간 증가 */
   font-weight: 500;
   color: #808080; /* 더 어두운 내비게이션 링크 색상 */
   text-decoration: none;
@@ -75,7 +75,7 @@
 /* 인증 버튼 */
 .auth-buttons {
   display: flex;
-  gap: 2rem;
+  gap: 2.5rem;
   flex-shrink: 0;
 }
 

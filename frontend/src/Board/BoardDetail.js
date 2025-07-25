@@ -8,7 +8,7 @@ import '../css/BoardDetail.css';
 function BoardDetail() {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { user, getAuthHeaders } = useAuth();
+  const { user } = useAuth(); // ✅ getAuthHeaders 제거
   const [post, setPost] = useState(null);
   const [error, setError] = useState('');
   const [comments, setComments] = useState([]);
@@ -16,11 +16,17 @@ function BoardDetail() {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentContent, setEditingCommentContent] = useState('');
 
+  // ✅ 직접 정의한 getAuthHeaders 사용
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('accessToken');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const fetchPostData = useCallback(async () => {
     try {
       const [postRes, commentsRes] = await Promise.all([
-        fetch(`/api/posts/${postId}`, { headers: getAuthHeaders() }),
-        fetch(`/api/posts/${postId}/comments`, { headers: getAuthHeaders() })
+        fetch(`/api/posts/${postId}`, { headers: getAuthHeaders(), credentials: 'include' }),
+        fetch(`/api/posts/${postId}/comments`, { headers: getAuthHeaders(), credentials: 'include' })
       ]);
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
@@ -44,33 +50,42 @@ function BoardDetail() {
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 
-  const handleDelete = async () => {
-    if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
-    if (!user) {
-      alert('로그인이 필요합니다.');
-      navigate('/login');
-      return;
+ const handleDelete = async () => {
+  if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
+  if (!user) {
+    alert('로그인이 필요합니다.');
+    navigate('/login');
+    return;
+  }
+
+  const headers = getAuthHeaders();
+  const url = `/api/posts/${postId}`;
+  console.log('📌 postId:', postId);
+  console.log('🔐 Authorization 헤더:', headers);
+  console.log('📡 요청 URL:', url);
+
+  try {
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers,
+      credentials: 'include',
+    });
+
+    const resText = await res.text();
+    console.log('🧾 응답 상태:', res.status);
+    console.log('🧾 응답 본문:', resText);
+
+    if (!res.ok) {
+      throw new Error(`삭제 실패: ${res.status} - ${resText}`);
     }
 
-    try {
-      const res = await fetch(`/api/posts/${postId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('삭제 실패 응답 본문:', errorText);
-        throw new Error(`삭제 실패: ${res.status} - ${errorText}`);
-      }
-
-      alert('삭제되었습니다.');
-      navigate('/board');
-    } catch (err) {
-      console.error('삭제 오류:', err);
-      alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
-    }
-  };
+    alert('삭제되었습니다.');
+    navigate('/board');
+  } catch (err) {
+    console.error('❌ 삭제 오류:', err);
+    alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+  }
+};
 
   const handleLike = async () => {
     if (!user) {
@@ -82,13 +97,14 @@ function BoardDetail() {
       const res = await fetch(`/api/posts/${postId}/like`, {
         method: 'POST',
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
       }
-      fetchPostData(); // 좋아요 상태 변경 후 데이터 다시 불러오기
+      fetchPostData();
     } catch (err) {
       alert(err.message);
       console.error('좋아요 처리 실패:', err);
@@ -111,6 +127,7 @@ function BoardDetail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ content: newComment }),
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 작성 실패');
       setNewComment('');
@@ -143,6 +160,7 @@ function BoardDetail() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ content: editingCommentContent }),
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 수정 실패');
       setEditingCommentId(null);
@@ -159,6 +177,7 @@ function BoardDetail() {
       const res = await fetch(`/api/comments/${commentId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 삭제 실패');
       fetchPostData();

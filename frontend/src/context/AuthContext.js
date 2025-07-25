@@ -96,21 +96,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (tokens) => {
-    if (!tokens || !tokens.accessToken || !tokens.refreshToken || !tokens.user) {
+    if (!tokens || !tokens.token || !tokens.token.accessToken || !tokens.token.refreshToken || !tokens.user) {
       console.error('❌ login()에 전달된 토큰/유저 정보가 부족합니다:', tokens);
       return;
     }
 
-    localStorage.setItem('accessToken', tokens.accessToken);
-    localStorage.setItem('refreshToken', tokens.refreshToken);
+    localStorage.setItem('accessToken', tokens.token.accessToken);
+    localStorage.setItem('refreshToken', tokens.token.refreshToken);
     localStorage.setItem('user', JSON.stringify(tokens.user));
 
-    setAccessToken(tokens.accessToken);
-    setRefreshToken(tokens.refreshToken);
+    setAccessToken(tokens.token.accessToken);
+    setRefreshToken(tokens.token.refreshToken);
     setUser(tokens.user);
 
     setLoading(true);
-    await fetchUser(tokens.accessToken);
+    await fetchUser(tokens.token.accessToken);
   };
 
   const logout = () => {

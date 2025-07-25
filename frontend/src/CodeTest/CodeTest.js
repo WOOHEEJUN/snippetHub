@@ -95,7 +95,7 @@ ${data.error}`;
   return (
     <div className="code-test-container">
       <div className="code-test-header">
-        <h1>💻코드 테스트</h1>
+        <h1>코드 테스트</h1>
         <select onChange={handleLanguageChange} value={language}>
           {LANGUAGES.map((lang) => (
             <option key={lang.value} value={lang.value}>
@@ -145,7 +145,7 @@ ${data.error}`;
         )}
       </div>
 
-      <button className="run-btn" onClick={handleRun}>🚀 실행</button>
+      <button className="run-btn" onClick={handleRun}> 실행</button>
 
       <div className="preview-pane">
         {language === 'html' || language === 'css' ? (

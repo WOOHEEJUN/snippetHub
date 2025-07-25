@@ -1,20 +1,35 @@
 .code-test-container {
   padding: 2rem;
-  background: #1a1a1a;
+  background: #121212; /* 더 어두운 배경 */
   font-family: 'Segoe UI', sans-serif;
-  color: #e0e0e0;
+  color: #a0a0a0; /* 기본 텍스트 색상도 칙칙하게 */
 }
 
 .code-test-header {
   padding-bottom: 1rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #333; /* 더 어두운 경계선 */
 }
 
 .code-test-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #e0e0e0;
+  color: #a0a0a0; /* 제목 색상도 칙칙하게 */
+}
+
+.code-test-header select {
+  background-color: #1a1a1a; /* 드롭다운 배경색 */
+  color: #c0c0c0; /* 드롭다운 글자색 */
+  border: 1px solid #444; /* 드롭다운 테두리 */
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.code-test-header select:focus {
+  border-color: #666; /* 포커스 시 테두리 색상 */
 }
 
 /* 코드 입력 3개 영역 (HTML, CSS, JS) */
@@ -33,16 +48,16 @@
 .code-editor-block h4 {
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #e0e0e0;
+  color: #a0a0a0; /* 섹션 제목 색상도 칙칙하게 */
 }
 
 .code-editor-block textarea {
-  background-color: #222222;
-  color: #e0e0e0;
+  background-color: #1a1a1a; /* 더 어두운 텍스트 영역 배경 */
+  color: #c0c0c0; /* 텍스트 색상도 칙칙하게 */
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 1rem;
   padding: 12px;
-  border: 1px solid #555;
+  border: 1px solid #444; /* 더 어두운 테두리 */
   border-radius: 6px;
   height: 300px;
   resize: vertical;
@@ -54,8 +69,8 @@
   margin-bottom: 1rem;
   padding: 10px 20px;
   font-size: 1rem;
-  background-color: #6c757d;
-  color: #ffffff;
+  background-color: #007bff; /* 더 밝은 파란색 */
+  color: #ffffff; /* 흰색 텍스트 */
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -63,14 +78,28 @@
 }
 
 .run-btn:hover {
-  background-color: #5a6268;
+  background-color: #0056b3; /* 호버 시 약간 어둡게 */
 }
 
 /* 결과 iframe */
 .preview-pane iframe {
   width: 100%;
   height: 400px;
-  border: 1px solid #555;
+  border: 1px solid #444; /* 더 어두운 테두리 */
   border-radius: 6px;
-  background: #333333;
+  background: #222222; /* 더 어두운 미리보기 배경 */
+}
+
+/* 출력 패널 */
+.output-pane {
+  background-color: #1a1a1a; /* 텍스트 영역 배경과 동일하게 */
+  color: #c0c0c0; /* 텍스트 색상도 칙칙하게 */
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 1rem;
+  padding: 12px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  height: 400px;
+  overflow: auto;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
 }

@@ -5,9 +5,21 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #1c1c1c; /* 더 칙칙한 배경색 */
+  color: #b0b0b0; /* 기본 텍스트 색상도 칙칙하게 */
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+a {
+  color: #909090; /* 링크 색상도 칙칙하게 */
+  text-decoration: none;
+}
+
+a:hover {
+  color: #c0c0c0; /* 호버 시 약간 밝게 */
+  text-decoration: underline;
 }
