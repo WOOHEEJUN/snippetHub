@@ -59,14 +59,14 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="App">
-          <nav className="nav-container">
+ <nav className="nav-container">
   <div className="container">
     <div className="d-flex justify-content-between align-items-center w-100">
-      <div className="d-flex align-items-center gap-4">
+      <div className="d-flex align-items-center" style={{ gap: '30px' }}>
         <Link to="/" className="text-decoration-none">
           <h3 className="mb-0">SNI</h3>
         </Link>
-        <ul className="nav-list d-flex align-items-center">
+        <ul className="nav-list d-flex align-items-center" style={{ gap: '20px', listStyle: 'none', margin: 0 }}>
           <li><Link to="/snippets">스니펫</Link></li>
           <li><Link to="/board">게시판</Link></li>
         </ul>
