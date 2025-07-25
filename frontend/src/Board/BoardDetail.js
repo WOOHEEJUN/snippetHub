@@ -1,7 +1,8 @@
+// src/Board/BoardDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp } from 'react-icons/fa';
+import { FaHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
 import '../css/BoardDetail.css';
 
 function BoardDetail() {
@@ -35,7 +36,7 @@ function BoardDetail() {
       console.error('데이터 불러오기 실패:', err);
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
     }
-  }, [postId, getAuthHeaders]);
+  }, [postId]);
 
   useEffect(() => {
     fetchPostData();
@@ -45,17 +46,29 @@ function BoardDetail() {
 
   const handleDelete = async () => {
     if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
     try {
       const res = await fetch(`/api/posts/${postId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error('삭제 실패');
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('삭제 실패 응답 본문:', errorText);
+        throw new Error(`삭제 실패: ${res.status} - ${errorText}`);
+      }
+
       alert('삭제되었습니다.');
       navigate('/board');
     } catch (err) {
       console.error('삭제 오류:', err);
-      alert('삭제 중 오류가 발생했습니다.');
+      alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
     }
   };
 
@@ -168,18 +181,12 @@ function BoardDetail() {
     <div className="board-detail-page">
       <div className="post-main-content">
         <div className="post-header">
-          
           <h1>{post.title}</h1>
           <div className="post-meta-info">
-            <span className="author-info-inline">
-              <FaUser /> {post.author?.nickname}
-            </span>
-            <span className="date-info-inline">
-              <FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}
-            </span>
-            <span className="view-info-inline">
-              <FaEye /> {post.viewCount}
-            </span>
+            <span className="category-info-inline"><FaTag /> {post.category}</span>
+            <span className="author-info-inline"><FaUser /> {post.author?.nickname}</span>
+            <span className="date-info-inline"><FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}</span>
+            <span className="view-info-inline"><FaEye /> {post.viewCount}</span>
           </div>
         </div>
 
@@ -191,11 +198,11 @@ function BoardDetail() {
             </div>
           )}
         </div>
-         <div className="post-actions-top">
+
+        <div className="post-actions-top">
           <button onClick={handleLike} className={`action-button like-button ${post.likedByCurrentUser ? 'liked' : ''}`}>
-              <FaHeart /> {post.likedByCurrentUser ? '좋아요 취소' : '좋아요'} ({post.likeCount})
+            <FaHeart /> {post.likedByCurrentUser ? '좋아요 취소' : '좋아요'} ({post.likeCount})
           </button>
-          
         </div>
 
         <div className="comment-section">
@@ -262,13 +269,13 @@ function BoardDetail() {
         </div>
 
         <div className="sidebar-card actions-card">
-            {isAuthor && (
+          {isAuthor && (
             <>
-                <button onClick={handleEdit} className="action-button edit-button"><FaEdit /> 수정하기</button>
-                <button onClick={handleDelete} className="action-button delete-button"><FaTrash /> 삭제하기</button>
+              <button onClick={handleEdit} className="action-button edit-button"><FaEdit /> 수정하기</button>
+              <button onClick={handleDelete} className="action-button delete-button"><FaTrash /> 삭제하기</button>
             </>
-            )}
-            <button onClick={() => navigate('/board')} className="action-button back-button">목록으로</button>
+          )}
+          <button onClick={() => navigate('/board')} className="action-button back-button">목록으로</button>
         </div>
       </div>
     </div>

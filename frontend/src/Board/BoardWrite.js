@@ -9,6 +9,7 @@ function BoardWrite() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState('GENERAL'); // 카테고리 상태 추가, 기본값 GENERAL
   const [imageFile, setImageFile] = useState(null);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [error, setError] = useState(null);
@@ -66,7 +67,7 @@ function BoardWrite() {
           title,
           content,
           imageUrl: finalImageUrl, // 이미지 URL 추가
-          category: '자유게시판',        
+          category: category,        
           tags: [],                      
         }),
       });
@@ -132,6 +133,20 @@ function BoardWrite() {
             onChange={(e) => setContent(e.target.value)}
             required
           ></textarea>
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="category" className="form-label">카테고리</label>
+          <select
+            id="category"
+            className="form-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="GENERAL">일반</option>
+            <option value="QNA">QnA</option>
+            <option value="INFO">정보</option>
+          </select>
         </div>
 
         <div className="mb-3">

@@ -10,6 +10,9 @@ function BoardEdit() {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState('');
+  const [tags, setTags] = useState([]);
+  const [isPublic, setIsPublic] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
@@ -35,6 +38,9 @@ function BoardEdit() {
 
       setTitle(postData.title);
       setContent(postData.content);
+      setCategory(postData.category || 'GENERAL'); // 기본값 설정
+      setTags(postData.tags || []);
+      setIsPublic(postData.isPublic);
       setImageUrl(postData.imageUrl || '');
       setPreviewImageUrl(postData.imageUrl || '');
     } catch (err) {
@@ -97,7 +103,7 @@ function BoardEdit() {
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({ title, content, imageUrl: finalImageUrl }),
+        body: JSON.stringify({ title, content, category, tags, isPublic }),
       });
 
       if (!response.ok) {
@@ -148,6 +154,36 @@ function BoardEdit() {
             onChange={(e) => setContent(e.target.value)}
             placeholder="내용을 입력하세요"
           ></textarea>
+        </div>
+
+        <div className="row mb-3">
+          <div className="col-md-6">
+            <label htmlFor="category" className="form-label">카테고리</label>
+            <select
+              id="category"
+              className="form-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="GENERAL">일반</option>
+              <option value="QNA">Q&A</option>
+              <option value="INFO">정보</option>
+            </select>
+          </div>
+          <div className="col-md-6 d-flex align-items-end">
+            <div className="form-check form-switch">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="isPublic"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="isPublic">
+                공개글
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="mb-3">

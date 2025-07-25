@@ -25,29 +25,34 @@
 .login-header h1 {
   font-weight: 700;
   font-size: 2.25rem;
-  color: #e0e0e0;
+  color: #FFFFFF;
 }
 
 .login-header p {
-  color: #b0b0b0;
+  color: #FFFFFF !important;
 }
 
 .form-label {
   font-weight: 600;
-  color: #e0e0e0;
+  color: #FFFFFF;
 }
 
 .form-control {
   background-color: #333333;
   border: 1px solid #555555;
-  color: #e0e0e0;
+  color: #FFFFFF;
+}
+
+.form-control::placeholder {
+  color: #FFFFFF;
+  opacity: 0.7; /* 필요에 따라 투명도 조절 */
 }
 
 .form-control:focus {
   border-color: #888888; /* 회색 계열 */
   box-shadow: 0 0 0 0.25rem rgba(136, 136, 136, 0.25);
   background-color: #333333;
-  color: #e0e0e0;
+  color: #FFFFFF;
 }
 
 .btn-primary {
@@ -71,7 +76,7 @@
 }
 
 .login-footer a {
-  color: #e0e0e0; /* 밝은 회색 */
+  color: #FFFFFF; /* 밝은 회색 */
   text-decoration: none;
 }
 

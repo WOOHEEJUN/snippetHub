@@ -71,6 +71,49 @@
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
 }
 
+.search-card .form-control,
+.search-card .form-select {
+  background-color: #555;
+  color: #fff;
+  border-color: #666;
+}
+
+.search-card .form-control::placeholder {
+  color: #fff;
+  opacity: 0.7;
+}
+
+.search-card .form-control:focus,
+.search-card .form-select:focus {
+  background-color: #555;
+  color: #fff;
+  border-color: #888;
+  box-shadow: none;
+}
+
+.text-muted {
+  color: #6c757d !important; /* Bootstrap's default muted color */
+}
+
+.bg-light .text-muted {
+  color: #212529 !important; /* Black for light backgrounds */
+}
+
+.bg-light h2 {
+  color: #000000 !important; /* 인기 스니펫 제목 검은색 */
+}
+
+.bg-light .text-center p {
+  color: #000000 !important;
+}
+
+.hero-section .text-muted,
+.search-card .text-muted,
+.snippet-card .text-muted,
+.cta-section .text-muted {
+  color: #adb5bd !important; /* Lighter gray for dark backgrounds */
+}
+
 /* Snippet 카드 */
 .snippet-card {
   border: 1px solid #444444;

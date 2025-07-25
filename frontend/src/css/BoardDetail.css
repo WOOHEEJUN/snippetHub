@@ -67,26 +67,25 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  justify-content: flex-end;
+  justify-content: flex-end; /* Ensure right alignment */
   flex-wrap: wrap;
 }
 
-.post-actions-top .action-button {
-  padding: 0.6rem 1.2rem;
-  border-radius: 25px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
 .post-actions-top .like-button {
-  background-color: #444444;
-  color: #e53935;
-  border: 1px solid #666666;
+  padding: 0.8rem 1.5rem !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
+  background-color: #444444 !important;
+  color: #e53935 !important;
+  border: 1px solid #666666 !important;
+  width: auto !important; /* 내용에 따라 너비 자동 조절 */
+  margin-left: auto !important; /* 오른쪽 정렬 */
 }
 
 .post-actions-top .like-button.liked {
