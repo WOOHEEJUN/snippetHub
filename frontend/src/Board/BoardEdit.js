@@ -1,55 +1,83 @@
-// src/Board/BoardEdit.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // useAuth 훅 임포트
+import { useAuth } from '../context/AuthContext';
+import '../css/BoardForm.css'; // 폼 디자인을 위해 BoardForm.css 재활용
 
 function BoardEdit() {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { getAuthHeaders } = useAuth(); // getAuthHeaders 훅 사용
-  const [post, setPost] = useState({ title: '', content: '', imageUrl: '' }); // imageUrl 상태 추가
-  const [imageFile, setImageFile] = useState(null); // 이미지 파일 상태
-  const [previewImageUrl, setPreviewImageUrl] = useState(''); // 미리보기 이미지 URL 상태
+  const { getAuthHeaders, user } = useAuth();
+
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [category, setCategory] = useState('');
+  const [tags, setTags] = useState([]);
+  const [isPublic, setIsPublic] = useState(true);
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchPost = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        headers: getAuthHeaders(),
+      });
+      if (!response.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
+      const responseData = await response.json();
+      const postData = responseData.data; // 실제 게시글 데이터는 responseData.data에 있습니다.
+
+      // 권한 확인
+      if (user?.userId !== postData.author?.userId) {
+        alert('수정 권한이 없습니다.');
+        navigate(`/board/${postId}`);
+        return;
+      }
+
+      setTitle(postData.title);
+      setContent(postData.content);
+      setCategory(postData.category || 'GENERAL'); // 기본값 설정
+      setTags(postData.tags || []);
+      setIsPublic(postData.isPublic);
+      setImageUrl(postData.imageUrl || '');
+      setPreviewImageUrl(postData.imageUrl || '');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [postId, navigate, getAuthHeaders, user]);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    fetch(`/api/posts/${postId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPost({ title: data.title, content: data.content, imageUrl: data.imageUrl || '' });
-        setPreviewImageUrl(data.imageUrl || ''); // 기존 이미지 미리보기 설정
-        setLoading(false);
-      });
-  }, [postId]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPost((prev) => ({ ...prev, [name]: value }));
-  };
+    if (user) { // user 정보가 로드된 후에 게시글 불러오기
+      fetchPost();
+    }
+  }, [fetchPost, user]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
       const reader = new FileReader();
       reader.onload = (event) => {
-        setPreviewImageUrl(event.target.result); // 새 이미지 미리보기 설정
+        setPreviewImageUrl(event.target.result);
       };
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const handleUpdate = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title || !content) {
+      setError('제목과 내용을 모두 입력해주세요.');
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
 
-      let finalImageUrl = post.imageUrl; // 기존 이미지 URL 유지
+    try {
+      let finalImageUrl = imageUrl; // 기존 이미지 URL 유지
 
       if (imageFile) {
         const formData = new FormData();
@@ -69,43 +97,49 @@ function BoardEdit() {
         finalImageUrl = uploadData.url; // 서버에서 반환된 이미지 URL
       }
 
-      // 3. 게시글 데이터와 함께 이미지 URL 전송
       const response = await fetch(`/api/posts/${postId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({ ...post, imageUrl: finalImageUrl }),
+        body: JSON.stringify({ title, content, category, tags, isPublic }),
       });
 
       if (!response.ok) {
-        throw new Error('수정 실패');
+        const errData = await response.json();
+        throw new Error(errData.message || '게시글 수정에 실패했습니다.');
       }
 
-      alert('게시글이 수정되었습니다.');
+      alert('게시글이 성공적으로 수정되었습니다.');
       navigate(`/board/${postId}`);
     } catch (err) {
-      alert('수정 중 오류: ' + err.message);
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (loading) return <p className="text-center mt-4">⏳ 게시글을 불러오는 중입니다...</p>;
+  if (loading) return <div className="text-center py-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow-sm p-4">
-        <h2 className="mb-4 text-primary">📄 게시글 수정</h2>
+    <div className="board-form-container">
+      <div className="form-header">
+        <h1>게시글 수정</h1>
+        <p className="text-muted">게시글의 내용을 수정합니다.</p>
+      </div>
 
+      {error && <div className="alert alert-danger">{error}</div>}
+
+      <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="title" className="form-label">제목</label>
           <input
             type="text"
             id="title"
-            name="title"
             className="form-control"
-            value={post.title}
-            onChange={handleChange}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="제목을 입력하세요"
           />
         </div>
@@ -114,16 +148,45 @@ function BoardEdit() {
           <label htmlFor="content" className="form-label">내용</label>
           <textarea
             id="content"
-            name="content"
             className="form-control"
             rows="10"
-            value={post.content}
-            onChange={handleChange}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
             placeholder="내용을 입력하세요"
-          />
+          ></textarea>
         </div>
 
-        <div className="mb-4">
+        <div className="row mb-3">
+          <div className="col-md-6">
+            <label htmlFor="category" className="form-label">카테고리</label>
+            <select
+              id="category"
+              className="form-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="GENERAL">일반</option>
+              <option value="QNA">Q&A</option>
+              <option value="INFO">정보</option>
+            </select>
+          </div>
+          <div className="col-md-6 d-flex align-items-end">
+            <div className="form-check form-switch">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="isPublic"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="isPublic">
+                공개글
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-3">
           <label htmlFor="image" className="form-label">이미지 변경</label>
           <input
             type="file"
@@ -139,12 +202,13 @@ function BoardEdit() {
           )}
         </div>
 
-        <div className="text-end">
-          <button className="btn btn-outline-primary" onClick={handleUpdate}>
-            💾 수정 완료
+        <div className="d-flex justify-content-end">
+          <button type="button" className="btn btn-secondary me-2" onClick={() => navigate(-1)}>취소</button>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? '수정 중...' : '수정 완료'}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

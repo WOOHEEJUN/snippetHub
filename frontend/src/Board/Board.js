@@ -14,8 +14,9 @@ const Board = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('LATEST');
+  const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 추가
 
-  const fetchPosts = (page = 0, term = '', sort = 'LATEST') => {
+  const fetchPosts = (page = 0, term = '', sort = 'LATEST', category = '') => {
     setLoading(true);
     setError(null);
 
@@ -26,6 +27,9 @@ const Board = () => {
     });
     if (term) {
       params.append('search', term);
+    }
+    if (category) {
+      params.append('category', category);
     }
 
 fetch(`/api/posts?${params.toString()}`)
@@ -47,12 +51,12 @@ fetch(`/api/posts?${params.toString()}`)
   };
 
   useEffect(() => {
-    fetchPosts(0, searchTerm, sortOrder);
-  }, [searchTerm, sortOrder]);
+    fetchPosts(0, searchTerm, sortOrder, selectedCategory);
+  }, [searchTerm, sortOrder, selectedCategory]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchPosts(0, searchTerm, sortOrder);
+    fetchPosts(0, searchTerm, sortOrder, selectedCategory);
   };
 
   const handleWrite = () => {
@@ -83,6 +87,17 @@ fetch(`/api/posts?${params.toString()}`)
           <select 
             className="form-select" 
             style={{width: '150px'}}
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+          >
+            <option value="">모든 카테고리</option>
+            <option value="GENERAL">일반</option>
+            <option value="QNA">Q&A</option>
+            <option value="INFO">정보</option>
+          </select>
+          <select 
+            className="form-select" 
+            style={{width: '150px'}}
             value={sortOrder}
             onChange={e => setSortOrder(e.target.value)}
           >
@@ -103,7 +118,8 @@ fetch(`/api/posts?${params.toString()}`)
             <thead className="table-light">
               <tr>
                 <th style={{width: '10%'}}>번호</th>
-                <th style={{width: '50%'}}>제목</th>
+                <th style={{width: '10%'}}>카테고리</th>
+                <th style={{width: '40%'}}>제목</th>
                 <th style={{width: '15%'}}>작성자</th>
                 <th style={{width: '15%'}}>작성일</th>
               </tr>
@@ -113,6 +129,7 @@ fetch(`/api/posts?${params.toString()}`)
                 posts.map((post) => (
                   <tr key={post.postId} onClick={() => navigate(`/board/${post.postId}`)} style={{ cursor: 'pointer' }}>
                     <td>{post.postId}</td>
+                    <td>{post.category}</td>
                     <td>
                       <Link to={`/board/${post.postId}`} className="post-title">
                         {post.title}
@@ -124,7 +141,7 @@ fetch(`/api/posts?${params.toString()}`)
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="text-center py-5 text-muted">
+                  <td colSpan="5" className="text-center py-5 text-muted">
                     <h5>게시글이 없습니다.</h5>
                     <p>첫 번째 게시글을 작성해보세요!</p>
                   </td>

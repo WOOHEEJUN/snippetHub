@@ -48,23 +48,32 @@ const SnippetEdit = () => {
 
   const fetchSnippet = useCallback(async () => {
     try {
-      const response = await fetch(`/api/snippets/${snippetId}`);
+      const response = await fetch(`/api/snippets/${snippetId}`, {
+        headers: getAuthHeaders(),
+      });
       if (!response.ok) throw new Error('스니펫 정보를 불러올 수 없습니다.');
-      const data = await response.json();
+      const responseData = await response.json();
+      const snippetData = responseData.data; // 실제 스니펫 데이터는 responseData.data에 있습니다.
+
+      console.log('Current user:', user);
+      console.log('Raw snippet response data:', responseData);
+      console.log('Parsed snippet data:', snippetData);
+      console.log('User ID:', user?.userId, 'Snippet Author ID:', snippetData.author?.userId);
 
       // Check if the logged-in user is the author
-      if (user?.userId !== data.author?.userId) {
+      if (user?.userId !== snippetData.author?.userId) {
+        console.warn('수정 권한이 없습니다. 현재 사용자 ID:', user?.userId, '스니펫 작성자 ID:', snippetData.author?.userId);
         alert('수정 권한이 없습니다.');
         navigate(`/snippets/${snippetId}`);
         return;
       }
 
-      setTitle(data.title);
-      setLanguage(data.language);
-      setDescription(data.description);
-      setCode(data.code);
-      setTags(data.tags || []);
-      setIsPublic(data.public || false);
+      setTitle(snippetData.title);
+      setLanguage(snippetData.language);
+      setDescription(snippetData.description);
+      setCode(snippetData.code);
+      setTags(snippetData.tags || []);
+      setIsPublic(snippetData.public || false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -73,8 +82,10 @@ const SnippetEdit = () => {
   }, [snippetId, navigate, user]);
 
   useEffect(() => {
-    fetchSnippet();
-  }, [fetchSnippet]);
+    if (user) {
+      fetchSnippet();
+    }
+  }, [fetchSnippet, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,9 +107,17 @@ const SnippetEdit = () => {
         body: JSON.stringify({ title, description, code, language, tags, public: isPublic }),
       });
 
+      console.log('Snippet Edit API Response Status:', response.status);
+      const responseText = await response.text();
+      console.log('Snippet Edit API Response Text:', responseText);
+
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || '스니펫 수정에 실패했습니다.');
+        try {
+          const errData = JSON.parse(responseText);
+          throw new Error(errData.message || '스니펫 수정에 실패했습니다.');
+        } catch (e) {
+          throw new Error(responseText || '스니펫 수정에 실패했습니다.');
+        }
       }
 
       alert('스니펫이 성공적으로 수정되었습니다.');
@@ -115,7 +134,6 @@ const SnippetEdit = () => {
   return (
     <div className="container snippet-form-container">
       <div className="form-header">
-        <h1>스니펫 수정</h1>
         <p className="text-muted">스니펫의 내용을 수정합니다.</p>
       </div>
 

@@ -1,96 +1,117 @@
-/* Header.css */
-
+/* 공통 헤더 */
 .header {
-  background-color: #ffffff !important; /* ✅ 흰색으로 강제 적용 */
-  border-bottom: 1px solid #e9ecef;
-  padding: 0.75rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: #121212; /* 아주 어두운 배경 */
+  border-bottom: 1px solid #282828; /* 더 어두운 경계선 */
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* 더 진한 그림자 */
 }
 
-/* flexbox layout */
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 2.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* 로고 스타일 */
+/* 로고 */
 .logo {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #6A5ACD;
+  color: #a0a0a0; /* 더 어두운 회색 로고 */
   text-decoration: none;
   display: flex;
   align-items: center;
+  letter-spacing: -0.05em;
 }
 
-/* 메뉴 */
+.logo span:first-child {
+  color: #555555; /* 강조 색상도 어둡게 */
+}
+
+/* 내비게이션 */
 .nav-list {
   display: flex;
-  gap: 2rem;
-  list-style: none !important; /* ✅ 혹시 남아있는 점 제거 */
+  gap: 2.5rem;
+  list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* 메뉴 링크 */
 .nav-link {
   font-size: 1.05rem;
   font-weight: 500;
-  color: #495057;
+  color: #808080; /* 더 어두운 내비게이션 링크 색상 */
   text-decoration: none;
-  transition: color 0.2s ease-in-out, border-bottom 0.2s ease-in-out;
-  padding-bottom: 0.25rem;
+  transition: color 0.3s ease-in-out, border-bottom 0.3s ease-in-out;
+  padding-bottom: 0.4rem;
+  display: inline-block;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: #444444; /* 호버 시 밑줄 색상도 어둡게 */
+  transition: width 0.3s ease-in-out;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: #6A5ACD;
-  border-bottom: 2px solid #6A5ACD;
+  color: #c0c0c0; /* 호버/활성 시 약간 밝은 회색 */
 }
 
-/* 로그인 / 회원가입 */
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+/* 인증 버튼 */
 .auth-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
+  flex-shrink: 0;
 }
 
 .btn {
   font-weight: 500;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.375rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
   text-decoration: none;
   border: 1px solid transparent;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px; /* 최소 너비 설정 */
 }
 
 .btn-outline-primary {
-  color: #6A5ACD;
-  border: 1px solid #6A5ACD;
   background-color: transparent;
+  color: #606060; /* 더 어두운 강조 색상 */
+  border-color: #606060;
 }
 
 .btn-outline-primary:hover {
-  background-color: #6A5ACD;
-  color: #fff;
+  background-color: #404040;
+  color: #e0e0e0;
 }
 
 .btn-primary {
-  background-color: #6A5ACD;
-  color: #fff;
-  border: 1px solid #6A5ACD;
+  background-color: #404040; /* 더 어두운 배경색 */
+  color: #e0e0e0;
+  border-color: #404040;
 }
 
 .btn-primary:hover {
-  background-color: #483D8B;
-  border-color: #483D8B;
-}
-.auth-buttons {
-  display: flex;
-  gap: 1rem; /* 버튼 간 간격 확보 */
+  background-color: #303030;
+  border-color: #303030;
 }

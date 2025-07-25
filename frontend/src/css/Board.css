@@ -1,72 +1,95 @@
 .board-container {
   padding: 3rem 0;
+  background-color: #1a1a1a; /* 검은색 배경 추가 */
 }
 
 .board-header {
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #444444;
   margin-bottom: 2rem;
 }
 
 .board-header h2 {
   font-weight: 700;
+  color: #e0e0e0;
+}
+
+.board-header p {
+  color: #ffffff;
+}
+
+.table {
+  background-color: #000000;
+  color: #e0e0e0;
 }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(106, 90, 205, 0.05); /* 주요 색상 계열 */
+  background-color: rgba(255, 255, 255, 0.05); /* 밝은 회색 계열 */
   cursor: pointer;
 }
 
 .table th {
   font-weight: 600;
+  color: #b0b0b0;
 }
 
 .table td {
   vertical-align: middle;
+  color: #e0e0e0;
+  border-left: 5px solid #ffffff; /* 흰색 띠 추가 */
 }
 
 .post-title {
   font-weight: 500;
-  color: #212529;
+  color: #e0e0e0;
   text-decoration: none;
 }
 
 .post-title:hover {
-  color: #6A5ACD; /* 주요 색상 */
+  color: #99ccff; /* 밝은 파란색 */
 }
 
 .pagination .page-link {
-  color: #6A5ACD; /* 주요 색상 */
+  color: #99ccff; /* 밝은 파란색 */
+  background-color: #333333;
+  border-color: #444444;
 }
 
 .pagination .page-item.active .page-link {
   z-index: 3;
-  color: #fff;
-  background-color: #6A5ACD; /* 주요 색상 */
-  border-color: #6A5ACD;
+  color: #000000;
+  background-color: #e0e0e0; /* 밝은 회색 */
+  border-color: #e0e0e0;
 }
 
 .search-form .form-control {
   margin-right: 0.5rem;
+  background-color: #333333;
+  border: 1px solid #555555;
+  color: #e0e0e0;
 }
 
 .search-form .btn {
   white-space: nowrap;
   text-align: center;
+  background-color: #e0e0e0;
+  color: #000000;
+  border: 1px solid #e0e0e0;
 }
 
 .board-write-container {
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #fff;
+  background-color: #222222;
   border-radius: 0.5rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.2);
 }
 
 .board-write-container h2 {
   font-weight: 700;
   margin-bottom: 2rem;
+  color: #e0e0e0;
 }
 
 /* BoardDetail.css styles merged below */
@@ -103,7 +126,7 @@
 
 .like-button i {
   font-size: 1.5rem; /* 아이콘 크기 */
-  color: #6c757d; /* 기본 색상 */
+  color: #b0b0b0; /* 기본 색상 */
   transition: color 0.2s, transform 0.2s;
 }
 
@@ -118,7 +141,7 @@
 .like-count {
   font-size: 1rem; /* 좋아요 수 폰트 크기 작게 */
   font-weight: 600;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .comment-section {
@@ -128,23 +151,29 @@
 .comment-section h4 {
     font-weight: 700;
     margin-bottom: 1.5rem;
+    color: #e0e0e0;
 }
 
 .comment-form textarea {
   resize: none;
+  background-color: #333333;
+  border: 1px solid #555555;
+  color: #e0e0e0;
 }
 
 .comment {
   padding: 1rem;
-  background-color: #F0F8FF; /* 연한 하늘색 계열 */
+  background-color: #222222; /* 어두운 배경 */
   border-radius: 0.5rem;
+  border: 1px solid #444444;
 }
 
 .comment-author {
   font-weight: 600;
+  color: #e0e0e0;
 }
 
 .comment-date {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: #b0b0b0;
 }

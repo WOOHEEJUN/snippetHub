@@ -90,7 +90,7 @@ const SnippetBoard = () => {
   return (
     <div className="container snippet-board-container">
       <div className="board-header">
-        <h2 className="mb-3">스니펫 라이브러리</h2>
+        <h2 className="mb-3">스니펫</h2>
         <p className="text-muted">다양한 코드 스니펫을 탐색하고 공유하세요.</p>
       </div>
 

@@ -1,23 +1,182 @@
-.like-section {
+/* frontend/src/css/BoardDetail.css */
+
+/* Page Layout */
+.board-detail-page {
   display: flex;
-  justify-content: center;
+  gap: 2.5rem;
+  padding: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #1a1a1a; /* 검은색 배경 */
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.post-main-content {
+  flex: 3;
+  min-width: 0;
+  background-color: #222222;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+}
+
+.post-sidebar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header */
+.post-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.post-header h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #e0e0e0;
+  margin-bottom: 0.75rem;
+  word-break: break-word;
+}
+
+.post-meta-info {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 20px 0;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  color: #b0b0b0;
+  flex-wrap: wrap;
 }
 
-.like-button {
-  border: none;
-  background: transparent;
-  font-size: 1.8rem;
-  cursor: pointer;
-  color: #ccc;
+.post-meta-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.like-button.liked {
-  color: red;
+.post-meta-info svg {
+  color: #999;
 }
 
-.like-count {
-  font-size: 1.2rem;
+/* Top Action Buttons */
+.post-actions-top {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: flex-end; /* Ensure right alignment */
+  flex-wrap: wrap;
 }
+
+.post-actions-top .like-button {
+  padding: 0.8rem 1.5rem !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
+  background-color: #444444 !important;
+  color: #e53935 !important;
+  border: 1px solid #666666 !important;
+  width: auto !important; /* 내용에 따라 너비 자동 조절 */
+  margin-left: auto !important; /* 오른쪽 정렬 */
+}
+
+.post-actions-top .like-button.liked {
+  background-color: #e53935;
+  color: #fff;
+  border-color: #e53935;
+}
+
+.post-actions-top .like-button:hover {
+  background-color: #e53935;
+  color: #fff;
+}
+
+.post-actions-top .like-button.liked:hover {
+  background-color: #c62828;
+}
+
+.post-actions-top .comment-button {
+  background-color: #444444;
+  color: #99ccff;
+  border: 1px solid #666666;
+}
+
+.post-actions-top .comment-button:hover {
+  background-color: #99ccff;
+  color: #000000;
+}
+
+/* Post Content Body */
+.post-content-body {
+  background-color: #333333;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #555555;
+  line-height: 1.8;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
+}
+
+.post-image-container {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.post-image-container img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar Cards */
+.sidebar-card {
+  background-color: #222222;
+  border: 1px solid #444444;
+  border-radius: 12px;
+  padding: 1.8rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-card h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #e0e0e0;
+}
+
+.author-card .author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.author-card img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #99ccff;
+}
+
+.author-card span {
+  font-weight: 600;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+}
+
+/* ... rest unchanged ... */

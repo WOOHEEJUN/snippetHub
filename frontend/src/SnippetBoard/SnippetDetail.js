@@ -1,94 +1,74 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+// frontend/src/SnippetBoard/SnippetDetail.js
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import copy from 'clipboard-copy';
+import { FaHeart, FaComment, FaEye, FaPlay, FaTags, FaUser, FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy } from 'react-icons/fa';
 import '../css/SnippetDetail.css';
 
-const SnippetDetail = () => {
+function SnippetDetail() {
   const { snippetId } = useParams();
-  const { user, getAuthHeaders } = useAuth();
   const navigate = useNavigate();
+  const { user, getAuthHeaders } = useAuth();
 
   const [snippet, setSnippet] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [editContent, setEditContent] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  const [isCopied, setIsCopied] = useState(false);
 
-  const fetchSnippetData = useCallback(async () => {
+  const fetchSnippet = async () => {
     try {
-      const [snippetRes, commentsRes] = await Promise.all([
-        fetch(`/api/snippets/${snippetId}`),
-        fetch(`/api/snippets/${snippetId}/comments`)
-      ]);
-
-      if (!snippetRes.ok) throw new Error('스니펫 정보를 불러올 수 없습니다.');
-      const snippetData = await snippetRes.json();
-      setSnippet(snippetData);
-      setLikeCount(snippetData.likeCount);
-
-      // isLiked 상태는 백엔드에서 직접 제공하지 않으므로, 초기에는 false로 설정하거나
-      // 사용자별 좋아요 여부를 가져오는 별도의 API가 필요합니다.
-      // 현재는 snippetData에 isLiked 정보가 없으므로, 좋아요 버튼 클릭 시 토글 로직만 구현합니다.
-      setIsLiked(false); // 초기 상태는 false로 설정
-
-      if (commentsRes.ok) {
-        const commentsData = await commentsRes.json();
-        setComments(commentsData.content || []);
-      }
-
+      const res = await fetch(`/api/snippets/${snippetId}`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error('스니펫 불러오기 실패');
+      const data = await res.json();
+      setSnippet(data.data);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError('스니펫을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
-  }, [snippetId, getAuthHeaders]);
-
-  useEffect(() => {
-    fetchSnippetData();
-  }, [fetchSnippetData]);
-
-  const handleCopyToClipboard = () => {
-    copy(snippet.code).then(() => {
-      alert('코드가 클립보드에 복사되었습니다!');
-    });
   };
 
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(`/api/snippets/${snippetId}/comments`, {
+          headers: getAuthHeaders(),
+        });
+        const data = await res.json();
+        setComments(Array.isArray(data.data) ? data.data : []);
+      } catch (err) {
+        console.error('댓글 불러오기 실패:', err);
+      }
+    };
+
+    fetchSnippet();
+    fetchComments();
+  }, [snippetId, getAuthHeaders]);
+
+  const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
+
   const handleDelete = async () => {
-    if (!window.confirm('정말로 이 스니펫을 삭제하시겠습니까?')) return;
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
     try {
-      const response = await fetch(`/api/snippets/${snippetId}`, {
+      const res = await fetch(`/api/snippets/${snippetId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      if (!response.ok) throw new Error('삭제에 실패했습니다.');
-      alert('스니펫이 삭제되었습니다.');
+      if (!res.ok) throw new Error('삭제 실패');
+      alert('삭제되었습니다.');
       navigate('/snippets');
     } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  const handleLike = async () => {
-    if (!user) return alert('로그인이 필요합니다.');
-    try {
-      const response = await fetch(`/api/snippets/${snippetId}/like`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-      });
-      if (!response.ok) throw new Error('요청 실패');
-      
-      // 백엔드에서 토글 결과를 반환한다고 가정
-      const result = await response.json();
-      setIsLiked(result.data); // 백엔드에서 isLiked 값을 반환한다고 가정
-      setLikeCount(prev => result.data ? prev + 1 : prev - 1); // 백엔드 결과에 따라 좋아요 수 업데이트
-
-    } catch (err) {
       console.error(err);
+      alert('삭제 중 오류가 발생했습니다.');
     }
   };
 
@@ -96,119 +76,195 @@ const SnippetDetail = () => {
     e.preventDefault();
     if (!newComment.trim()) return;
     try {
-      const response = await fetch(`/api/snippets/${snippetId}/comments`, {
+      const res = await fetch(`/api/snippets/${snippetId}/comments`, {
         method: 'POST',
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newComment }),
       });
-      if (!response.ok) throw new Error('댓글 작성 실패');
+      if (!res.ok) throw new Error('댓글 작성 실패');
+      const data = await res.json();
+      setComments((prev) => [...prev, data.data]);
       setNewComment('');
-      fetchSnippetData();
     } catch (err) {
-      alert(err.message);
+      console.error(err);
     }
   };
 
-  if (loading) return <div className="text-center py-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
-  if (!snippet) return <div className="alert alert-warning">스니펫을 찾을 수 없습니다.</div>;
+  const handleCommentDelete = async (commentId) => {
+    if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+    try {
+      await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      setComments((prev) => prev.filter((c) => c.commentId !== commentId));
+    } catch (err) {
+      console.error('댓글 삭제 실패:', err);
+    }
+  };
 
-  const isAuthor = Number(user?.userId) === Number(snippet.author?.userId);
-/*console.log(user)*/
+  const handleCommentEdit = async (commentId) => {
+    if (!editContent.trim()) return;
+    try {
+      await fetch(`/api/comments/${commentId}`, {
+        method: 'PUT',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editContent }),
+      });
+      setComments((prev) =>
+        prev.map((c) =>
+          c.commentId === commentId ? { ...c, content: editContent } : c
+        )
+      );
+      setEditCommentId(null);
+      setEditContent('');
+    } catch (err) {
+      console.error('댓글 수정 실패:', err);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/snippets/${snippetId}/like`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
+      }
+
+      // 좋아요 요청 성공 후 스니펫 데이터를 다시 불러와 화면을 업데이트합니다.
+      fetchSnippet();
+
+    } catch (err) {
+      alert(err.message);
+      console.error('좋아요 처리 실패:', err);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(snippet.code);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
+  if (error) return <div className="error-container">{error}</div>;
+  if (!snippet) return <div className="error-container">스니펫이 존재하지 않습니다.</div>;
+
   return (
-    <div className="container snippet-detail-container">
-      <div className="snippet-header">
-        <h1>{snippet.title}</h1>
-        <div className="d-flex justify-content-between align-items-center snippet-meta">
-          <div>
-            <span className="author">by {snippet.author?.nickname}</span>
-            <span className="mx-2">|</span>
-            <span>{new Date(snippet.createdAt).toLocaleDateString()}</span>
+    <div className="snippet-detail-page">
+      <div className="snippet-main-content">
+        <div className="snippet-header">
+          <h1>{snippet.title}</h1>
+          <p className="description">{snippet.description}</p>
+        </div>
+
+        <div className="code-block-container">
+          <SyntaxHighlighter language={snippet.language?.toLowerCase()} style={solarizedlight} showLineNumbers>
+            {snippet.code}
+          </SyntaxHighlighter>
+          <button onClick={copyToClipboard} className="copy-button">
+            {isCopied ? <><FaCopy /> 복사됨!</> : <><FaCopy /> 복사</>}
+          </button>
+        </div>
+
+        <div className="comment-section">
+          <h3><FaComment /> 댓글 ({comments.length})</h3>
+          <form onSubmit={handleCommentSubmit} className="comment-form">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="따뜻한 댓글을 남겨주세요."
+            />
+            <button type="submit">등록</button>
+          </form>
+          <div className="comment-list">
+            {comments.map((comment) => (
+              <div key={comment.commentId} className="comment-item">
+                <div className="comment-author">
+                  <img src={comment.author.profileImage || '/default-profile.png'} alt={comment.author.nickname} />
+                  <span>{comment.author.nickname}</span>
+                </div>
+                {editCommentId === comment.commentId ? (
+                  <div className="comment-edit-form">
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                    />
+                    <button onClick={() => handleCommentEdit(comment.commentId)}>저장</button>
+                    <button onClick={() => setEditCommentId(null)}>취소</button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="comment-content">{comment.content}</p>
+                    <div className="comment-meta">
+                      <span>{new Date(comment.createdAt).toLocaleString()}</span>
+                      {user?.userId === comment.author.userId && (
+                        <div className="comment-actions">
+                          <button onClick={() => { setEditCommentId(comment.commentId); setEditContent(comment.content); }}><FaEdit /> 수정</button>
+                          <button onClick={() => handleCommentDelete(comment.commentId)}><FaTrash /> 삭제</button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
-          {isAuthor && (
-            <div className="snippet-actions">
-              <button onClick={() => navigate(`/snippets/edit/${snippetId}`)} className="btn btn-outline-secondary btn-sm me-2">수정</button>
-              <button onClick={handleDelete} className="btn btn-outline-danger btn-sm">삭제</button>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-lg-8">
-          <h5 className="mb-3">코드</h5>
-          <div className="code-container">
-            <SyntaxHighlighter language={snippet.language?.toLowerCase()} style={solarizedlight} showLineNumbers>
-              {snippet.code || ''}
-            </SyntaxHighlighter>
-            <button onClick={handleCopyToClipboard} className="btn btn-sm btn-light copy-button">
-              <i className="bi bi-clipboard"></i> 복사
-            </button>
-          </div>
-
-          <h5 className="mt-4 mb-3">설명</h5>
-          <div className="card description-card">
-            <div className="card-body">
-              <p className="card-text">{snippet.description || '설명이 없습니다.'}</p>
-            </div>
+      <div className="snippet-sidebar">
+        <div className="sidebar-card author-card">
+          <h4><FaUser /> 작성자</h4>
+          <div className="author-info">
+            <img src={snippet.author?.profileImage || '/default-profile.png'} alt={snippet.author?.nickname} />
+            <span>{snippet.author?.nickname}</span>
           </div>
         </div>
 
-        <div className="col-lg-4">
-          <h5 className="mb-3">정보</h5>
-          <div className="card">
-            <ul className="list-group list-group-flush">
-              <li className="list-group-item d-flex justify-content-between align-items-center">
-                언어
-                <span className="badge bg-primary rounded-pill">{snippet.language}</span>
-              </li>
-              <li className="list-group-item d-flex justify-content-between align-items-center">
-                좋아요
-                <span className="badge rounded-pill d-flex align-items-center">
-                  <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
-                    <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
-                  </button>
-                  <span className="fw-bold">{likeCount}</span>
-                </span>
-              </li>
-            </ul>
-          </div>
+        <div className="sidebar-card info-card">
+          <h4><FaCode /> 스니펫 정보</h4>
+          <ul>
+            <li><FaHeart className={snippet.isLiked ? 'liked' : ''} /> 좋아요 {snippet.likeCount}</li>
+            <li><FaEye /> 조회수 {snippet.viewCount}</li>
+            <li><FaPlay /> 실행 {snippet.runCount}회</li>
+            <li><FaCalendarAlt /> {new Date(snippet.createdAt).toLocaleDateString()}</li>
+            <li><strong>Language:</strong> {snippet.language}</li>
+          </ul>
+        </div>
 
-          <div className="comment-section mt-4">
-            <h4 className="mb-4">댓글 ({comments.length})</h4>
-            {user && (
-              <form onSubmit={handleCommentSubmit} className="mb-4">
-                <div className="input-group">
-                  <textarea
-                    className="form-control comment-form-textarea"
-                    rows="3"
-                    placeholder="댓글을 입력하세요..."
-                    value={newComment}
-                    onChange={e => setNewComment(e.target.value)}
-                  ></textarea>
-                  <button className="btn btn-primary" type="submit">등록</button>
-                </div>
-              </form>
-            )}
-            <div className="comment-list">
-              {comments.map(comment => (
-                <div key={comment.commentId} className="comment mb-3">
-                  <div className="d-flex justify-content-between">
-                    <span className="comment-author">{comment.author?.nickname}</span>
-                    <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
-                  </div>
-                  <p className="mt-2 mb-0">{comment.content}</p>
-                </div>
-              ))}
-            </div>
+        <div className="sidebar-card tags-card">
+          <h4><FaTags /> 태그</h4>
+          <div className="tags-list">
+            {snippet.tags?.map((tag, i) => <span key={i} className="tag">#{tag}</span>)}
           </div>
+        </div>
+        
+        <div className="sidebar-card actions-card">
+            <button onClick={handleLike} className={`action-button like-button ${snippet.isLiked ? 'liked' : ''}`}>
+                <FaHeart /> {snippet.isLiked ? '좋아요 취소' : '좋아요'}
+            </button>
+            {user?.userId === snippet.author?.userId && (
+            <>
+                <button onClick={handleEdit} className="action-button edit-button"><FaEdit /> 수정하기</button>
+                <button onClick={handleDelete} className="action-button delete-button"><FaTrash /> 삭제하기</button>
+            </>
+            )}
+            <button onClick={() => navigate('/snippets')} className="action-button back-button">목록으로</button>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default SnippetDetail;

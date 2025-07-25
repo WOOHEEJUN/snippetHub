@@ -11,17 +11,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  color: #212529;
-  background-color: #ffffff; /* ✅ 배경을 흰색으로 고정 */
+  color: #e0e0e0; /* 밝은 회색 텍스트 */
+  background-color: #1a1a1a; /* 어두운 배경 */
 }
 
 a {
   text-decoration: none;
-  color: #6A5ACD;
+  color: #99ccff; /* 밝은 파란색 링크 */
 }
 
 a:hover {
-  color: #483D8B;
+  color: #66b3ff;
 }
 
 /* 유틸리티 클래스 */
@@ -53,87 +53,22 @@ a:hover {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #333333;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #555555;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #777777;
 }
 
 /* code 태그 */
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-.auth-status {
-  display: flex;
-  align-items: center;
-  gap: 1rem; /* 버튼 겹침 방지 */
-  flex-wrap: wrap; /* 화면 작을 때 줄바꿈 허용 */
-}
-
-.auth-status .btn {
-  white-space: nowrap;
-}
-
-.nav-list {
-  display: flex;
-  gap: 2rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-list li a {
-  color: #6A5ACD;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.nav-list li a:hover {
-  text-decoration: underline;
-}
-
-.nav-container {
-  background-color: #ffffff;
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem 0;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-.nav-list {
-  display: flex;
-  gap: 1.5rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-list li a {
-  color: #6A5ACD;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.nav-list li a:hover {
-  text-decoration: underline;
-}
-
-.auth-status {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  white-space: nowrap;
 }
 
 

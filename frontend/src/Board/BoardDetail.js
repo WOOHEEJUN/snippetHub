@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
 import '../css/BoardDetail.css';
 
 function BoardDetail() {
@@ -10,8 +11,6 @@ function BoardDetail() {
   const { user, getAuthHeaders } = useAuth();
   const [post, setPost] = useState(null);
   const [error, setError] = useState('');
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -20,16 +19,14 @@ function BoardDetail() {
   const fetchPostData = useCallback(async () => {
     try {
       const [postRes, commentsRes] = await Promise.all([
-        fetch(`/api/posts/${postId}`),
-        fetch(`/api/posts/${postId}/comments`)
+        fetch(`/api/posts/${postId}`, { headers: getAuthHeaders() }),
+        fetch(`/api/posts/${postId}/comments`, { headers: getAuthHeaders() })
       ]);
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
       const postData = await postRes.json();
       const actualPost = postData.data;
       setPost(actualPost);
-      setLikeCount(actualPost.likeCount || 0);
-      setIsLiked(actualPost.likedByCurrentUser || false);
 
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
@@ -49,40 +46,63 @@ function BoardDetail() {
 
   const handleDelete = async () => {
     if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/posts/${postId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error('삭제 실패');
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('삭제 실패 응답 본문:', errorText);
+        throw new Error(`삭제 실패: ${res.status} - ${errorText}`);
+      }
+
       alert('삭제되었습니다.');
       navigate('/board');
     } catch (err) {
       console.error('삭제 오류:', err);
-      alert('삭제 중 오류가 발생했습니다.');
+      alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
     }
   };
 
   const handleLike = async () => {
-    if (!user) return alert('로그인이 필요합니다.');
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
     try {
       const res = await fetch(`/api/posts/${postId}/like`, {
         method: 'POST',
         headers: getAuthHeaders(),
       });
-      const result = await res.json();
-      const liked = result.isLiked ?? result.data ?? false;
-      setIsLiked(liked);
-      setLikeCount(prev => liked ? prev + 1 : prev - 1);
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
+      }
+      fetchPostData(); // 좋아요 상태 변경 후 데이터 다시 불러오기
     } catch (err) {
-      console.error(err);
+      alert(err.message);
+      console.error('좋아요 처리 실패:', err);
     }
   };
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
     try {
       const res = await fetch(`/api/posts/${postId}/comments`, {
         method: 'POST',
@@ -155,83 +175,107 @@ function BoardDetail() {
     </div>
   );
 
-  const isAuthor = user?.nickname === post.author?.nickname;
+  const isAuthor = user?.userId === post.author?.userId;
 
   return (
-    <div className="container post-detail-container col-lg-8 mx-auto p-4 shadow rounded-4 bg-white">
-      <h2 className="post-title mb-3">{post.title}</h2>
-      <div className="post-meta d-flex justify-content-between align-items-center mb-4 text-muted">
-        <span className="post-author">작성자: {post.author?.nickname}</span>
-        <span className="post-date">작성일: {new Date(post.createdAt).toLocaleString()}</span>
-      </div>
-      <div className="post-content mb-4" style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem' }}>
-        {post.content}
-      </div>
-
-      {isAuthor && (
-        <div className="post-actions d-flex justify-content-end gap-2 mt-4">
-          <button className="btn btn-outline-primary px-4" onClick={handleEdit}>수정</button>
-          <button className="btn btn-outline-danger px-4" onClick={handleDelete}>삭제</button>
+    <div className="board-detail-page">
+      <div className="post-main-content">
+        <div className="post-header">
+          <h1>{post.title}</h1>
+          <div className="post-meta-info">
+            <span className="category-info-inline"><FaTag /> {post.category}</span>
+            <span className="author-info-inline"><FaUser /> {post.author?.nickname}</span>
+            <span className="date-info-inline"><FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}</span>
+            <span className="view-info-inline"><FaEye /> {post.viewCount}</span>
+          </div>
         </div>
-      )}
 
-      <div className="d-flex justify-content-center align-items-center gap-3 mb-5"> {/* 새로운 부모 div */}
-        <button className="btn btn-secondary px-4" onClick={() => navigate(-1)}>← 목록으로 돌아가기</button>
-        <div className="like-section"> {/* 좋아요 섹션은 그대로 유지하되, 스타일은 부모 div에서 관리 */}
-          <button onClick={handleLike} className={`like-button ${isLiked ? 'liked' : ''}`}>
-            <i className={`bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+        <div className="post-content-body">
+          {post.content}
+          {post.imageUrl && (
+            <div className="post-image-container">
+              <img src={post.imageUrl} alt="게시글 이미지" />
+            </div>
+          )}
+        </div>
+
+        <div className="post-actions-top">
+          <button onClick={handleLike} className={`action-button like-button ${post.likedByCurrentUser ? 'liked' : ''}`}>
+            <FaHeart /> {post.likedByCurrentUser ? '좋아요 취소' : '좋아요'} ({post.likeCount})
           </button>
-          <span className="like-count">{likeCount}</span>
+        </div>
+
+        <div className="comment-section">
+          <h3><FaComment /> 댓글 ({comments.length})</h3>
+          <form onSubmit={handleCommentSubmit} className="comment-form">
+            <textarea
+              id="comment-input"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 남겨주세요."
+            />
+            <button type="submit">등록</button>
+          </form>
+          <div className="comment-list">
+            {comments.map((comment) => (
+              <div key={comment.commentId} className="comment-item">
+                <div className="comment-author">
+                  <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname} />
+                  <span>{comment.author?.nickname}</span>
+                </div>
+                {editingCommentId === comment.commentId ? (
+                  <div className="comment-edit-form">
+                    <textarea
+                      value={editingCommentContent}
+                      onChange={(e) => setEditingCommentContent(e.target.value)}
+                    />
+                    <button onClick={() => handleSaveComment(comment.commentId)}>저장</button>
+                    <button onClick={handleCancelEdit}>취소</button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="comment-content">{comment.content}</p>
+                    <div className="comment-meta">
+                      <span>{new Date(comment.createdAt).toLocaleString()}</span>
+                      {user?.userId === comment.author?.userId && (
+                        <div className="comment-actions">
+                          <button onClick={() => handleEditComment(comment)}><FaEdit /> 수정</button>
+                          <button onClick={() => handleDeleteComment(comment.commentId)}><FaTrash /> 삭제</button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="comment-section mt-5">
-        <h4 className="mb-4">댓글 ({comments.length})</h4>
-        {user && (
-          <form onSubmit={handleCommentSubmit} className="mb-4">
-            <div className="input-group">
-              <textarea
-                className="form-control comment-form-textarea"
-                rows="3"
-                placeholder="댓글을 입력하세요..."
-                value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-              ></textarea>
-              <button className="btn btn-primary" type="submit">등록</button>
-            </div>
-          </form>
-        )}
-        <div className="comment-list">
-          {comments.map(comment => (
-            <div key={comment.commentId} className="comment mb-3">
-              {editingCommentId === comment.commentId ? (
-                <div className="input-group">
-                  <textarea
-                    className="form-control"
-                    rows="2"
-                    value={editingCommentContent}
-                    onChange={(e) => setEditingCommentContent(e.target.value)}
-                  ></textarea>
-                  <button className="btn btn-primary" onClick={() => handleSaveComment(comment.commentId)}>저장</button>
-                  <button className="btn btn-secondary" onClick={handleCancelEdit}>취소</button>
-                </div>
-              ) : (
-                <>
-                  <div className="d-flex justify-content-between">
-                    <span className="comment-author">{comment.author?.nickname}</span>
-                    <span className="comment-date">{new Date(comment.createdAt).toLocaleString()}</span>
-                  </div>
-                  <p className="mt-2 mb-0">{comment.content}</p>
-                  {user?.nickname === comment.author?.nickname && (
-                    <div className="comment-actions d-flex justify-content-end gap-2 mt-2">
-                      <button className="btn btn-sm btn-outline-secondary" onClick={() => handleEditComment(comment)}>수정</button>
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteComment(comment.commentId)}>삭제</button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
+      <div className="post-sidebar">
+        <div className="sidebar-card author-card">
+          <h4><FaUser /> 작성자</h4>
+          <div className="author-info">
+            <img src={post.author?.profileImage || '/default-profile.png'} alt={post.author?.nickname} />
+            <span>{post.author?.nickname}</span>
+          </div>
+        </div>
+
+        <div className="sidebar-card info-card">
+          <h4><FaThumbsUp /> 게시글 정보</h4>
+          <ul>
+            <li><FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}</li>
+          </ul>
+        </div>
+
+        <div className="sidebar-card actions-card">
+          {isAuthor && (
+            <>
+              <button onClick={handleEdit} className="action-button edit-button"><FaEdit /> 수정하기</button>
+              <button onClick={handleDelete} className="action-button delete-button"><FaTrash /> 삭제하기</button>
+            </>
+          )}
+          <button onClick={() => navigate('/board')} className="action-button back-button">목록으로</button>
         </div>
       </div>
     </div>
