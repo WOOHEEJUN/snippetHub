@@ -28,16 +28,15 @@ const AuthStatus = () => {
   if (loading) return <p>Loading...</p>;
 
   if (!user) {
-    return (
-      <div className="auth-status">
-        <Link to="/login" className="btn btn-primary">로그인</Link>
-        <Link to="/register" className="btn btn-primary">회원가입</Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="auth-status d-flex align-items-center gap-2">
+   <div className="auth-status d-flex align-items-center gap-5">
+  <Link to="/login" className="custom-btn-sm">로그인</Link>
+  <Link to="/register" className="custom-btn-sm">회원가입</Link>
+</div>
+  );
+}
+  return (
+    <div className="auth-status d-flex align-items-center gap-3">
       <span>안녕하세요, {user.nickname || user.email}님!</span>
       <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
       <Link to="/code-test" className="btn btn-outline-success">코드 테스트</Link>

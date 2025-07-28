@@ -96,22 +96,22 @@
 
 .btn-outline-primary {
   background-color: transparent;
-  color: #606060; /* 더 어두운 강조 색상 */
-  border-color: #606060;
+  color: #d3d3d3; /* 연한 회색 */
+  border-color: #d3d3d3;
 }
 
 .btn-outline-primary:hover {
-  background-color: #404040;
-  color: #e0e0e0;
+  background-color: #e0e0e0;
+  color: #000000;
 }
 
 .btn-primary {
-  background-color: #404040; /* 더 어두운 배경색 */
-  color: #e0e0e0;
-  border-color: #404040;
+  background-color: #d3d3d3; /* 연한 회색 */
+  color: #000000;
+  border-color: #d3d3d3;
 }
 
 .btn-primary:hover {
-  background-color: #303030;
-  border-color: #303030;
+  background-color: #e0e0e0;
+  border-color: #e0e0e0;
 }
