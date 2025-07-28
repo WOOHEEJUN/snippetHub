@@ -5,7 +5,8 @@ import '../css/Header.css';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, getAuthHeaders } = useAuth();
+  console.log('Header - isAuthenticated:', isAuthenticated);
 
   const handleLogout = () => {
     logout();
@@ -17,12 +18,14 @@ const Header = () => {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="logo">
-          <span>SNI</span><span>PET</span>
+          <span>SNI</span>
         </Link>
-        <nav className="nav-list">
-          <NavLink to="/snippets" className="nav-link">스니펫</NavLink>
-          <NavLink to="/board" className="nav-link">게시판</NavLink>
-        </nav>
+       <nav>
+  <ul className="nav-list">
+    <li><NavLink to="/snippets" className="nav-link">스니펫</NavLink></li>
+    <li><NavLink to="/board" className="nav-link">게시판</NavLink></li>
+  </ul>
+</nav>
         <div className="auth-buttons">
           {!isAuthenticated ? (
             <>

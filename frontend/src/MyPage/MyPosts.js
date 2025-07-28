@@ -7,12 +7,14 @@ function MyPosts() {
   const location = useLocation();
   const navigate = useNavigate();
   const token = location.state?.accessToken || localStorage.getItem('accessToken');
+  const currentUserId = localStorage.getItem('userId');
+  const parsedCurrentUserId = parseInt(currentUserId);
+
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      alert('토큰이 없습니다. 로그인하세요.');
+    if (!token || isNaN(parsedCurrentUserId)) {
       setLoading(false);
       return;
     }
@@ -29,7 +31,8 @@ function MyPosts() {
       .then((data) => {
         const content = data?.data?.content;
         if (Array.isArray(content)) {
-          setPosts(content);
+          const myPosts = content.filter(post => post.author && post.author.userId === parsedCurrentUserId);
+          setPosts(myPosts);
         } else {
           console.error('예상치 못한 데이터 구조:', data);
           setPosts([]);
@@ -39,7 +42,7 @@ function MyPosts() {
         alert(err.message || '게시글 불러오기 실패');
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, parsedCurrentUserId]);
 
   const handlePostClick = (postId) => {
     navigate(`/board/${postId}`);

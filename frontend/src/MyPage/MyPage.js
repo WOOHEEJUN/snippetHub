@@ -19,15 +19,14 @@ function MyPage() {
     })
       .then((res) => res.ok ? res.json() : Promise.reject('유저 정보 불러오기 실패'))
       .then((data) => {
-        console.log('📦 받은 응답:', data);
-        setUserInfo(data.data); // ✅ 여기서 data 전체를 저장
+        setUserInfo(data.data);
       })
       .catch((err) => {
-        console.error(err);
+        console.error('유저 정보를 불러오는 데 실패했습니다:', err);
         alert('유저 정보를 불러오는 데 실패했습니다.');
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   const goToMyPosts = () => {
     navigate('/mypage/posts', { state: { accessToken: token } });
@@ -42,10 +41,12 @@ function MyPage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    alert('로그아웃 되었습니다.');
-    navigate('/login');
-  };
+  localStorage.removeItem('accessToken');
+  sessionStorage.removeItem('accessToken'); 
+  setUserInfo(null); 
+
+  alert('로그아웃 되었습니다.');
+};
 
   if (loading) return <p className="loading-message">로딩 중...</p>;
 

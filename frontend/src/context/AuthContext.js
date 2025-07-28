@@ -53,6 +53,8 @@ export const AuthProvider = ({ children }) => {
         const userData = await res.json();
         setUser(userData.data);
         localStorage.setItem('user', JSON.stringify(userData.data));
+        localStorage.setItem('userEmail', userData.data.email);
+        localStorage.setItem('userId', userData.data.userId);
       } catch (err) {
         console.error('사용자 정보 오류:', err);
         logout();
@@ -104,6 +106,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('accessToken', tokens.token.accessToken);
     localStorage.setItem('refreshToken', tokens.token.refreshToken);
     localStorage.setItem('user', JSON.stringify(tokens.user));
+    localStorage.setItem('userId', tokens.user.userId);
 
     setAccessToken(tokens.token.accessToken);
     setRefreshToken(tokens.token.refreshToken);
@@ -117,6 +120,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
