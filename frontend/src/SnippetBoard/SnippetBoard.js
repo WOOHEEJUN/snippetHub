@@ -17,6 +17,7 @@ const SnippetBoard = () => {
   const [searchLanguage, setSearchLanguage] = useState('');
   const [sortOrder, setSortOrder] = useState('LATEST');
 
+  // 데이터 요청 및 상태 업데이트
   const fetchSnippets = (page = 0, term = '', lang = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
@@ -48,28 +49,33 @@ const SnippetBoard = () => {
   };
 
   useEffect(() => {
+    // URL 파라미터 가져오기
     const params = new URLSearchParams(location.search);
     const term = params.get('search') || '';
     const lang = params.get('language') || '';
     const sort = params.get('sort') || 'LATEST';
     const page = parseInt(params.get('page') || '0');
 
+    // 상태 업데이트
     setSearchTerm(term);
     setSearchLanguage(lang);
     setSortOrder(sort);
 
+    // 데이터 로드
     fetchSnippets(page, term, lang, sort);
   }, [location.search]);
 
   const handleSearch = (e) => {
     e.preventDefault();
 
+    // URL 파라미터 설정
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
     if (searchLanguage) params.set('language', searchLanguage);
     if (sortOrder) params.set('sort', sortOrder);
-    params.set('page', 0); // 검색 시 항상 첫 페이지로
+    params.set('page', 0); // 검색 시 첫 페이지로
 
+    // 페이지 이동
     navigate(`/snippets?${params.toString()}`);
   };
 
@@ -155,7 +161,7 @@ const SnippetBoard = () => {
             <tbody>
               {snippets.length > 0 ? (
                 snippets.map((snippet) => (
-                  <tr key={snippet.snippetId} onClick={() => navigate(`/snippets/${snippet.snippetId}`)}>
+                  <tr key={snippet.snippetId} onClick={() => navigate(`/snippets/${snippet.snippetId}`)} style={{ cursor: 'pointer' }}>
                     <td>{snippet.snippetId}</td>
                     <td>{snippet.title}</td>
                     <td><span className={getLanguageBadgeClass(snippet.language)}>{snippet.language}</span></td>

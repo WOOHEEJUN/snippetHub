@@ -1,9 +1,9 @@
 /* 공통 헤더 */
 .header {
-  background-color: #121212; /* 아주 어두운 배경 */
-  border-bottom: 1px solid #282828; /* 더 어두운 경계선 */
+  background-color: #0d0d0d; /* 더 어두운 배경 */
+  border-bottom: 1px solid #222222; /* 더 어두운 경계선 */
   padding: 1rem 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* 더 진한 그림자 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7); /* 더 진한 그림자 */
 }
 
 .header-container {
@@ -20,7 +20,7 @@
   font-family: 'Poppins', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: #a0a0a0; /* 더 어두운 회색 로고 */
+  color: #d3d3d3; /* 밝은 회색 로고 */
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -28,7 +28,7 @@
 }
 
 .logo span:first-child {
-  color: #555555; /* 강조 색상도 어둡게 */
+  color: #777777; /* 강조 색상도 어둡게 */
 }
 
 /* 내비게이션 */
@@ -43,7 +43,7 @@
 .nav-link {
   font-size: 1.1rem; /* 폰트 크기 약간 증가 */
   font-weight: 500;
-  color: #808080; /* 더 어두운 내비게이션 링크 색상 */
+  color: #b0b0b0; /* 밝은 회색 내비게이션 링크 색상 */
   text-decoration: none;
   transition: color 0.3s ease-in-out, border-bottom 0.3s ease-in-out;
   padding-bottom: 0.4rem;
@@ -58,13 +58,13 @@
   bottom: 0;
   width: 0;
   height: 2px;
-  background-color: #444444; /* 호버 시 밑줄 색상도 어둡게 */
+  background-color: #555555; /* 호버 시 밑줄 색상도 어둡게 */
   transition: width 0.3s ease-in-out;
 }
 
 .nav-link:hover,
 .nav-link.active {
-  color: #c0c0c0; /* 호버/활성 시 약간 밝은 회색 */
+  color: #ffffff; /* 호버/활성 시 흰색 */
 }
 
 .nav-link:hover::after,
@@ -96,13 +96,13 @@
 
 .btn-outline-primary {
   background-color: transparent;
-  color: #d3d3d3; /* 연한 회색 */
-  border-color: #d3d3d3;
+  color: #a0a0a0; /* 연한 회색 */
+  border-color: #a0a0a0;
 }
 
 .btn-outline-primary:hover {
-  background-color: #e0e0e0;
-  color: #000000;
+  background-color: #444444;
+  color: #d3d3d3;
 }
 
 .btn-primary {
@@ -112,33 +112,33 @@
 }
 
 .btn-primary:hover {
-  background-color: #e0e0e0;
-  border-color: #e0e0e0;
+  background-color: #b0b0b0;
+  border-color: #b0b0b0;
 }
 
 /* Notification Bell */
 .notification-icon-link {
   position: relative;
   margin-right: 1.5rem;
-  color: #808080;
+  color: #606060;
   font-size: 1.5rem;
   display: flex;
   align-items: center;
 }
 
 .notification-icon-link:hover {
-  color: #c0c0c0;
+  color: #a0a0a0;
 }
 
 .notification-bell.red {
-  color: #ff4d4d; /* 빨간색 종 */
+  color: #bf3636; /* 칙칙한 빨간색 종 */
 }
 
 .notification-count {
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: #ff4d4d; /* 빨간색 배경 */
+  background-color: #bf3636; /* 칙칙한 빨간색 배경 */
   color: white;
   font-size: 0.7rem;
   font-weight: bold;

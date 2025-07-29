@@ -25,6 +25,7 @@ const Board = () => {
       size: 10,
       sort,
     });
+
     if (term) {
       params.append('search', term);
     }
@@ -32,22 +33,22 @@ const Board = () => {
       params.append('category', category);
     }
 
-fetch(`/api/posts?${params.toString()}`)
-  .then(res => {
-    if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
-    return res.json();
-  })
-  .then(result => {
-    const { content, currentPage, totalPages } = result.data;
-    setPosts(content || []);
-    setCurrentPage(currentPage);
-    setTotalPages(totalPages);
-  })
-  .catch(err => {
-    setError(err.message);
-    console.error('게시글 로드 실패:', err);
-  })
-  .finally(() => setLoading(false));
+    fetch(`/api/posts?${params.toString()}`)
+      .then(res => {
+        if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
+        return res.json();
+      })
+      .then(result => {
+        const { content, currentPage, totalPages } = result.data;
+        setPosts(content || []);
+        setCurrentPage(currentPage);
+        setTotalPages(totalPages);
+      })
+      .catch(err => {
+        setError(err.message);
+        console.error('게시글 로드 실패:', err);
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {

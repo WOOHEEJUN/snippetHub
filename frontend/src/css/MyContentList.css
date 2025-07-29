@@ -4,18 +4,18 @@
   max-width: 960px; /* 컨테이너 너비 확장 */
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #222222;
+  background-color: #1a1a1a;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .my-content-container h2 {
   font-size: 2rem; /* 제목 폰트 크기 증가 */
   font-weight: 700;
-  color: #e0e0e0;
+  color: #d3d3d3;
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #444444;
+  border-bottom: 1px solid #333333;
   text-align: center;
 }
 
@@ -29,11 +29,11 @@
 }
 
 .content-item {
-  background-color: #333333;
+  background-color: #222222;
   border-radius: 12px;
   padding: 1.75rem;
-  border: 1px solid #555555;
-  border-left: 5px solid #ffffff; /* 흰색 띠 추가 */
+  border: 1px solid #444444;
+  border-left: 5px solid #555555; /* 어두운 띠 추가 */
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
@@ -43,13 +43,13 @@
 
 .content-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
 .item-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #e0e0e0;
+  color: #d3d3d3;
   margin-bottom: 1rem;
 }
 
@@ -64,8 +64,8 @@
 
 .item-details .language {
   font-weight: 500;
-  background-color: #444444;
-  color: #99ccff;
+  background-color: #333333;
+  color: #8ab0d1;
   padding: 0.25rem 0.75rem;
   border-radius: 50rem;
 }
@@ -74,7 +74,7 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  color: #e74c3c;
+  color: #bf3636;
   font-weight: 500;
 }
 
@@ -88,7 +88,7 @@
   padding: 4rem;
   font-size: 1.1rem;
   color: #b0b0b0;
-  background-color: #333333;
+  background-color: #222222;
   border-radius: 12px;
   grid-column: 1 / -1; /* 그리드 전체 너비 차지 */
 }

@@ -3,15 +3,15 @@
 .snippet-edit-container {
   max-width: 800px;
   margin: 40px auto;
-  background: #222222;
+  background: #1a1a1a;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .snippet-edit-container h2 {
   margin-bottom: 20px;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .snippet-edit-container .form-control,
@@ -20,7 +20,7 @@
   padding: 10px;
   margin-bottom: 16px;
   border-radius: 8px;
-  border: 1px solid #555555;
-  background-color: #333333;
-  color: #e0e0e0;
+  border: 1px solid #444444;
+  background-color: #222222;
+  color: #d3d3d3;
 }

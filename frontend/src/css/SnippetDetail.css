@@ -7,6 +7,7 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: #121212;
 }
 
 .snippet-main-content {
@@ -30,7 +31,7 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .snippet-header .description {
@@ -46,18 +47,18 @@
 
 .code-block-container pre {
   border-radius: 8px !important;
-  border: 1px solid #444;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  background-color: #222222;
-  color: #e0e0e0;
+  border: 1px solid #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  background-color: #1a1a1a;
+  color: #d3d3d3;
 }
 
 .copy-button {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background-color: #333333;
-  border: 1px solid #555555;
+  background-color: #222222;
+  border: 1px solid #444444;
   border-radius: 5px;
   padding: 0.5rem 0.75rem;
   cursor: pointer;
@@ -66,20 +67,20 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   transition: all 0.2s ease-in-out;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .copy-button:hover {
-  background-color: #444444;
+  background-color: #333333;
 }
 
 /* Sidebar Cards */
 .sidebar-card {
-  background-color: #222222;
-  border: 1px solid #444444;
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .sidebar-card h4 {
@@ -89,7 +90,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .author-card .author-info {
@@ -107,7 +108,7 @@
 
 .author-card span {
   font-weight: 500;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .info-card ul {
@@ -127,7 +128,7 @@
 }
 
 .info-card .liked {
-  color: #e53e3e;
+  color: #bf3636;
 }
 
 .tags-card .tags-list {
@@ -137,8 +138,8 @@
 }
 
 .tags-card .tag {
-  background-color: #444444;
-  color: #e0e0e0;
+  background-color: #333333;
+  color: #d3d3d3;
   padding: 0.25rem 0.75rem;
   border-radius: 15px;
   font-size: 0.85rem;
@@ -154,8 +155,8 @@
     width: 100%;
     padding: 0.75rem;
     border-radius: 5px;
-    border: 1px solid #555555;
-    background-color: #333333;
+    border: 1px solid #444444;
+    background-color: #222222;
     cursor: pointer;
     font-weight: 500;
     display: flex;
@@ -163,29 +164,29 @@
     justify-content: center;
     gap: 0.5rem;
     transition: background-color 0.2s;
-    color: #e0e0e0;
+    color: #d3d3d3;
 }
 
 .action-button:hover {
-    background-color: #444444;
+    background-color: #333333;
 }
 
 .like-button.liked {
-    background-color: #e53e3e; /* 선명한 빨간색 배경 */
+    background-color: #bf3636; /* 칙칙한 빨간색 배경 */
     color: #fff; /* 흰색 글씨 */
-    border-color: #e53e3e; /* 테두리 색상도 동일하게 */
+    border-color: #bf3636; /* 테두리 색상도 동일하게 */
 }
 
 .edit-button {
-    background-color: #4a90e2;
+    background-color: #4a5a6a;
     color: #ffffff;
-    border-color: #4a90e2;
+    border-color: #4a5a6a;
 }
 
 .delete-button {
-    background-color: #e74c3c;
+    background-color: #bf3636;
     color: #ffffff;
-    border-color: #e74c3c;
+    border-color: #bf3636;
 }
 
 /* Comment Section */
@@ -200,7 +201,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .comment-form {
@@ -212,17 +213,17 @@
 .comment-form textarea {
   flex-grow: 1;
   padding: 0.75rem;
-  border: 1px solid #555555;
+  border: 1px solid #444444;
   border-radius: 5px;
   resize: vertical;
   min-height: 80px;
-  background-color: #333333;
-  color: #e0e0e0;
+  background-color: #222222;
+  color: #d3d3d3;
 }
 
 .comment-form button {
   padding: 0.75rem 1.5rem;
-  background-color: #e0e0e0;
+  background-color: #d3d3d3;
   color: #000000;
   border: none;
   border-radius: 5px;
@@ -237,10 +238,10 @@
 }
 
 .comment-item {
-  background-color: #222222;
+  background-color: #1a1a1a;
   padding: 1.5rem;
   border-radius: 8px;
-  border: 1px solid #444444;
+  border: 1px solid #333333;
 }
 
 .comment-author {
@@ -252,7 +253,7 @@
 
 .comment-author span {
   font-weight: 600;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .comment-content {
@@ -266,7 +267,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
-  color: #999999;
+  color: #808080;
 }
 
 .comment-actions {
@@ -293,14 +294,14 @@
 .comment-edit-form textarea {
     width: 100%;
     padding: 0.5rem;
-    border: 1px solid #555555;
+    border: 1px solid #444444;
     border-radius: 5px;
-    background-color: #333333;
-    color: #e0e0e0;
+    background-color: #222222;
+    color: #d3d3d3;
 }
 
 .comment-edit-form button {
-    background-color: #e0e0e0;
+    background-color: #d3d3d3;
     color: #000000;
     border: none;
     padding: 0.5rem 1rem;
@@ -309,7 +310,7 @@
     align-self: flex-start;
 }
 .comment-edit-form button:last-child {
-    background-color: #666666;
+    background-color: #555555;
 }
 
 /* Loading and Error States */
@@ -319,7 +320,7 @@
   align-items: center;
   height: 50vh;
   font-size: 1.2rem;
-  color: #e0e0e0;
+  color: #d3d3d3;
 }
 
 .spinner {
@@ -327,7 +328,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border-left-color: #99ccff;
+  border-left-color: #8ab0d1;
   animation: spin 1s ease infinite;
 }
 
