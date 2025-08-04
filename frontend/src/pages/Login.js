@@ -129,9 +129,25 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="mb-3">
-            <KakaoLoginButton />
-            <GoogleLoginButton />
+          <div className="social-login-divider">
+            <span>또는</span>
+          </div>
+
+          <div className="d-grid gap-2">
+            <a href="http://localhost:8080/oauth2/authorization/kakao" className="btn social-login-btn kakao-btn">
+              <i className="bi bi-chat-fill me-2"></i> 카카오로 로그인
+            </a>
+            <a href="http://localhost:8080/oauth2/authorization/google" className="btn social-login-btn google-btn">
+              <svg className="me-2" width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                <g fill="none" fillRule="evenodd">
+                    <path d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4818h4.8436c-.2086 1.125-.8427 2.0782-1.7772 2.7218v2.2591h2.9082c1.7018-1.5664 2.6836-3.8736 2.6836-6.6218z" fill="#4285F4"/>
+                    <path d="M9 18c2.43 0 4.47-.8055 5.96-2.1818l-2.9082-2.2591c-.8055.54-1.8373.8627-3.0518.8627-2.3455 0-4.3282-1.5873-5.0355-3.71H.9545v2.3318C2.45 16.3 5.48 18 9 18z" fill="#34A853"/>
+                    <path d="M3.9645 10.71c-.18-.54-.2827-1.1164-.2827-1.71s.1027-1.17.2827-1.71V4.9582H.9545C.3473 6.1736 0 7.5473 0 9s.3473 2.8264.9545 4.0418L3.9645 10.71z" fill="#FBBC05"/>
+                    <path d="M9 3.5727c1.3218 0 2.5073.4555 3.44 1.3455l2.5818-2.5818C13.46.8918 11.43 0 9 0 5.48 0 2.45 1.7 1.0455 4.0418L3.9645 6.29C4.6718 4.1636 6.6545 3.5727 9 3.5727z" fill="#EA4335"/>
+                </g>
+              </svg>
+              구글로 로그인
+            </a>
           </div>
         </form>
 

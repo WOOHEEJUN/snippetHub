@@ -79,6 +79,71 @@
   text-decoration: none;
 }
 
+
 .login-footer a:hover {
   text-decoration: underline;
+}
+
+/* 소셜 로그인 버튼 스타일 */
+.social-login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #888;
+  margin: 1.5rem 0;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #444;
+}
+
+.social-login-divider:not(:empty)::before {
+  margin-right: .5em;
+}
+
+.social-login-divider:not(:empty)::after {
+  margin-left: .5em;
+}
+
+.social-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.social-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.kakao-btn {
+  background-color: #FEE500;
+  color: #191919;
+  border: none;
+}
+
+.kakao-btn:hover {
+  background-color: #fddc00;
+  color: #191919;
+}
+
+.google-btn {
+  background-color: #FFFFFF;
+  color: #444;
+  border: 1px solid #ddd;
+}
+
+.google-btn:hover {
+  background-color: #f8f9fa;
+  color: #222;
+  border-color: #ccc;
 }
