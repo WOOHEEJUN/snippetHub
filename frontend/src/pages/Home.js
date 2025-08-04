@@ -16,7 +16,7 @@ const Home = () => {
   console.log();
 
   useEffect(() => {
-    fetch('/api/snippets?page=0&size=6&sort=likeCount,desc')
+    fetch('http://localhost:8080/api/snippets?page=0&size=6&sort=likeCount,desc')
       .then((res) => res.json())
       .then((data) => setPopularSnippets(data.content || []))
       .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
@@ -27,7 +27,7 @@ const Home = () => {
       sort: 'createdAt,desc',
     });
 
-    fetch(`/api/posts?${postParams.toString()}`)
+    fetch(`http://localhost:8080/api/posts?${postParams.toString()}`)
       .then((res) => res.json())
       .then((data) => setRecentPosts(data.content || []))
       .catch((err) => console.error('🔥 최신 게시글 로딩 실패:', err));
