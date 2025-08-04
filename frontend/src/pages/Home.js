@@ -16,9 +16,12 @@ const Home = () => {
   console.log();
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/snippets?page=0&size=6&sort=likeCount,desc')
+    fetch('http://localhost:8080/api/snippets?page=0&size=5&sort=POPULAR')
       .then((res) => res.json())
-      .then((data) => setPopularSnippets(data.content || []))
+      .then((data) => {
+        console.log('인기 스니펫 API 응답:', data); // 데이터 확인을 위한 로그 추가
+        setPopularSnippets(data.data.content || []);
+      })
       .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
 
     const postParams = new URLSearchParams({
@@ -29,7 +32,7 @@ const Home = () => {
 
     fetch(`http://localhost:8080/api/posts?${postParams.toString()}`)
       .then((res) => res.json())
-      .then((data) => setRecentPosts(data.content || []))
+      .then((data) => setRecentPosts(data.data.content || []))
       .catch((err) => console.error('🔥 최신 게시글 로딩 실패:', err));
   }, []);
 
