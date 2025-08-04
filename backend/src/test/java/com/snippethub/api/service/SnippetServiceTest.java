@@ -79,11 +79,11 @@ class SnippetServiceTest {
     @Test
     @DisplayName("스니펫 생성 성공")
     void createSnippetSuccess() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(tagService.findOrCreateTags(anyList())).thenReturn(Arrays.asList(new com.snippethub.api.domain.Tag("java"), new com.snippethub.api.domain.Tag("test")));
         when(snippetRepository.save(any(Snippet.class))).thenReturn(testSnippet);
 
-        Snippet createdSnippet = snippetService.createSnippet(createRequestDto, 1L);
+        Snippet createdSnippet = snippetService.createSnippet(createRequestDto, testUser.getEmail());
 
         assertThat(createdSnippet).isNotNull();
         assertThat(createdSnippet.getTitle()).isEqualTo(createRequestDto.getTitle());
@@ -95,9 +95,9 @@ class SnippetServiceTest {
     @Test
     @DisplayName("스니펫 생성 실패 - 사용자 없음")
     void createSnippetFail_UserNotFound() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> snippetService.createSnippet(createRequestDto, 1L))
+        assertThatThrownBy(() -> snippetService.createSnippet(createRequestDto, testUser.getEmail()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("사용자를 찾을 수 없습니다.");
     }
@@ -161,8 +161,7 @@ class SnippetServiceTest {
         List<Snippet> snippets = Arrays.asList(testSnippet);
         Page<Snippet> snippetPage = new PageImpl<>(snippets, pageable, snippets.size());
 
-        when(snippetRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCodeContainingIgnoreCase(
-                anyString(), anyString(), anyString(), any(Pageable.class))).thenReturn(snippetPage);
+        when(snippetRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(snippetPage);
 
         Page<Snippet> result = snippetService.getSnippets(pageable, null, "test");
 
@@ -177,8 +176,8 @@ class SnippetServiceTest {
         List<Snippet> snippets = Arrays.asList(testSnippet);
         Page<Snippet> snippetPage = new PageImpl<>(snippets, pageable, snippets.size());
 
-        when(snippetRepository.findByLanguageAndTitleContainingIgnoreCaseOrLanguageAndDescriptionContainingIgnoreCaseOrLanguageAndCodeContainingIgnoreCase(
-                eq("JAVA"), anyString(), eq("JAVA"), anyString(), eq("JAVA"), anyString(), any(Pageable.class))).thenReturn(snippetPage);
+        when(snippetRepository.findByLanguageAndTitleContainingIgnoreCase(
+                eq("JAVA"), anyString(), any(Pageable.class))).thenReturn(snippetPage);
 
         Page<Snippet> result = snippetService.getSnippets(pageable, "JAVA", "test");
 

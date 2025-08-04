@@ -3,6 +3,7 @@ package com.snippethub.api.config;
 import com.snippethub.api.security.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -44,6 +45,17 @@ public class SecurityConfig {
                 .requestMatchers("/api/posts/**").permitAll() // 프론트엔드 호환성
                 .requestMatchers("/api/v1/snippets/**", "/api/v1/execute").permitAll()
                 .requestMatchers("/api/snippets/**").permitAll() // 프론트엔드 호환성
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId}/comments").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/snippets/{snippetId}/comments").permitAll()
+                                    .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/snippets/{snippetId}/comments").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/notifications").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/notifications/{notificationId}/read").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/notifications/unread-count").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/notifications/read-all").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/profile").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/posts").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/snippets").permitAll()
                 .requestMatchers(
     "/swagger-ui/**",
                 "/v3/api-docs/**",

@@ -1,6 +1,6 @@
 // src/Board/BoardDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
 import '../css/BoardDetail.css';
@@ -15,6 +15,8 @@ function BoardDetail() {
   const [newComment, setNewComment] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentContent, setEditingCommentContent] = useState('');
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
 
   // ✅ 직접 정의한 getAuthHeaders 사용
   const getAuthHeaders = () => {
@@ -26,7 +28,7 @@ function BoardDetail() {
     try {
       const [postRes, commentsRes] = await Promise.all([
         fetch(`/api/posts/${postId}`, { headers: getAuthHeaders(), credentials: 'include' }),
-        fetch(`/api/posts/${postId}/comments`, { headers: getAuthHeaders(), credentials: 'include' })
+        fetch(`/api/posts/${postId}/comments/all`, { headers: getAuthHeaders(), credentials: 'include' })
       ]);
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
@@ -36,7 +38,10 @@ function BoardDetail() {
 
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
-        setComments(Array.isArray(commentsData.data) ? commentsData.data : []);
+        console.log('댓글 데이터:', commentsData);
+        const commentsArray = Array.isArray(commentsData) ? commentsData : [];
+        console.log('댓글 배열:', commentsArray);
+        setComments(commentsArray);
       }
     } catch (err) {
       console.error('데이터 불러오기 실패:', err);
@@ -130,8 +135,10 @@ function BoardDetail() {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 작성 실패');
+      const newCommentData = await res.json();
+      console.log('새 댓글 응답:', newCommentData);
+      setComments(prevComments => [...prevComments, newCommentData]); // 서버 응답에서 실제 데이터 사용
       setNewComment('');
-      fetchPostData();
     } catch (err) {
       alert(err.message);
     }
@@ -163,9 +170,12 @@ function BoardDetail() {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 수정 실패');
+      const updatedCommentData = await res.json();
+      setComments(prevComments => 
+        prevComments.map(c => c.commentId === commentId ? updatedCommentData : c)
+      );
       setEditingCommentId(null);
       setEditingCommentContent('');
-      fetchPostData();
     } catch (err) {
       alert(err.message);
     }
@@ -180,10 +190,50 @@ function BoardDetail() {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 삭제 실패');
-      fetchPostData();
+      setComments(prevComments => prevComments.filter(c => c.commentId !== commentId));
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  const handleReplySubmit = async (e, parentCommentId) => {
+    e.preventDefault();
+    if (!replyContent.trim()) return;
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          content: replyContent,
+          parentCommentId: parentCommentId 
+        }),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('답글 작성 실패');
+      const newReplyData = await res.json();
+      console.log('새 답글 응답:', newReplyData);
+      
+      // 댓글 목록을 새로고침하여 대댓글을 포함한 전체 구조를 가져옴
+      fetchPostData();
+      
+      setReplyContent('');
+      setReplyingToCommentId(null);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleCancelReply = () => {
+    setReplyingToCommentId(null);
+    setReplyContent('');
   };
 
   if (error) return <div className="container text-center py-5 text-danger">{error}</div>;
@@ -236,37 +286,85 @@ function BoardDetail() {
             <button type="submit">등록</button>
           </form>
           <div className="comment-list">
-            {comments.map((comment) => (
-              <div key={comment.commentId} className="comment-item">
-                <div className="comment-author">
-                  <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname} />
-                  <span>{comment.author?.nickname}</span>
-                </div>
-                {editingCommentId === comment.commentId ? (
-                  <div className="comment-edit-form">
-                    <textarea
-                      value={editingCommentContent}
-                      onChange={(e) => setEditingCommentContent(e.target.value)}
-                    />
-                    <button onClick={() => handleSaveComment(comment.commentId)}>저장</button>
-                    <button onClick={handleCancelEdit}>취소</button>
+            {comments.map((comment) => {
+              console.log('개별 댓글:', comment);
+              return (
+                <div key={comment.commentId} className="comment-item">
+                  <div className="comment-author">
+                                          <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
+                      <Link to={`/users/${comment.author?.userId}`} className="author-link">
+                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      </Link>
                   </div>
-                ) : (
-                  <>
-                    <p className="comment-content">{comment.content}</p>
-                    <div className="comment-meta">
-                      <span>{new Date(comment.createdAt).toLocaleString()}</span>
-                      {user?.userId === comment.author?.userId && (
+                  {editingCommentId === comment.commentId ? (
+                    <div className="comment-edit-form">
+                      <textarea
+                        value={editingCommentContent}
+                        onChange={(e) => setEditingCommentContent(e.target.value)}
+                      />
+                      <button onClick={() => handleSaveComment(comment.commentId)}>저장</button>
+                      <button onClick={handleCancelEdit}>취소</button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="comment-content">{comment.content}</p>
+                      <div className="comment-meta">
+                        <span>{new Date(comment.createdAt).toLocaleString()}</span>
                         <div className="comment-actions">
-                          <button onClick={() => handleEditComment(comment)}><FaEdit /> 수정</button>
-                          <button onClick={() => handleDeleteComment(comment.commentId)}><FaTrash /> 삭제</button>
+                          <button onClick={() => setReplyingToCommentId(comment.commentId)}>답글</button>
+                          {(user?.userId === comment.author?.userId || user?.userId === comment.authorId) && (
+                            <>
+                              <button onClick={() => handleEditComment(comment)}><FaEdit /> 수정</button>
+                              <button onClick={() => handleDeleteComment(comment.commentId)}><FaTrash /> 삭제</button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* 답글 작성 폼 */}
+                      {replyingToCommentId === comment.commentId && (
+                        <div className="reply-form">
+                          <form onSubmit={(e) => handleReplySubmit(e, comment.commentId)}>
+                            <textarea
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                              placeholder="답글을 입력하세요..."
+                            />
+                            <button type="submit">답글 작성</button>
+                            <button type="button" onClick={handleCancelReply}>취소</button>
+                          </form>
                         </div>
                       )}
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+                      
+                      {/* 대댓글 목록 */}
+                      {comment.replies && comment.replies.length > 0 && (
+                        <div className="replies-container">
+                          {comment.replies.map((reply) => (
+                            <div key={reply.commentId} className="reply-item" style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}>
+                                                             <div className="comment-author">
+                                 <img src={reply.author?.profileImage || '/default-profile.png'} alt={reply.author?.nickname || '사용자'} />
+                                 <Link to={`/users/${reply.author?.userId}`} className="author-link">
+                                   {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                 </Link>
+                               </div>
+                              <p className="comment-content">{reply.content}</p>
+                              <div className="comment-meta">
+                                <span>{new Date(reply.createdAt).toLocaleString()}</span>
+                                {(user?.userId === reply.author?.userId || user?.userId === reply.authorId) && (
+                                  <div className="comment-actions">
+                                    <button onClick={() => handleDeleteComment(reply.commentId)}><FaTrash /> 삭제</button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

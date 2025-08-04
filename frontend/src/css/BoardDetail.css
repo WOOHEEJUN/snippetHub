@@ -179,4 +179,16 @@
   font-size: 1.1rem;
 }
 
+.author-link {
+  font-weight: bold;
+  color: #d3d3d3;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.author-link:hover {
+  color: #8ab0d1;
+  text-decoration: underline;
+}
+
 /* ... rest unchanged ... */

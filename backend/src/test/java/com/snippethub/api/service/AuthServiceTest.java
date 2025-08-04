@@ -25,6 +25,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -202,7 +203,7 @@ class AuthServiceTest {
 
         when(tokenProvider.validateToken(anyString())).thenReturn(true);
         when(tokenProvider.getAuthentication(anyString())).thenReturn(authentication);
-        when(refreshTokenRepository.findById(anyString())).thenReturn(Optional.of(new com.snippethub.api.domain.RefreshToken(user.getId().toString(), "oldRefreshToken")));
+        when(refreshTokenRepository.findById(anyLong())).thenReturn(Optional.of(new com.snippethub.api.domain.RefreshToken(user, "oldRefreshToken", Instant.now().plusSeconds(3600))));
         when(tokenProvider.generateTokenDto(any(Authentication.class))).thenReturn(tokenDto);
         when(refreshTokenRepository.save(any())).thenReturn(any());
 

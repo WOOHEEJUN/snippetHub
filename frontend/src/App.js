@@ -18,6 +18,7 @@ import SnippetEdit from './SnippetBoard/SnippetEdit';
 import CodeTest from './CodeTest/CodeTest';
 import OAuth2Callback from './pages/OAuth2Callback';
 import Notifications from './pages/Notifications'; // Notifications 컴포넌트 임포트
+import UserProfile from './pages/UserProfile'; // UserProfile 컴포넌트 임포트
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './css/App.css';
 
@@ -96,6 +97,7 @@ function App() {
             <Route path="/oauth2/callback" element={<OAuth2Callback />} />
             <Route path="/oauth2/redirect" element={<OAuth2Callback />} />
             <Route path="/notifications" element={<Notifications />} /> {/* 알림 페이지 라우팅 추가 */}
+            <Route path="/users/:userId" element={<UserProfile />} /> {/* 사용자 프로필 페이지 라우팅 추가 */}
           </Routes>
         </div>
       </AuthProvider>
