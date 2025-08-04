@@ -4,6 +4,108 @@ import '../css/Home.css';
 
 import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
 
+// 더미 데이터 정의
+const dummySnippets = [
+  {
+    snippetId: 1,
+    language: 'JAVASCRIPT',
+    createdAt: new Date().toISOString(),
+    title: 'JavaScript 배열 중복 제거',
+    description: 'Set을 사용하여 JavaScript 배열에서 중복된 항목을 제거하는 간단한 방법입니다.',
+    author: { nickname: 'DummyUser1' },
+    likeCount: 128,
+  },
+  {
+    snippetId: 2,
+    language: 'PYTHON',
+    createdAt: new Date().toISOString(),
+    title: 'Python 리스트 뒤집기',
+    description: '슬라이싱을 사용하여 Python 리스트를 뒤집는 효율적인 방법입니다.',
+    author: { nickname: 'CodeMaster' },
+    likeCount: 99,
+  },
+  {
+    snippetId: 3,
+    language: 'JAVA',
+    createdAt: new Date().toISOString(),
+    title: 'Java 문자열 포맷팅',
+    description: 'String.format() 메서드를 사용하여 Java에서 문자열을 깔끔하게 포맷팅합니다.',
+    author: { nickname: 'JavaGod' },
+    likeCount: 76,
+  },
+    {
+    snippetId: 4,
+    language: 'HTML',
+    createdAt: new Date().toISOString(),
+    title: 'HTML 시맨틱 태그',
+    description: '웹 접근성과 SEO를 개선하는 시맨틱 HTML 태그 사용법 예제입니다.',
+    author: { nickname: 'WebDev' },
+    likeCount: 64,
+  },
+  {
+    snippetId: 5,
+    language: 'CSS',
+    createdAt: new Date().toISOString(),
+    title: 'CSS Flexbox 중앙 정렬',
+    description: 'Flexbox를 사용하여 요소를 수직 및 수평 중앙에 정렬하는 방법을 보여줍니다.',
+    author: { nickname: 'StyleQueen' },
+    likeCount: 55,
+  },
+  {
+    snippetId: 6,
+    language: 'C',
+    createdAt: new Date().toISOString(),
+    title: 'C언어 포인터 기초',
+    description: 'C언어에서 포인터의 개념과 기본 사용법을 설명하는 코드입니다.',
+    author: { nickname: 'SystemHacker' },
+    likeCount: 42,
+  },
+];
+
+const dummyPosts = [
+  {
+    postId: 1,
+    title: '리액트 Hooks, 언제 사용해야 할까요?',
+    createdAt: new Date().toISOString(),
+    author: { nickname: 'ReactFan' },
+    viewCount: 1024,
+    likeCount: 58,
+  },
+  {
+    postId: 2,
+    title: '개발자 취업 준비 팁 공유합니다.',
+    createdAt: new Date().toISOString(),
+    author: { nickname: 'JobSeeker' },
+    viewCount: 2048,
+    likeCount: 123,
+  },
+  {
+    postId: 3,
+    title: '코딩 테스트, 다들 어떻게 준비하시나요?',
+    createdAt: new Date().toISOString(),
+    author: { nickname: 'AlgoKing' },
+    viewCount: 1536,
+    likeCount: 99,
+  },
+  {
+    postId: 4,
+    title: '새로운 사이드 프로젝트 시작했습니다!',
+    createdAt: new Date().toISOString(),
+    author: { nickname: 'ProjectLover' },
+    viewCount: 876,
+    likeCount: 45,
+  },
+  {
+    postId: 5,
+    title: '좋아하는 개발 유튜버 있으신가요?',
+    createdAt: new Date().toISOString(),
+    author: { nickname: 'CuriousDev' },
+    viewCount: 998,
+    likeCount: 77,
+  },
+];
+
+
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth(); // useAuth 훅을 사용하여 user 객체 가져오기
@@ -16,11 +118,25 @@ const Home = () => {
   console.log();
 
   useEffect(() => {
+    // 인기 스니펫 로딩
     fetch('/api/snippets?page=0&size=6&sort=likeCount,desc')
-      .then((res) => res.json())
-      .then((data) => setPopularSnippets(data.content || []))
-      .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then((data) => {
+        if (data.content && data.content.length > 0) {
+          setPopularSnippets(data.content);
+        } else {
+          setPopularSnippets(dummySnippets); // 데이터 없으면 더미 데이터 사용
+        }
+      })
+      .catch((err) => {
+        console.error('🔥 인기 스니펫 로딩 실패:', err);
+        setPopularSnippets(dummySnippets); // 에러 발생 시 더미 데이터 사용
+      });
 
+    // 최신 게시글 로딩
     const postParams = new URLSearchParams({
       page: 0,
       size: 5,
@@ -28,9 +144,21 @@ const Home = () => {
     });
 
     fetch(`/api/posts?${postParams.toString()}`)
-      .then((res) => res.json())
-      .then((data) => setRecentPosts(data.content || []))
-      .catch((err) => console.error('🔥 최신 게시글 로딩 실패:', err));
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then((data) => {
+        if (data.content && data.content.length > 0) {
+          setRecentPosts(data.content);
+        } else {
+          setRecentPosts(dummyPosts); // 데이터 없으면 더미 데이터 사용
+        }
+      })
+      .catch((err) => {
+        console.error('🔥 최신 게시글 로딩 실패:', err);
+        setRecentPosts(dummyPosts); // 에러 발생 시 더미 데이터 사용
+      });
   }, []);
 
   const handleSearch = (e) => {
