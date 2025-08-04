@@ -95,7 +95,7 @@ class ExecutionServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(codeExecutionRepository.save(any(CodeExecution.class))).thenReturn(any(CodeExecution.class));
 
-        ExecutionResponse response = executionService.execute(javaRequest, 1L);
+        ExecutionResponse response = executionService.execute(javaRequest, testUser.getEmail());
 
         assertThat(response.getStatus()).isEqualTo(CodeExecution.Status.SUCCESS.name());
         assertThat(response.getOutput()).contains("Hello");
@@ -108,7 +108,7 @@ class ExecutionServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(codeExecutionRepository.save(any(CodeExecution.class))).thenReturn(any(CodeExecution.class));
 
-        ExecutionResponse response = executionService.execute(pythonRequest, 1L);
+        ExecutionResponse response = executionService.execute(pythonRequest, testUser.getEmail());
 
         assertThat(response.getStatus()).isEqualTo(CodeExecution.Status.SUCCESS.name());
         assertThat(response.getOutput()).contains("Hello");
@@ -121,7 +121,7 @@ class ExecutionServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(codeExecutionRepository.save(any(CodeExecution.class))).thenReturn(any(CodeExecution.class));
 
-        ExecutionResponse response = executionService.execute(cRequest, 1L);
+        ExecutionResponse response = executionService.execute(cRequest, testUser.getEmail());
 
         assertThat(response.getStatus()).isEqualTo(CodeExecution.Status.SUCCESS.name());
         assertThat(response.getOutput()).contains("Hello");
@@ -134,7 +134,7 @@ class ExecutionServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(codeExecutionRepository.save(any(CodeExecution.class))).thenReturn(any(CodeExecution.class));
 
-        ExecutionResponse response = executionService.execute(htmlRequest, 1L);
+        ExecutionResponse response = executionService.execute(htmlRequest, testUser.getEmail());
 
         assertThat(response.getStatus()).isEqualTo(CodeExecution.Status.SUCCESS.name());
         assertThat(response.getOutput()).isEqualTo(htmlRequest.getCode());
@@ -147,7 +147,7 @@ class ExecutionServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(codeExecutionRepository.save(any(CodeExecution.class))).thenReturn(any(CodeExecution.class));
 
-        ExecutionResponse response = executionService.execute(cssRequest, 1L);
+        ExecutionResponse response = executionService.execute(cssRequest, testUser.getEmail());
 
         assertThat(response.getStatus()).isEqualTo(CodeExecution.Status.SUCCESS.name());
         assertThat(response.getOutput()).isEqualTo(cssRequest.getCode());
@@ -164,7 +164,7 @@ class ExecutionServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
         when(codeExecutionRepository.save(any(CodeExecution.class))).thenReturn(any(CodeExecution.class));
 
-        ExecutionResponse response = executionService.execute(unsupportedRequest, 1L);
+        ExecutionResponse response = executionService.execute(unsupportedRequest, testUser.getEmail());
 
         assertThat(response.getStatus()).isEqualTo(CodeExecution.Status.ERROR.name());
         assertThat(response.getError()).contains("Unsupported language");

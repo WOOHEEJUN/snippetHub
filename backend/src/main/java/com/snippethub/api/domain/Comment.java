@@ -1,30 +1,31 @@
 package com.snippethub.api.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "comments")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "comments")
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "comment_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "user_id")
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,35 +36,21 @@ public class Comment {
     @JoinColumn(name = "snippet_id")
     private Snippet snippet;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Comment parent;
-
-    @OneToMany(mappedBy = "parent", orphanRemoval = true)
-    private List<Comment> replies = new ArrayList<>();
-
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    // 대댓글을 위한 필드들
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> replies = new ArrayList<>();
+
+    @Column(name = "depth", nullable = false)
+    private Integer depth = 0; // 0: 원댓글, 1: 대댓글, 2: 대대댓글
+
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    public void updateContent(String content) {
-        this.content = content;
-    }
-
-    @Builder
-    public Comment(User author, Post post, Snippet snippet, Comment parent, String content) {
-        this.author = author;
-        this.post = post;
-        this.snippet = snippet;
-        this.parent = parent;
-        this.content = content;
-    }
 }

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import '../css/Header.css';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, logout, getAuthHeaders } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   console.log('Header - isAuthenticated:', isAuthenticated);
 
   const handleLogout = () => {
@@ -34,6 +35,7 @@ const Header = () => {
             </>
           ) : (
             <>
+              <NotificationBell />
               <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
               <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
             </>

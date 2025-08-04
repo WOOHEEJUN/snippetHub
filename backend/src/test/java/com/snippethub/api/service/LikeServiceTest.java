@@ -76,12 +76,12 @@ class LikeServiceTest {
     @Test
     @DisplayName("게시글 좋아요 추가 성공")
     void toggleLikeForPost_AddSuccess() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(testPost));
         when(likeRepository.findByUserIdAndPostId(anyLong(), anyLong())).thenReturn(Optional.empty());
         when(likeRepository.save(any(Like.class))).thenReturn(any(Like.class));
 
-        boolean isLiked = likeService.toggleLikeForPost(1L, 1L);
+        boolean isLiked = likeService.toggleLikeForPost(1L, testUser.getEmail());
 
         assertThat(isLiked).isTrue();
         assertThat(testPost.getLikeCount()).isEqualTo(1); // 좋아요 수 증가 확인
@@ -99,7 +99,7 @@ class LikeServiceTest {
         when(likeRepository.findByUserIdAndPostId(anyLong(), anyLong())).thenReturn(Optional.of(existingLike));
         doNothing().when(likeRepository).delete(any(Like.class));
 
-        boolean isLiked = likeService.toggleLikeForPost(1L, 1L);
+        boolean isLiked = likeService.toggleLikeForPost(1L, testUser.getEmail());
 
         assertThat(isLiked).isFalse();
         assertThat(testPost.getLikeCount()).isEqualTo(0); // 좋아요 수 감소 확인
@@ -109,12 +109,12 @@ class LikeServiceTest {
     @Test
     @DisplayName("스니펫 좋아요 추가 성공")
     void toggleLikeForSnippet_AddSuccess() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(snippetRepository.findById(anyLong())).thenReturn(Optional.of(testSnippet));
         when(likeRepository.findByUserIdAndSnippetId(anyLong(), anyLong())).thenReturn(Optional.empty());
         when(likeRepository.save(any(Like.class))).thenReturn(any(Like.class));
 
-        boolean isLiked = likeService.toggleLikeForSnippet(1L, 1L);
+        boolean isLiked = likeService.toggleLikeForSnippet(1L, testUser.getEmail());
 
         assertThat(isLiked).isTrue();
         assertThat(testSnippet.getLikeCount()).isEqualTo(1); // 좋아요 수 증가 확인
@@ -127,12 +127,12 @@ class LikeServiceTest {
         Like existingLike = Like.builder().user(testUser).snippet(testSnippet).build();
         testSnippet.increaseLikeCount(); // Simulate existing like
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(snippetRepository.findById(anyLong())).thenReturn(Optional.of(testSnippet));
         when(likeRepository.findByUserIdAndSnippetId(anyLong(), anyLong())).thenReturn(Optional.of(existingLike));
         doNothing().when(likeRepository).delete(any(Like.class));
 
-        boolean isLiked = likeService.toggleLikeForSnippet(1L, 1L);
+        boolean isLiked = likeService.toggleLikeForSnippet(1L, testUser.getEmail());
 
         assertThat(isLiked).isFalse();
         assertThat(testSnippet.getLikeCount()).isEqualTo(0); // 좋아요 수 감소 확인

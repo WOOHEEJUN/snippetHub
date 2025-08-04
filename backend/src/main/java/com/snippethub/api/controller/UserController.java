@@ -93,4 +93,37 @@ public class UserController {
         );
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
+
+    // 다른 사용자의 프로필 조회
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<ApiResponse<UserProfileResponseDto>> getUserProfileById(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+        UserStatsDto stats = userService.getUserStats(user.getId());
+        UserProfileResponseDto responseDto = new UserProfileResponseDto(user, stats);
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
+    }
+
+    // 다른 사용자의 게시글 목록 조회
+    @GetMapping("/{userId}/posts")
+    public ResponseEntity<ApiResponse<PageResponseDto<PostResponseDto>>> getUserPosts(
+            @PathVariable Long userId,
+            Pageable pageable) {
+        Page<Post> postsPage = userService.getUserPosts(userId, pageable);
+        PageResponseDto<PostResponseDto> responseDto = new PageResponseDto<>(
+                postsPage.map(PostResponseDto::new)
+        );
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
+    }
+
+    // 다른 사용자의 스니펫 목록 조회
+    @GetMapping("/{userId}/snippets")
+    public ResponseEntity<ApiResponse<PageResponseDto<SnippetResponseDto>>> getUserSnippets(
+            @PathVariable Long userId,
+            Pageable pageable) {
+        Page<Snippet> snippetsPage = userService.getUserSnippets(userId, pageable);
+        PageResponseDto<SnippetResponseDto> responseDto = new PageResponseDto<>(
+                snippetsPage.map(SnippetResponseDto::new)
+        );
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
+    }
 }

@@ -12,4 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByTitleContainingIgnoreCase(String search, Pageable pageable);
     
     Page<Post> findByCategoryAndTitleContainingIgnoreCase(String category, String search, Pageable pageable);
+    
+    Page<Post> findByAuthorId(Long authorId, Pageable pageable);
 }

@@ -15,4 +15,7 @@ public interface SnippetRepository extends JpaRepository<Snippet, Long> {
     
     // 언어 + 제목 검색
     Page<Snippet> findByLanguageAndTitleContainingIgnoreCase(String language, String search, Pageable pageable);
+    
+    // 작성자별 조회
+    Page<Snippet> findByAuthorId(Long authorId, Pageable pageable);
 }

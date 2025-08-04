@@ -74,11 +74,11 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 생성 성공")
     void createPostSuccess() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(tagService.findOrCreateTags(anyList())).thenReturn(Arrays.asList(new com.snippethub.api.domain.Tag("spring"), new com.snippethub.api.domain.Tag("boot")));
         when(postRepository.save(any(Post.class))).thenReturn(testPost);
 
-        Post createdPost = postService.createPost(createRequestDto, 1L);
+        Post createdPost = postService.createPost(createRequestDto, testUser.getEmail());
 
         assertThat(createdPost).isNotNull();
         assertThat(createdPost.getTitle()).isEqualTo(createRequestDto.getTitle());
@@ -90,9 +90,9 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 생성 실패 - 사용자 없음")
     void createPostFail_UserNotFound() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> postService.createPost(createRequestDto, 1L))
+        assertThatThrownBy(() -> postService.createPost(createRequestDto, testUser.getEmail()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("사용자를 찾을 수 없습니다.");
     }
@@ -156,8 +156,7 @@ class PostServiceTest {
         List<Post> posts = Arrays.asList(testPost);
         Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
-        when(postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                anyString(), anyString(), any(Pageable.class))).thenReturn(postPage);
+        when(postRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(postPage);
 
         Page<Post> result = postService.getPosts(pageable, null, "test");
 
@@ -172,8 +171,8 @@ class PostServiceTest {
         List<Post> posts = Arrays.asList(testPost);
         Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
-        when(postRepository.findByCategoryAndTitleContainingIgnoreCaseOrCategoryAndContentContainingIgnoreCase(
-                eq("GENERAL"), anyString(), eq("GENERAL"), anyString(), any(Pageable.class))).thenReturn(postPage);
+        when(postRepository.findByCategoryAndTitleContainingIgnoreCase(
+                eq("GENERAL"), anyString(), any(Pageable.class))).thenReturn(postPage);
 
         Page<Post> result = postService.getPosts(pageable, "GENERAL", "test");
 

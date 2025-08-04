@@ -128,4 +128,20 @@ public class UserService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return postRepository.findAll(pageable);
     }
+
+    // 다른 사용자 조회
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    // 다른 사용자의 게시글 목록 조회
+    public Page<Post> getUserPosts(Long userId, Pageable pageable) {
+        return postRepository.findByAuthorId(userId, pageable);
+    }
+
+    // 다른 사용자의 스니펫 목록 조회
+    public Page<Snippet> getUserSnippets(Long userId, Pageable pageable) {
+        return snippetRepository.findByAuthorId(userId, pageable);
+    }
 }

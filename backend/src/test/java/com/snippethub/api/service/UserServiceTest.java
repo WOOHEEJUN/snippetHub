@@ -68,7 +68,7 @@ class UserServiceTest {
     @Test
     @DisplayName("프로필 조회 성공")
     void getUserProfileSuccess() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(userRepository.countSnippetsByUserId(anyLong())).thenReturn(5L);
         when(userRepository.countPostsByUserId(anyLong())).thenReturn(3L);
         when(userRepository.countCommentsByUserId(anyLong())).thenReturn(10L);
@@ -76,8 +76,8 @@ class UserServiceTest {
         when(userRepository.sumSnippetViewCountsByUserId(anyLong())).thenReturn(100L);
         when(userRepository.sumPostViewCountsByUserId(anyLong())).thenReturn(50L);
 
-        User foundUser = userService.getUserProfile(1L);
-        UserProfileResponseDto.UserStatsDto stats = userService.getUserStats(1L);
+        User foundUser = userService.getUserProfile(testUser.getEmail());
+        UserProfileResponseDto.UserStatsDto stats = userService.getUserStats(testUser.getId());
 
         assertThat(foundUser).isNotNull();
         assertThat(foundUser.getEmail()).isEqualTo(testUser.getEmail());
@@ -91,9 +91,9 @@ class UserServiceTest {
     @Test
     @DisplayName("프로필 조회 실패 - 사용자 없음")
     void getUserProfileFail_UserNotFound() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.getUserProfile(1L))
+        assertThatThrownBy(() -> userService.getUserProfile(testUser.getEmail()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("사용자를 찾을 수 없습니다.");
     }
@@ -105,10 +105,10 @@ class UserServiceTest {
         requestDto.setNickname("newnickname");
         requestDto.setBio("new bio");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(userRepository.existsByNickname(anyString())).thenReturn(false);
 
-        User updatedUser = userService.updateUserProfile(1L, requestDto);
+        User updatedUser = userService.updateUserProfile(testUser.getEmail(), requestDto);
 
         assertThat(updatedUser.getNickname()).isEqualTo("newnickname");
         assertThat(updatedUser.getBio()).isEqualTo("new bio");
@@ -126,10 +126,10 @@ class UserServiceTest {
                 .fileUrl("http://example.com/image.jpg")
                 .build();
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
-        when(fileService.uploadFile(any(MultipartFile.class), anyString(), anyLong())).thenReturn(uploadedFile);
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
+        when(fileService.uploadFile(any(MultipartFile.class), anyString(), anyString())).thenReturn(uploadedFile);
 
-        User updatedUser = userService.updateUserProfile(1L, requestDto);
+        User updatedUser = userService.updateUserProfile(testUser.getEmail(), requestDto);
 
         assertThat(updatedUser.getProfileImage()).isEqualTo("http://example.com/image.jpg");
     }
@@ -140,10 +140,10 @@ class UserServiceTest {
         UserProfileUpdateRequestDto requestDto = new UserProfileUpdateRequestDto();
         requestDto.setNickname("existingnickname");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(userRepository.existsByNickname(anyString())).thenReturn(true);
 
-        assertThatThrownBy(() -> userService.updateUserProfile(1L, requestDto))
+        assertThatThrownBy(() -> userService.updateUserProfile(testUser.getEmail(), requestDto))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("이미 사용중인 닉네임입니다.");
     }
@@ -156,11 +156,11 @@ class UserServiceTest {
         requestDto.setNewPassword("newpassword123!@#");
         requestDto.setConfirmNewPassword("newpassword123!@#");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn("newencodedpassword");
 
-        userService.changeUserPassword(1L, requestDto);
+        userService.changeUserPassword(testUser.getEmail(), requestDto);
 
         assertThat(testUser.getPassword()).isEqualTo("newencodedpassword");
     }
@@ -173,10 +173,10 @@ class UserServiceTest {
         requestDto.setNewPassword("newpassword123!@#");
         requestDto.setConfirmNewPassword("newpassword123!@#");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        assertThatThrownBy(() -> userService.changeUserPassword(1L, requestDto))
+        assertThatThrownBy(() -> userService.changeUserPassword(testUser.getEmail(), requestDto))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("비밀번호가 일치하지 않습니다.");
     }
@@ -189,10 +189,10 @@ class UserServiceTest {
         requestDto.setNewPassword("newpassword123!@#");
         requestDto.setConfirmNewPassword("mismatchedpassword");
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
-        assertThatThrownBy(() -> userService.changeUserPassword(1L, requestDto))
+        assertThatThrownBy(() -> userService.changeUserPassword(testUser.getEmail(), requestDto))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("비밀번호가 일치하지 않습니다.");
     }
@@ -204,7 +204,7 @@ class UserServiceTest {
         Page<com.snippethub.api.domain.Snippet> snippetPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(snippetRepository.findAll(any(Pageable.class))).thenReturn(snippetPage);
 
-        Page<com.snippethub.api.domain.Snippet> result = userService.getMySnippets(1L, pageable, "ALL");
+        Page<com.snippethub.api.domain.Snippet> result = userService.getMySnippets(testUser.getEmail(), pageable, "ALL");
 
         assertThat(result).isNotNull();
         verify(snippetRepository, times(1)).findAll(any(Pageable.class));
@@ -217,7 +217,7 @@ class UserServiceTest {
         Page<com.snippethub.api.domain.Post> postPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(postRepository.findAll(any(Pageable.class))).thenReturn(postPage);
 
-        Page<com.snippethub.api.domain.Post> result = userService.getMyPosts(1L, pageable);
+        Page<com.snippethub.api.domain.Post> result = userService.getMyPosts(testUser.getEmail(), pageable);
 
         assertThat(result).isNotNull();
         verify(postRepository, times(1)).findAll(any(Pageable.class));
