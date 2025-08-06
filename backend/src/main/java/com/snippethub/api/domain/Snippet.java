@@ -44,6 +44,10 @@ public class Snippet {
     @OneToMany(mappedBy = "snippet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
+    // 댓글과의 관계 추가 (Cascade 설정으로 스니펫 삭제 시 댓글도 함께 삭제)
+    @OneToMany(mappedBy = "snippet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "snippet_tags",
             joinColumns = @JoinColumn(name = "snippet_id"),
