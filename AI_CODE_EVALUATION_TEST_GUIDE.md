@@ -56,7 +56,7 @@ POST /api/ai/suggest/learning-path
 **Request 설정:**
 ```
 Method: POST
-URL: http://localhost:8080/api/ai/evaluate/code-quality
+URL: http://localhost:80/api/ai/evaluate/code-quality
 Query Params:
   code: def find_max(arr):
             return max(arr)
@@ -156,7 +156,7 @@ public int factorial(int n) {
 
 3. **코드 품질 평가 테스트:**
    ```http
-   POST /api/ai/evaluate/code-quality?code=print("Hello")&language=python&problemId=1
+   POST http://localhost:80/api/ai/evaluate/code-quality?code=print("Hello")&language=python&problemId=1
    ```
 
 4. **다른 AI 기능들 테스트**

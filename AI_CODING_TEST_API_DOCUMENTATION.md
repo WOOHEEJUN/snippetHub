@@ -659,7 +659,7 @@ GET /api/users/level-stats
 
 **문서 버전**: 1.0
 **최종 업데이트**: 2025년 08월 06일
-**API 기본 URL**: `http://localhost:8080`
+**API 기본 URL**: `http://localhost:80`
 
 ## 🚨 **Jackson 직렬화 오류 발견!**
 

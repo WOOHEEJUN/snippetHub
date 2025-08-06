@@ -22,7 +22,7 @@ POST /api/ai/problems/generate?difficulty=EASY&difficulty=MEDIUM&difficulty=HARD
 
 **✅ 올바른 호출:**
 ```http
-POST /api/ai/problems/generate?difficulty=EASY&category=ALGORITHM
+POST http://localhost:80/api/ai/problems/generate?difficulty=EASY&category=ALGORITHM
 Authorization: Bearer {your_jwt_token}
 ```
 
@@ -143,7 +143,7 @@ INFO  - AI가 새로운 문제를 생성했습니다: ...
 
 3. **AI 문제 생성 테스트:**
    ```http
-   POST /api/ai/problems/generate?difficulty=EASY&category=ALGORITHM
+   POST http://localhost:80/api/ai/problems/generate?difficulty=EASY&category=ALGORITHM
    Authorization: Bearer {jwt_token}
    ```
 
