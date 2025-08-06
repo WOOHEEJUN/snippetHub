@@ -25,6 +25,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final TagService tagService;
+    private final PointService pointService;
+    private final BadgeService badgeService;
 
     @Transactional
     public Post createPost(PostCreateRequestDto requestDto, String email) {
@@ -44,7 +46,18 @@ public class PostService {
             post.getTags().addAll(tags);
         }
 
-        return postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+        
+        // 포인트 지급 및 뱃지 체크
+        try {
+            pointService.awardPointsForPost(author.getId());
+            badgeService.checkAndAwardBadges(author.getId());
+        } catch (Exception e) {
+            // 포인트/뱃지 시스템 오류가 게시글 작성에 영향을 주지 않도록 처리
+            System.err.println("포인트/뱃지 시스템 오류: " + e.getMessage());
+        }
+
+        return savedPost;
     }
 
     @Transactional

@@ -143,19 +143,11 @@ public class CommentService {
         if (!comment.getAuthor().getEmail().equals(userEmail)) {
             throw new IllegalStateException("You are not the author of this comment");
         }
-        // Comment 엔티티에 setter가 없으므로, 새로운 Comment를 만들어서 저장하는 방식을 사용합니다.
-        // 이는 불변성을 유지하는데 도움이 됩니다.
-        Comment updatedComment = Comment.builder()
-            .id(comment.getId())
-            .content(requestDto.getContent())
-            .author(comment.getAuthor())
-            .post(comment.getPost())
-            .snippet(comment.getSnippet())
-            .createdAt(comment.getCreatedAt())
-            .build();
-
-        commentRepository.save(updatedComment);
-        return CommentDto.CommentResponseDto.from(updatedComment);
+        
+        // 기존 댓글의 내용만 업데이트
+        comment.updateContent(requestDto.getContent());
+        
+        return CommentDto.CommentResponseDto.from(comment);
     }
 
     // 댓글 삭제

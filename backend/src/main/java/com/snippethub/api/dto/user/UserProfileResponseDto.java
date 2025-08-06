@@ -24,7 +24,7 @@ public class UserProfileResponseDto {
         this.nickname = user.getNickname();
         this.profileImage = user.getProfileImage();
         this.bio = user.getBio();
-        this.level = user.getLevel();
+        this.level = user.getLevel().getDisplayName();
         this.points = user.getPoints();
         this.joinDate = user.getCreatedAt();
         this.lastLoginAt = user.getLastLoginAt();

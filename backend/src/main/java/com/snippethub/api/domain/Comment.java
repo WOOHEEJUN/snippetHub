@@ -53,4 +53,8 @@ public class Comment {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+    
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

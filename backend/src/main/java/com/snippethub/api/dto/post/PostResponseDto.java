@@ -27,7 +27,7 @@ public class PostResponseDto {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.category = post.getCategory();
-        // this.tags = post.getTags(); // TODO: Implement Tag system
+        // this.tags = post.getTags().stream().map(Tag::getName).collect(Collectors.toList()); // TODO: Implement Tag system
         this.tags = List.of();
         this.author = new UserDto(post.getAuthor());
         this.createdAt = post.getCreatedAt();

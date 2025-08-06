@@ -144,4 +144,81 @@ public class UserService {
     public Page<Snippet> getUserSnippets(Long userId, Pageable pageable) {
         return snippetRepository.findByAuthorId(userId, pageable);
     }
+
+    /**
+     * 이메일로 사용자 조회
+     */
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    /**
+     * 사용자 랭킹 조회
+     */
+    public Page<User> getUserRanking(Pageable pageable, String level) {
+        if ("ALL".equals(level)) {
+            return userRepository.findAllByOrderByPointsDesc(pageable);
+        } else {
+            return userRepository.findByLevelOrderByPointsDesc(level, pageable);
+        }
+    }
+
+    /**
+     * 등급별 통계 조회
+     */
+    public LevelStatsResponseDto getLevelStats() {
+        long totalUsers = userRepository.count();
+        long bronzeUsers = userRepository.countByLevel("BRONZE");
+        long silverUsers = userRepository.countByLevel("SILVER");
+        long goldUsers = userRepository.countByLevel("GOLD");
+        long platinumUsers = userRepository.countByLevel("PLATINUM");
+        long diamondUsers = userRepository.countByLevel("DIAMOND");
+        long masterUsers = userRepository.countByLevel("MASTER");
+        long grandmasterUsers = userRepository.countByLevel("GRANDMASTER");
+        long legendUsers = userRepository.countByLevel("LEGEND");
+
+        return new LevelStatsResponseDto(
+                totalUsers, bronzeUsers, silverUsers, goldUsers, 
+                platinumUsers, diamondUsers, masterUsers, grandmasterUsers, legendUsers
+        );
+    }
+
+    // DTO 클래스
+    public static class LevelStatsResponseDto {
+        private long totalUsers;
+        private long bronzeUsers;
+        private long silverUsers;
+        private long goldUsers;
+        private long platinumUsers;
+        private long diamondUsers;
+        private long masterUsers;
+        private long grandmasterUsers;
+        private long legendUsers;
+
+        public LevelStatsResponseDto(long totalUsers, long bronzeUsers, long silverUsers, 
+                                   long goldUsers, long platinumUsers, long diamondUsers,
+                                   long masterUsers, long grandmasterUsers, long legendUsers) {
+            this.totalUsers = totalUsers;
+            this.bronzeUsers = bronzeUsers;
+            this.silverUsers = silverUsers;
+            this.goldUsers = goldUsers;
+            this.platinumUsers = platinumUsers;
+            this.diamondUsers = diamondUsers;
+            this.masterUsers = masterUsers;
+            this.grandmasterUsers = grandmasterUsers;
+            this.legendUsers = legendUsers;
+        }
+
+        // Getters
+        public long getTotalUsers() { return totalUsers; }
+        public long getBronzeUsers() { return bronzeUsers; }
+        public long getSilverUsers() { return silverUsers; }
+        public long getGoldUsers() { return goldUsers; }
+        public long getPlatinumUsers() { return platinumUsers; }
+        public long getDiamondUsers() { return diamondUsers; }
+        public long getMasterUsers() { return masterUsers; }
+        public long getGrandmasterUsers() { return grandmasterUsers; }
+        public long getLegendUsers() { return legendUsers; }
+    }
 }

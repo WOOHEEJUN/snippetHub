@@ -36,4 +36,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT SUM(p.viewCount) FROM Post p WHERE p.author.id = :userId")
     Long sumPostViewCountsByUserId(@Param("userId") Long userId);
+
+    // 등급별 사용자 조회
+    @Query("SELECT u FROM User u ORDER BY u.points DESC")
+    org.springframework.data.domain.Page<User> findAllByOrderByPointsDesc(org.springframework.data.domain.Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.level = :level ORDER BY u.points DESC")
+    org.springframework.data.domain.Page<User> findByLevelOrderByPointsDesc(@Param("level") String level, org.springframework.data.domain.Pageable pageable);
+
+    // 등급별 사용자 수 조회
+    @Query("SELECT COUNT(u) FROM User u WHERE u.level = :level")
+    long countByLevel(@Param("level") String level);
 }

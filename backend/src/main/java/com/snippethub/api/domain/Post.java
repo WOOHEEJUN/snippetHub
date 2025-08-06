@@ -102,4 +102,48 @@ public class Post {
     public void decreaseLikeCount() {
         this.likeCount = Math.max(0, this.likeCount - 1);
     }
+    
+    public List<Tag> getTags() {
+        return this.tags;
+    }
+    
+    public Long getId() {
+        return this.id;
+    }
+    
+    public String getTitle() {
+        return this.title;
+    }
+    
+    public String getContent() {
+        return this.content;
+    }
+    
+    public String getCategory() {
+        return this.category;
+    }
+    
+    public User getAuthor() {
+        return this.author;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
+    }
+    
+    public LocalDateTime getUpdatedAt() {
+        return this.updatedAt;
+    }
+    
+    public int getViewCount() {
+        return this.viewCount;
+    }
+    
+    public int getLikeCount() {
+        return this.likeCount;
+    }
+    
+    public int getCommentCount() {
+        return this.commentCount;
+    }
 }
