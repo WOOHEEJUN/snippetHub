@@ -29,4 +29,25 @@ public class UserRegisterRequestDto {
 
     @AssertTrue(message = "이용약관에 동의해야 합니다.")
     private boolean agreeToTerms;
+
+    // Lombok이 제대로 작동하지 않을 경우를 대비한 수동 getter 메서드
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public boolean isAgreeToTerms() {
+        return agreeToTerms;
+    }
 }
