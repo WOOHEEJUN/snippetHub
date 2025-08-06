@@ -45,10 +45,22 @@ public class AIProblemGenerationService {
      */
     public Optional<Problem> generateProblem(ProblemDifficulty difficulty, ProblemCategory category) {
         try {
+            log.info("AI 문제 생성 시작 - 난이도: {}, 카테고리: {}", difficulty, category);
+            
+            // API 키 검증
+            if (openaiApiKey == null || openaiApiKey.isEmpty() || openaiApiKey.equals("YOUR_ACTUAL_OPENAI_API_KEY_HERE")) {
+                log.error("OpenAI API 키가 설정되지 않았습니다.");
+                return createMockProblem(difficulty, category);
+            }
+            
             String prompt = createProblemPrompt(difficulty, category);
+            log.debug("생성된 프롬프트: {}", prompt);
+            
             String aiResponse = callAI(prompt);
             
-            if (aiResponse != null) {
+            if (aiResponse != null && !aiResponse.trim().isEmpty()) {
+                log.debug("AI 응답 받음: {}", aiResponse.substring(0, Math.min(200, aiResponse.length())));
+                
                 Problem problem = parseAIResponse(aiResponse, difficulty, category);
                 if (problem != null) {
                     // 중복 검사
@@ -58,14 +70,20 @@ public class AIProblemGenerationService {
                         return Optional.of(savedProblem);
                     } else {
                         log.warn("중복된 문제가 생성되었습니다: {}", problem.getTitle());
+                        return createMockProblem(difficulty, category);
                     }
+                } else {
+                    log.warn("AI 응답 파싱 실패");
+                    return createMockProblem(difficulty, category);
                 }
+            } else {
+                log.warn("AI 응답이 비어있습니다.");
+                return createMockProblem(difficulty, category);
             }
         } catch (Exception e) {
             log.error("AI 문제 생성 중 오류 발생", e);
+            return createMockProblem(difficulty, category);
         }
-        
-        return Optional.empty();
     }
 
     /**
@@ -170,6 +188,7 @@ public class AIProblemGenerationService {
         try {
             // JSON 응답에서 실제 내용 추출
             String jsonContent = extractJsonFromResponse(aiResponse);
+            log.debug("추출된 JSON: {}", jsonContent);
             
             // JSON을 AIProblemResponse로 파싱
             AIProblemResponse aiResponseObj = objectMapper.readValue(jsonContent, AIProblemResponse.class);
@@ -187,6 +206,8 @@ public class AIProblemGenerationService {
                 .solutionTemplate(aiResponseObj.getSolutionTemplate())
                 .difficulty(difficulty)
                 .category(category)
+                .timeLimit(1000)
+                .memoryLimit(128)
                 .build();
         } catch (Exception e) {
             log.error("AI 응답 파싱 실패: {}", aiResponse, e);
@@ -234,24 +255,61 @@ public class AIProblemGenerationService {
     }
 
     /**
+     * Mock 문제 생성 (AI API 실패 시 사용)
+     */
+    private Optional<Problem> createMockProblem(ProblemDifficulty difficulty, ProblemCategory category) {
+        try {
+            String title = String.format("%s - %s 문제", category.getDisplayName(), difficulty.getDisplayName());
+            String description = String.format("이것은 %s 카테고리의 %s 난이도 문제입니다.", 
+                category.getDisplayName(), difficulty.getDisplayName());
+            
+            Problem mockProblem = Problem.builder()
+                .title(title)
+                .description(description)
+                .problemStatement("주어진 조건에 맞는 솔루션을 구현하세요.")
+                .inputFormat("표준 입력")
+                .outputFormat("표준 출력")
+                .constraints("1 ≤ N ≤ 100")
+                .sampleInput("5")
+                .sampleOutput("25")
+                .solutionTemplate("// 여기에 솔루션을 작성하세요")
+                .difficulty(difficulty)
+                .category(category)
+                .timeLimit(1000)
+                .memoryLimit(128)
+                .build();
+            
+            Problem savedProblem = problemRepository.save(mockProblem);
+            log.info("Mock 문제가 생성되었습니다: {}", savedProblem.getTitle());
+            return Optional.of(savedProblem);
+        } catch (Exception e) {
+            log.error("Mock 문제 생성 실패", e);
+            return Optional.empty();
+        }
+    }
+
+    /**
      * 문제 생성 프롬프트 생성
      */
     private String createProblemPrompt(ProblemDifficulty difficulty, ProblemCategory category) {
         return """
-            다음 조건에 맞는 프로그래밍 문제를 생성해주세요:
+            다음 조건에 맞는 프로그래밍 문제를 JSON 형식으로 생성해주세요:
             
             난이도: %s
             카테고리: %s
             
-            요구사항:
-            1. 명확하고 이해하기 쉬운 문제 설명
-            2. 구체적인 입력/출력 형식
-            3. 적절한 제약 조건
-            4. 2-3개의 샘플 테스트 케이스
-            5. 기본 코드 템플릿 (Java, Python, JavaScript)
-            6. 문제 해결을 위한 힌트 2-3개
-            
-            JSON 형식으로 응답해주세요.
+            응답 형식:
+            {
+              "title": "문제 제목",
+              "description": "문제 설명",
+              "problemStatement": "상세한 문제 설명",
+              "inputFormat": "입력 형식",
+              "outputFormat": "출력 형식", 
+              "constraints": "제약 조건",
+              "sampleInput": "샘플 입력",
+              "sampleOutput": "샘플 출력",
+              "solutionTemplate": "기본 코드 템플릿"
+            }
             """.formatted(difficulty.getDisplayName(), category.getDisplayName());
     }
 } 

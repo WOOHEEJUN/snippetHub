@@ -20,6 +20,12 @@ POST /api/ai/problems/generate
 - `difficulty` (필수): `EASY` | `MEDIUM` | `HARD` | `EXPERT`
 - `category` (필수): `ALGORITHM` | `DATA_STRUCTURE` | `WEB_DEVELOPMENT` | `DATABASE` | `SYSTEM_DESIGN` | `FRONTEND` | `BACKEND` | `DEVOPS`
 
+**사용 예시:**
+```http
+POST /api/ai/problems/generate?difficulty=EASY&category=ALGORITHM
+Authorization: Bearer {your_jwt_token}
+```
+
 **응답 예시:**
 ```json
 {
@@ -654,3 +660,17 @@ GET /api/users/level-stats
 **문서 버전**: 1.0
 **최종 업데이트**: 2025년 08월 06일
 **API 기본 URL**: `http://localhost:8080`
+
+## 🚨 **Jackson 직렬화 오류 발견!**
+
+로그를 보니 **Jackson 직렬화 오류**가 발생하고 있습니다:
+
+```
+<code_block_to_apply_changes_from>
+```
+
+**문제**: 내부 클래스 `CodeQualityReport`에 `@Data` 어노테이션이 없어서 Jackson이 직렬화할 수 없습니다.
+
+## 🔧 **해결 방법**
+
+AICodeEvaluationService의 내부 클래스들에 `@Data` 어노테이션을 추가하겠습니다.
