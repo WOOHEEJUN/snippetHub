@@ -31,7 +31,7 @@ const Header = () => {
           {!isAuthenticated ? (
             <>
               <Link to="/login" className="btn btn-outline-primary">로그인</Link>
-              <Link to="/register" className="btn btn-primary">회원가입</Link>
+              <Link to="/register" className="btn btn-primary">회원가-입</Link>
             </>
           ) : (
             <>

@@ -1,0 +1,155 @@
+/* frontend/src/css/MyBadges.css */
+
+.my-badges-page {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  color: #d3d3d3;
+}
+
+.my-badges-page h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.info-section {
+  display: flex;
+  justify-content: space-around;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.info-card {
+  background-color: #222222;
+  border: 1px solid #333333;
+  border-radius: 10px;
+  padding: 1.5rem;
+  flex: 1;
+  min-width: 180px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.info-card .label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #b0b0b0;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.info-card .value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.badge-section {
+  margin-bottom: 2.5rem;
+}
+
+.badge-section h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.badge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.badge-item {
+  background-color: #222222;
+  border: 1px solid #333333;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  width: 120px; /* 고정 너비 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer; /* 대표 뱃지 토글 기능 고려 */
+}
+
+.badge-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.badge-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
+.badge-item .badge-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #b0b0b0;
+}
+
+.badge-item.featured {
+  border-color: #8ab0d1; /* 대표 뱃지 강조 색상 */
+  box-shadow: 0 0 15px rgba(138, 176, 209, 0.5); /* 대표 뱃지 그림자 */
+}
+
+.badge-item.not-owned img {
+  opacity: 0.3; /* 획득하지 않은 뱃지 흐리게 */
+}
+
+.loading-message, .error-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #b0b0b0;
+  padding: 2rem;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .my-badges-page {
+    padding: 1.5rem;
+    margin: 1rem auto;
+  }
+
+  .my-badges-page h2 {
+    font-size: 1.8rem;
+  }
+
+  .info-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .info-card {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .badge-grid {
+    justify-content: center;
+  }
+
+  .badge-item {
+    width: 100px;
+  }
+
+  .badge-item img {
+    width: 50px;
+    height: 50px;
+  }
+}

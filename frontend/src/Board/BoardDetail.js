@@ -2,8 +2,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaHeart, FaRegHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
+import { FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
+import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import '../css/BoardDetail.css';
+
+const MOCK_ENABLED = false;
 
 function BoardDetail() {
   const { postId } = useParams();
@@ -50,7 +53,7 @@ function BoardDetail() {
 
   useEffect(() => {
     fetchPostData();
-  }, [fetchPostData]);
+  }, [fetchPostData, postId]);
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 
@@ -108,7 +111,15 @@ function BoardDetail() {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
       }
-      fetchPostData();
+
+      // 좋아요 요청 성공 후 likeCount와 isLiked만 갱신
+      const result = await res.json();
+      console.log('좋아요 API 응답:', result);
+      setPost(prev => ({
+        ...prev,
+        isLiked: result.data?.isLiked ?? !prev.isLiked,
+        likeCount: result.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1)
+      }));
     } catch (err) {
       alert(err.message);
       console.error('좋아요 처리 실패:', err);
@@ -241,54 +252,7 @@ function BoardDetail() {
     setReplyingToCommentId(null);
     setReplyContent('');
   };
-
-  // 추가: 내 뱃지/포인트/등급/랭킹 상태
-  const [myBadges, setMyBadges] = useState([]);
-  const [myFeaturedBadges, setMyFeaturedBadges] = useState([]);
-  const [myPoints, setMyPoints] = useState(null);
-  const [myLevel, setMyLevel] = useState(null);
-  const [myRanking, setMyRanking] = useState(null);
-
-  // 추가: 내 정보 불러오기
-  useEffect(() => {
-    if (!user) return;
-
-    // 내 뱃지 목록
-    fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setMyBadges(data.data || []))
-      .catch(() => {});
-
-    // 내 대표 뱃지
-    fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setMyFeaturedBadges(data.data || []))
-      .catch(() => {});
-
-    // 내 포인트
-    fetch('/api/points/my', { headers: getAuthHeaders(), credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setMyPoints(data.data))
-      .catch(() => {});
-
-    // 내 등급
-    fetch('/api/users/level', { headers: getAuthHeaders(), credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setMyLevel(data.data))
-      .catch(() => {});
-
-    // 내 랭킹 (1페이지, 10개 중 내 userId 찾기)
-    fetch('/api/users/ranking?page=0&size=10', { headers: getAuthHeaders(), credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.data?.content) {
-          const found = data.data.content.find(u => u.userId === user.userId);
-          setMyRanking(found);
-        }
-      })
-      .catch(() => {});
-  }, [user]);
-
+  
   if (error) return <div className="container text-center py-5 text-danger">{error}</div>;
   if (!post) return (
     <div className="container text-center py-5">
@@ -337,8 +301,8 @@ function BoardDetail() {
   aria-label={post.isLiked ? '좋아요 취소' : '좋아요'}
 >
   {post.isLiked
-    ? <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
-    : <FaRegHeart />}
+    ? <AiFillHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
+    : <AiOutlineHeart />}
   <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>{post.likeCount}</span>
 </button>
         </div>
@@ -464,56 +428,7 @@ function BoardDetail() {
           <button onClick={() => navigate('/board')} className="action-button back-button">목록으로</button>
         </div>
 
-        {/* 내 대표 뱃지 카드 */}
-        <div className="sidebar-card badge-card">
-          <h4>🏅 내 대표 뱃지</h4>
-          <div>
-            {myFeaturedBadges.length === 0
-              ? <span>대표 뱃지가 없습니다.</span>
-              : myFeaturedBadges.map(badge => (
-                  <span key={badge.badgeId} style={{ marginRight: 8 }}>
-                    <img src={badge.imageUrl} alt={badge.name} style={{ width: 32, height: 32 }} />
-                    <span>{badge.name}</span>
-                  </span>
-                ))}
-          </div>
-        </div>
-
-        {/* 내 포인트 카드 */}
-        <div className="sidebar-card point-card">
-          <h4>💰 내 포인트</h4>
-          <div>
-            {myPoints ? (
-              <span>{myPoints.point} P</span>
-            ) : (
-              <span>포인트 정보 없음</span>
-            )}
-          </div>
-        </div>
-
-        {/* 내 등급 카드 */}
-        <div className="sidebar-card level-card">
-          <h4>👑 내 등급</h4>
-          <div>
-            {myLevel ? (
-              <span>{myLevel.levelName} (Lv.{myLevel.level})</span>
-            ) : (
-              <span>등급 정보 없음</span>
-            )}
-          </div>
-        </div>
-
-        {/* 내 랭킹 카드 */}
-        <div className="sidebar-card ranking-card">
-          <h4>🏆 내 랭킹</h4>
-          <div>
-            {myRanking ? (
-              <span>{myRanking.nickname} : {myRanking.rank}위</span>
-            ) : (
-              <span>랭킹 정보 없음</span>
-            )}
-          </div>
-        </div>
+        
       </div>
     </div>
   );

@@ -19,7 +19,11 @@ import CodeTest from './CodeTest/CodeTest';
 import OAuth2Callback from './pages/OAuth2Callback';
 import Notifications from './pages/Notifications'; // Notifications 컴포넌트 임포트
 import UserProfile from './pages/UserProfile'; // UserProfile 컴포넌트 임포트
+import MyBadges from './MyPage/MyBadges';
+import Ranking from './MyPage/Ranking';
+import PointsGuide from './MyPage/PointsGuide';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import NotificationBell from './components/NotificationBell'; // NotificationBell 임포트
 import './css/App.css';
 
 const AuthStatus = () => {
@@ -38,6 +42,7 @@ const AuthStatus = () => {
 }
   return (
     <div className="auth-status d-flex align-items-center gap-3">
+      <NotificationBell />
       <span>안녕하세요, {user.nickname || user.email}님!</span>
       <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
       <Link to="/code-test" className="btn btn-outline-success">코드 테스트</Link>
@@ -89,6 +94,9 @@ function App() {
             <Route path="/mypage/posts" element={<MyPosts />} />
             <Route path="/mypage/snippets" element={<MySnippets />} />
             <Route path="/mypage/edit" element={<ProfileEdit />} />
+            <Route path="/mypage/badges" element={<MyBadges />} />
+            <Route path="/mypage/ranking" element={<Ranking />} />
+            <Route path="/mypage/points-guide" element={<PointsGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
             <Route path="/snippets/write" element={<SnippetWrite />} />
             <Route path="/snippets/:snippetId" element={<SnippetDetail />} />

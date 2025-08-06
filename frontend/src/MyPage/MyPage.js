@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../css/Mypage.css';
 
 function MyPage() {
@@ -64,6 +64,7 @@ function MyPage() {
               <p><strong>레벨:</strong> {userInfo.level}</p>
               <p><strong>포인트:</strong> {userInfo.points}</p>
               <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
+              <Link to="/mypage/badges" className="btn btn-primary-custom mt-3">등급보기</Link>
             </div>
           </div>
 
@@ -109,6 +110,12 @@ function MyPage() {
         <button className="btn btn-secondary-custom" onClick={goToEditProfile}>
           개인정보 수정
         </button>
+        <Link to="/mypage/ranking" className="btn btn-secondary-custom">
+          랭킹 보기
+        </Link>
+        <Link to="/mypage/points-guide" className="btn btn-secondary-custom">
+          포인트 획득 기준
+        </Link>
         <button className="btn btn-secondary-custom" onClick={handleLogout}>
           로그아웃
         </button>
