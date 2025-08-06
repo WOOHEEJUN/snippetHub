@@ -1,10 +1,10 @@
 // frontend/src/SnippetBoard/SnippetDetail.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { FaHeart, FaComment, FaEye, FaPlay, FaTags, FaUser, FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaComment, FaEye, FaPlay, FaTags, FaUser, FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy } from 'react-icons/fa';
 import '../css/SnippetDetail.css';
 
 function SnippetDetail() {
@@ -23,7 +23,7 @@ function SnippetDetail() {
   const [loading, setLoading] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
 
-  const fetchSnippet = async () => {
+  const fetchSnippet = useCallback(async () => {
     try {
       const res = await fetch(`/api/snippets/${snippetId}`, {
         headers: getAuthHeaders(),
@@ -32,30 +32,27 @@ function SnippetDetail() {
       const data = await res.json();
       setSnippet(data.data);
     } catch (err) {
-      console.error(err);
       setError('스니펫을 불러오는 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [snippetId, getAuthHeaders]);
+
+  const fetchComments = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/snippets/${snippetId}/comments/all`, {
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      setComments(Array.isArray(data) ? data : []);
+    } catch (err) {
+    }
+  }, [snippetId, getAuthHeaders]);
 
   useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const res = await fetch(`/api/snippets/${snippetId}/comments/all`, {
-          headers: getAuthHeaders(),
-        });
-        const data = await res.json();
-        console.log('스니펫 댓글 데이터:', data);
-        setComments(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error('댓글 불러오기 실패:', err);
-      }
-    };
-
     fetchSnippet();
     fetchComments();
-  }, [snippetId, getAuthHeaders]);
+  }, [fetchSnippet, fetchComments]);
 
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
@@ -64,13 +61,12 @@ function SnippetDetail() {
     try {
       const res = await fetch(`/api/snippets/${snippetId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
       });
       if (!res.ok) throw new Error('삭제 실패');
       alert('삭제되었습니다.');
       navigate('/snippets');
     } catch (err) {
-      console.error(err);
       alert('삭제 중 오류가 발생했습니다.');
     }
   };
@@ -79,18 +75,16 @@ function SnippetDetail() {
     e.preventDefault();
     if (!newComment.trim()) return;
     try {
-      const res = await fetch(`/api/snippets/${snippetId}/comments`, {
+      const res = await fetch(`/api/v1/snippets/${snippetId}/comments`, {
         method: 'POST',
         headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newComment }),
       });
       if (!res.ok) throw new Error('댓글 작성 실패');
       const newCommentData = await res.json();
-      console.log('새 스니펫 댓글 응답:', newCommentData);
       setComments((prev) => [...prev, newCommentData]);
       setNewComment('');
     } catch (err) {
-      console.error(err);
     }
   };
 
@@ -104,17 +98,16 @@ function SnippetDetail() {
       if (!res.ok) throw new Error('댓글 삭제 실패');
       setComments((prev) => prev.filter((c) => c.commentId !== commentId));
     } catch (err) {
-      console.error('댓글 삭제 실패:', err);
     }
   };
 
   const handleCommentEdit = async (commentId) => {
     if (!editContent.trim()) return;
     try {
-      const res = await fetch(`/api/comments/${commentId}`, {
+      const res = await fetch(`/api/v1/comments/${commentId}`, {
         method: 'PUT',
         headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: editContent }),
+        body: JSON.stringify({ content: editContent, parentCommentId: 0 }),
       });
       if (!res.ok) throw new Error('댓글 수정 실패');
       const updatedCommentData = await res.json();
@@ -125,8 +118,8 @@ function SnippetDetail() {
       );
       setEditCommentId(null);
       setEditContent('');
+      fetchComments(); // Refresh comments after saving
     } catch (err) {
-      console.error('댓글 수정 실패:', err);
     }
   };
 
@@ -134,7 +127,7 @@ function SnippetDetail() {
     e.preventDefault();
     if (!replyContent.trim()) return;
     try {
-      const res = await fetch(`/api/snippets/${snippetId}/comments`, {
+      const res = await fetch(`/api/v1/snippets/${snippetId}/comments`, {
         method: 'POST',
         headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -144,7 +137,6 @@ function SnippetDetail() {
       });
       if (!res.ok) throw new Error('답글 작성 실패');
       const newReplyData = await res.json();
-      console.log('새 스니펫 답글 응답:', newReplyData);
       
       // 댓글 목록을 새로고침하여 대댓글을 포함한 전체 구조를 가져옴
       const fetchComments = async () => {
@@ -153,7 +145,6 @@ function SnippetDetail() {
             headers: getAuthHeaders(),
           });
           const data = await res.json();
-          console.log('스니펫 댓글 데이터:', data);
           setComments(Array.isArray(data) ? data : []);
         } catch (err) {
           console.error('댓글 불러오기 실패:', err);
@@ -164,7 +155,6 @@ function SnippetDetail() {
       setReplyContent('');
       setReplyingToCommentId(null);
     } catch (err) {
-      console.error(err);
     }
   };
 
@@ -191,12 +181,16 @@ function SnippetDetail() {
         throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
       }
 
-      // 좋아요 요청 성공 후 스니펫 데이터를 다시 불러와 화면을 업데이트합니다.
-      fetchSnippet();
+      // 좋아요 요청 성공 후 likeCount와 isLiked만 갱신
+      const result = await res.json();
+      setSnippet(prev => ({
+        ...prev,
+        isLiked: result.data?.isLiked ?? !prev.isLiked,
+        likeCount: result.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1)
+      }));
 
     } catch (err) {
       alert(err.message);
-      console.error('좋아요 처리 실패:', err);
     }
   };
 
@@ -239,7 +233,6 @@ function SnippetDetail() {
           </form>
           <div className="comment-list">
             {comments.map((comment) => {
-              console.log('스니펫 댓글:', comment);
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
@@ -349,8 +342,22 @@ function SnippetDetail() {
         </div>
         
         <div className="sidebar-card actions-card">
-            <button onClick={handleLike} className={`action-button like-button ${snippet.isLiked ? 'liked' : ''}`}>
-                <FaHeart /> {snippet.isLiked ? '좋아요 취소' : '좋아요'}
+            <button
+              onClick={handleLike}
+              className={`action-button like-button ${snippet.isLiked ? 'liked' : ''}`}
+              style={{
+                background: 'none',
+                border: 'none',
+                outline: 'none',
+                cursor: 'pointer',
+                fontSize: 24,
+                color: snippet.isLiked ? '#e74c3c' : '#aaa',
+                transition: 'color 0.2s'
+              }}
+              aria-label={snippet.isLiked ? '좋아요 취소' : '좋아요'}
+            >
+              {snippet.isLiked ? <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} /> : <FaRegHeart />}
+              <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>{snippet.likeCount}</span>
             </button>
             {user?.userId === snippet.author?.userId && (
             <>

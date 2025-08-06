@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/Home.css';
+import { Bell } from 'react-bootstrap-icons'; // 또는 <i className="bi bi-bell"></i> 사용 가능
 
 import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
 
@@ -13,13 +14,11 @@ const Home = () => {
   const [recentPosts, setRecentPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
-  console.log();
 
   useEffect(() => {
     fetch('http://localhost:8080/api/snippets?page=0&size=5&sort=POPULAR')
       .then((res) => res.json())
       .then((data) => {
-        console.log('인기 스니펫 API 응답:', data); // 데이터 확인을 위한 로그 추가
         setPopularSnippets(data.data.content || []);
       })
       .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
@@ -48,6 +47,25 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      {/* 상단 인사 + 알림 */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        padding: '16px 24px 0 24px'
+      }}>
+        {isLoggedIn && (
+          <>
+            <span style={{ fontWeight: 'bold', marginRight: 12 }}>
+              안녕하세요, {user?.nickname ?? user?.username ?? '회원'}님!
+            </span>
+            {/* 아이콘 라이브러리 없으면 아래 span 사용 */}
+            {/* <span style={{ fontSize: 22, cursor: 'pointer' }}>🔔</span> */}
+            <Bell size={22} style={{ cursor: 'pointer' }} />
+          </>
+        )}
+      </div>
+
       {/* Hero Section */}
       <section className="hero-section text-start">
   <div className="container hero-container">

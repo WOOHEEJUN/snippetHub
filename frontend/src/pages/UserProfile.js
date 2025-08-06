@@ -31,7 +31,6 @@ const UserProfile = () => {
         setError('사용자를 찾을 수 없습니다.');
       }
     } catch (error) {
-      console.error('프로필 가져오기 실패:', error);
       setError('프로필을 불러오는데 실패했습니다.');
     }
   };
@@ -45,7 +44,6 @@ const UserProfile = () => {
         setPosts(data.data.content || []);
       }
     } catch (error) {
-      console.error('게시글 가져오기 실패:', error);
     }
   };
 
@@ -58,7 +56,6 @@ const UserProfile = () => {
         setSnippets(data.data.content || []);
       }
     } catch (error) {
-      console.error('스니펫 가져오기 실패:', error);
     }
   };
 
@@ -171,8 +168,8 @@ const UserProfile = () => {
                 <div className="no-content">작성한 게시글이 없습니다.</div>
               ) : (
                 posts.map((post) => (
-                  <div key={post.id} className="content-item">
-                    <Link to={`/board/${post.id}`} className="content-link">
+                  <div key={post.postId} className="content-item">
+                    <Link to={`/board/${post.postId}`} className="content-link">
                       <h3 className="content-title">{post.title}</h3>
                       <p className="content-excerpt">{post.content.substring(0, 100)}...</p>
                       <div className="content-meta">
@@ -193,8 +190,8 @@ const UserProfile = () => {
                 <div className="no-content">작성한 스니펫이 없습니다.</div>
               ) : (
                 snippets.map((snippet) => (
-                  <div key={snippet.id} className="content-item">
-                    <Link to={`/snippets/${snippet.id}`} className="content-link">
+                  <div key={snippet.snippetId} className="content-item">
+                    <Link to={`/snippets/${snippet.snippetId}`} className="content-link">
                       <h3 className="content-title">{snippet.title}</h3>
                       <p className="content-excerpt">{snippet.description}</p>
                       <div className="content-meta">
@@ -215,4 +212,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;

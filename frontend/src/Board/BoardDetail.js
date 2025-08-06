@@ -1,8 +1,8 @@
-// src/Board/BoardDetail.js
+// frontend/src/Board/BoardDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
 import '../css/BoardDetail.css';
 
 function BoardDetail() {
@@ -28,7 +28,7 @@ function BoardDetail() {
     try {
       const [postRes, commentsRes] = await Promise.all([
         fetch(`/api/posts/${postId}`, { headers: getAuthHeaders(), credentials: 'include' }),
-        fetch(`/api/posts/${postId}/comments/all`, { headers: getAuthHeaders(), credentials: 'include' })
+        fetch(`/api/v1/posts/${postId}/comments/all`, { headers: getAuthHeaders(), credentials: 'include' })
       ]);
 
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
@@ -38,9 +38,8 @@ function BoardDetail() {
 
       if (commentsRes.ok) {
         const commentsData = await commentsRes.json();
-        console.log('댓글 데이터:', commentsData);
+        
         const commentsArray = Array.isArray(commentsData) ? commentsData : [];
-        console.log('댓글 배열:', commentsArray);
         setComments(commentsArray);
       }
     } catch (err) {
@@ -71,9 +70,9 @@ function BoardDetail() {
 
   try {
     const res = await fetch(url, {
-      method: 'DELETE',
-      headers,
-      credentials: 'include',
+        method: 'DELETE',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        credentials: 'include',
     });
 
     const resText = await res.text();
@@ -125,7 +124,7 @@ function BoardDetail() {
       return;
     }
     try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
+      const res = await fetch(`/api/v1/posts/${postId}/comments`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -160,13 +159,13 @@ function BoardDetail() {
       return;
     }
     try {
-      const res = await fetch(`/api/comments/${commentId}`, {
+      const res = await fetch(`/api/v1/comments/${commentId}`, {
         method: 'PUT',
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content: editingCommentContent }),
+        body: JSON.stringify({ content: editingCommentContent, parentCommentId: 0 }),
         credentials: 'include',
       });
       if (!res.ok) throw new Error('댓글 수정 실패');
@@ -176,6 +175,7 @@ function BoardDetail() {
       );
       setEditingCommentId(null);
       setEditingCommentContent('');
+      fetchPostData(); // Refresh comments after saving
     } catch (err) {
       alert(err.message);
     }
@@ -184,11 +184,17 @@ function BoardDetail() {
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm('정말 이 댓글을 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`/api/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-        credentials: 'include',
-      });
+      let res;
+      if (MOCK_ENABLED) {
+        setComments(prevComments => prevComments.filter(c => c.commentId !== commentId));
+        res = { ok: true, status: 200 }; // Simulate successful deletion
+      } else {
+        res = await fetch(`/api/v1/comments/${commentId}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+          credentials: 'include',
+        });
+      }
       if (!res.ok) throw new Error('댓글 삭제 실패');
       setComments(prevComments => prevComments.filter(c => c.commentId !== commentId));
     } catch (err) {
@@ -205,7 +211,7 @@ function BoardDetail() {
       return;
     }
     try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
+      const res = await fetch(`/api/v1/posts/${postId}/comments`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -235,6 +241,53 @@ function BoardDetail() {
     setReplyingToCommentId(null);
     setReplyContent('');
   };
+
+  // 추가: 내 뱃지/포인트/등급/랭킹 상태
+  const [myBadges, setMyBadges] = useState([]);
+  const [myFeaturedBadges, setMyFeaturedBadges] = useState([]);
+  const [myPoints, setMyPoints] = useState(null);
+  const [myLevel, setMyLevel] = useState(null);
+  const [myRanking, setMyRanking] = useState(null);
+
+  // 추가: 내 정보 불러오기
+  useEffect(() => {
+    if (!user) return;
+
+    // 내 뱃지 목록
+    fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setMyBadges(data.data || []))
+      .catch(() => {});
+
+    // 내 대표 뱃지
+    fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setMyFeaturedBadges(data.data || []))
+      .catch(() => {});
+
+    // 내 포인트
+    fetch('/api/points/my', { headers: getAuthHeaders(), credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setMyPoints(data.data))
+      .catch(() => {});
+
+    // 내 등급
+    fetch('/api/users/level', { headers: getAuthHeaders(), credentials: 'include' })
+      .then(res => res.json())
+      .then(data => setMyLevel(data.data))
+      .catch(() => {});
+
+    // 내 랭킹 (1페이지, 10개 중 내 userId 찾기)
+    fetch('/api/users/ranking?page=0&size=10', { headers: getAuthHeaders(), credentials: 'include' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.content) {
+          const found = data.data.content.find(u => u.userId === user.userId);
+          setMyRanking(found);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   if (error) return <div className="container text-center py-5 text-danger">{error}</div>;
   if (!post) return (
@@ -269,9 +322,25 @@ function BoardDetail() {
         </div>
 
         <div className="post-actions-top">
-          <button onClick={handleLike} className={`action-button like-button ${post.likedByCurrentUser ? 'liked' : ''}`}>
-            <FaHeart /> {post.likedByCurrentUser ? '좋아요 취소' : '좋아요'} ({post.likeCount})
-          </button>
+          <button
+  onClick={handleLike}
+  className={`action-button like-button ${post.isLiked ? 'liked' : ''}`}
+  style={{
+    background: 'none',
+    border: 'none',
+    outline: 'none',
+    cursor: 'pointer',
+    fontSize: 24,
+    color: post.isLiked ? '#e74c3c' : '#aaa',
+    transition: 'color 0.2s'
+  }}
+  aria-label={post.isLiked ? '좋아요 취소' : '좋아요'}
+>
+  {post.isLiked
+    ? <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
+    : <FaRegHeart />}
+  <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>{post.likeCount}</span>
+</button>
         </div>
 
         <div className="comment-section">
@@ -393,6 +462,57 @@ function BoardDetail() {
             </>
           )}
           <button onClick={() => navigate('/board')} className="action-button back-button">목록으로</button>
+        </div>
+
+        {/* 내 대표 뱃지 카드 */}
+        <div className="sidebar-card badge-card">
+          <h4>🏅 내 대표 뱃지</h4>
+          <div>
+            {myFeaturedBadges.length === 0
+              ? <span>대표 뱃지가 없습니다.</span>
+              : myFeaturedBadges.map(badge => (
+                  <span key={badge.badgeId} style={{ marginRight: 8 }}>
+                    <img src={badge.imageUrl} alt={badge.name} style={{ width: 32, height: 32 }} />
+                    <span>{badge.name}</span>
+                  </span>
+                ))}
+          </div>
+        </div>
+
+        {/* 내 포인트 카드 */}
+        <div className="sidebar-card point-card">
+          <h4>💰 내 포인트</h4>
+          <div>
+            {myPoints ? (
+              <span>{myPoints.point} P</span>
+            ) : (
+              <span>포인트 정보 없음</span>
+            )}
+          </div>
+        </div>
+
+        {/* 내 등급 카드 */}
+        <div className="sidebar-card level-card">
+          <h4>👑 내 등급</h4>
+          <div>
+            {myLevel ? (
+              <span>{myLevel.levelName} (Lv.{myLevel.level})</span>
+            ) : (
+              <span>등급 정보 없음</span>
+            )}
+          </div>
+        </div>
+
+        {/* 내 랭킹 카드 */}
+        <div className="sidebar-card ranking-card">
+          <h4>🏆 내 랭킹</h4>
+          <div>
+            {myRanking ? (
+              <span>{myRanking.nickname} : {myRanking.rank}위</span>
+            ) : (
+              <span>랭킹 정보 없음</span>
+            )}
+          </div>
         </div>
       </div>
     </div>

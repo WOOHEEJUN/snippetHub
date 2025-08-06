@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/SnippetBoard.css';
@@ -18,7 +18,7 @@ const SnippetBoard = () => {
   const [sortOrder, setSortOrder] = useState('LATEST');
 
   // 데이터 요청 및 상태 업데이트
-  const fetchSnippets = (page = 0, term = '', lang = '', sort = 'LATEST') => {
+  const fetchSnippets = useCallback((page = 0, term = '', lang = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
 
@@ -43,10 +43,9 @@ const SnippetBoard = () => {
       })
       .catch(err => {
         setError(err.message);
-        console.error('스니펫 로드 실패:', err);
       })
       .finally(() => setLoading(false));
-  };
+  }, [searchTerm, searchLanguage, sortOrder]);
 
   useEffect(() => {
     // URL 파라미터 가져오기
@@ -63,7 +62,7 @@ const SnippetBoard = () => {
 
     // 데이터 로드
     fetchSnippets(page, term, lang, sort);
-  }, [location.search]);
+  }, [location.search, fetchSnippets]);
 
   const handleSearch = (e) => {
     e.preventDefault();
