@@ -43,6 +43,14 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags = new ArrayList<>();
 
+    // 좋아요와의 관계 추가
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+    // 댓글과의 관계 추가
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     // TODO: Implement Tag system
     // @Column(name = "tags", columnDefinition = "text[]")
     // private String[] tags;

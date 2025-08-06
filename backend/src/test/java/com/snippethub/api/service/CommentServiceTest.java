@@ -80,7 +80,7 @@ class CommentServiceTest {
                 .isPublic(true)
                 .build();
 
-        createRequestDto = new CommentDto.CommentRequestDto("Test Comment");
+        createRequestDto = new CommentDto.CommentRequestDto("Test Comment", null);
     }
 
     @Test

@@ -24,6 +24,12 @@ public class PointService {
     public static final int POINTS_FOR_DAILY_LOGIN = 5;     // 일일 로그인
     public static final int POINTS_FOR_WEEKLY_LOGIN = 20;   // 주간 로그인 (7일 연속)
     public static final int POINTS_FOR_MONTHLY_LOGIN = 100; // 월간 로그인 (30일 연속)
+    
+    // 문제 해결 포인트 (난이도별)
+    public static final int POINTS_FOR_EASY_PROBLEM = 10;   // 쉬운 문제 해결
+    public static final int POINTS_FOR_MEDIUM_PROBLEM = 20; // 보통 문제 해결
+    public static final int POINTS_FOR_HARD_PROBLEM = 30;   // 어려운 문제 해결
+    public static final int POINTS_FOR_EXPERT_PROBLEM = 50; // 전문가 문제 해결
 
     /**
      * 게시글 작성 포인트 지급
@@ -93,6 +99,26 @@ public class PointService {
         userRepository.save(user);
         
         log.info("User {} earned {} points for code execution", user.getNickname(), POINTS_FOR_CODE_EXECUTION);
+    }
+
+    /**
+     * 문제 해결 포인트 지급 (난이도별)
+     */
+    public void awardPointsForProblemSolved(Long userId, com.snippethub.api.domain.ProblemDifficulty difficulty) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        int points = switch (difficulty) {
+            case EASY -> POINTS_FOR_EASY_PROBLEM;
+            case MEDIUM -> POINTS_FOR_MEDIUM_PROBLEM;
+            case HARD -> POINTS_FOR_HARD_PROBLEM;
+            case EXPERT -> POINTS_FOR_EXPERT_PROBLEM;
+        };
+        
+        user.addPoints(points);
+        userRepository.save(user);
+        
+        log.info("User {} earned {} points for solving {} problem", user.getNickname(), points, difficulty.getDisplayName());
     }
 
     /**
