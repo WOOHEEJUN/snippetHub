@@ -16,12 +16,15 @@ const Home = () => {
   const [searchLanguage, setSearchLanguage] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/snippets?page=0&size=5&sort=POPULAR')
+    fetch('/api/snippets?page=0&size=5&sort=POPULAR')
       .then((res) => res.json())
       .then((data) => {
         setPopularSnippets(data.data.content || []);
       })
-      .catch((err) => console.error('🔥 인기 스니펫 로딩 실패:', err));
+      .catch((err) => {
+        console.error('🔥 인기 스니펫 로딩 실패:', err);
+        setPopularSnippets([]);
+      });
 
     const postParams = new URLSearchParams({
       page: 0,
@@ -29,10 +32,13 @@ const Home = () => {
       sort: 'createdAt,desc',
     });
 
-    fetch(`http://localhost:8080/api/posts?${postParams.toString()}`)
+    fetch(`/api/posts?${postParams.toString()}`)
       .then((res) => res.json())
       .then((data) => setRecentPosts(data.data.content || []))
-      .catch((err) => console.error('🔥 최신 게시글 로딩 실패:', err));
+      .catch((err) => {
+        console.error('🔥 최신 게시글 로딩 실패:', err);
+        setRecentPosts([]);
+      });
   }, []);
 
   const handleSearch = (e) => {

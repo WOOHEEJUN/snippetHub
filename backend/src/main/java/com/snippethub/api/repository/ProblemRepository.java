@@ -49,4 +49,14 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     Page<Problem> findUnsolvedProblemsByUserAndDifficulty(@Param("userId") Long userId, 
                                                           @Param("difficulty") ProblemDifficulty difficulty, 
                                                           Pageable pageable);
+    
+    // 랜덤 활성화된 문제들 조회 (추천용)
+    @Query(value = "SELECT * FROM problems WHERE is_active = true ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Problem> findRandomActiveProblems(@Param("limit") int limit);
+    
+    // 난이도별 문제 개수 조회
+    long countByDifficultyAndIsActiveTrue(ProblemDifficulty difficulty);
+    
+    // 활성화된 문제 개수 조회
+    long countByIsActiveTrue();
 } 

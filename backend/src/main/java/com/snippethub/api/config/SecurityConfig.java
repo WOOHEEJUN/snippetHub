@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/posts/**").permitAll() // 프론트엔드 호환성
                 .requestMatchers("/api/v1/snippets/**", "/api/v1/execute").permitAll()
                 .requestMatchers("/api/snippets/**").permitAll() // 프론트엔드 호환성
+                .requestMatchers("/api/daily-problems/**").permitAll() // 일일 문제 API 허용
+                .requestMatchers("/api/problems/**").permitAll() // 문제 목록 API 허용
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId}/comments").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/snippets/{snippetId}/comments").permitAll()
                                     .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()

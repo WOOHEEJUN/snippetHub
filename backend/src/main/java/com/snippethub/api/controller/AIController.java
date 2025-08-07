@@ -91,16 +91,14 @@ public class AIController {
      */
     @PostMapping("/evaluate/code-quality")
     public ResponseEntity<ApiResponse<AICodeEvaluationService.CodeQualityReport>> evaluateCodeQuality(
-            @RequestParam String code,
-            @RequestParam String language,
-            @RequestParam Long problemId,
+            @RequestBody AICodeEvaluationRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         // 실제 구현에서는 problemId로 Problem을 조회
         Problem problem = new Problem("테스트 문제", "테스트", null, null, null, null, null, null, null, ProblemDifficulty.EASY, ProblemCategory.ALGORITHM, 1000, 128);
 
         AICodeEvaluationService.CodeQualityReport report = 
-            aiCodeEvaluationService.evaluateCodeQuality(code, language, problem);
+            aiCodeEvaluationService.evaluateCodeQuality(request.getCode(), request.getLanguage(), problem);
         
         return ResponseEntity.ok(ApiResponse.success("코드 품질 평가가 완료되었습니다.", report));
     }
@@ -110,16 +108,14 @@ public class AIController {
      */
     @PostMapping("/suggest/optimization")
     public ResponseEntity<ApiResponse<AICodeEvaluationService.CodeOptimizationSuggestion>> suggestOptimization(
-            @RequestParam String code,
-            @RequestParam String language,
-            @RequestParam Long problemId,
+            @RequestBody AICodeEvaluationRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         // 실제 구현에서는 problemId로 Problem을 조회
         Problem problem = new Problem("테스트 문제", "테스트", null, null, null, null, null, null, null, ProblemDifficulty.EASY, ProblemCategory.ALGORITHM, 1000, 128);
 
         AICodeEvaluationService.CodeOptimizationSuggestion suggestion = 
-            aiCodeEvaluationService.suggestOptimization(code, language, problem);
+            aiCodeEvaluationService.suggestOptimization(request.getCode(), request.getLanguage(), problem);
         
         return ResponseEntity.ok(ApiResponse.success("코드 최적화 제안이 완료되었습니다.", suggestion));
     }
@@ -129,11 +125,10 @@ public class AIController {
      */
     @PostMapping("/explain/code")
     public ResponseEntity<ApiResponse<String>> explainCode(
-            @RequestParam String code,
-            @RequestParam String language,
+            @RequestBody AICodeEvaluationRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        String explanation = aiCodeEvaluationService.generateCodeExplanation(code, language);
+        String explanation = aiCodeEvaluationService.generateCodeExplanation(request.getCode(), request.getLanguage());
         
         return ResponseEntity.ok(ApiResponse.success("코드 설명이 생성되었습니다.", explanation));
     }

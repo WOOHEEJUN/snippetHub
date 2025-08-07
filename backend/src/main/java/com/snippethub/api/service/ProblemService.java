@@ -152,6 +152,38 @@ public class ProblemService {
     }
 
     /**
+     * 사용자 맞춤 추천 문제 조회
+     */
+    public List<ProblemResponseDto> getRecommendedProblems(String userEmail) {
+        // 임시로 랜덤 문제 5개를 추천 (실제로는 사용자 수준과 학습 패턴을 분석해야 함)
+        List<Problem> randomProblems = problemRepository.findRandomActiveProblems(5);
+        return randomProblems.stream()
+                .map(ProblemResponseDto::new)
+                .toList();
+    }
+
+    /**
+     * 사용자 문제 해결 통계 조회
+     */
+    public UserProblemStats getUserProblemStats(String userEmail) {
+        // 임시 통계 데이터 (실제로는 사용자의 제출 이력을 분석해야 함)
+        return new UserProblemStats(
+            15, // solvedProblems
+            0.75, // successRate
+            "SILVER", // currentLevel
+            3, // streak
+            5, // easySolved
+            7, // mediumSolved
+            3, // hardSolved
+            List.of(
+                new CategoryProgress("ALGORITHM", 8, 50),
+                new CategoryProgress("DATA_STRUCTURE", 4, 30),
+                new CategoryProgress("STRING", 3, 20)
+            )
+        );
+    }
+
+    /**
      * 문제 통계 DTO
      */
     public static class ProblemStatistics {
@@ -217,6 +249,67 @@ public class ProblemService {
                 return new ProblemStatistics(totalProblems, activeProblems, totalSubmissions, 
                                            correctSubmissions, overallSuccessRate);
             }
+        }
+    }
+
+    /**
+     * 사용자 문제 해결 통계 데이터 클래스
+     */
+    public static class UserProblemStats {
+        private final int solvedProblems;
+        private final double successRate;
+        private final String currentLevel;
+        private final int streak;
+        private final int easySolved;
+        private final int mediumSolved;
+        private final int hardSolved;
+        private final List<CategoryProgress> categoryProgress;
+
+        public UserProblemStats(int solvedProblems, double successRate, String currentLevel, 
+                              int streak, int easySolved, int mediumSolved, int hardSolved, 
+                              List<CategoryProgress> categoryProgress) {
+            this.solvedProblems = solvedProblems;
+            this.successRate = successRate;
+            this.currentLevel = currentLevel;
+            this.streak = streak;
+            this.easySolved = easySolved;
+            this.mediumSolved = mediumSolved;
+            this.hardSolved = hardSolved;
+            this.categoryProgress = categoryProgress;
+        }
+
+        // Getters
+        public int getSolvedProblems() { return solvedProblems; }
+        public double getSuccessRate() { return successRate; }
+        public String getCurrentLevel() { return currentLevel; }
+        public int getStreak() { return streak; }
+        public int getEasySolved() { return easySolved; }
+        public int getMediumSolved() { return mediumSolved; }
+        public int getHardSolved() { return hardSolved; }
+        public List<CategoryProgress> getCategoryProgress() { return categoryProgress; }
+    }
+
+    /**
+     * 카테고리별 진행률 데이터 클래스
+     */
+    public static class CategoryProgress {
+        private final String category;
+        private final int solved;
+        private final int total;
+
+        public CategoryProgress(String category, int solved, int total) {
+            this.category = category;
+            this.solved = solved;
+            this.total = total;
+        }
+
+        // Getters
+        public String getCategory() { return category; }
+        public int getSolved() { return solved; }
+        public int getTotal() { return total; }
+        
+        public double getProgress() {
+            return total > 0 ? (double) solved / total * 100 : 0;
         }
     }
 } 

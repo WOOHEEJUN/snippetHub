@@ -14,6 +14,9 @@ public interface DailyProblemRepository extends JpaRepository<DailyProblem, Long
     // 특정 날짜의 일일 과제 조회
     Optional<DailyProblem> findByProblemDate(LocalDate problemDate);
     
+    // 특정 날짜의 모든 일일 과제 조회 (생성일 기준 내림차순)
+    List<DailyProblem> findByProblemDateOrderByCreatedAtDesc(LocalDate problemDate);
+    
     // 활성화된 일일 과제 조회
     Optional<DailyProblem> findByProblemDateAndIsActiveTrue(LocalDate problemDate);
     
@@ -22,8 +25,8 @@ public interface DailyProblemRepository extends JpaRepository<DailyProblem, Long
         LocalDate startDate, LocalDate endDate);
     
     // 오늘의 일일 과제 조회
-    @Query("SELECT dp FROM DailyProblem dp WHERE dp.problemDate = CURRENT_DATE AND dp.isActive = true")
-    Optional<DailyProblem> findTodayProblem();
+    @Query("SELECT dp FROM DailyProblem dp WHERE dp.problemDate = :today AND dp.isActive = true")
+    Optional<DailyProblem> findTodayProblem(@Param("today") LocalDate today);
     
     // 이번 주 일일 과제들 조회
     @Query("SELECT dp FROM DailyProblem dp WHERE dp.problemDate BETWEEN :startOfWeek AND :endOfWeek ORDER BY dp.problemDate DESC")

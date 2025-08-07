@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -31,7 +32,8 @@ public class ProblemController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponseDto<ProblemResponseDto>>> getActiveProblems(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam(required = false) String sort,
+            @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         
         Page<ProblemResponseDto> problems = problemService.getActiveProblems(pageable);
         PageResponseDto<ProblemResponseDto> response = new PageResponseDto<>(problems);
@@ -161,5 +163,27 @@ public class ProblemController {
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse<ProblemCategory[]>> getCategories() {
         return ResponseEntity.ok(ApiResponse.success("카테고리 목록을 조회했습니다.", ProblemCategory.values()));
+    }
+
+    /**
+     * 사용자 맞춤 추천 문제 조회
+     */
+    @GetMapping("/recommended")
+    public ResponseEntity<ApiResponse<List<ProblemResponseDto>>> getRecommendedProblems(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        List<ProblemResponseDto> recommendedProblems = problemService.getRecommendedProblems(userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("추천 문제를 조회했습니다.", recommendedProblems));
+    }
+
+    /**
+     * 사용자 문제 해결 통계 조회
+     */
+    @GetMapping("/user-stats")
+    public ResponseEntity<ApiResponse<ProblemService.UserProblemStats>> getUserProblemStats(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        ProblemService.UserProblemStats stats = problemService.getUserProblemStats(userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("사용자 통계를 조회했습니다.", stats));
     }
 } 

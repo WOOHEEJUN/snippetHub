@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './NotificationBell.css';
 
 const NotificationBell = () => {
+  const { getAuthHeaders } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken'); // accessToken으로 변경
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-  };
 
   // 알림 목록 가져오기
   const fetchNotifications = async () => {
@@ -28,8 +22,9 @@ const NotificationBell = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('fetchNotifications 응답:', data);
-        setNotifications(data);
+        if (data.success) {
+          setNotifications(data.data || []);
+        }
       }
     } catch (error) {
       console.error('알림 가져오기 실패:', error);
@@ -41,14 +36,15 @@ const NotificationBell = () => {
   // 읽지 않은 알림 개수 가져오기
   const fetchUnreadCount = async () => {
     try {
-      const response = await fetch('/api/notifications/count', {
+      const response = await fetch('/api/notifications/unread-count', {
         headers: getAuthHeaders(),
         credentials: 'include'
       });
       if (response.ok) {
-        const count = await response.json();
-        console.log('fetchUnreadCount 응답:', count);
-        setUnreadCount(count);
+        const data = await response.json();
+        if (data.success) {
+          setUnreadCount(data.data);
+        }
       }
     } catch (error) {
       console.error('읽지 않은 알림 개수 가져오기 실패:', error);

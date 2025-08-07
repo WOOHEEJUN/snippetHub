@@ -12,13 +12,8 @@ function AICodeEvaluation({ snippetId, code, language, onEvaluationComplete }) {
     setLoading(true);
     setError(null);
     
-    console.log('🔍 AI 코드 평가 시도:', { snippetId, code, language, NODE_ENV: process.env.NODE_ENV });
-    
     try {
       // 개발 모드에서도 실제 API 호출 시도 (임시 데이터는 백엔드에서 처리)
-      console.log('🚀 실제 백엔드 API 호출 시도');
-      console.log('📡 API 요청 URL:', '/api/ai/evaluate-code');
-      console.log('📦 요청 데이터:', { snippetId, code, language });
       
       const response = await fetch('/api/ai/evaluate-code', {
         method: 'POST',
@@ -34,16 +29,12 @@ function AICodeEvaluation({ snippetId, code, language, onEvaluationComplete }) {
         }),
       });
 
-      console.log('📊 API 응답 상태:', response.status, response.statusText);
-      
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ API 에러:', errorData);
         throw new Error(errorData.message || '코드 평가 중 오류가 발생했습니다.');
       }
 
       const data = await response.json();
-      console.log('✅ API 응답 성공:', data);
       setEvaluation(data.data);
       
       if (onEvaluationComplete) {

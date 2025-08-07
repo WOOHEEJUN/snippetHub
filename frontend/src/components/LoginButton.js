@@ -1,7 +1,7 @@
 // src/components/KakaoLoginButton.js
 import React from 'react';
 
-const KAKAO_AUTH_URL = "http://localhost:8080/oauth2/authorization/kakao";
+const KAKAO_AUTH_URL = "/oauth2/authorization/kakao";
 
 function KakaoLoginButton() {
   const handleLogin = () => {
@@ -39,7 +39,7 @@ function KakaoLoginButton() {
   );
 }
 
-const GOOGLE_AUTH_URL = "http://localhost:8080/oauth2/authorization/google";
+const GOOGLE_AUTH_URL = "/oauth2/authorization/google";
 
 function GoogleLoginButton() {
   return (

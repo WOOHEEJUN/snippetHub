@@ -248,21 +248,82 @@ public class AIProblemGenerationService {
                 .build();
         } catch (Exception e) {
             log.error("AI 응답 파싱 실패: {}", aiResponse, e);
-            return null;
+            
+            // 파싱 실패 시 Mock 문제 생성
+            log.info("Mock 문제를 생성합니다.");
+            return createMockProblemForParsingFailure(difficulty, category);
         }
+    }
+
+    /**
+     * 파싱 실패 시 사용할 Mock 문제 생성
+     */
+    private Problem createMockProblemForParsingFailure(ProblemDifficulty difficulty, ProblemCategory category) {
+        return Problem.builder()
+            .title("AI 생성 문제 - " + category.name() + " (" + difficulty.name() + ")")
+            .description("AI가 생성한 " + category.name() + " 카테고리의 " + difficulty.name() + " 난이도 문제입니다.")
+            .problemStatement("주어진 조건을 만족하는 프로그램을 작성하세요.")
+            .inputFormat("첫 번째 줄에 정수 N이 주어집니다.")
+            .outputFormat("결과를 한 줄에 출력하세요.")
+            .constraints("1 ≤ N ≤ 1000")
+            .sampleInput("5")
+            .sampleOutput("25")
+            .solutionTemplate("// 여기에 솔루션을 작성하세요")
+            .difficulty(difficulty)
+            .category(category)
+            .timeLimit(1000)
+            .memoryLimit(128)
+            .build();
     }
 
     /**
      * AI 응답에서 JSON 부분 추출
      */
     private String extractJsonFromResponse(String response) {
-        // AI가 ```json ... ``` 형태로 응답할 수 있으므로 처리
-        if (response.contains("```json")) {
-            int start = response.indexOf("```json") + 7;
-            int end = response.indexOf("```", start);
-            return response.substring(start, end).trim();
+        try {
+            // AI가 ```json ... ``` 형태로 응답할 수 있으므로 처리
+            if (response.contains("```json")) {
+                int start = response.indexOf("```json") + 7;
+                int end = response.indexOf("```", start);
+                if (end > start) {
+                    String jsonContent = response.substring(start, end).trim();
+                    // 줄바꿈 문자와 특수 문자 처리
+                    return cleanJsonString(jsonContent);
+                }
+            }
+            
+            // JSON 블록 찾기 (중괄호로 시작하고 끝나는 부분)
+            int startIndex = response.indexOf('{');
+            int endIndex = response.lastIndexOf('}');
+            
+            if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                String jsonContent = response.substring(startIndex, endIndex + 1);
+                return cleanJsonString(jsonContent);
+            }
+            
+            // JSON 블록을 찾을 수 없으면 전체 응답 반환 (정리된 형태)
+            return cleanJsonString(response.trim());
+        } catch (Exception e) {
+            log.error("JSON 추출 실패", e);
+            return response.trim();
         }
-        return response.trim();
+    }
+
+    /**
+     * JSON 문자열 정리 (줄바꿈 문자와 특수 문자 처리)
+     */
+    private String cleanJsonString(String jsonString) {
+        if (jsonString == null) return "";
+        
+        // 줄바꿈 문자를 공백으로 대체
+        String cleaned = jsonString.replaceAll("\\n", " ")
+                                 .replaceAll("\\r", " ")
+                                 .replaceAll("\\t", " ")
+                                 // 연속된 공백을 하나로
+                                 .replaceAll("\\s+", " ")
+                                 .trim();
+        
+        return cleaned;
     }
 
     /**

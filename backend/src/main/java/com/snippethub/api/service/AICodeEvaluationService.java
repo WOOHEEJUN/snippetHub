@@ -1,11 +1,18 @@
 package com.snippethub.api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.snippethub.api.domain.Problem;
 import com.snippethub.api.domain.ProblemSubmission;
 import com.snippethub.api.domain.SubmissionStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +21,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class AICodeEvaluationService {
+
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+
+    @Value("${ai.openai.api.key}")
+    private String openaiApiKey;
+
+    @Value("${ai.openai.api.url}")
+    private String openaiApiUrl;
 
     /**
      * AI를 사용하여 코드 품질 평가
@@ -215,16 +231,65 @@ public class AICodeEvaluationService {
      */
     private String callAI(String prompt) {
         try {
-            // OpenAI API 호출 (AIProblemGenerationService와 동일한 방식)
-            // 실제 구현에서는 AIProblemGenerationService의 callAI 메서드를 재사용하거나
-            // 공통 AI 서비스를 만들어야 합니다.
+            // OpenAI API 호출
+            if (openaiApiKey != null && !openaiApiKey.isEmpty() && !"your-openai-api-key".equals(openaiApiKey)) {
+                return callOpenAI(prompt);
+            }
             
-            // 임시로 Mock 응답 반환
+            // API 키가 없으면 Mock 응답 반환
+            log.warn("OpenAI API 키가 설정되지 않아 Mock 응답을 반환합니다.");
             return createMockAIResponse(prompt);
         } catch (Exception e) {
             log.error("AI API 호출 중 오류", e);
-            return null;
+            return createMockAIResponse(prompt);
         }
+    }
+
+    /**
+     * OpenAI API 호출
+     */
+    private String callOpenAI(String prompt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(openaiApiKey);
+
+        // OpenAI API 요청 형식에 맞게 수정
+        Map<String, Object> message = Map.of("role", "user", "content", prompt);
+        Map<String, Object> requestBody = Map.of(
+            "model", "gpt-4",
+            "messages", java.util.List.of(message),
+            "temperature", 0.7,
+            "max_tokens", 2000
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        
+        try {
+            log.info("OpenAI API 호출 시작 - 코드 평가");
+            log.debug("요청 본문: {}", requestBody);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(openaiApiUrl, request, Map.class);
+            Map<String, Object> responseBody = response.getBody();
+            
+            log.info("OpenAI API 응답 상태: {}", response.getStatusCode());
+            log.debug("응답 본문: {}", responseBody);
+            
+            if (responseBody != null && responseBody.containsKey("choices")) {
+                var choices = (java.util.List<Map<String, Object>>) responseBody.get("choices");
+                if (!choices.isEmpty()) {
+                    var messageObj = (Map<String, Object>) choices.get(0).get("message");
+                    String content = (String) messageObj.get("content");
+                    log.info("AI 응답 성공: {} 문자", content.length());
+                    return content;
+                }
+            } else {
+                log.error("OpenAI API 응답 형식 오류: {}", responseBody);
+            }
+        } catch (Exception e) {
+            log.error("OpenAI API 호출 실패", e);
+        }
+        
+        return null;
     }
 
     /**
@@ -272,23 +337,74 @@ public class AICodeEvaluationService {
      */
     private CodeQualityReport parseCodeQualityResponse(String response) {
         try {
-            // 간단한 파싱 (실제로는 ObjectMapper 사용)
-            if (response.contains("overallScore")) {
-                return CodeQualityReport.builder()
-                    .score(8.5)
-                    .feedback("전반적으로 좋은 코드입니다. 다만 메모리 사용량을 줄일 수 있습니다.")
-                    .improvements(List.of("메모리 최적화", "변수명 개선"))
-                    .build();
+            log.info("AI 응답 파싱 시작: {}", response.substring(0, Math.min(200, response.length())));
+            
+            // JSON 응답에서 실제 내용 추출
+            String jsonContent = extractJsonFromResponse(response);
+            log.debug("추출된 JSON: {}", jsonContent);
+            
+            // JSON을 Map으로 파싱
+            Map<String, Object> responseMap = objectMapper.readValue(jsonContent, Map.class);
+            
+            double overallScore = 0.0;
+            if (responseMap.containsKey("overallScore")) {
+                Object scoreObj = responseMap.get("overallScore");
+                if (scoreObj instanceof Number) {
+                    overallScore = ((Number) scoreObj).doubleValue();
+                } else if (scoreObj instanceof String) {
+                    overallScore = Double.parseDouble((String) scoreObj);
+                }
             }
+            
+            String feedback = (String) responseMap.getOrDefault("feedback", "코드 품질 평가가 완료되었습니다.");
+            
+            List<String> improvements = List.of();
+            if (responseMap.containsKey("improvements")) {
+                Object improvementsObj = responseMap.get("improvements");
+                if (improvementsObj instanceof List) {
+                    improvements = (List<String>) improvementsObj;
+                }
+            }
+            
+            log.info("파싱된 결과 - 점수: {}, 피드백: {}", overallScore, feedback);
+            
+            return CodeQualityReport.builder()
+                .score(overallScore)
+                .feedback(feedback)
+                .improvements(improvements)
+                .build();
+                
         } catch (Exception e) {
-            log.error("코드 품질 응답 파싱 실패", e);
+            log.error("코드 품질 응답 파싱 실패: {}", response, e);
+            
+            // 파싱 실패 시 기본값 반환
+            return CodeQualityReport.builder()
+                .score(7.0)
+                .feedback("코드 품질 평가가 완료되었습니다. (파싱 오류로 인해 기본값 사용)")
+                .improvements(List.of("코드 리뷰를 통해 개선점을 찾아보세요"))
+                .build();
         }
-        
-        return CodeQualityReport.builder()
-            .score(7.0)
-            .feedback("코드 품질 평가가 완료되었습니다.")
-            .improvements(List.of("코드 리뷰를 통해 개선점을 찾아보세요"))
-            .build();
+    }
+
+    /**
+     * AI 응답에서 JSON 부분 추출
+     */
+    private String extractJsonFromResponse(String response) {
+        try {
+            // JSON 블록 찾기
+            int startIndex = response.indexOf('{');
+            int endIndex = response.lastIndexOf('}');
+            
+            if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                return response.substring(startIndex, endIndex + 1);
+            }
+            
+            // JSON 블록을 찾을 수 없으면 전체 응답 반환
+            return response;
+        } catch (Exception e) {
+            log.error("JSON 추출 실패", e);
+            return response;
+        }
     }
 
     private CodeOptimizationSuggestion parseOptimizationResponse(String response) {

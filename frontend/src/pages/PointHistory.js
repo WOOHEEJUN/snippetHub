@@ -35,92 +35,26 @@ function PointHistory() {
     try {
       setLoading(true);
       
-      // 백엔드 API가 준비되지 않은 경우를 위한 임시 데이터
-      if (process.env.NODE_ENV === 'development') {
-        setTimeout(() => {
-          const mockPointHistory = [
-            {
-              id: 1,
-              type: 'POST_CREATE',
-              pointChange: 10,
-              description: '[임시 데이터] 게시글 작성으로 포인트 획득 (실제 포인트 시스템은 백엔드 구현 필요)',
-              createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() // 2시간 전
-            },
-            {
-              id: 2,
-              type: 'SNIPPET_CREATE',
-              pointChange: 15,
-              description: '[임시 데이터] 스니펫 작성으로 포인트 획득',
-              createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() // 1일 전
-            },
-            {
-              id: 3,
-              type: 'COMMENT_CREATE',
-              pointChange: 5,
-              description: '[임시 데이터] 댓글 작성으로 포인트 획득',
-              createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() // 2일 전
-            },
-            {
-              id: 4,
-              type: 'LIKE_RECEIVE',
-              pointChange: 2,
-              description: '[임시 데이터] 좋아요 받음으로 포인트 획득',
-              createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString() // 3일 전
-            },
-            {
-              id: 5,
-              type: 'DAILY_LOGIN',
-              pointChange: 5,
-              description: '[임시 데이터] 일일 로그인 보상',
-              createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString() // 4일 전
-            }
-          ];
-          
-          const mockCurrentPoints = 37; // [임시 데이터] 총 획득 포인트
-          
-          // 필터링 적용
-          let filteredHistory = mockPointHistory;
-          
-          if (filter === 'EARN') {
-            filteredHistory = filteredHistory.filter(item => item.pointChange > 0);
-          } else if (filter === 'SPEND') {
-            filteredHistory = filteredHistory.filter(item => item.pointChange < 0);
-          }
-          
-          setPointHistory(filteredHistory);
-          setCurrentPoints(mockCurrentPoints);
-          setLoading(false);
-        }, 1000);
-        return;
+      // 백엔드 API 호출
+      const response = await fetch('/api/points/my', {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setPointHistory(data.data.history || []);
+          setCurrentPoints(data.data.currentPoints || 0);
+        } else {
+          setError(data.message || '포인트 내역을 불러올 수 없습니다.');
+        }
+      } else {
+        setError('포인트 내역을 불러올 수 없습니다.');
       }
-
-      const params = new URLSearchParams();
-      if (filter !== 'ALL') params.append('type', filter);
-      if (selectedMonth !== 'ALL') params.append('month', selectedMonth);
-
-      const [historyRes, pointsRes] = await Promise.all([
-        fetch(`/api/points/history?${params.toString()}`, {
-          headers: getAuthHeaders(),
-          credentials: 'include'
-        }),
-        fetch('/api/points/my', {
-          headers: getAuthHeaders(),
-          credentials: 'include'
-        })
-      ]);
-
-      if (!historyRes.ok || !pointsRes.ok) {
-        throw new Error('포인트 정보를 불러오는 중 오류가 발생했습니다.');
-      }
-
-      const historyData = await historyRes.json();
-      const pointsData = await pointsRes.json();
-
-      setPointHistory(historyData.data || []);
-      setCurrentPoints(pointsData.data?.point || 0);
     } catch (err) {
-      console.error('포인트 내역 불러오기 실패:', err);
-      setError(err.message);
+      console.error('포인트 내역 조회 실패:', err);
+      setError('포인트 내역을 불러올 수 없습니다.');
     } finally {
       setLoading(false);
     }

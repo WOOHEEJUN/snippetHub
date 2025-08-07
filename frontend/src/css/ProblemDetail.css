@@ -1,0 +1,288 @@
+.problem-detail {
+  padding: 20px 0;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.problem-detail .container {
+  max-width: 1400px;
+}
+
+.problem-section {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.problem-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid #f8f9fa;
+  padding-bottom: 20px;
+}
+
+.problem-header h1 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.problem-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.difficulty-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.category-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #6c757d;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.problem-content h3 {
+  color: #2c3e50;
+  margin: 25px 0 15px 0;
+  font-weight: 600;
+  border-left: 4px solid #667eea;
+  padding-left: 15px;
+}
+
+.problem-content p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.problem-statement,
+.input-format,
+.output-format,
+.constraints,
+.sample-input,
+.sample-output {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.problem-statement pre,
+.input-format pre,
+.output-format pre,
+.constraints pre,
+.sample-input pre,
+.sample-output pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #495057;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* 코드 작성 섹션 */
+.code-section {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.code-header h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
+}
+
+.language-selector {
+  width: 150px;
+}
+
+.language-selector select {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  padding: 8px 12px;
+  font-size: 0.9em;
+}
+
+.code-editor {
+  margin-bottom: 20px;
+}
+
+.code-editor textarea {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 400px;
+}
+
+.code-editor textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.code-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.code-actions .btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* 제출 결과 */
+.submission-result {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.submission-result h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.result-info {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.execution-time,
+.memory-used {
+  color: #6c757d;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.output-section,
+.error-section {
+  margin-top: 15px;
+}
+
+.output-section h5,
+.error-section h5 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.output-content,
+.error-content {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-content {
+  color: #dc3545;
+  background: #fff5f5;
+  border-color: #f5c6cb;
+}
+
+/* 로딩 및 에러 상태 */
+.loading {
+  text-align: center;
+  padding: 50px;
+  color: white;
+  font-size: 1.2em;
+}
+
+.alert {
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .problem-detail .container {
+    padding: 0 15px;
+  }
+  
+  .problem-section,
+  .code-section {
+    padding: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .problem-header h1 {
+    font-size: 1.5em;
+  }
+  
+  .code-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  
+  .language-selector {
+    width: 100%;
+  }
+  
+  .code-actions {
+    flex-direction: column;
+  }
+  
+  .result-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .problem-meta {
+    flex-wrap: wrap;
+  }
+}

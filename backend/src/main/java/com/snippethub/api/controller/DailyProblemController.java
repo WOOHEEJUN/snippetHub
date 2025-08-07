@@ -89,10 +89,13 @@ public class DailyProblemController {
             @RequestParam Long problemId,
             @AuthenticationPrincipal UserDetails userDetails) {
         
+        log.info("일일 문제 생성 요청 - 날짜: {}, 문제ID: {}, 현재 날짜: {}", problemDate, problemId, LocalDate.now());
+        
         try {
             dailyProblemService.createDailyProblem(problemDate, problemId);
             return ResponseEntity.ok(ApiResponse.success(problemDate + " 날짜의 일일 문제가 생성되었습니다.", null));
         } catch (Exception e) {
+            log.error("일일 문제 생성 실패", e);
             return ResponseEntity.ok(ApiResponse.error("일일 문제 생성에 실패했습니다: " + e.getMessage()));
         }
     }

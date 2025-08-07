@@ -23,8 +23,12 @@ import MyBadges from './MyPage/MyBadges';
 import Ranking from './MyPage/Ranking';
 import PointsGuide from './MyPage/PointsGuide';
 import AIProblemGeneration from './pages/AIProblemGeneration';
+import AICodeEvaluation from './pages/AICodeEvaluation';
+import DailyProblem from './pages/DailyProblem';
+import SubmissionHistory from './pages/SubmissionHistory';
 import BadgeGuide from './pages/BadgeGuide';
 import ProblemList from './pages/ProblemList';
+import ProblemDetail from './pages/ProblemDetail';
 import PointHistory from './pages/PointHistory';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import NotificationBell from './components/NotificationBell'; // NotificationBell 임포트
@@ -49,7 +53,6 @@ const AuthStatus = () => {
       <NotificationBell />
       <span>안녕하세요, {user.nickname || user.email}님!</span>
       <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
-      <Link to="/code-test" className="btn btn-outline-success">코드 테스트</Link>
       <button
         onClick={() => {
           logout();
@@ -79,7 +82,9 @@ function App() {
           <li><Link to="/snippets">스니펫</Link></li>
           <li><Link to="/board">게시판</Link></li>
           <li><Link to="/problems">코딩 문제</Link></li>
+          <li><Link to="/daily-problems">일일 문제</Link></li>
           <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
+          <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
           <li><Link to="/badge-guide">뱃지 가이드</Link></li>
         </ul>
       </div>
@@ -111,7 +116,11 @@ function App() {
             <Route path="/snippets/edit/:snippetId" element={<SnippetEdit />} />
             <Route path="/code-test" element={<CodeTest />} />
             <Route path="/ai-problem-generation" element={<AIProblemGeneration />} />
+            <Route path="/ai-code-evaluation" element={<AICodeEvaluation />} />
+            <Route path="/daily-problems" element={<DailyProblem />} />
+            <Route path="/submission-history" element={<SubmissionHistory />} />
             <Route path="/problems" element={<ProblemList />} />
+            <Route path="/problems/:problemId" element={<ProblemDetail />} />
             <Route path="/point-history" element={<PointHistory />} />
             <Route path="/oauth2/callback" element={<OAuth2Callback />} />
             <Route path="/oauth2/redirect" element={<OAuth2Callback />} />

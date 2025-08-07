@@ -1,12 +1,10 @@
 package com.snippethub.api.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class AICodeEvaluationRequest {
-    private Long snippetId;
     private String code;
     private String language;
+    private Long problemId;
 } 

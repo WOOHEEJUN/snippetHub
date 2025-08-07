@@ -34,112 +34,28 @@ function ProblemList() {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('latest'); // latest, difficulty, success_rate
+  
+  // 새로운 상태들
+  const [recommendedProblems, setRecommendedProblems] = useState([]);
+  const [userStats, setUserStats] = useState(null);
+  const [activeTab, setActiveTab] = useState('all'); // all, recommended, progress
 
   useEffect(() => {
     fetchProblems();
+    fetchRecommendedProblems();
+    fetchUserStats();
   }, [selectedDifficulty, selectedCategory, sortBy]);
 
   const fetchProblems = async () => {
     try {
       setLoading(true);
       
-      // 백엔드 API가 준비되지 않은 경우를 위한 임시 데이터
-      if (process.env.NODE_ENV === 'development') {
-        setTimeout(() => {
-          const mockProblems = [
-            {
-              problemId: 1,
-              title: '[임시 데이터] 배열의 합 구하기',
-              description: '[임시 데이터] 주어진 배열의 모든 요소의 합을 구하는 문제입니다. (실제 문제 데이터는 백엔드 구현 필요)',
-              difficulty: 'EASY',
-              category: 'ALGORITHM',
-              totalSubmissions: 150,
-              successRate: 0.85,
-              timeLimit: 1000
-            },
-            {
-              problemId: 2,
-              title: '[임시 데이터] 문자열 뒤집기',
-              description: '[임시 데이터] 주어진 문자열을 뒤집는 문제입니다.',
-              difficulty: 'EASY',
-              category: 'STRING',
-              totalSubmissions: 120,
-              successRate: 0.92,
-              timeLimit: 1000
-            },
-            {
-              problemId: 3,
-              title: '[임시 데이터] 피보나치 수열',
-              description: '[임시 데이터] n번째 피보나치 수를 구하는 문제입니다.',
-              difficulty: 'MEDIUM',
-              category: 'ALGORITHM',
-              totalSubmissions: 80,
-              successRate: 0.75,
-              timeLimit: 1000
-            },
-            {
-              problemId: 4,
-              title: '[임시 데이터] 이진 탐색',
-              description: '[임시 데이터] 정렬된 배열에서 특정 값을 찾는 문제입니다.',
-              difficulty: 'MEDIUM',
-              category: 'ALGORITHM',
-              totalSubmissions: 95,
-              successRate: 0.68,
-              timeLimit: 1000
-            },
-            {
-              problemId: 5,
-              title: '[임시 데이터] 최단 경로 찾기',
-              description: '[임시 데이터] 그래프에서 두 정점 간의 최단 경로를 찾는 문제입니다.',
-              difficulty: 'HARD',
-              category: 'GRAPH',
-              totalSubmissions: 45,
-              successRate: 0.55,
-              timeLimit: 2000
-            }
-          ];
-          
-          // 필터링 적용
-          let filteredProblems = mockProblems;
-          
-          if (selectedDifficulty !== 'ALL') {
-            filteredProblems = filteredProblems.filter(p => p.difficulty === selectedDifficulty);
-          }
-          
-          if (selectedCategory !== 'ALL') {
-            filteredProblems = filteredProblems.filter(p => p.category === selectedCategory);
-          }
-          
-          if (searchQuery) {
-            filteredProblems = filteredProblems.filter(p => 
-              p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              p.description.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-          }
-          
-          // 정렬 적용
-          if (sortBy === 'difficulty') {
-            const difficultyOrder = { 'EASY': 1, 'MEDIUM': 2, 'HARD': 3 };
-            filteredProblems.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
-          } else if (sortBy === 'success_rate') {
-            filteredProblems.sort((a, b) => b.successRate - a.successRate);
-          } else {
-            // latest (기본값)
-            filteredProblems.sort((a, b) => b.problemId - a.problemId);
-          }
-          
-          setProblems(filteredProblems);
-          setLoading(false);
-        }, 1000);
-        return;
-      }
-
       const params = new URLSearchParams();
       
       if (selectedDifficulty !== 'ALL') params.append('difficulty', selectedDifficulty);
       if (selectedCategory !== 'ALL') params.append('category', selectedCategory);
       if (searchQuery) params.append('search', searchQuery);
-      params.append('sort', sortBy);
+      // sort 파라미터 제거 - 백엔드에서 기본적으로 최신순으로 정렬됨
       
       const response = await fetch(`/api/problems?${params.toString()}`, {
         headers: getAuthHeaders(),
@@ -151,7 +67,11 @@ function ProblemList() {
       }
 
       const data = await response.json();
-      setProblems(data.data || []);
+      if (data.success && data.data && data.data.content) {
+        setProblems(data.data.content);
+      } else {
+        setProblems([]);
+      }
     } catch (err) {
       console.error('문제 목록 불러오기 실패:', err);
       setError(err.message);
@@ -163,6 +83,46 @@ function ProblemList() {
   const handleSearch = (e) => {
     e.preventDefault();
     fetchProblems();
+  };
+
+  const fetchRecommendedProblems = async () => {
+    try {
+      const response = await fetch('/api/problems/recommended', {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setRecommendedProblems(data.data);
+        }
+      }
+    } catch (err) {
+      console.error('추천 문제 불러오기 실패:', err);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await fetch('/api/problems/user-stats', {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setUserStats(data.data);
+        }
+      }
+    } catch (err) {
+      console.error('사용자 통계 불러오기 실패:', err);
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -193,8 +153,53 @@ function ProblemList() {
         <div className="page-header">
           <h1>💻 코딩 문제</h1>
           <p>다양한 알고리즘 문제를 풀어보고 실력을 향상시켜보세요!</p>
-          
         </div>
+
+        {/* 탭 네비게이션 */}
+        <div className="tab-navigation">
+          <button 
+            className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+            onClick={() => handleTabChange('all')}
+          >
+            전체 문제
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'recommended' ? 'active' : ''}`}
+            onClick={() => handleTabChange('recommended')}
+          >
+            추천 문제
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'progress' ? 'active' : ''}`}
+            onClick={() => handleTabChange('progress')}
+          >
+            학습 진도
+          </button>
+        </div>
+
+        {/* 사용자 통계 섹션 */}
+        {userStats && (
+          <div className="user-stats-section">
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>총 해결한 문제</h3>
+                <div className="stat-value">{userStats.solvedProblems || 0}개</div>
+              </div>
+              <div className="stat-card">
+                <h3>성공률</h3>
+                <div className="stat-value">{userStats.successRate ? `${(userStats.successRate * 100).toFixed(1)}%` : '0%'}</div>
+              </div>
+              <div className="stat-card">
+                <h3>현재 레벨</h3>
+                <div className="stat-value">{userStats.currentLevel || 'BRONZE'}</div>
+              </div>
+              <div className="stat-card">
+                <h3>연속 해결</h3>
+                <div className="stat-value">{userStats.streak || 0}일</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 검색 및 필터 섹션 */}
         <div className="search-filter-section">
@@ -264,64 +269,183 @@ function ProblemList() {
         </div>
 
         {/* 문제 목록 */}
-        <div className="problems-grid">
-          {problems.length === 0 ? (
-            <div className="no-problems">
-              <FaCode className="no-problems-icon" />
-              <p>조건에 맞는 문제가 없습니다.</p>
+        {activeTab === 'all' && (
+          <div className="problems-grid">
+            {problems.length === 0 ? (
+              <div className="no-problems">
+                <FaCode className="no-problems-icon" />
+                <p>조건에 맞는 문제가 없습니다.</p>
+              </div>
+            ) : (
+              problems.map(problem => (
+                <Link 
+                  key={problem.problemId} 
+                  to={`/problems/${problem.problemId}`}
+                  className="problem-card"
+                >
+                  <div className="problem-header">
+                    <div className="problem-title">
+                      <h3>{problem.title}</h3>
+                    </div>
+                    <div 
+                      className="difficulty-badge"
+                      style={{ backgroundColor: getDifficultyColor(problem.difficulty) }}
+                    >
+                      {getDifficultyLabel(problem.difficulty)}
+                    </div>
+                  </div>
+
+                  <div className="problem-category">
+                    <span className="category-tag">
+                      {getCategoryLabel(problem.category)}
+                    </span>
+                  </div>
+
+                  <div className="problem-stats">
+                    <div className="stat-item">
+                      <FaUsers className="stat-icon" />
+                      <span>{problem.totalSubmissions || 0}명 제출</span>
+                    </div>
+                    <div className="stat-item">
+                      <FaTrophy className="stat-icon" />
+                      <span>{formatSuccessRate(problem.successRate)} 성공률</span>
+                    </div>
+                    <div className="stat-item">
+                      <FaClock className="stat-icon" />
+                      <span>{problem.timeLimit || 1000}ms</span>
+                    </div>
+                  </div>
+
+                  {problem.description && (
+                    <div className="problem-description">
+                      {problem.description.length > 100 
+                        ? `${problem.description.substring(0, 100)}...` 
+                        : problem.description
+                      }
+                    </div>
+                  )}
+                </Link>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* 추천 문제 섹션 */}
+        {activeTab === 'recommended' && (
+          <div className="recommended-problems">
+            <div className="section-header">
+              <h2>🎯 당신에게 추천하는 문제</h2>
+              <p>현재 수준과 학습 패턴을 분석하여 맞춤형 문제를 추천해드립니다.</p>
             </div>
-          ) : (
-            problems.map(problem => (
-              <Link 
-                key={problem.problemId} 
-                to={`/problems/${problem.problemId}`}
-                className="problem-card"
-              >
-                <div className="problem-header">
-                  <div className="problem-title">
-                    <h3>{problem.title}</h3>
-                  </div>
-                  <div 
-                    className="difficulty-badge"
-                    style={{ backgroundColor: getDifficultyColor(problem.difficulty) }}
+            
+            {recommendedProblems.length === 0 ? (
+              <div className="no-problems">
+                <FaCode className="no-problems-icon" />
+                <p>추천할 문제가 없습니다. 더 많은 문제를 풀어보세요!</p>
+              </div>
+            ) : (
+              <div className="problems-grid">
+                {recommendedProblems.map(problem => (
+                  <Link 
+                    key={problem.problemId} 
+                    to={`/problems/${problem.problemId}`}
+                    className="problem-card recommended"
                   >
-                    {getDifficultyLabel(problem.difficulty)}
+                    <div className="recommended-badge">추천</div>
+                    <div className="problem-header">
+                      <div className="problem-title">
+                        <h3>{problem.title}</h3>
+                      </div>
+                      <div 
+                        className="difficulty-badge"
+                        style={{ backgroundColor: getDifficultyColor(problem.difficulty) }}
+                      >
+                        {getDifficultyLabel(problem.difficulty)}
+                      </div>
+                    </div>
+
+                    <div className="problem-category">
+                      <span className="category-tag">
+                        {getCategoryLabel(problem.category)}
+                      </span>
+                    </div>
+
+                    <div className="problem-stats">
+                      <div className="stat-item">
+                        <FaUsers className="stat-icon" />
+                        <span>{problem.totalSubmissions || 0}명 제출</span>
+                      </div>
+                      <div className="stat-item">
+                        <FaTrophy className="stat-icon" />
+                        <span>{formatSuccessRate(problem.successRate)} 성공률</span>
+                      </div>
+                      <div className="stat-item">
+                        <FaClock className="stat-icon" />
+                        <span>{problem.timeLimit || 1000}ms</span>
+                      </div>
+                    </div>
+
+                    {problem.recommendationReason && (
+                      <div className="recommendation-reason">
+                        <strong>추천 이유:</strong> {problem.recommendationReason}
+                      </div>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 학습 진도 섹션 */}
+        {activeTab === 'progress' && (
+          <div className="learning-progress">
+            <div className="section-header">
+              <h2>📊 학습 진도</h2>
+              <p>지금까지의 학습 현황과 다음 목표를 확인해보세요.</p>
+            </div>
+            
+            <div className="progress-overview">
+              <div className="progress-stats">
+                <div className="progress-item">
+                  <h3>난이도별 해결 현황</h3>
+                  <div className="difficulty-progress">
+                    <div className="progress-bar">
+                      <div className="progress-fill easy" style={{width: `${userStats?.easySolved || 0}%`}}></div>
+                      <span>쉬움: {userStats?.easySolved || 0}개</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill medium" style={{width: `${userStats?.mediumSolved || 0}%`}}></div>
+                      <span>보통: {userStats?.mediumSolved || 0}개</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill hard" style={{width: `${userStats?.hardSolved || 0}%`}}></div>
+                      <span>어려움: {userStats?.hardSolved || 0}개</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="problem-category">
-                  <span className="category-tag">
-                    {getCategoryLabel(problem.category)}
-                  </span>
-                </div>
-
-                <div className="problem-stats">
-                  <div className="stat-item">
-                    <FaUsers className="stat-icon" />
-                    <span>{problem.totalSubmissions || 0}명 제출</span>
-                  </div>
-                  <div className="stat-item">
-                    <FaTrophy className="stat-icon" />
-                    <span>{formatSuccessRate(problem.successRate)} 성공률</span>
-                  </div>
-                  <div className="stat-item">
-                    <FaClock className="stat-icon" />
-                    <span>{problem.timeLimit || 1000}ms</span>
+                
+                <div className="progress-item">
+                  <h3>카테고리별 해결 현황</h3>
+                  <div className="category-progress">
+                    {userStats?.categoryProgress?.map(cat => (
+                      <div key={cat.category} className="category-item">
+                        <span>{getCategoryLabel(cat.category)}</span>
+                        <div className="category-bar">
+                          <div 
+                            className="category-fill" 
+                            style={{width: `${cat.progress}%`}}
+                          ></div>
+                        </div>
+                        <span>{cat.solved}/{cat.total}</span>
+                      </div>
+                    )) || []}
                   </div>
                 </div>
-
-                {problem.description && (
-                  <div className="problem-description">
-                    {problem.description.length > 100 
-                      ? `${problem.description.substring(0, 100)}...` 
-                      : problem.description
-                    }
-                  </div>
-                )}
-              </Link>
-            ))
-          )}
-        </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 문제 생성 링크 */}
         <div className="create-problem-section">

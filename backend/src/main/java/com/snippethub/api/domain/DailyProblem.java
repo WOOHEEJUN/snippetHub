@@ -25,7 +25,7 @@ public class DailyProblem {
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
-    @Column(name = "problem_date", nullable = false, unique = true)
+    @Column(name = "problem_date", nullable = false)
     private LocalDate problemDate;
 
     @Column(name = "is_active")

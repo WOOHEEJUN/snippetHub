@@ -46,33 +46,51 @@ function PointsGuide() {
       <div className="guide-section">
         <h3>활동별 포인트</h3>
         <ul className="points-list">
-          {guideData.activityPoints && Object.entries(guideData.activityPoints).map(([activity, points]) => (
-            <li key={activity}>
-              <span className="activity-name">{activity}</span>
-              <span className="points-amount">+{points} P</span>
-            </li>
-          ))}
+          <li>
+            <span className="activity-name">게시글 작성</span>
+            <span className="points-amount">+{guideData.postPoints || 10} P</span>
+          </li>
+          <li>
+            <span className="activity-name">스니펫 작성</span>
+            <span className="points-amount">+{guideData.snippetPoints || 15} P</span>
+          </li>
+          <li>
+            <span className="activity-name">댓글 작성</span>
+            <span className="points-amount">+{guideData.commentPoints || 5} P</span>
+          </li>
+          <li>
+            <span className="activity-name">좋아요 받음</span>
+            <span className="points-amount">+{guideData.likeReceivedPoints || 2} P</span>
+          </li>
+          <li>
+            <span className="activity-name">코드 실행</span>
+            <span className="points-amount">+{guideData.codeExecutionPoints || 1} P</span>
+          </li>
+          <li>
+            <span className="activity-name">일일 로그인</span>
+            <span className="points-amount">+{guideData.dailyLoginPoints || 5} P</span>
+          </li>
+          <li>
+            <span className="activity-name">주간 로그인 보너스</span>
+            <span className="points-amount">+{guideData.weeklyLoginBonus || 20} P</span>
+          </li>
+          <li>
+            <span className="activity-name">월간 로그인 보너스</span>
+            <span className="points-amount">+{guideData.monthlyLoginBonus || 100} P</span>
+          </li>
         </ul>
       </div>
 
       <div className="guide-section">
-        <h3>등급별 혜택</h3>
-        <ul className="benefits-list">
-          {guideData.levelBenefits && Object.entries(guideData.levelBenefits).map(([level, benefit]) => (
-            <li key={level}>
-              <span className="level-name">{level}</span>
-              <span className="benefit-description">{benefit}</span>
-            </li>
-          ))}
+        <h3>포인트 획득 팁</h3>
+        <ul className="tips-list">
+          <li>매일 로그인하여 일일 보상을 받으세요!</li>
+          <li>다른 사용자의 게시글에 댓글을 남겨보세요.</li>
+          <li>유용한 스니펫을 공유하면 더 많은 포인트를 얻을 수 있습니다.</li>
+          <li>코딩 문제를 풀어보세요.</li>
+          <li>AI 기능을 활용해보세요.</li>
         </ul>
       </div>
-
-      {guideData.additionalInfo && (
-        <div className="guide-section">
-          <h3>추가 정보</h3>
-          <p className="additional-info">{guideData.additionalInfo}</p>
-        </div>
-      )}
     </div>
   );
 }

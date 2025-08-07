@@ -30,7 +30,8 @@ public class DailyProblemService {
      * 오늘의 일일 문제 조회
      */
     public Optional<ProblemResponseDto> getTodayProblem() {
-        Optional<DailyProblem> dailyProblem = dailyProblemRepository.findTodayProblem();
+        LocalDate today = LocalDate.now();
+        Optional<DailyProblem> dailyProblem = dailyProblemRepository.findTodayProblem(today);
         return dailyProblem.map(dp -> new ProblemResponseDto(dp.getProblem()));
     }
 
@@ -47,9 +48,12 @@ public class DailyProblemService {
      */
     @Transactional
     public DailyProblem createDailyProblem(LocalDate problemDate, Long problemId) {
-        // 이미 해당 날짜에 문제가 있는지 확인
-        if (dailyProblemRepository.findByProblemDate(problemDate).isPresent()) {
-            throw new BusinessException(ErrorCode.DAILY_PROBLEM_NOT_FOUND);
+        // 이미 해당 날짜에 활성화된 문제가 있는지 확인
+        Optional<DailyProblem> existingDailyProblem = dailyProblemRepository.findByProblemDateAndIsActiveTrue(problemDate);
+        if (existingDailyProblem.isPresent()) {
+            // 기존 문제가 있으면 그대로 반환
+            log.info("{} 날짜에 이미 활성화된 일일 문제가 있습니다", problemDate);
+            return existingDailyProblem.get();
         }
 
         Problem problem = problemRepository.findById(problemId)
@@ -61,7 +65,7 @@ public class DailyProblemService {
                 .build();
 
         DailyProblem savedDailyProblem = dailyProblemRepository.save(dailyProblem);
-        log.info("{} 날짜의 일일 문제가 생성되었습니다: {}", problemDate, problem.getTitle());
+        log.info("{} 날짜의 일일 문제가 생성되었습니다", problemDate);
         
         return savedDailyProblem;
     }

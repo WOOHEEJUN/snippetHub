@@ -98,6 +98,9 @@ function MyPage() {
               </div>
             </div>
             <div className="mypage-actions">
+              <Link to="/submission-history" className="btn btn-primary-custom">
+                제출 이력
+              </Link>
               <button className="btn btn-primary-custom" onClick={goToMyPosts}>
                 게시물 목록 보기
               </button>
