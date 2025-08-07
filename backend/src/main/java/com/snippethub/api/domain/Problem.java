@@ -24,36 +24,28 @@ public class Problem {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @Lob
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Lob
-    @Column(name = "problem_statement")
+    @Column(name = "problem_statement", columnDefinition = "TEXT")
     private String problemStatement;
 
-    @Lob
-    @Column(name = "input_format")
+    @Column(name = "input_format", columnDefinition = "TEXT")
     private String inputFormat;
 
-    @Lob
-    @Column(name = "output_format")
+    @Column(name = "output_format", columnDefinition = "TEXT")
     private String outputFormat;
 
-    @Lob
-    @Column(name = "constraints")
+    @Column(name = "constraints", columnDefinition = "TEXT")
     private String constraints;
 
-    @Lob
-    @Column(name = "sample_input")
+    @Column(name = "sample_input", columnDefinition = "TEXT")
     private String sampleInput;
 
-    @Lob
-    @Column(name = "sample_output")
+    @Column(name = "sample_output", columnDefinition = "TEXT")
     private String sampleOutput;
 
-    @Lob
-    @Column(name = "solution_template")
+    @Column(name = "solution_template", columnDefinition = "TEXT")
     private String solutionTemplate;
 
     @Enumerated(EnumType.STRING)

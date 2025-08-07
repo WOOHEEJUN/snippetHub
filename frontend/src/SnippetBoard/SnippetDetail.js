@@ -4,7 +4,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { FaHeart, FaRegHeart, FaComment, FaEye, FaPlay, FaTags, FaUser, FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaComment, FaEye, FaPlay, FaTags, FaUser, FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy, FaRobot } from 'react-icons/fa';
+import AICodeEvaluation from '../components/AICodeEvaluation';
 import '../css/SnippetDetail.css';
 
 function SnippetDetail() {
@@ -219,6 +220,18 @@ function SnippetDetail() {
           <button onClick={copyToClipboard} className="copy-button">
             {isCopied ? <><FaCopy /> 복사됨!</> : <><FaCopy /> 복사</>}
           </button>
+        </div>
+
+        {/* AI 코드 평가 섹션 */}
+        <div className="ai-evaluation-section">
+          <AICodeEvaluation 
+            snippetId={snippetId}
+            code={snippet.code}
+            language={snippet.language}
+            onEvaluationComplete={(evaluation) => {
+              console.log('AI 평가 완료:', evaluation);
+            }}
+          />
         </div>
 
         <div className="comment-section">

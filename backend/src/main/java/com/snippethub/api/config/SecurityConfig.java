@@ -39,6 +39,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .formLogin(form -> form.disable())
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/api/health").permitAll()
+                .requestMatchers("/api/ai/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/posts/**").permitAll() // 게시글 관련 API 비회원 허용

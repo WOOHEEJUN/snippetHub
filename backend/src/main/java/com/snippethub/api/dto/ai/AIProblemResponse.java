@@ -1,36 +1,35 @@
 package com.snippethub.api.dto.ai;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
-import java.util.List;
-
-@Data
 public class AIProblemResponse {
     private String title;
     private String description;
-    @JsonProperty("problem_statement")
     private String problemStatement;
-    @JsonProperty("input_format")
     private String inputFormat;
-    @JsonProperty("output_format")
     private String outputFormat;
     private String constraints;
-    @JsonProperty("sample_input")
     private String sampleInput;
-    @JsonProperty("sample_output")
     private String sampleOutput;
-    @JsonProperty("solution_template")
     private String solutionTemplate;
-    @JsonProperty("test_cases")
-    private List<TestCase> testCases;
-    private List<String> hints;
-    private List<String> tags;
 
-    @Data
-    public static class TestCase {
-        private String input;
-        private String output;
-        private String explanation;
-    }
+    // Getters
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public String getProblemStatement() { return problemStatement; }
+    public String getInputFormat() { return inputFormat; }
+    public String getOutputFormat() { return outputFormat; }
+    public String getConstraints() { return constraints; }
+    public String getSampleInput() { return sampleInput; }
+    public String getSampleOutput() { return sampleOutput; }
+    public String getSolutionTemplate() { return solutionTemplate; }
+
+    // Setters
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setProblemStatement(String problemStatement) { this.problemStatement = problemStatement; }
+    public void setInputFormat(String inputFormat) { this.inputFormat = inputFormat; }
+    public void setOutputFormat(String outputFormat) { this.outputFormat = outputFormat; }
+    public void setConstraints(String constraints) { this.constraints = constraints; }
+    public void setSampleInput(String sampleInput) { this.sampleInput = sampleInput; }
+    public void setSampleOutput(String sampleOutput) { this.sampleOutput = sampleOutput; }
+    public void setSolutionTemplate(String solutionTemplate) { this.solutionTemplate = solutionTemplate; }
 } 

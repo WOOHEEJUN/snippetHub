@@ -58,9 +58,25 @@ class NotificationControllerV2 {
         return ResponseEntity.ok().build();
     }
 
+    // 알림 읽음 처리 (프론트엔드 호환성 - PUT 메서드)
+    @PutMapping("/{notificationId}/read")
+    public ResponseEntity<Void> markAsReadPut(
+            @PathVariable Long notificationId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        notificationService.markAsRead(notificationId, userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
+
     // 읽지 않은 알림 개수 조회
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(@AuthenticationPrincipal UserDetails userDetails) {
+        Long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
+        return ResponseEntity.ok(unreadCount);
+    }
+
+    // 읽지 않은 알림 개수 조회 (프론트엔드 호환성)
+    @GetMapping("/count")
+    public ResponseEntity<Long> getUnreadCountV2(@AuthenticationPrincipal UserDetails userDetails) {
         Long unreadCount = notificationService.getUnreadCount(userDetails.getUsername());
         return ResponseEntity.ok(unreadCount);
     }

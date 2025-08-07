@@ -24,4 +24,14 @@ public class HomeController {
         );
         return ResponseEntity.ok(response);
     }
+    
+    @GetMapping("/api/health")
+    public ResponseEntity<Map<String, Object>> health() {
+        Map<String, Object> response = Map.of(
+            "status", "UP",
+            "message", "SnippetHub API is healthy",
+            "timestamp", System.currentTimeMillis()
+        );
+        return ResponseEntity.ok(response);
+    }
 } 

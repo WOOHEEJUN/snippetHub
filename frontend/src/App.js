@@ -22,6 +22,10 @@ import UserProfile from './pages/UserProfile'; // UserProfile 컴포넌트 임�
 import MyBadges from './MyPage/MyBadges';
 import Ranking from './MyPage/Ranking';
 import PointsGuide from './MyPage/PointsGuide';
+import AIProblemGeneration from './pages/AIProblemGeneration';
+import BadgeGuide from './pages/BadgeGuide';
+import ProblemList from './pages/ProblemList';
+import PointHistory from './pages/PointHistory';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import NotificationBell from './components/NotificationBell'; // NotificationBell 임포트
 import './css/App.css';
@@ -74,6 +78,9 @@ function App() {
         <ul className="nav-list d-flex align-items-center" style={{ gap: '20px', listStyle: 'none', margin: 0 }}>
           <li><Link to="/snippets">스니펫</Link></li>
           <li><Link to="/board">게시판</Link></li>
+          <li><Link to="/problems">코딩 문제</Link></li>
+          <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
+          <li><Link to="/badge-guide">뱃지 가이드</Link></li>
         </ul>
       </div>
       <AuthStatus />
@@ -97,11 +104,15 @@ function App() {
             <Route path="/mypage/badges" element={<MyBadges />} />
             <Route path="/mypage/ranking" element={<Ranking />} />
             <Route path="/mypage/points-guide" element={<PointsGuide />} />
+            <Route path="/badge-guide" element={<BadgeGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
             <Route path="/snippets/write" element={<SnippetWrite />} />
             <Route path="/snippets/:snippetId" element={<SnippetDetail />} />
             <Route path="/snippets/edit/:snippetId" element={<SnippetEdit />} />
             <Route path="/code-test" element={<CodeTest />} />
+            <Route path="/ai-problem-generation" element={<AIProblemGeneration />} />
+            <Route path="/problems" element={<ProblemList />} />
+            <Route path="/point-history" element={<PointHistory />} />
             <Route path="/oauth2/callback" element={<OAuth2Callback />} />
             <Route path="/oauth2/redirect" element={<OAuth2Callback />} />
             <Route path="/notifications" element={<Notifications />} /> {/* 알림 페이지 라우팅 추가 */}

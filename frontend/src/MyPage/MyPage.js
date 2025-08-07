@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import LevelProgress from '../components/LevelProgress';
 import '../css/Mypage.css';
 
 function MyPage() {
@@ -61,12 +62,16 @@ function MyPage() {
             <div className="user-info-details">
               <p><strong>이메일:</strong> {userInfo.email}</p>
               <p><strong>닉네임:</strong> {userInfo.nickname}</p>
-              <p><strong>레벨:</strong> {userInfo.level}</p>
-              <p><strong>포인트:</strong> {userInfo.points}</p>
               <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
               <Link to="/mypage/badges" className="btn btn-primary-custom mt-3">등급보기</Link>
             </div>
           </div>
+
+          {/* 레벨 진행률 컴포넌트 */}
+          <LevelProgress 
+            userLevel={userInfo.level} 
+            userPoints={userInfo.points || 0} 
+          />
 
           <div className="mypage-card activity-card">
             <h3 className="card-title">내 활동</h3>
@@ -115,6 +120,9 @@ function MyPage() {
         </Link>
         <Link to="/mypage/points-guide" className="btn btn-secondary-custom">
           포인트 획득 기준
+        </Link>
+        <Link to="/point-history" className="btn btn-secondary-custom">
+          포인트 내역
         </Link>
         <button className="btn btn-secondary-custom" onClick={handleLogout}>
           로그아웃
