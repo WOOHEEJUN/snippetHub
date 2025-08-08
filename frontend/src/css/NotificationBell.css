@@ -12,12 +12,12 @@
 }
 
 .bell-container:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .bell-icon {
   font-size: 20px;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .notification-badge {
@@ -55,10 +55,10 @@
   right: 0;
   width: 350px;
   max-height: 400px;
-  background: white;
-  border: 1px solid #ddd;
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   z-index: 1000;
   overflow: hidden;
 }
@@ -68,20 +68,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  border-bottom: 1px solid #eee;
-  background-color: #f8f9fa;
+  border-bottom: 1px solid #333333;
+  background-color: #222222;
 }
 
 .notification-header h3 {
   margin: 0;
   font-size: 16px;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .mark-all-read-btn {
   background: none;
   border: none;
-  color: #007bff;
+  color: #8ab0d1;
   font-size: 12px;
   cursor: pointer;
   padding: 4px 8px;
@@ -90,7 +90,7 @@
 }
 
 .mark-all-read-btn:hover {
-  background-color: rgba(0, 123, 255, 0.1);
+  background-color: rgba(138, 176, 209, 0.1);
 }
 
 .notification-list {
@@ -100,22 +100,22 @@
 
 .notification-item {
   padding: 15px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #333333;
   cursor: pointer;
   transition: background-color 0.2s;
   position: relative;
 }
 
 .notification-item:hover {
-  background-color: #f8f9fa;
+  background-color: #2a2a2a;
 }
 
 .notification-item.unread {
-  background-color: #f0f8ff;
+  background-color: #2a2a2a;
 }
 
 .notification-item.unread:hover {
-  background-color: #e6f3ff;
+  background-color: #333333;
 }
 
 .notification-content {
@@ -127,13 +127,13 @@
 .notification-message {
   margin: 0;
   font-size: 14px;
-  color: #333;
+  color: #e0e0e0;
   line-height: 1.4;
 }
 
 .notification-time {
   font-size: 12px;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .unread-indicator {
@@ -142,21 +142,21 @@
   right: 15px;
   width: 8px;
   height: 8px;
-  background-color: #007bff;
+  background-color: #8ab0d1;
   border-radius: 50%;
 }
 
 .loading {
   padding: 20px;
   text-align: center;
-  color: #666;
+  color: #b0b0b0;
   font-size: 14px;
 }
 
 .no-notifications {
   padding: 40px 20px;
   text-align: center;
-  color: #666;
+  color: #b0b0b0;
   font-size: 14px;
 }
 
@@ -166,14 +166,14 @@
 }
 
 .notification-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #222222;
 }
 
 .notification-list::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #555555;
   border-radius: 3px;
 }
 
 .notification-list::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #777777;
 } 

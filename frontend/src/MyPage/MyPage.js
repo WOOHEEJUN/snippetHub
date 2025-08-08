@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import LevelProgress from '../components/LevelProgress';
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/Mypage.css';
 
 function MyPage() {
@@ -23,7 +24,7 @@ function MyPage() {
         setUserInfo(data.data);
       })
       .catch((err) => {
-        console.error('유저 정보를 불러오는 데 실패했습니다:', err);
+        
         alert('유저 정보를 불러오는 데 실패했습니다.');
       })
       .finally(() => setLoading(false));
@@ -61,7 +62,10 @@ function MyPage() {
             <h3 className="card-title">내 정보</h3>
             <div className="user-info-details">
               <p><strong>이메일:</strong> {userInfo.email}</p>
-              <p><strong>닉네임:</strong> {userInfo.nickname}</p>
+              <p><strong>닉네임:</strong> 
+                {userInfo.level && <img src={getLevelBadgeImage(userInfo.level)} alt={userInfo.level} className="level-badge-mypage" />}
+                {userInfo.nickname}
+              </p>
               <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
               <Link to="/mypage/badges" className="btn btn-primary-custom mt-3">등급보기</Link>
             </div>
@@ -107,6 +111,9 @@ function MyPage() {
               <button className="btn btn-primary-custom" onClick={goToMySnippets}>
                 스니펫 목록 보기
               </button>
+              <Link to="/mypage/saved-problems" className="btn btn-primary-custom">
+                저장한 문제 보기
+              </Link>
             </div>
           </div>
         </>

@@ -69,9 +69,9 @@
 }
 
 .pagination-controls button {
-  background-color: #333333;
-  color: #d3d3d3;
-  border: 1px solid #555555;
+  background-color: #e0e0e0;
+  color: #333333;
+  border: 1px solid #e0e0e0;
   padding: 0.6rem 1.2rem;
   border-radius: 5px;
   cursor: pointer;
@@ -80,7 +80,7 @@
 }
 
 .pagination-controls button:hover:not(:disabled) {
-  background-color: #555555;
+  background-color: #d3d3d3;
 }
 
 .pagination-controls button:disabled {

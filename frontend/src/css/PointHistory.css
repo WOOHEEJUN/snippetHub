@@ -1,6 +1,6 @@
 .point-history-page {
   padding: 40px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #1a1a1a;
   min-height: 100vh;
 }
 
@@ -26,20 +26,20 @@
 }
 
 .current-points-card {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 30px;
   display: flex;
   align-items: center;
   gap: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 
 .points-icon {
   font-size: 3rem;
-  color: #ffc107;
-  background: #fff3cd;
+  color: #FFC107;
+  background-color: #333333;
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -53,13 +53,13 @@
 }
 
 .points-label {
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 1rem;
   margin-bottom: 5px;
 }
 
 .points-value {
-  color: #495057;
+  color: #e0e0e0;
   font-size: 2.5rem;
   font-weight: 700;
 }
@@ -72,10 +72,10 @@
 }
 
 .stats-card {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .stat-item {
@@ -92,19 +92,19 @@
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  color: white;
+  color: #e0e0e0;
 }
 
 .stat-icon.earn {
-  background: #28a745;
+  background-color: #4CAF50;
 }
 
 .stat-icon.spend {
-  background: #dc3545;
+  background-color: #DC3545;
 }
 
 .stat-icon:not(.earn):not(.spend) {
-  background: #6c757d;
+  background-color: #6c757d;
 }
 
 .stat-info {
@@ -112,23 +112,23 @@
 }
 
 .stat-label {
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 0.9rem;
   margin-bottom: 5px;
 }
 
 .stat-value {
-  color: #495057;
+  color: #e0e0e0;
   font-size: 1.3rem;
   font-weight: 600;
 }
 
 .filter-section {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
@@ -143,35 +143,36 @@
 
 .filter-group label {
   font-weight: 600;
-  color: #495057;
+  color: #e0e0e0;
   font-size: 0.9rem;
 }
 
 .filter-select {
   padding: 10px 15px;
-  border: 2px solid #e9ecef;
+  border: 2px solid #444444;
   border-radius: 6px;
   font-size: 0.9rem;
-  background: white;
+  background-color: #333333;
+  color: #e0e0e0;
   cursor: pointer;
   transition: border-color 0.3s ease;
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #666666;
 }
 
 .history-section {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .history-section h3 {
-  color: #495057;
+  color: #e0e0e0;
   margin-bottom: 20px;
   font-weight: 600;
 }
@@ -179,12 +180,12 @@
 .no-history {
   text-align: center;
   padding: 60px 20px;
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .no-history-icon {
   font-size: 3rem;
-  color: #dee2e6;
+  color: #444444;
   margin-bottom: 20px;
 }
 
@@ -200,34 +201,35 @@
   gap: 15px;
   padding: 20px;
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #444444;
   transition: all 0.3s ease;
 }
 
 .history-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
 }
 
 .history-item.earned {
-  border-left: 4px solid #28a745;
-  background: #f8fff9;
+  border-left: 4px solid #4CAF50;
+  background-color: #333333;
 }
 
 .history-item.spent {
-  border-left: 4px solid #dc3545;
-  background: #fff8f8;
+  border-left: 4px solid #DC3545;
+  background-color: #333333;
 }
 
 .history-icon {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #f8f9fa;
+  background-color: #444444;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #e0e0e0;
 }
 
 .history-content {
@@ -235,20 +237,20 @@
 }
 
 .history-title {
-  color: #495057;
+  color: #e0e0e0;
   font-weight: 600;
   font-size: 1.1rem;
   margin-bottom: 5px;
 }
 
 .history-description {
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 0.9rem;
   margin-bottom: 8px;
 }
 
 .history-date {
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
@@ -262,11 +264,11 @@
 }
 
 .history-points.earned {
-  color: #28a745;
+  color: #4CAF50;
 }
 
 .history-points.spent {
-  color: #dc3545;
+  color: #DC3545;
 }
 
 .guide-link-section {
@@ -277,37 +279,37 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
-  color: white;
+  background-color: #e0e0e0;
+  color: #333333;
   padding: 15px 25px;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .guide-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
-  color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  color: #333333;
   text-decoration: none;
 }
 
 .loading-message,
 .error-message {
   text-align: center;
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 40px;
   margin: 20px 0;
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .error-message {
   color: #dc3545;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: #3a2a2a;
+  border: 1px solid #5a3a3a;
 }
 
 @media (max-width: 768px) {

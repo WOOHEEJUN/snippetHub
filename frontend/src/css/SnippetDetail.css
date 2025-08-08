@@ -57,8 +57,8 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background-color: #222222;
-  border: 1px solid #444444;
+  background-color: #000000;
+  border: 1px solid #000000;
   border-radius: 5px;
   padding: 0.5rem 0.75rem;
   cursor: pointer;
@@ -67,7 +67,7 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   transition: all 0.2s ease-in-out;
-  color: #d3d3d3;
+  color: #e0e0e0;
 }
 
 .copy-button:hover {
@@ -155,8 +155,8 @@
     width: 100%;
     padding: 0.75rem;
     border-radius: 5px;
-    border: 1px solid #444444;
-    background-color: #222222;
+    border: 1px solid #000000;
+    background-color: #000000;
     cursor: pointer;
     font-weight: 500;
     display: flex;
@@ -164,7 +164,7 @@
     justify-content: center;
     gap: 0.5rem;
     transition: background-color 0.2s;
-    color: #d3d3d3;
+    color: #e0e0e0;
 }
 
 .action-button:hover {
@@ -188,15 +188,15 @@
 }
 
 .edit-button {
-    background-color: #4a5a6a;
-    color: #ffffff;
-    border-color: #4a5a6a;
+    background-color: #000000;
+    color: #e0e0e0;
+    border-color: #000000;
 }
 
 .delete-button {
-    background-color: #bf3636;
-    color: #ffffff;
-    border-color: #bf3636;
+    background-color: #000000;
+    color: #e0e0e0;
+    border-color: #000000;
 }
 
 /* Comment Section */
@@ -233,8 +233,8 @@
 
 .comment-form button {
   padding: 0.75rem 1.5rem;
-  background-color: #d3d3d3;
-  color: #000000;
+  background-color: #000000;
+  color: #e0e0e0;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -323,8 +323,8 @@
 }
 
 .comment-edit-form button {
-    background-color: #d3d3d3;
-    color: #000000;
+    background-color: #000000;
+    color: #e0e0e0;
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 5px;
@@ -332,7 +332,7 @@
     align-self: flex-start;
 }
 .comment-edit-form button:last-child {
-    background-color: #555555;
+    background-color: #333333;
 }
 
 /* Loading and Error States */
@@ -397,8 +397,8 @@
 
 .reply-form button {
   padding: 0.5rem 1rem;
-  background-color: #d3d3d3;
-  color: #000000;
+  background-color: #000000;
+  color: #e0e0e0;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -406,6 +406,6 @@
 }
 
 .reply-form button[type="button"] {
-  background-color: #555555;
-  color: #ffffff;
+  background-color: #000000;
+  color: #e0e0e0;
 }

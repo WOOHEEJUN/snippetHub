@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/Home.css';
-
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 
 import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
 
@@ -22,7 +22,7 @@ const Home = () => {
         setPopularSnippets(data.data.content || []);
       })
       .catch((err) => {
-        console.error('🔥 인기 스니펫 로딩 실패:', err);
+        
         setPopularSnippets([]);
       });
 
@@ -36,7 +36,7 @@ const Home = () => {
       .then((res) => res.json())
       .then((data) => setRecentPosts(data.data.content || []))
       .catch((err) => {
-        console.error('🔥 최신 게시글 로딩 실패:', err);
+        
         setRecentPosts([]);
       });
   }, []);
@@ -141,7 +141,19 @@ const Home = () => {
                       <h5 className="card-title mt-2">{snippet.title}</h5>
                       <p className="card-text text-muted flex-grow-1">{snippet.description?.slice(0, 100)}</p>
                       <div className="d-flex justify-content-between align-items-center mt-auto">
-                        <small className="text-muted">by {snippet.author?.nickname}</small>
+                        <small className="text-muted">
+                          by {snippet.author?.userId ? (
+                            <Link to={`/users/${snippet.author.userId}`}>
+                              {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
+                              {snippet.author?.nickname}
+                            </Link>
+                          ) : (
+                            <>
+                              {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
+                              {snippet.author?.nickname}
+                            </>
+                          )}
+                        </small>
                         <div className="d-flex align-items-center gap-2 text-danger">
                           <i className="bi bi-heart-fill"></i>
                           <small>{snippet.likeCount}</small>
@@ -185,7 +197,19 @@ const Home = () => {
                       <small className="text-muted">{new Date(post.createdAt).toLocaleDateString()}</small>
                     </div>
                     <div className="d-flex justify-content-between align-items-center mt-2">
-                      <small className="text-muted">by {post.author?.nickname}</small>
+                      <small className="text-muted">
+                        by {post.author?.userId ? (
+                          <span onClick={(e) => { e.stopPropagation(); navigate(`/users/${post.author.userId}`); }} style={{ cursor: 'pointer' }}>
+                            {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                            {post.author?.nickname}
+                          </span>
+                        ) : (
+                          <>
+                            {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                            {post.author?.nickname}
+                          </>
+                        )}
+                      </small>
                       <div className="d-flex align-items-center gap-3 text-muted">
                         <small><i className="bi bi-eye-fill me-1"></i>{post.viewCount ?? 0}</small>
                         <small><i className="bi bi-heart-fill me-1"></i>{post.likeCount ?? 0}</small>

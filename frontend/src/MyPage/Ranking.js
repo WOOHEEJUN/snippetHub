@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/Ranking.css';
 
 function Ranking() {
   const { getAuthHeaders } = useAuth();
+  const navigate = useNavigate();
   const [rankingData, setRankingData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,7 +41,7 @@ function Ranking() {
       setTotalPages(data.data.totalPages || 0);
 
     } catch (err) {
-      console.error('랭킹 불러오기 실패:', err);
+      
       setError(err.message);
     } finally {
       setLoading(false);
@@ -94,9 +97,12 @@ function Ranking() {
             {rankingData.map((user, index) => (
               <tr key={user.userId}>
                 <td>{user.rank || (page * size) + index + 1}</td>
-                <td>{user.nickname}</td>
-                <td>{user.levelName} (Lv.{user.level})</td>
-                <td>{user.points} P</td>
+                <td className="nickname-cell" onClick={() => navigate(`/users/${user.userId}`)}>
+                  {user.currentLevel && <img src={getLevelBadgeImage(user.currentLevel)} alt={user.currentLevel} className="level-badge-ranking" />}
+                  {user.nickname}
+                </td>
+                <td>{user.currentLevel}</td>
+                <td>{user.currentPoints} P</td>
               </tr>
             ))}
           </tbody>

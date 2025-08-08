@@ -6,6 +6,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { FaHeart, FaRegHeart, FaComment, FaEye, FaPlay, FaTags, FaUser, FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy, FaRobot } from 'react-icons/fa';
 import AICodeEvaluation from '../components/AICodeEvaluation';
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/SnippetDetail.css';
 
 function SnippetDetail() {
@@ -148,7 +149,7 @@ function SnippetDetail() {
           const data = await res.json();
           setComments(Array.isArray(data) ? data : []);
         } catch (err) {
-          console.error('댓글 불러오기 실패:', err);
+          
         }
       };
       fetchComments();
@@ -229,7 +230,7 @@ function SnippetDetail() {
             code={snippet.code}
             language={snippet.language}
             onEvaluationComplete={(evaluation) => {
-              console.log('AI 평가 완료:', evaluation);
+              
             }}
           />
         </div>
@@ -249,10 +250,18 @@ function SnippetDetail() {
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
-                                          <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
-                      <Link to={`/users/${comment.author?.userId}`} className="author-link">
+                    <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
+                    {comment.author?.userId ? (
+                      <Link to={`/users/${comment.author.userId}`} className="author-link">
+                        {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
                         {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
                       </Link>
+                    ) : (
+                      <span className="author-link">
+                        {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
+                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      </span>
+                    )}
                   </div>
                                   {editCommentId === comment.commentId ? (
                     <div className="comment-edit-form">
@@ -301,9 +310,17 @@ function SnippetDetail() {
                             <div key={reply.commentId} className="reply-item" style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}>
                                                              <div className="comment-author">
                                  <img src={reply.author?.profileImage || '/default-profile.png'} alt={reply.author?.nickname || '사용자'} />
-                                 <Link to={`/users/${reply.author?.userId}`} className="author-link">
-                                   {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
-                                 </Link>
+                                 {reply.author?.userId ? (
+                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
+                                     {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
+                                     {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                   </Link>
+                                 ) : (
+                                   <span className="author-link">
+                                     {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
+                                     {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                   </span>
+                                 )}
                                </div>
                               <p className="comment-content">{reply.content}</p>
                               <div className="comment-meta">
@@ -332,7 +349,17 @@ function SnippetDetail() {
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
             <img src={snippet.author?.profileImage || '/default-profile.png'} alt={snippet.author?.nickname} />
-            <span>{snippet.author?.nickname}</span>
+            {snippet.author?.userId ? (
+              <Link to={`/users/${snippet.author.userId}`}>
+                {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
+                <span>{snippet.author?.nickname}</span>
+              </Link>
+            ) : (
+              <>
+                {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
+                <span>{snippet.author?.nickname}</span>
+              </>
+            )}
           </div>
         </div>
 

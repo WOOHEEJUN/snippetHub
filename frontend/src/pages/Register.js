@@ -73,18 +73,18 @@ const Register = () => {
       });
 
       if (response.ok) {
-        setRegisterSuccess(true);
-        setTimeout(() => navigate('/login'), 2000);
-      } else {
+          alert('회원가입이 완료되었습니다!');
+          navigate('/login');
+        } else {
         const errorData = await response.json();
         setRegisterError(errorData.message || '회원가입에 실패했습니다. 다시 시도해주세요.');
       }
-    } catch (error) {
-      setRegisterError('서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    
+
+  } finally {
+        setIsLoading(false);
+      }
+    }; // <-- 이 중괄호가 handleSubmit 함수를 닫습니다.
 
   return (
     <div className="login-container">
@@ -99,11 +99,6 @@ const Register = () => {
             {registerError}
           </div>
         }
-        {registerSuccess && (
-          <div className="alert alert-success" role="alert">
-            회원가입이 완료되었습니다! 잠시 후 로그인 페이지로 이동합니다.
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">

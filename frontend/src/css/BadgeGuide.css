@@ -1,13 +1,13 @@
 .badge-guide-page {
   padding: 40px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #1a1a1a;
   min-height: 100vh;
 }
 
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  color: white;
+  color: #e0e0e0;
 }
 
 .page-header h1 {
@@ -29,11 +29,11 @@
 }
 
 .stats-card {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
 }
 
@@ -44,25 +44,25 @@
 .stats-number {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: #8ab0d1;
   margin-bottom: 8px;
 }
 
 .stats-label {
-  color: #6c757d;
+  color: #b0b0b0;
   font-weight: 500;
 }
 
 .filter-section {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .filter-section h3 {
-  color: #495057;
+  color: #e0e0e0;
   margin-bottom: 20px;
   font-weight: 600;
 }
@@ -74,9 +74,9 @@
 }
 
 .category-filter {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
-  color: #495057;
+  background-color: #333333;
+  border: 2px solid #444444;
+  color: #e0e0e0;
   padding: 10px 20px;
   border-radius: 25px;
   cursor: pointer;
@@ -85,14 +85,14 @@
 }
 
 .category-filter:hover {
-  background: #e9ecef;
-  border-color: #667eea;
+  background-color: #444444;
+  border-color: #666666;
 }
 
 .category-filter.active {
-  background: #667eea;
-  border-color: #667eea;
-  color: white;
+  background-color: #8ab0d1;
+  border-color: #8ab0d1;
+  color: #333333;
 }
 
 .badges-grid {
@@ -102,10 +102,10 @@
 }
 
 .badge-card {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -113,15 +113,15 @@
 
 .badge-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
 .badge-card.owned {
-  border: 2px solid #28a745;
+  border: 2px solid #4CAF50;
 }
 
 .badge-card.not-owned {
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .badge-image {
@@ -142,7 +142,7 @@
   top: -5px;
   right: 50%;
   transform: translateX(50%);
-  background: #28a745;
+  background: #4CAF50;
   color: white;
   width: 24px;
   height: 24px;
@@ -159,14 +159,14 @@
 }
 
 .badge-name {
-  color: #495057;
+  color: #e0e0e0;
   margin-bottom: 10px;
   font-weight: 600;
   font-size: 1.2rem;
 }
 
 .badge-description {
-  color: #6c757d;
+  color: #b0b0b0;
   margin-bottom: 15px;
   line-height: 1.5;
 }
@@ -186,23 +186,23 @@
 }
 
 .category-activity {
-  background: #e3f2fd;
-  color: #1976d2;
+  background-color: #333333;
+  color: #8ab0d1;
 }
 
 .category-achievement {
-  background: #fff3e0;
-  color: #f57c00;
+  background-color: #333333;
+  color: #FF9800;
 }
 
 .category-special {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background-color: #333333;
+  color: #9C27B0;
 }
 
 .category-event {
-  background: #e8f5e8;
-  color: #388e3c;
+  background-color: #333333;
+  color: #4CAF50;
 }
 
 .progress-section {
@@ -212,7 +212,7 @@
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #e9ecef;
+  background-color: #444444;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -220,13 +220,13 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #444444 0%, #666666 100%);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #b0b0b0;
   font-weight: 500;
 }
 
@@ -238,7 +238,7 @@
 
 .badge-requirements h5,
 .badge-rewards h5 {
-  color: #495057;
+  color: #e0e0e0;
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 0.9rem;
@@ -253,7 +253,7 @@
 
 .badge-requirements li,
 .badge-rewards li {
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 0.85rem;
   margin-bottom: 5px;
   padding-left: 15px;
@@ -263,7 +263,7 @@
 .badge-requirements li:before,
 .badge-rewards li:before {
   content: "•";
-  color: #667eea;
+  color: #8ab0d1;
   font-weight: bold;
   position: absolute;
   left: 0;
@@ -271,26 +271,26 @@
 
 .no-badges {
   text-align: center;
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 40px;
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .loading-message,
 .error-message {
   text-align: center;
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 40px;
   margin: 20px 0;
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .error-message {
   color: #dc3545;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: #3a2a2a;
+  border: 1px solid #5a3a3a;
 }
 
 @media (max-width: 768px) {

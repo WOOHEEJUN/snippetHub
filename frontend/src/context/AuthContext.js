@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userEmail', userData.data.email);
         localStorage.setItem('userId', userData.data.userId);
       } catch (err) {
-        console.error('사용자 정보 오류:', err);
+        
         logout();
       } finally {
         setLoading(false);
@@ -91,17 +91,14 @@ export const AuthProvider = ({ children }) => {
 
       return newAccessToken;
     } catch (error) {
-      console.error('토큰 재발급 실패:', error);
+      
       logout();
       throw error;
     }
   };
 
   const login = async (tokens) => {
-    if (!tokens || !tokens.token || !tokens.token.accessToken || !tokens.token.refreshToken || !tokens.user) {
-      console.error('❌ login()에 전달된 토큰/유저 정보가 부족합니다:', tokens);
-      return;
-    }
+    
 
     localStorage.setItem('accessToken', tokens.token.accessToken);
     localStorage.setItem('refreshToken', tokens.token.refreshToken);

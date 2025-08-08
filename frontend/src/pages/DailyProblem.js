@@ -23,7 +23,7 @@ function DailyProblem() {
 
   const fetchTodayProblem = async () => {
     try {
-      console.log('오늘의 문제 조회 시작...');
+      
       const response = await fetch('/api/daily-problems/today', {
         headers: {
           ...getAuthHeaders(),
@@ -32,12 +32,11 @@ function DailyProblem() {
         },
       });
 
-      console.log('응답 상태:', response.status);
-      console.log('응답 헤더:', response.headers.get('content-type'));
+      
 
       if (response.ok) {
         const data = await response.json();
-        console.log('응답 데이터:', data);
+        
         if (data.success) {
           setTodayProblem(data.data);
         } else {
@@ -53,7 +52,7 @@ function DailyProblem() {
         }
       }
     } catch (err) {
-      console.error('오늘의 문제 조회 실패:', err);
+      
       setError(`오늘의 문제를 불러올 수 없습니다: ${err.message}`);
     } finally {
       setLoading(false);
@@ -74,7 +73,7 @@ function DailyProblem() {
         }
       }
     } catch (err) {
-      console.error('이번 주 문제 조회 실패:', err);
+      
     }
   };
 
@@ -92,7 +91,7 @@ function DailyProblem() {
         }
       }
     } catch (err) {
-      console.error('이번 달 문제 조회 실패:', err);
+      
     }
   };
 
@@ -115,11 +114,11 @@ function DailyProblem() {
         // HTML 응답인지 확인
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('text/html')) {
-          console.warn('통계 조회 중 서버 오류 발생');
+          
         }
       }
     } catch (err) {
-      console.error('통계 조회 실패:', err);
+      
     }
   };
 
@@ -153,7 +152,7 @@ function DailyProblem() {
 
       const generateData = await generateResponse.json();
       
-      console.log('AI 문제 생성 응답:', generateData);
+      
       
       if (!generateData.success) {
         throw new Error(generateData.message || 'AI 문제 생성에 실패했습니다.');
@@ -164,7 +163,7 @@ function DailyProblem() {
       const now = new Date();
       const koreaTime = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
       const today = koreaTime.toISOString().split('T')[0]; // YYYY-MM-DD 형식
-      console.log('현재 날짜 (한국 시간):', today);
+      
       const dailyResponse = await fetch(`/api/daily-problems?problemDate=${today}&problemId=${generateData.data.problemId}`, {
         method: 'POST',
         headers: {
@@ -176,11 +175,11 @@ function DailyProblem() {
 
       const dailyData = await dailyResponse.json();
       
-      console.log('일일 문제 설정 응답:', dailyData);
+      
       
       // 일일 문제 설정이 실패해도 AI 문제는 생성되었으므로 성공으로 처리
       if (!dailyData.success) {
-        console.warn('일일 문제 설정 실패, 하지만 AI 문제는 생성됨:', dailyData.message);
+        
         // AI 문제 생성은 성공했으므로 오늘의 문제로 직접 설정
         setTodayProblem(generateData.data);
         return;
@@ -190,7 +189,7 @@ function DailyProblem() {
       await fetchTodayProblem();
       
     } catch (err) {
-      console.error('오늘의 문제 생성 실패:', err);
+      
       setError(err.message || '오늘의 문제 생성에 실패했습니다.');
     } finally {
       setGenerating(false);

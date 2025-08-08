@@ -7,8 +7,11 @@ function LevelProgress({ userLevel, userPoints }) {
     { level: 1, name: 'BRONZE', minPoints: 0, maxPoints: 100, color: '#cd7f32' },
     { level: 2, name: 'SILVER', minPoints: 100, maxPoints: 500, color: '#c0c0c0' },
     { level: 3, name: 'GOLD', minPoints: 500, maxPoints: 1000, color: '#ffd700' },
-    { level: 4, name: 'PLATINUM', minPoints: 1000, maxPoints: 2000, color: '#e5e4e2' },
-    { level: 5, name: 'DIAMOND', minPoints: 2000, maxPoints: 999999, color: '#b9f2ff' }
+    { level: 4, name: 'PLATINUM', minPoints: 1000, maxPoints: 2500, color: '#e5e4e2' },
+    { level: 5, name: 'DIAMOND', minPoints: 2500, maxPoints: 5000, color: '#b9f2ff' },
+    { level: 6, name: 'MASTER', minPoints: 5000, maxPoints: 10000, color: '#800080' },
+    { level: 7, name: 'GRANDMASTER', minPoints: 10000, maxPoints: 20000, color: '#ff4500' },
+    { level: 8, name: 'LEGEND', minPoints: 20000, maxPoints: Infinity, color: '#00bfff' }
   ];
 
   const getCurrentLevelInfo = () => {
@@ -49,6 +52,12 @@ function LevelProgress({ userLevel, userPoints }) {
         return <FaCrown style={{ color: '#e5e4e2' }} />;
       case 'DIAMOND':
         return <FaCrown style={{ color: '#b9f2ff' }} />;
+      case 'MASTER':
+        return <FaCrown style={{ color: '#9370db' }} />;
+      case 'GRANDMASTER':
+        return <FaCrown style={{ color: '#ff4500' }} />;
+      case 'LEGEND':
+        return <FaCrown style={{ color: '#00bfff' }} />;
       default:
         return <FaStar />;
     }
@@ -88,7 +97,7 @@ function LevelProgress({ userLevel, userPoints }) {
                 className="progress-fill" 
                 style={{ 
                   width: `${progressPercentage}%`,
-                  backgroundColor: currentLevel.color
+                  backgroundColor: '#8ab0d1'
                 }}
               ></div>
             </div>
@@ -102,7 +111,7 @@ function LevelProgress({ userLevel, userPoints }) {
       {!nextLevel && (
         <div className="max-level-info">
           <div className="max-level-badge">
-            <FaCrown style={{ color: '#b9f2ff', fontSize: '2rem' }} />
+            <FaCrown style={{ color: '#ffd700', fontSize: '2rem' }} />
             <span>최고 레벨 달성!</span>
           </div>
         </div>

@@ -27,7 +27,7 @@ const NotificationBell = () => {
         }
       }
     } catch (error) {
-      console.error('알림 가져오기 실패:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -47,13 +47,13 @@ const NotificationBell = () => {
         }
       }
     } catch (error) {
-      console.error('읽지 않은 알림 개수 가져오기 실패:', error);
+      
     }
   };
 
   // 알림 읽음 처리 및 이동
   const handleNotificationClick = async (notification) => {
-    console.log('handleNotificationClick 호출됨. 알림:', notification);
+    
     if (!notification.isRead) {
       try {
         const readResponse = await fetch(`/api/notifications/${notification.id}/read`, {
@@ -62,30 +62,30 @@ const NotificationBell = () => {
           credentials: 'include'
         });
         if (readResponse.ok) {
-          console.log('알림 읽음 처리 성공!');
+          
         } else {
-          console.error('알림 읽음 처리 실패: ', readResponse.status, readResponse.statusText);
+          
         }
         // 읽음 처리 후 목록/카운트 갱신
         fetchNotifications();
         fetchUnreadCount();
       } catch (error) {
-        console.error('알림 읽음 처리 실패:', error);
+        
       }
     }
     // 게시글로 이동 (알림에 postId, snippetId, commentId 등 포함되어야 함)
     if (notification.targetType === 'POST' && notification.targetId) {
       const path = `/board/${notification.targetId}`;
-      console.log('게시글로 이동:', path);
+      
       navigate(path);
     } else if (notification.targetType === 'SNIPPET' && notification.targetId) {
       const path = `/snippets/${notification.targetId}`;
-      console.log('스니펫으로 이동:', path);
+      
       navigate(path);
     } else if (notification.targetType === 'COMMENT' && notification.targetId && notification.parentId) {
       // 예시: 댓글 알림이면 해당 게시글/스니펫으로 이동
       const path = `/board/${notification.parentId}#comment-${notification.targetId}`;
-      console.log('댓글이 있는 게시글로 이동:', path);
+      
       navigate(path);
     }
     // 필요시 다른 타입도 추가
@@ -94,19 +94,19 @@ const NotificationBell = () => {
   // 모든 알림 읽음 처리
   const markAllAsRead = async () => {
     try {
-      await Promise.all(
-        notifications.filter(n => !n.isRead).map(n =>
-          fetch(`/api/notifications/${n.id}/read`, {
-            method: 'PUT',
-            headers: getAuthHeaders(),
-            credentials: 'include'
-          })
-        )
-      );
-      fetchNotifications();
-      fetchUnreadCount();
+      const response = await fetch('/api/notifications/read-all', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      if (response.ok) {
+        fetchNotifications();
+        fetchUnreadCount();
+      } else {
+        
+      }
     } catch (error) {
-      console.error('모든 알림 읽음 처리 실패:', error);
+      
     }
   };
 

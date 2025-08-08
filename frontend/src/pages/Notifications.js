@@ -22,7 +22,7 @@ const Notifications = () => {
       setNotifications(data.data.content); // Assuming data.data.content holds the array of notifications
     } catch (err) {
       setError('알림을 불러오는 데 실패했습니다.');
-      console.error('Error fetching notifications:', err);
+      
     } finally {
       setLoading(false);
     }
@@ -46,10 +46,10 @@ const Notifications = () => {
           )
         );
       } else {
-        console.error('Failed to mark notification as read');
+        
       }
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+      
     }
   };
 

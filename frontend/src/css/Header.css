@@ -95,25 +95,26 @@
 }
 
 .btn-outline-primary {
-  background-color: transparent;
-  color: #a0a0a0; /* 연한 회색 */
-  border-color: #a0a0a0;
+  background-color: #e0e0e0;
+  color: #333333; /* 밝은 회색 */
+  border-color: #e0e0e0;
 }
 
 .btn-outline-primary:hover {
-  background-color: #444444;
-  color: #d3d3d3;
-}
-
-.btn-primary {
-  background-color: #d3d3d3; /* 연한 회색 */
-  color: #000000;
+  background-color: #d3d3d3;
+  color: #333333;
   border-color: #d3d3d3;
 }
 
+.btn-primary {
+  background-color: #e0e0e0; /* 밝은 회색 */
+  color: #333333;
+  border-color: #e0e0e0;
+}
+
 .btn-primary:hover {
-  background-color: #b0b0b0;
-  border-color: #b0b0b0;
+  background-color: #d3d3d3;
+  border-color: #d3d3d3;
 }
 
 

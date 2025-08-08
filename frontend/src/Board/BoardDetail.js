@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag } from 'react-icons/fa';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/BoardDetail.css';
 
 const MOCK_ENABLED = false;
@@ -20,6 +21,38 @@ function BoardDetail() {
   const [editingCommentContent, setEditingCommentContent] = useState('');
   const [replyingToCommentId, setReplyingToCommentId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
+
+  const handleLike = async () => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/login');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
+      }
+
+      // 좋아요 요청 성공 후 likeCount와 isLiked만 갱신
+      const result = await res.json();
+      
+      setPost(prev => ({
+        ...prev,
+        isLiked: result.data?.isLiked ?? !prev.isLiked,
+        likeCount: result.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1)
+      }));
+    } catch (err) {
+      alert(err.message);
+      
+    }
+  };
 
   // ✅ 직접 정의한 getAuthHeaders 사용
   const getAuthHeaders = () => {
@@ -46,7 +79,6 @@ function BoardDetail() {
         setComments(commentsArray);
       }
     } catch (err) {
-      console.error('데이터 불러오기 실패:', err);
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
     }
   }, [postId]);
@@ -58,71 +90,33 @@ function BoardDetail() {
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 
  const handleDelete = async () => {
-  if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
-  if (!user) {
-    alert('로그인이 필요합니다.');
-    navigate('/login');
-    return;
-  }
-
-  const headers = getAuthHeaders();
-  const url = `/api/posts/${postId}`;
-  console.log('📌 postId:', postId);
-  console.log('🔐 Authorization 헤더:', headers);
-  console.log('📡 요청 URL:', url);
-
-  try {
-    const res = await fetch(url, {
-        method: 'DELETE',
-        headers: { ...headers, 'Content-Type': 'application/json' },
-        credentials: 'include',
-    });
-
-    const resText = await res.text();
-    console.log('🧾 응답 상태:', res.status);
-    console.log('🧾 응답 본문:', resText);
-
-    if (!res.ok) {
-      throw new Error(`삭제 실패: ${res.status} - ${resText}`);
-    }
-
-    alert('삭제되었습니다.');
-    navigate('/board');
-  } catch (err) {
-    console.error('❌ 삭제 오류:', err);
-    alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
-  }
-};
-
-  const handleLike = async () => {
+    if (!window.confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
     if (!user) {
       alert('로그인이 필요합니다.');
       navigate('/login');
       return;
     }
+
+    const headers = getAuthHeaders();
+    const url = `/api/posts/${postId}`;
+
     try {
-      const res = await fetch(`/api/posts/${postId}/like`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        credentials: 'include',
+      const res = await fetch(url, {
+          method: 'DELETE',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          credentials: 'include',
       });
 
+      const resText = await res.text();
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
+        throw new Error(`삭제 실패: ${res.status} - ${resText}`);
       }
 
-      // 좋아요 요청 성공 후 likeCount와 isLiked만 갱신
-      const result = await res.json();
-      console.log('좋아요 API 응답:', result);
-      setPost(prev => ({
-        ...prev,
-        isLiked: result.data?.isLiked ?? !prev.isLiked,
-        likeCount: result.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1)
-      }));
+      alert('삭제되었습니다.');
+      navigate('/board');
     } catch (err) {
-      alert(err.message);
-      console.error('좋아요 처리 실패:', err);
+      alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
     }
   };
 
@@ -146,7 +140,7 @@ function BoardDetail() {
       });
       if (!res.ok) throw new Error('댓글 작성 실패');
       const newCommentData = await res.json();
-      console.log('새 댓글 응답:', newCommentData);
+      
       setComments(prevComments => [...prevComments, newCommentData]); // 서버 응답에서 실제 데이터 사용
       setNewComment('');
     } catch (err) {
@@ -236,7 +230,7 @@ function BoardDetail() {
       });
       if (!res.ok) throw new Error('답글 작성 실패');
       const newReplyData = await res.json();
-      console.log('새 답글 응답:', newReplyData);
+      
       
       // 댓글 목록을 새로고침하여 대댓글을 포함한 전체 구조를 가져옴
       fetchPostData();
@@ -270,7 +264,20 @@ function BoardDetail() {
           <h1>{post.title}</h1>
           <div className="post-meta-info">
             <span className="category-info-inline"><FaTag /> {post.category}</span>
-            <span className="author-info-inline"><FaUser /> {post.author?.nickname}</span>
+            <span className="author-info-inline">
+              <FaUser /> 
+              {post.author?.userId ? (
+                <Link to={`/users/${post.author.userId}`}>
+                  {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                  {post.author?.nickname}
+                </Link>
+              ) : (
+                <>
+                  {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                  {post.author?.nickname}
+                </>
+              )}
+            </span>
             <span className="date-info-inline"><FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}</span>
             <span className="view-info-inline"><FaEye /> {post.viewCount}</span>
           </div>
@@ -320,14 +327,22 @@ function BoardDetail() {
           </form>
           <div className="comment-list">
             {comments.map((comment) => {
-              console.log('개별 댓글:', comment);
+              
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
-                                          <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
-                      <Link to={`/users/${comment.author?.userId}`} className="author-link">
+                    <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
+                    {comment.author?.userId ? (
+                      <Link to={`/users/${comment.author.userId}`} className="author-link">
+                        {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
                         {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
                       </Link>
+                    ) : (
+                      <span className="author-link">
+                        {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
+                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      </span>
+                    )}
                   </div>
                   {editingCommentId === comment.commentId ? (
                     <div className="comment-edit-form">
@@ -376,9 +391,17 @@ function BoardDetail() {
                             <div key={reply.commentId} className="reply-item" style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}>
                                                              <div className="comment-author">
                                  <img src={reply.author?.profileImage || '/default-profile.png'} alt={reply.author?.nickname || '사용자'} />
-                                 <Link to={`/users/${reply.author?.userId}`} className="author-link">
-                                   {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
-                                 </Link>
+                                 {reply.author?.userId ? (
+                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
+                                     {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
+                                     {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                   </Link>
+                                 ) : (
+                                   <span className="author-link">
+                                     {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
+                                     {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                   </span>
+                                 )}
                                </div>
                               <p className="comment-content">{reply.content}</p>
                               <div className="comment-meta">
@@ -407,7 +430,17 @@ function BoardDetail() {
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
             <img src={post.author?.profileImage || '/default-profile.png'} alt={post.author?.nickname} />
-            <span>{post.author?.nickname}</span>
+            {post.author?.userId ? (
+              <Link to={`/users/${post.author.userId}`}>
+                {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                <span>{post.author?.nickname}</span>
+              </Link>
+            ) : (
+              <>
+                {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                <span>{post.author?.nickname}</span>
+              </>
+            )}
           </div>
         </div>
 

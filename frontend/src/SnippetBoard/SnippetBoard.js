@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/SnippetBoard.css';
+
+const LANGUAGE_OPTIONS = ['C', 'Python', 'Java', 'JavaScript', 'CSS', 'HTML'];
 
 const SnippetBoard = () => {
   const navigate = useNavigate();
@@ -13,11 +16,12 @@ const SnippetBoard = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
   const [sortOrder, setSortOrder] = useState('LATEST');
 
-  // 데이터 요청 및 상태 업데이트
+  // 스니펫 목록 요청
   const fetchSnippets = useCallback((page = 0, term = '', lang = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
@@ -31,50 +35,43 @@ const SnippetBoard = () => {
     if (lang) params.append('language', lang);
 
     fetch(`/api/snippets?${params.toString()}`)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         const pageData = data.data;
         setSnippets(pageData.content || []);
         setCurrentPage(pageData.currentPage);
         setTotalPages(pageData.totalPages);
       })
-      .catch(err => {
-        setError(err.message);
-      })
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [searchTerm, searchLanguage, sortOrder]);
+  }, []);
 
   useEffect(() => {
-    // URL 파라미터 가져오기
     const params = new URLSearchParams(location.search);
     const term = params.get('search') || '';
     const lang = params.get('language') || '';
     const sort = params.get('sort') || 'LATEST';
-    const page = parseInt(params.get('page') || '0');
+    const page = parseInt(params.get('page') || '0', 10);
 
-    // 상태 업데이트
     setSearchTerm(term);
     setSearchLanguage(lang);
     setSortOrder(sort);
 
-    // 데이터 로드
     fetchSnippets(page, term, lang, sort);
   }, [location.search, fetchSnippets]);
 
   const handleSearch = (e) => {
     e.preventDefault();
 
-    // URL 파라미터 설정
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
     if (searchLanguage) params.set('language', searchLanguage);
     if (sortOrder) params.set('sort', sortOrder);
-    params.set('page', 0); // 검색 시 첫 페이지로
+    params.set('page', 0); // 검색 시 1페이지로
 
-    // 페이지 이동
     navigate(`/snippets?${params.toString()}`);
   };
 
@@ -82,9 +79,9 @@ const SnippetBoard = () => {
     if (!user) {
       alert('로그인이 필요합니다.');
       navigate('/login');
-    } else {
-      navigate('/snippets/write');
+      return;
     }
+    navigate('/snippets/write');
   };
 
   const getLanguageBadgeClass = (language) => {
@@ -101,39 +98,49 @@ const SnippetBoard = () => {
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <form className="d-flex search-form" onSubmit={handleSearch}>
-          <input 
-            type="text" 
-            className="form-control" 
-            placeholder="검색..." 
+          {/* 키워드 검색 */}
+          <input
+            type="text"
+            className="form-control"
+            placeholder="검색..."
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <select 
-            className="form-select" 
-            style={{ width: '150px' }}
+
+          {/* 언어 선택 */}
+          <select
+            className="form-select"
+            style={{ width: '150px', marginLeft: '8px' }}
             value={searchLanguage}
-            onChange={e => setSearchLanguage(e.target.value)}
+            onChange={(e) => setSearchLanguage(e.target.value)}
           >
             <option value="">모든 언어</option>
-            <option value="HTML">HTML</option>
-            <option value="CSS">CSS</option>
-            <option value="JAVASCRIPT">JavaScript</option>
-            <option value="JAVA">Java</option>
-            <option value="PYTHON">Python</option>
-            <option value="C">C</option>
+            {LANGUAGE_OPTIONS.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
           </select>
-          <select 
-            className="form-select" 
-            style={{ width: '150px' }}
+
+          {/* 정렬 */}
+          <select
+            className="form-select"
+            style={{ width: '150px', marginLeft: '8px' }}
             value={sortOrder}
-            onChange={e => setSortOrder(e.target.value)}
+            onChange={(e) => setSortOrder(e.target.value)}
           >
             <option value="LATEST">최신순</option>
             <option value="POPULAR">인기순</option>
           </select>
-          <button className="btn btn-outline-secondary" type="submit">검색</button>
+
+          <button className="btn btn-outline-secondary" type="submit" style={{ marginLeft: '8px' }}>
+            검색
+          </button>
         </form>
-        <button className="btn btn-primary" onClick={handleWrite}>스니펫 작성</button>
+
+        <button className="btn btn-primary" onClick={handleWrite}>
+          스니펫 작성
+        </button>
       </div>
 
       {loading && (
@@ -143,28 +150,60 @@ const SnippetBoard = () => {
           </div>
         </div>
       )}
+
       {error && <div className="alert alert-danger">{error}</div>}
-      
+
       {!loading && !error && (
         <>
           <table className="table table-hover align-middle">
             <thead className="table-light">
               <tr>
-                <th scope="col" style={{ width: '10%' }}>번호</th>
-                <th scope="col" style={{ width: '40%' }}>제목</th>
-                <th scope="col" style={{ width: '15%' }}>언어</th>
-                <th scope="col" style={{ width: '15%' }}>작성자</th>
-                <th scope="col" style={{ width: '20%' }}>작성일</th>
+                <th scope="col" style={{ width: '10%' }}>
+                  번호
+                </th>
+                <th scope="col" style={{ width: '40%' }}>
+                  제목
+                </th>
+                <th scope="col" style={{ width: '15%' }}>
+                  언어
+                </th>
+                <th scope="col" style={{ width: '15%' }}>
+                  작성자
+                </th>
+                <th scope="col" style={{ width: '20%' }}>
+                  작성일
+                </th>
               </tr>
             </thead>
             <tbody>
               {snippets.length > 0 ? (
                 snippets.map((snippet) => (
-                  <tr key={snippet.snippetId} onClick={() => navigate(`/snippets/${snippet.snippetId}`)} style={{ cursor: 'pointer' }}>
+                  <tr
+                    key={snippet.snippetId}
+                    onClick={() => navigate(`/snippets/${snippet.snippetId}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td>{snippet.snippetId}</td>
                     <td>{snippet.title}</td>
-                    <td><span className={getLanguageBadgeClass(snippet.language)}>{snippet.language}</span></td>
-                    <td>{snippet.author?.nickname || '-'}</td>
+                    <td>
+                      <span className={getLanguageBadgeClass(snippet.language)}>{snippet.language}</span>
+                    </td>
+                    <td>
+                      {snippet.author?.userId ? (
+                        <Link to={`/users/${snippet.author.userId}`}>
+                          {snippet.author?.level && (
+                            <img
+                              src={getLevelBadgeImage(snippet.author.level)}
+                              alt={snippet.author.level}
+                              className="level-badge-inline"
+                            />
+                          )}
+                          {snippet.author?.nickname || '-'}
+                        </Link>
+                      ) : (
+                        <span>{snippet.author?.nickname || '-'}</span>
+                      )}
+                    </td>
                     <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))
@@ -182,7 +221,7 @@ const SnippetBoard = () => {
           {totalPages > 1 && (
             <nav className="d-flex justify-content-center">
               <ul className="pagination">
-                {[...Array(totalPages).keys()].map(page => (
+                {[...Array(totalPages).keys()].map((page) => (
                   <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
                     <button
                       className="page-link"

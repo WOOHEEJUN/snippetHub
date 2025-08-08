@@ -152,22 +152,24 @@ textarea.form-control {
 }
 
 .btn-primary {
-  background-color: #d3d3d3; /* Primary purple */
-  color: #000000;
+  background-color: #e0e0e0; /* 밝은 회색 */
+  color: #333333;
 }
 
 .btn-primary:hover {
-  background-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+  background-color: #d3d3d3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #333333;
 }
 
 .btn-secondary {
-  background-color: #555555;
-  color: #d3d3d3;
+  background-color: #e0e0e0;
+  color: #333333;
 }
 
 .btn-secondary:hover {
-  background-color: #666666;
+  background-color: #d3d3d3;
+  color: #333333;
 }
 
 .me-2 {

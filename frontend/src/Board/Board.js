@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/Board.css';
 
 const Board = () => {
@@ -136,7 +137,16 @@ const Board = () => {
                         {post.title}
                       </Link>
                     </td>
-                    <td>{post.author?.nickname || '-'}</td>
+                    <td>
+                      {post.author?.userId ? (
+                        <Link to={`/users/${post.author.userId}`}>
+                          {post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" />}
+                          {post.author?.nickname || '-'}
+                        </Link>
+                      ) : (
+                        <span>{post.author?.nickname || '-'}</span>
+                      )}
+                    </td>
                     <td>{new Date(post.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))

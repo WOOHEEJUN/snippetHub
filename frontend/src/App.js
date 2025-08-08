@@ -30,8 +30,10 @@ import BadgeGuide from './pages/BadgeGuide';
 import ProblemList from './pages/ProblemList';
 import ProblemDetail from './pages/ProblemDetail';
 import PointHistory from './pages/PointHistory';
+import SavedProblems from './MyPage/SavedProblems'; // SavedProblems 컴포넌트 임포트
 import { AuthProvider, useAuth } from './context/AuthContext';
 import NotificationBell from './components/NotificationBell'; // NotificationBell 임포트
+import { getLevelBadgeImage } from './utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import './css/App.css';
 
 const AuthStatus = () => {
@@ -42,7 +44,7 @@ const AuthStatus = () => {
 
   if (!user) {
   return (
-   <div className="auth-status d-flex align-items-center gap-5">
+   <div className="auth-status d-flex align-items-center gap-3">
   <Link to="/login" className="custom-btn-sm">로그인</Link>
   <Link to="/register" className="custom-btn-sm">회원가입</Link>
 </div>
@@ -51,7 +53,10 @@ const AuthStatus = () => {
   return (
     <div className="auth-status d-flex align-items-center gap-3">
       <NotificationBell />
-      <span>안녕하세요, {user.nickname || user.email}님!</span>
+      <span>
+        {user.level && <img src={getLevelBadgeImage(user.level)} alt={user.level} className="level-badge-header" />}
+        안녕하세요, {user.nickname || user.email}님!
+      </span>
       <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
       <button
         onClick={() => {
@@ -109,6 +114,7 @@ function App() {
             <Route path="/mypage/badges" element={<MyBadges />} />
             <Route path="/mypage/ranking" element={<Ranking />} />
             <Route path="/mypage/points-guide" element={<PointsGuide />} />
+            <Route path="/mypage/saved-problems" element={<SavedProblems />} /> {/* 저장한 문제 보기 라우트 추가 */}
             <Route path="/badge-guide" element={<BadgeGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
             <Route path="/snippets/write" element={<SnippetWrite />} />

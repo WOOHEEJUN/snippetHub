@@ -151,7 +151,7 @@ function ProblemList() {
     <div className="problem-list-page">
       <div className="container">
         <div className="page-header">
-          <h1>💻 코딩 문제</h1>
+          <h1> 코딩 문제</h1>
           <p>다양한 알고리즘 문제를 풀어보고 실력을 향상시켜보세요!</p>
         </div>
 

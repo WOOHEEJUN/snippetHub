@@ -103,12 +103,12 @@ function AIProblemGeneration() {
     <div className="ai-problem-generation">
       <div className="container">
         <div className="page-header">
-          <h1>🤖 AI 문제 생성</h1>
+          <h1> AI 문제 생성</h1>
           <p>원하는 조건에 맞는 코딩 문제를 AI가 생성해드립니다.</p>
         </div>
 
         <div className="generation-form">
-          <h3>📝 문제 생성 조건</h3>
+          <h3> 문제 생성 조건</h3>
           
           <div className="form-grid">
             <div className="form-group">
@@ -169,7 +169,7 @@ function AIProblemGeneration() {
             disabled={loading}
             className="generate-btn"
           >
-            {loading ? '문제 생성 중...' : '🚀 문제 생성하기'}
+            {loading ? '문제 생성 중...' : ' 문제 생성하기'}
           </button>
         </div>
 

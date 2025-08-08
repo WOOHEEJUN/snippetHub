@@ -1,13 +1,13 @@
 .problem-list-page {
   padding: 40px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #1a1a1a;
   min-height: 100vh;
 }
 
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  color: white;
+  color: #e0e0e0;
 }
 
 .page-header h1 {
@@ -26,10 +26,10 @@
   display: flex;
   justify-content: center;
   margin-bottom: 30px;
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .tab-btn {
@@ -40,28 +40,28 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 1rem;
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+  background-color: #8ab0d1;
+  color: #333333;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .tab-btn:hover:not(.active) {
-  background: #f8f9fa;
-  color: #495057;
+  background-color: #333333;
+  color: #e0e0e0;
 }
 
 /* 사용자 통계 섹션 */
 .user-stats-section {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .stats-grid {
@@ -71,8 +71,8 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #333333;
+  color: #e0e0e0;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
@@ -99,11 +99,11 @@
 /* 추천 문제 섹션 */
 .recommended-problems,
 .learning-progress {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .section-header {
@@ -112,44 +112,44 @@
 }
 
 .section-header h2 {
-  color: #333;
+  color: #e0e0e0;
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .section-header p {
-  color: #666;
+  color: #b0b0b0;
   font-size: 1rem;
 }
 
 .problem-card.recommended {
   position: relative;
-  border: 2px solid #667eea;
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+  border: 2px solid #8ab0d1;
+  background-color: #333333;
 }
 
 .recommended-badge {
   position: absolute;
   top: -10px;
   right: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #8ab0d1;
+  color: #333333;
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .recommendation-reason {
-  background: #e3f2fd;
-  border-left: 4px solid #2196f3;
+  background-color: #333333;
+  border-left: 4px solid #8ab0d1;
   padding: 10px;
   margin-top: 10px;
   border-radius: 4px;
   font-size: 0.9rem;
-  color: #1976d2;
+  color: #e0e0e0;
 }
 
 /* 학습 진도 섹션 */
@@ -164,13 +164,13 @@
 }
 
 .progress-item {
-  background: #f8f9fa;
+  background-color: #333333;
   border-radius: 10px;
   padding: 20px;
 }
 
 .progress-item h3 {
-  color: #333;
+  color: #e0e0e0;
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 15px;
@@ -196,15 +196,15 @@
 }
 
 .progress-fill.easy {
-  background: linear-gradient(90deg, #28a745, #20c997);
+  background-color: #4CAF50;
 }
 
 .progress-fill.medium {
-  background: linear-gradient(90deg, #ffc107, #fd7e14);
+  background-color: #FFC107;
 }
 
 .progress-fill.hard {
-  background: linear-gradient(90deg, #dc3545, #e83e8c);
+  background-color: #DC3545;
 }
 
 .category-progress {
@@ -223,19 +223,20 @@
 .category-item span:first-child {
   min-width: 80px;
   font-weight: 500;
+  color: #e0e0e0;
 }
 
 .category-bar {
   flex: 1;
   height: 8px;
-  background: #e9ecef;
+  background-color: #444444;
   border-radius: 4px;
   overflow: hidden;
 }
 
 .category-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background-color: #8ab0d1;
   transition: width 0.3s ease;
 }
 
@@ -243,15 +244,15 @@
   min-width: 40px;
   text-align: right;
   font-weight: 600;
-  color: #667eea;
+  color: #8ab0d1;
 }
 
 .search-filter-section {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .search-form {
@@ -261,19 +262,19 @@
 .search-input-group {
   display: flex;
   align-items: center;
-  background: #f8f9fa;
+  background-color: #333333;
   border-radius: 8px;
   padding: 5px;
-  border: 2px solid #e9ecef;
+  border: 2px solid #444444;
   transition: border-color 0.3s ease;
 }
 
 .search-input-group:focus-within {
-  border-color: #667eea;
+  border-color: #666666;
 }
 
 .search-icon {
-  color: #6c757d;
+  color: #b0b0b0;
   margin: 0 15px;
   font-size: 1.1rem;
 }
@@ -285,11 +286,12 @@
   padding: 12px 0;
   font-size: 1rem;
   outline: none;
+  color: #e0e0e0;
 }
 
 .search-btn {
-  background: #667eea;
-  color: white;
+  background-color: #e0e0e0;
+  color: #333333;
   border: none;
   padding: 12px 20px;
   border-radius: 6px;
@@ -299,7 +301,7 @@
 }
 
 .search-btn:hover {
-  background: #5a6fd8;
+  background-color: #d3d3d3;
 }
 
 .filter-section {
@@ -316,7 +318,7 @@
 
 .filter-group label {
   font-weight: 600;
-  color: #495057;
+  color: #e0e0e0;
   font-size: 0.9rem;
 }
 
@@ -328,9 +330,10 @@
 
 .filter-btn {
   padding: 8px 16px;
-  border: 2px solid;
+  border: 2px solid #444444;
   border-radius: 20px;
-  background: transparent;
+  background-color: #333333;
+  color: #e0e0e0;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -339,15 +342,17 @@
 
 .filter-btn:hover {
   transform: translateY(-1px);
+  background-color: #444444;
 }
 
 .category-select,
 .sort-select {
   padding: 10px 15px;
-  border: 2px solid #e9ecef;
+  border: 2px solid #444444;
   border-radius: 6px;
   font-size: 0.9rem;
-  background: white;
+  background-color: #333333;
+  color: #e0e0e0;
   cursor: pointer;
   transition: border-color 0.3s ease;
 }
@@ -355,7 +360,7 @@
 .category-select:focus,
 .sort-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #666666;
 }
 
 .problems-grid {
@@ -366,10 +371,10 @@
 }
 
 .problem-card {
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
   text-decoration: none;
   color: inherit;
@@ -378,7 +383,7 @@
 
 .problem-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
 .problem-header {
@@ -389,7 +394,7 @@
 }
 
 .problem-title h3 {
-  color: #495057;
+  color: #e0e0e0;
   margin: 0;
   font-weight: 600;
   font-size: 1.2rem;
@@ -397,7 +402,7 @@
 }
 
 .difficulty-badge {
-  color: white;
+  color: #333333;
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
@@ -413,8 +418,8 @@
 
 .category-tag {
   display: inline-block;
-  background: #e3f2fd;
-  color: #1976d2;
+  background-color: #333333;
+  color: #8ab0d1;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
@@ -432,7 +437,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 0.85rem;
 }
 
@@ -441,7 +446,7 @@
 }
 
 .problem-description {
-  color: #6c757d;
+  color: #b0b0b0;
   font-size: 0.9rem;
   line-height: 1.5;
   margin-top: 10px;
@@ -450,15 +455,15 @@
 .no-problems {
   grid-column: 1 / -1;
   text-align: center;
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 60px 20px;
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .no-problems-icon {
   font-size: 3rem;
-  color: #dee2e6;
+  color: #444444;
   margin-bottom: 20px;
 }
 
@@ -470,38 +475,38 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background-color: #e0e0e0;
+  color: #333333;
   padding: 15px 30px;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .create-problem-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-  color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  color: #333333;
   text-decoration: none;
 }
 
 .loading-message,
 .error-message {
   text-align: center;
-  background: white;
+  background-color: #222222;
   border-radius: 12px;
   padding: 40px;
   margin: 20px 0;
-  color: #6c757d;
+  color: #b0b0b0;
 }
 
 .error-message {
   color: #dc3545;
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: #3a2a2a;
+  border: 1px solid #5a3a3a;
 }
 
 @media (max-width: 768px) {

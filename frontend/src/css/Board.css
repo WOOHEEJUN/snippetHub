@@ -57,7 +57,7 @@
 
 .pagination .page-item.active .page-link {
   z-index: 3;
-  color: #000000;
+  color: #333333; /* 어두운 글씨 */
   background-color: #e0e0e0; /* 밝은 회색 */
   border-color: #e0e0e0;
 }

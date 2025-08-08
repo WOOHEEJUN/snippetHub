@@ -70,3 +70,92 @@ a:hover {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+/* custom-btn-sm */
+.custom-btn-sm {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+  color: #333333;
+  background-color: #e0e0e0; /* 밝은 회색 */
+  border-color: #e0e0e0;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.custom-btn-sm:hover {
+  color: #333333;
+  background-color: #d3d3d3;
+  border-color: #d3d3d3;
+}
+
+.btn-outline-danger {
+  background-color: #e0e0e0;
+  color: #333333; /* 밝은 회색 */
+  border-color: #e0e0e0;
+}
+
+.btn-outline-danger:hover {
+  background-color: #d3d3d3;
+  color: #333333;
+  border-color: #d3d3d3;
+}
+
+/* 헤더 스타일 */
+.nav-container {
+  min-width: 900px; /* 최소 너비 설정 (필요에 따라 조정) */
+}
+
+.auth-status > * {
+  flex-shrink: 0; /* 버튼들이 줄어들지 않도록 */
+}
+
+/* 작은 화면에서 메뉴 항목 간 간격 조정 */
+@media (max-width: 1200px) {
+  .nav-list {
+    gap: 10px !important; /* 메뉴 항목 간 간격 줄이기 */
+  }
+}
+
+@media (max-width: 992px) {
+  .auth-status {
+    gap: 10px !important; /* 인증 버튼 간 간격 줄이기 */
+  }
+  .auth-status span {
+    font-size: 0.9em; /* 닉네임 폰트 크기 줄이기 */
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-container .container > div {
+    flex-direction: column; /* 작은 화면에서 세로로 정렬 */
+    align-items: flex-start !important;
+  }
+  .nav-list {
+    margin-top: 10px; /* 메뉴와 로고 사이 간격 */
+    flex-wrap: wrap; /* 메뉴 항목 줄바꿈 허용 */
+  }
+  .auth-status {
+    margin-top: 10px; /* 인증 부분과 메뉴 사이 간격 */
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+}
+
+/* 뱃지 이미지 스타일 */
+.level-badge-header,
+.level-badge-mypage,
+.level-badge-ranking,
+.level-badge-profile {
+  width: 20px; /* 뱃지 이미지 크기 */
+  height: 20px;
+  vertical-align: middle; /* 텍스트와 정렬 */
+  margin-right: 5px; /* 닉네임과의 간격 */
+}

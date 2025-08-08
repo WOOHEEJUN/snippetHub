@@ -74,15 +74,15 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  background-color: #d3d3d3;
-  color: #000000;
-  border: 1px solid #d3d3d3;
+  background-color: #e0e0e0;
+  color: #333333;
+  border: 1px solid #e0e0e0;
 }
 
 .btn-submit:hover {
-  background-color: #ffffff;
+  background-color: #d3d3d3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 회원 탈퇴 버튼 */
@@ -94,15 +94,15 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  background-color: #bf3636;
-  color: #fff;
-  border: 1px solid #bf3636;
+  background-color: #e0e0e0;
+  color: #333333;
+  border: 1px solid #e0e0e0;
 }
 
 .btn-delete:hover {
-  background-color: #a62b2b;
+  background-color: #d3d3d3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(191, 54, 54, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 뒤로가기 버튼 */
@@ -112,9 +112,9 @@
 }
 
 .btn-back {
-  background-color: transparent;
-  color: #b0b0b0;
-  border: 1px solid #444444;
+  background-color: #e0e0e0;
+  color: #333333;
+  border: 1px solid #e0e0e0;
   padding: 0.7rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
@@ -123,6 +123,6 @@
 }
 
 .btn-back:hover {
-  background-color: #222222;
-  border-color: #555555;
+  background-color: #d3d3d3;
+  border-color: #d3d3d3;
 }

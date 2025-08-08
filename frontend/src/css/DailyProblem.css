@@ -1,7 +1,7 @@
 .daily-problem {
   padding: 2rem 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #1a1a1a;
 }
 
 .daily-problem .container {
@@ -47,9 +47,9 @@
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+  background-color: #333333;
+  color: #e0e0e0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .tab-btn:hover:not(.active) {
@@ -148,13 +148,13 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #e0e0e0;
+  color: #333333;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  background-color: #d3d3d3;
+  color: #333333;
 }
 
 .btn-lg {
@@ -162,24 +162,24 @@
   font-size: 1.1rem;
   font-weight: 600;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .btn-lg:hover {
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   transform: translateY(-3px);
 }
 
 .btn-outline-primary {
-  background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  background: #e0e0e0;
+  color: #333333;
+  border: 2px solid #e0e0e0;
 }
 
 .btn-outline-primary:hover {
-  background: #667eea;
-  color: white;
+  background: #d3d3d3;
+  color: #333333;
   transform: translateY(-2px);
 }
 
@@ -199,14 +199,14 @@
 }
 
 .welcome-message h3 {
-  color: #333;
+  color: #e0e0e0;
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
 }
 
 .welcome-message p {
@@ -289,8 +289,8 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #222222;
+  color: #e0e0e0;
   padding: 2rem;
   border-radius: 15px;
   text-align: center;
@@ -312,6 +312,7 @@
   font-size: 2.5rem;
   font-weight: bold;
   margin: 0;
+  color: #8ab0d1;
 }
 
 .loading {

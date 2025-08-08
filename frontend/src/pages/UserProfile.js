@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaUser, FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
+import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/UserProfile.css';
 
 const UserProfile = () => {
@@ -113,7 +114,12 @@ const UserProfile = () => {
           />
         </div>
         <div className="profile-info">
-          <h1 className="profile-nickname">{user.nickname}</h1>
+          <h1 className="profile-nickname">
+            {user.level && <img src={getLevelBadgeImage(user.level)} alt={user.level} className="level-badge-profile" />}
+            {user.nickname}
+          </h1>
+          {user.levelName && user.level && <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>}
+          {user.points !== undefined && <p className="profile-points">포인트: {user.points} P</p>}
           {user.bio && <p className="profile-bio">{user.bio}</p>}
           <div className="profile-stats">
             <div className="stat-item">

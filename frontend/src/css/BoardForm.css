@@ -95,21 +95,23 @@ textarea.form-control {
 }
 
 .btn-primary {
-  background-color: #d3d3d3;
-  color: #000000;
+  background-color: #e0e0e0;
+  color: #333333;
 }
 
 .btn-primary:hover {
-  background-color: #ffffff;
+  background-color: #d3d3d3;
+  color: #333333;
 }
 
 .btn-secondary {
-  background-color: #555555;
-  color: #d3d3d3;
+  background-color: #e0e0e0;
+  color: #333333;
 }
 
 .btn-secondary:hover {
-  background-color: #666666;
+  background-color: #d3d3d3;
+  color: #333333;
 }
 
 .btn:disabled {

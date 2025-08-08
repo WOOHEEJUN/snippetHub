@@ -1,7 +1,7 @@
 .submission-history {
   padding: 2rem 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #1a1a1a;
 }
 
 .submission-history .container {
@@ -11,7 +11,7 @@
 }
 
 .submission-history h1 {
-  color: white;
+  color: #e0e0e0;
   text-align: center;
   margin-bottom: 1rem;
   font-size: 2.5rem;
@@ -19,18 +19,18 @@
 }
 
 .submission-history .description {
-  color: rgba(255, 255, 255, 0.9);
+  color: #b0b0b0;
   text-align: center;
   margin-bottom: 2rem;
   font-size: 1.1rem;
 }
 
 .stats-summary {
-  background: white;
+  background-color: #222222;
   border-radius: 15px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
 }
@@ -44,24 +44,24 @@
 
 .stat-label {
   font-size: 0.9rem;
-  color: #666;
+  color: #b0b0b0;
   font-weight: 600;
 }
 
 .stat-value {
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: #8ab0d1;
 }
 
 .tab-navigation {
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
-  background: white;
+  background-color: #222222;
   border-radius: 15px;
   padding: 0.5rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .tab-btn {
@@ -72,55 +72,57 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+  background-color: #333333;
+  color: #e0e0e0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .tab-btn:hover:not(.active) {
-  background: #f8f9fa;
-  color: #333;
+  background-color: #444444;
+  color: #e0e0e0;
 }
 
 .problem-selector {
-  background: white;
+  background-color: #222222;
   border-radius: 15px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .problem-selector label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .form-control {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #e1e5e9;
+  border: 2px solid #444444;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  background-color: #333333;
+  color: #e0e0e0;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #666666;
+  box-shadow: 0 0 0 3px rgba(102, 102, 102, 0.2);
 }
 
 .submissions-container {
-  background: white;
+  background-color: #222222;
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .submissions-list {
@@ -130,7 +132,7 @@
 }
 
 .submission-card {
-  border: 1px solid #e1e5e9;
+  border: 1px solid #444444;
   border-radius: 12px;
   padding: 1.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -138,7 +140,7 @@
 
 .submission-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
 .submission-header {
@@ -159,17 +161,17 @@
 }
 
 .problem-title a {
-  color: #333;
+  color: #e0e0e0;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .problem-title a:hover {
-  color: #667eea;
+  color: #8ab0d1;
 }
 
 .submission-date {
-  color: #666;
+  color: #b0b0b0;
   font-size: 0.9rem;
 }
 
@@ -191,7 +193,7 @@
   gap: 1rem;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background-color: #333333;
   border-radius: 8px;
 }
 
@@ -203,32 +205,32 @@
 
 .detail-label {
   font-size: 0.8rem;
-  color: #666;
+  color: #b0b0b0;
   font-weight: 600;
 }
 
 .detail-value {
   font-weight: 600;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: #3a2a2a;
+  border: 1px solid #5a3a3a;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 
 .error-message strong {
-  color: #721c24;
+  color: #dc3545;
   display: block;
   margin-bottom: 0.5rem;
 }
 
 .error-message pre {
   margin: 0;
-  color: #721c24;
+  color: #dc3545;
   font-size: 0.9rem;
   white-space: pre-wrap;
   word-break: break-word;
@@ -252,24 +254,26 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #e0e0e0;
+  color: #333333;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background-color: #d3d3d3;
+  color: #333333;
 }
 
 .btn-outline-primary {
-  background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  background-color: #e0e0e0;
+  color: #333333;
+  border: 2px solid #e0e0e0;
 }
 
 .btn-outline-primary:hover {
-  background: #667eea;
-  color: white;
+  background-color: #d3d3d3;
+  color: #333333;
   transform: translateY(-2px);
 }
 
@@ -285,18 +289,18 @@
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid #e1e5e9;
+  border-top: 1px solid #444444;
 }
 
 .page-info {
   font-weight: 600;
-  color: #333;
+  color: #e0e0e0;
 }
 
 .no-submissions {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: #b0b0b0;
 }
 
 .no-submissions p {
@@ -307,7 +311,7 @@
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: #b0b0b0;
   font-size: 1.1rem;
 }
 
@@ -318,9 +322,9 @@
 }
 
 .alert-danger {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  background-color: #3a2a2a;
+  border: 1px solid #5a3a3a;
+  color: #dc3545;
 }
 
 @media (max-width: 768px) {
