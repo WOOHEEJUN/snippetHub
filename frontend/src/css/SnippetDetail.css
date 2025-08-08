@@ -64,8 +64,8 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  gap: 0.7rem;
+  font-size: 0.6rem;
   transition: all 0.2s ease-in-out;
   color: #e0e0e0;
 }
@@ -408,4 +408,26 @@
 .reply-form button[type="button"] {
   background-color: #000000;
   color: #e0e0e0;
+}
+.actions-card .like-button {
+  align-self: flex-end;  /* 오른쪽 끝으로 */
+  width: auto;           /* 전체 폭 차지하지 않게 */
+  padding: 0.5rem 0.75rem;
+  gap: 0.4rem;
+}
+
+/* 다른 버튼은 기존처럼 전체 폭 유지 */
+.actions-card .action-button:not(.like-button) {
+  width: 100%;
+}
+.like-button {
+ display: flex;
+  margin-left: auto !important; 
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+.actions-card {
+  display: flex;
+  justify-content: flex-end !important; /* 오른쪽 끝으로 */
+  align-items: center;
 }

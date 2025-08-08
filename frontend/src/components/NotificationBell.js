@@ -23,11 +23,12 @@ const NotificationBell = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          console.log("NotificationBell data:", data);
           setNotifications(data.data || []);
         }
       }
     } catch (error) {
-      
+      console.error("Failed to fetch notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,7 @@ const NotificationBell = () => {
         }
       }
     } catch (error) {
-      
+      console.error("Failed to fetch unread count:", error);
     }
   };
 
@@ -70,7 +71,7 @@ const NotificationBell = () => {
         fetchNotifications();
         fetchUnreadCount();
       } catch (error) {
-        
+        console.error("Failed to mark notification as read:", error);
       }
     }
     // 게시글로 이동 (알림에 postId, snippetId, commentId 등 포함되어야 함)
@@ -103,10 +104,10 @@ const NotificationBell = () => {
         fetchNotifications();
         fetchUnreadCount();
       } else {
-        
+        console.error("Failed to mark all notifications as read: ", response.statusText);
       }
     } catch (error) {
-      
+      console.error("Error marking all notifications as read:", error);
     }
   };
 

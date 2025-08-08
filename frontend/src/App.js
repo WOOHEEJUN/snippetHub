@@ -1,3 +1,4 @@
+// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
@@ -17,11 +18,8 @@ import SnippetWrite from './SnippetBoard/SnippetWrite';
 import SnippetEdit from './SnippetBoard/SnippetEdit';
 import CodeTest from './CodeTest/CodeTest';
 import OAuth2Callback from './pages/OAuth2Callback';
-import Notifications from './pages/Notifications'; // Notifications 컴포넌트 임포트
-import UserProfile from './pages/UserProfile'; // UserProfile 컴포넌트 임포트
-import MyBadges from './MyPage/MyBadges';
-import Ranking from './MyPage/Ranking';
-import PointsGuide from './MyPage/PointsGuide';
+import Notifications from './pages/Notifications';
+import UserProfile from './pages/UserProfile';
 import AIProblemGeneration from './pages/AIProblemGeneration';
 import AICodeEvaluation from './pages/AICodeEvaluation';
 import DailyProblem from './pages/DailyProblem';
@@ -30,11 +28,21 @@ import BadgeGuide from './pages/BadgeGuide';
 import ProblemList from './pages/ProblemList';
 import ProblemDetail from './pages/ProblemDetail';
 import PointHistory from './pages/PointHistory';
-import SavedProblems from './MyPage/SavedProblems'; // SavedProblems 컴포넌트 임포트
+import SavedProblems from './MyPage/SavedProblems';
+import NotificationBell from './components/NotificationBell';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import NotificationBell from './components/NotificationBell'; // NotificationBell 임포트
-import { getLevelBadgeImage } from './utils/badgeUtils'; // 뱃지 유틸리티 임포트
+import { getLevelBadgeImage } from './utils/badgeUtils';
 import './css/App.css';
+
+// 🚀 누락된 컴포넌트 임포트
+import MyBadges from './MyPage/MyBadges';
+import Ranking from './MyPage/Ranking';
+import PointsGuide from './MyPage/PointsGuide';
+
+// 🛠 파일이 아직 없다면 아래 주석 풀고 간단히 테스트용 컴포넌트 넣기
+// export default function MyBadges() { return <div>MyBadges placeholder</div>; }
+// export default function Ranking() { return <div>Ranking placeholder</div>; }
+// export default function PointsGuide() { return <div>PointsGuide placeholder</div>; }
 
 const AuthStatus = () => {
   const { user, logout, loading } = useAuth();
@@ -43,16 +51,16 @@ const AuthStatus = () => {
   if (loading) return <p>Loading...</p>;
 
   if (!user) {
-  return (
-   <div className="auth-status d-flex align-items-center gap-3">
-  <Link to="/login" className="custom-btn-sm">로그인</Link>
-  <Link to="/register" className="custom-btn-sm">회원가입</Link>
-</div>
-  );
-}
+    return (
+      <div className="auth-status d-flex align-items-center gap-3">
+        <Link to="/login" className="custom-btn-sm">로그인</Link>
+        <Link to="/register" className="custom-btn-sm">회원가입</Link>
+      </div>
+    );
+  }
   return (
     <div className="auth-status d-flex align-items-center gap-3">
-      <NotificationBell />
+      <Notifications />
       <span>
         {user.level && <img src={getLevelBadgeImage(user.level)} alt={user.level} className="level-badge-header" />}
         안녕하세요, {user.nickname || user.email}님!
@@ -76,27 +84,27 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="App">
- <nav className="nav-container">
-  <div className="container">
-    <div className="d-flex justify-content-between align-items-center w-100">
-      <div className="d-flex align-items-center" style={{ gap: '30px' }}>
-        <Link to="/" className="text-decoration-none">
-          <h3 className="mb-0">SNI</h3>
-        </Link>
-        <ul className="nav-list d-flex align-items-center" style={{ gap: '20px', listStyle: 'none', margin: 0 }}>
-          <li><Link to="/snippets">스니펫</Link></li>
-          <li><Link to="/board">게시판</Link></li>
-          <li><Link to="/problems">코딩 문제</Link></li>
-          <li><Link to="/daily-problems">일일 문제</Link></li>
-          <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
-          <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
-          <li><Link to="/badge-guide">뱃지 가이드</Link></li>
-        </ul>
-      </div>
-      <AuthStatus />
-    </div>
-  </div>
-</nav>
+          <nav className="nav-container">
+            <div className="container">
+              <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="d-flex align-items-center" style={{ gap: '30px' }}>
+                  <Link to="/" className="text-decoration-none">
+                    <h3 className="mb-0">SNI</h3>
+                  </Link>
+                  <ul className="nav-list d-flex align-items-center" style={{ gap: '20px', listStyle: 'none', margin: 0 }}>
+                    <li><Link to="/snippets">스니펫</Link></li>
+                    <li><Link to="/board">게시판</Link></li>
+                    <li><Link to="/problems">코딩 문제</Link></li>
+                    <li><Link to="/daily-problems">일일 문제</Link></li>
+                    <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
+                    <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
+                    <li><Link to="/badge-guide">뱃지 가이드</Link></li>
+                  </ul>
+                </div>
+                <AuthStatus />
+              </div>
+            </div>
+          </nav>
 
           <Routes>
             <Route path="/" element={<Home />} />
@@ -114,7 +122,7 @@ function App() {
             <Route path="/mypage/badges" element={<MyBadges />} />
             <Route path="/mypage/ranking" element={<Ranking />} />
             <Route path="/mypage/points-guide" element={<PointsGuide />} />
-            <Route path="/mypage/saved-problems" element={<SavedProblems />} /> {/* 저장한 문제 보기 라우트 추가 */}
+            <Route path="/mypage/saved-problems" element={<SavedProblems />} />
             <Route path="/badge-guide" element={<BadgeGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
             <Route path="/snippets/write" element={<SnippetWrite />} />
@@ -130,8 +138,8 @@ function App() {
             <Route path="/point-history" element={<PointHistory />} />
             <Route path="/oauth2/callback" element={<OAuth2Callback />} />
             <Route path="/oauth2/redirect" element={<OAuth2Callback />} />
-            <Route path="/notifications" element={<Notifications />} /> {/* 알림 페이지 라우팅 추가 */}
-            <Route path="/users/:userId" element={<UserProfile />} /> {/* 사용자 프로필 페이지 라우팅 추가 */}
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/users/:userId" element={<UserProfile />} />
           </Routes>
         </div>
       </AuthProvider>
