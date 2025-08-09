@@ -59,4 +59,28 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     
     // 활성화된 문제 개수 조회
     long countByIsActiveTrue();
+    
+    // 카테고리별 문제 개수 조회
+    long countByCategory(ProblemCategory category);
+    
+    // 최근 생성된 활성 문제들 조회 (상위 N개)
+    @Query("SELECT p FROM Problem p WHERE p.isActive = true ORDER BY p.createdAt DESC")
+    List<Problem> findTop5ByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
+    
+    // 복합 검색 (제목, 설명)
+    @Query("SELECT p FROM Problem p WHERE p.isActive = true AND " +
+           "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Problem> findByKeywordSearch(@Param("keyword") String keyword, Pageable pageable);
+    
+    // 복합 필터링 (난이도 + 카테고리 + 검색)
+    @Query("SELECT p FROM Problem p WHERE p.isActive = true " +
+           "AND (:difficulty IS NULL OR p.difficulty = :difficulty) " +
+           "AND (:category IS NULL OR p.category = :category) " +
+           "AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Problem> findByFilters(@Param("difficulty") ProblemDifficulty difficulty,
+                               @Param("category") ProblemCategory category,
+                               @Param("keyword") String keyword,
+                               Pageable pageable);
 } 

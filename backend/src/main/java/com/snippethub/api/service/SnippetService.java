@@ -32,32 +32,58 @@ public class SnippetService {
 
     @Transactional
     public Snippet createSnippet(SnippetCreateRequestDto requestDto, String email) {
-        User author = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        try {
+            System.out.println("=== 스니펫 생성 서비스 시작 ===");
+            System.out.println("요청자 이메일: " + email);
+            System.out.println("제목: " + requestDto.getTitle());
+            System.out.println("언어: " + requestDto.getLanguage());
+            System.out.println("코드 길이: " + (requestDto.getCode() != null ? requestDto.getCode().length() : 0));
+            System.out.println("설명 길이: " + (requestDto.getDescription() != null ? requestDto.getDescription().length() : 0));
+            System.out.println("공개 여부: " + requestDto.isPublic());
+            System.out.println("태그 개수: " + (requestDto.getTags() != null ? requestDto.getTags().size() : 0));
+            
+            User author = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+            System.out.println("사용자 조회 완료: " + author.getNickname());
 
-        Snippet snippet = Snippet.builder()
-                .title(requestDto.getTitle())
-                .description(requestDto.getDescription())
-                .language(requestDto.getLanguage())
-                .code(requestDto.getCode())
-                .isPublic(requestDto.isPublic())
-                .author(author)
-                .build();
+            Snippet snippet = Snippet.builder()
+                    .title(requestDto.getTitle())
+                    .description(requestDto.getDescription())
+                    .language(requestDto.getLanguage())
+                    .code(requestDto.getCode())
+                    .isPublic(requestDto.isPublic())
+                    .author(author)
+                    .build();
+            System.out.println("스니펫 객체 생성 완료");
 
-        if (requestDto.getTags() != null && !requestDto.getTags().isEmpty()) {
-            List<Tag> tags = tagService.findOrCreateTags(requestDto.getTags());
-            snippet.getTags().addAll(tags);
-        }
-
-        Snippet savedSnippet = snippetRepository.save(snippet);
-
-        if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
-            for (MultipartFile file : requestDto.getFiles()) {
-                fileService.uploadFile(file, "SNIPPET_ATTACHMENT", author.getEmail(), savedSnippet);
+            if (requestDto.getTags() != null && !requestDto.getTags().isEmpty()) {
+                System.out.println("태그 처리 시작: " + requestDto.getTags());
+                List<Tag> tags = tagService.findOrCreateTags(requestDto.getTags());
+                snippet.getTags().addAll(tags);
+                System.out.println("태그 처리 완료");
             }
-        }
 
-        return savedSnippet;
+            System.out.println("데이터베이스 저장 시작");
+            Snippet savedSnippet = snippetRepository.save(snippet);
+            System.out.println("데이터베이스 저장 완료 - ID: " + savedSnippet.getId());
+
+            if (requestDto.getFiles() != null && !requestDto.getFiles().isEmpty()) {
+                System.out.println("파일 업로드 시작 - 파일 개수: " + requestDto.getFiles().size());
+                for (MultipartFile file : requestDto.getFiles()) {
+                    fileService.uploadFile(file, "SNIPPET_ATTACHMENT", author.getEmail(), savedSnippet);
+                }
+                System.out.println("파일 업로드 완료");
+            }
+
+            System.out.println("=== 스니펫 생성 서비스 완료 ===");
+            return savedSnippet;
+        } catch (Exception e) {
+            System.err.println("=== 스니펫 생성 서비스 에러 ===");
+            System.err.println("에러 메시지: " + e.getMessage());
+            System.err.println("에러 클래스: " + e.getClass().getSimpleName());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Transactional
@@ -124,7 +150,33 @@ public class SnippetService {
             throw new BusinessException(ErrorCode.NO_PERMISSION);
         }
 
-        snippetRepository.delete(snippet);
+        try {
+            // 관련 데이터들을 먼저 삭제해야 함
+            deleteSnippetDependencies(snippetId);
+            
+            // 스니펫 삭제
+            snippetRepository.delete(snippet);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SNIPPET_DELETE_FAILED);
+        }
+    }
+    
+    /**
+     * 스니펫 삭제 전 관련 데이터들을 삭제
+     */
+    private void deleteSnippetDependencies(Long snippetId) {
+        // TODO: 실제 구현에서는 다음 서비스들을 주입받아 사용해야 함
+        // - LikeService: 스니펫의 모든 좋아요 삭제
+        // - CommentService: 스니펫의 모든 댓글 삭제
+        // - FileService: 스니펫의 모든 첨부파일 삭제
+        
+        // 임시로 로그만 출력 (실제로는 repository를 통해 삭제)
+        System.out.println("스니펫 ID " + snippetId + "의 관련 데이터를 삭제합니다.");
+        
+        // 실제 구현 예시:
+        // likeService.deleteAllBySnippetId(snippetId);
+        // commentService.deleteAllBySnippetId(snippetId);
+        // fileService.deleteAllBySnippetId(snippetId);
     }
 }
 

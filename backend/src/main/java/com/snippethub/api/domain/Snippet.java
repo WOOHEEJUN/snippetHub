@@ -31,14 +31,14 @@ public class Snippet {
     private String title;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String description;
 
     @Column(nullable = false, length = 20)
     private String language;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String code;
 
     @OneToMany(mappedBy = "snippet", cascade = CascadeType.ALL, orphanRemoval = true)

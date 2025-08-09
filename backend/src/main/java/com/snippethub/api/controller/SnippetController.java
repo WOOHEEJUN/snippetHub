@@ -42,10 +42,20 @@ public class SnippetController {
             @Valid @RequestBody SnippetCreateRequestDto requestDto,
             @AuthenticationPrincipal UserDetails userDetails) {
         
-        Snippet newSnippet = snippetService.createSnippet(requestDto, userDetails.getUsername());
-        SnippetResponseDto responseDto = new SnippetResponseDto(newSnippet);
+        try {
+            // 입력 데이터 로깅
+            System.out.println("스니펫 생성 요청 - 제목: " + requestDto.getTitle());
+            System.out.println("코드 길이: " + (requestDto.getCode() != null ? requestDto.getCode().length() : 0));
+            
+            Snippet newSnippet = snippetService.createSnippet(requestDto, userDetails.getUsername());
+            SnippetResponseDto responseDto = new SnippetResponseDto(newSnippet);
 
-        return new ResponseEntity<>(ApiResponse.success("스니펫이 성공적으로 생성되었습니다.", responseDto), HttpStatus.CREATED);
+            return new ResponseEntity<>(ApiResponse.success("스니펫이 성공적으로 생성되었습니다.", responseDto), HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.err.println("스니펫 생성 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(ApiResponse.error("스니펫 생성 중 오류가 발생했습니다: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{snippetId}")

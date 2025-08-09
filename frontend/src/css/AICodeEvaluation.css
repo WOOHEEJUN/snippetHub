@@ -268,6 +268,180 @@
   font-weight: 500;
 }
 
+/* 새로운 feedback 스타일 */
+.feedback-section {
+  margin-top: 2rem;
+}
+
+/* AI 분석 결과 스타일 */
+.ai-feedback {
+  background-color: #333333;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border-left: 5px solid #2196F3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #e0e0e0;
+  font-weight: 500;
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.feedback-section h5 {
+  color: #e0e0e0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 3px solid #444444;
+  padding-bottom: 0.5rem;
+}
+
+.feedback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.feedback-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  background-color: #333333;
+  border-radius: 10px;
+  border-left: 5px solid #FF9800;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  min-height: 60px;
+  width: 100%;
+}
+
+.feedback-type {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+}
+
+.feedback-content {
+  color: #e0e0e0;
+  font-weight: 500;
+  line-height: 1.5;
+  flex-grow: 1;
+  white-space: normal;
+  word-break: keep-all;
+  writing-mode: horizontal-tb;
+}
+
+/* 개선된 코드 섹션 */
+.improved-code-section {
+  margin-top: 2rem;
+}
+
+.improved-code-section h5 {
+  color: #e0e0e0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 3px solid #444444;
+  padding-bottom: 0.5rem;
+}
+
+.improved-code {
+  background-color: #333333;
+  padding: 1.5rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  border: 1px solid #444444;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* 평가 헤더 스타일 */
+.evaluation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.evaluation-header h4 {
+  color: #e0e0e0;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.evaluate-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.evaluate-btn:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+.evaluate-btn:disabled {
+  background-color: #666666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 점수 섹션 개선 */
+.score-section h5 {
+  color: #e0e0e0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 3px solid #444444;
+  padding-bottom: 0.5rem;
+}
+
+.score-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem;
+  background-color: #333333;
+  border-radius: 10px;
+  border-left: 5px solid #4CAF50;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.score-label {
+  font-weight: 700;
+  color: #e0e0e0;
+  font-size: 1rem;
+}
+
+.score-value {
+  font-weight: bold;
+  color: #4CAF50;
+  font-size: 1.2rem;
+  background-color: #444444;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  min-width: 60px;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .ai-code-evaluation h1 {
     font-size: 2rem;

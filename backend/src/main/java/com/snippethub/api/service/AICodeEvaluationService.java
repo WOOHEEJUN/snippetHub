@@ -49,6 +49,8 @@ public class AICodeEvaluationService {
         return CodeQualityReport.builder()
             .score(0.0)
             .feedback("AI 평가를 수행할 수 없습니다.")
+            .improvements(List.of())
+            .improvedCode("AI 평가 서비스를 사용할 수 없어 개선된 코드를 제공할 수 없습니다.")
             .build();
     }
 
@@ -115,12 +117,13 @@ public class AICodeEvaluationService {
      */
     private String createCodeQualityPrompt(String code, String language, Problem problem) {
         return """
-            다음 코드의 품질을 평가해주세요:
+            다음 코드의 품질을 평가하고 개선된 코드를 제공해주세요.
+            반드시 한국어로 응답해주세요.
             
             언어: %s
             문제: %s
             
-            코드:
+            원본 코드:
             %s
             
             다음 기준으로 평가해주세요:
@@ -129,6 +132,8 @@ public class AICodeEvaluationService {
             3. 최적화 (0-10점)
             4. 코딩 스타일 (0-10점)
             5. 에러 처리 (0-10점)
+            
+            그리고 실제로 개선된 코드를 작성해주세요. 설명이 아니라 실행 가능한 코드여야 합니다.
             
             JSON 형식으로 응답해주세요:
             {
@@ -139,8 +144,11 @@ public class AICodeEvaluationService {
                 "codingStyle": 9,
                 "errorHandling": 8,
                 "feedback": "전반적으로 좋은 코드입니다. 다만 메모리 사용량을 줄일 수 있습니다.",
-                "improvements": ["메모리 최적화", "변수명 개선"]
+                "improvements": ["메모리 최적화", "변수명 개선", "성능 향상"],
+                "improvedCode": "def improved_function():\\n    # 실제 개선된 코드를 여기에 작성\\n    return result"
             }
+            
+            중요: improvedCode에는 반드시 실행 가능한 코드를 작성해주세요. 설명문이 아닌 실제 코드여야 합니다.
             """.formatted(language, problem.getTitle(), code);
     }
 
@@ -232,12 +240,20 @@ public class AICodeEvaluationService {
     private String callAI(String prompt) {
         try {
             // OpenAI API 호출
+            log.info("AI API 호출 시도 - API 키 존재 여부: {}", openaiApiKey != null && !openaiApiKey.isEmpty());
             if (openaiApiKey != null && !openaiApiKey.isEmpty() && !"your-openai-api-key".equals(openaiApiKey)) {
-                return callOpenAI(prompt);
+                log.info("실제 OpenAI API 호출 시작");
+                String result = callOpenAI(prompt);
+                if (result != null) {
+                    log.info("OpenAI API 호출 성공");
+                    return result;
+                } else {
+                    log.warn("OpenAI API 호출이 null을 반환함. Mock 응답으로 fallback");
+                }
             }
             
-            // API 키가 없으면 Mock 응답 반환
-            log.warn("OpenAI API 키가 설정되지 않아 Mock 응답을 반환합니다.");
+            // API 키가 없거나 호출 실패 시 Mock 응답 반환
+            log.warn("OpenAI API 키가 설정되지 않았거나 호출에 실패하여 Mock 응답을 반환합니다.");
             return createMockAIResponse(prompt);
         } catch (Exception e) {
             log.error("AI API 호출 중 오류", e);
@@ -253,26 +269,27 @@ public class AICodeEvaluationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(openaiApiKey);
 
-        // OpenAI API 요청 형식에 맞게 수정
-        Map<String, Object> message = Map.of("role", "user", "content", prompt);
+        // OpenAI API 요청 형식에 맞게 수정 (시스템 메시지로 한국어 강제)
+        Map<String, Object> systemMessage = Map.of("role", "system", "content", "당신은 한국어로만 응답하는 코드 분석 전문가입니다. 모든 응답은 반드시 한국어로 해주세요. improvedCode 필드에는 실제 실행 가능한 코드를 작성해주세요.");
+        Map<String, Object> userMessage = Map.of("role", "user", "content", prompt);
         Map<String, Object> requestBody = Map.of(
-            "model", "gpt-4",
-            "messages", java.util.List.of(message),
+            "model", "gpt-3.5-turbo",
+            "messages", java.util.List.of(systemMessage, userMessage),
             "temperature", 0.7,
-            "max_tokens", 2000
+            "max_tokens", 1500
         );
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         
         try {
             log.info("OpenAI API 호출 시작 - 코드 평가");
-            log.debug("요청 본문: {}", requestBody);
+            log.info("요청 본문: {}", requestBody);
             
             ResponseEntity<Map> response = restTemplate.postForEntity(openaiApiUrl, request, Map.class);
             Map<String, Object> responseBody = response.getBody();
             
             log.info("OpenAI API 응답 상태: {}", response.getStatusCode());
-            log.debug("응답 본문: {}", responseBody);
+            log.info("응답 본문: {}", responseBody);
             
             if (responseBody != null && responseBody.containsKey("choices")) {
                 var choices = (java.util.List<Map<String, Object>>) responseBody.get("choices");
@@ -306,7 +323,8 @@ public class AICodeEvaluationService {
                     "codingStyle": 9,
                     "errorHandling": 8,
                     "feedback": "전반적으로 좋은 코드입니다. 다만 메모리 사용량을 줄일 수 있습니다.",
-                    "improvements": ["메모리 최적화", "변수명 개선"]
+                    "improvements": ["메모리 최적화", "변수명 개선", "성능 향상"],
+                    "improvedCode": "def improved_calculator():\\n    operations = {\\n        1: add, 2: subtract, 3: multiply, 4: divide\\n    }\\n    # 개선된 로직\\n    return operations.get(choice, lambda: print('잘못된 선택'))()"
                 }
                 """;
         } else if (prompt.contains("최적화")) {
@@ -346,15 +364,11 @@ public class AICodeEvaluationService {
             // JSON을 Map으로 파싱
             Map<String, Object> responseMap = objectMapper.readValue(jsonContent, Map.class);
             
-            double overallScore = 0.0;
-            if (responseMap.containsKey("overallScore")) {
-                Object scoreObj = responseMap.get("overallScore");
-                if (scoreObj instanceof Number) {
-                    overallScore = ((Number) scoreObj).doubleValue();
-                } else if (scoreObj instanceof String) {
-                    overallScore = Double.parseDouble((String) scoreObj);
-                }
-            }
+            // 각 점수 추출
+            double overallScore = extractScore(responseMap, "overallScore", 7.0);
+            double readabilityScore = extractScore(responseMap, "readability", overallScore);
+            double performanceScore = extractScore(responseMap, "efficiency", overallScore);
+            double securityScore = extractScore(responseMap, "errorHandling", overallScore);
             
             String feedback = (String) responseMap.getOrDefault("feedback", "코드 품질 평가가 완료되었습니다.");
             
@@ -366,12 +380,19 @@ public class AICodeEvaluationService {
                 }
             }
             
-            log.info("파싱된 결과 - 점수: {}, 피드백: {}", overallScore, feedback);
+            String improvedCode = (String) responseMap.getOrDefault("improvedCode", "개선된 코드를 제공할 수 없습니다.");
+            
+            log.info("파싱된 결과 - 전체: {}, 가독성: {}, 성능: {}, 보안: {}", overallScore, readabilityScore, performanceScore, securityScore);
+            log.info("개선사항 개수: {}, 개선된 코드 길이: {}", improvements.size(), improvedCode.length());
             
             return CodeQualityReport.builder()
                 .score(overallScore)
+                .readabilityScore(readabilityScore)
+                .performanceScore(performanceScore)
+                .securityScore(securityScore)
                 .feedback(feedback)
                 .improvements(improvements)
+                .improvedCode(improvedCode)
                 .build();
                 
         } catch (Exception e) {
@@ -382,8 +403,28 @@ public class AICodeEvaluationService {
                 .score(7.0)
                 .feedback("코드 품질 평가가 완료되었습니다. (파싱 오류로 인해 기본값 사용)")
                 .improvements(List.of("코드 리뷰를 통해 개선점을 찾아보세요"))
+                .improvedCode("AI 응답 파싱 오류로 개선된 코드를 제공할 수 없습니다.")
                 .build();
         }
+    }
+
+    /**
+     * 점수 추출 헬퍼 메서드
+     */
+    private double extractScore(Map<String, Object> responseMap, String key, double defaultValue) {
+        if (responseMap.containsKey(key)) {
+            Object scoreObj = responseMap.get(key);
+            if (scoreObj instanceof Number) {
+                return ((Number) scoreObj).doubleValue();
+            } else if (scoreObj instanceof String) {
+                try {
+                    return Double.parseDouble((String) scoreObj);
+                } catch (NumberFormatException e) {
+                    log.warn("점수 파싱 실패: {} = {}", key, scoreObj);
+                }
+            }
+        }
+        return defaultValue;
     }
 
     /**
@@ -453,9 +494,13 @@ public class AICodeEvaluationService {
     @lombok.Data
     @lombok.Builder
     public static class CodeQualityReport {
-        private double score;
+        private double score; // overallScore
+        private double readabilityScore;
+        private double performanceScore;
+        private double securityScore;
         private String feedback;
         private List<String> improvements;
+        private String improvedCode; // AI가 제안한 개선된 코드
     }
 
     @lombok.Data

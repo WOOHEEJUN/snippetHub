@@ -28,14 +28,29 @@ public class ProblemController {
     private final ProblemService problemService;
 
     /**
-     * 활성화된 문제 목록 조회
+     * 문제 생성/저장
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<ProblemResponseDto>> createProblem(
+            @RequestBody Object requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        ProblemResponseDto problem = problemService.createProblem(requestDto, userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("문제가 생성되었습니다.", problem));
+    }
+
+    /**
+     * 활성화된 문제 목록 조회 (필터링 지원)
      */
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponseDto<ProblemResponseDto>>> getActiveProblems(
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String sort,
             @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         
-        Page<ProblemResponseDto> problems = problemService.getActiveProblems(pageable);
+        Page<ProblemResponseDto> problems = problemService.getActiveProblemsWithFilters(difficulty, category, search, pageable);
         PageResponseDto<ProblemResponseDto> response = new PageResponseDto<>(problems);
         
         return ResponseEntity.ok(ApiResponse.success("문제 목록을 조회했습니다.", response));
@@ -185,5 +200,16 @@ public class ProblemController {
         
         ProblemService.UserProblemStats stats = problemService.getUserProblemStats(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("사용자 통계를 조회했습니다.", stats));
+    }
+
+    /**
+     * 사용자가 저장한 문제 목록 조회
+     */
+    @GetMapping("/saved")
+    public ResponseEntity<ApiResponse<List<ProblemResponseDto>>> getSavedProblems(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        
+        List<ProblemResponseDto> savedProblems = problemService.getSavedProblems(userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("저장된 문제를 조회했습니다.", savedProblems));
     }
 } 

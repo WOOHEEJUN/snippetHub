@@ -9,12 +9,42 @@ function AICodeEvaluation({ snippetId, code, language, onEvaluationComplete }) {
   const [error, setError] = useState(null);
 
   const evaluateCode = async () => {
+    // 코드 검증
+    if (!code || code.trim().length === 0) {
+      setError('평가할 코드를 입력해주세요. 빈 코드는 평가할 수 없습니다.');
+      return;
+    }
+    
+    // 템플릿 코드 체크
+    const trimmedCode = code.trim().toLowerCase();
+    const templateTexts = [
+      '// 코드를 여기에 입력하세요',
+      '# 코드를 여기에 입력하세요',
+      '<!-- 코드를 여기에 입력하세요 -->',
+      '/* 코드를 여기에 입력하세요 */',
+      '// todo: 구현하세요',
+      '# todo: 구현하세요'
+    ];
+    
+    if (templateTexts.some(template => trimmedCode.includes(template))) {
+      setError('실제 코드를 입력해주세요. 기본 템플릿은 평가할 수 없습니다.');
+      return;
+    }
+    
+    if (code.trim().length < 10) {
+      setError('평가하기에는 코드가 너무 짧습니다. 최소 10자 이상의 코드를 입력해주세요.');
+      return;
+    }
+    
+    if (!language || language.trim().length === 0) {
+      setError('프로그래밍 언어가 지정되지 않았습니다.');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
     try {
-      // 개발 모드에서도 실제 API 호출 시도 (임시 데이터는 백엔드에서 처리)
-      
       const response = await fetch('/api/ai/evaluate-code', {
         method: 'POST',
         headers: {
@@ -90,6 +120,15 @@ function AICodeEvaluation({ snippetId, code, language, onEvaluationComplete }) {
               </div>
             </div>
           </div>
+
+          {evaluation.feedback && (
+            <div className="feedback-section">
+              <h5>📝 AI 분석 결과</h5>
+              <div className="ai-feedback">
+                {evaluation.feedback}
+              </div>
+            </div>
+          )}
 
           <div className="feedback-section">
             <h5>💡 개선 제안</h5>

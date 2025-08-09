@@ -37,7 +37,7 @@ const SnippetWrite = () => {
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState(''); // 콤마로 구분된 문자열 입력
   const [isPublic, setIsPublic] = useState(true);
-  const [code, setCode] = useState('// 코드를 여기에 입력하세요');
+  const [code, setCode] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -173,6 +173,7 @@ const SnippetWrite = () => {
               highlight={code => highlight(code, languageMap[language] || languages.clike, language)}
               padding={10}
               className="code-editor"
+              placeholder="코드를 여기에 입력하세요..."
             />
           </div>
         </div>

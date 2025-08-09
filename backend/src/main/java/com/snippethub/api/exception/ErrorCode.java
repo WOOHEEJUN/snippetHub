@@ -25,6 +25,7 @@ public enum ErrorCode {
 
     // Snippet
     SNIPPET_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "스니펫을 찾을 수 없습니다."),
+    SNIPPET_DELETE_FAILED(HttpStatus.CONFLICT, "S002", "스니펫 삭제에 실패했습니다."),
 
     // Post
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "게시글을 찾을 수 없습니다."),

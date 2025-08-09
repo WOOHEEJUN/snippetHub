@@ -146,6 +146,56 @@ public class AIController {
         
         return ResponseEntity.ok(ApiResponse.success("학습 경로 제안이 완료되었습니다.", suggestion));
     }
+    
+    /**
+     * 템플릿 코드인지 확인하는 헬퍼 메서드
+     */
+    private boolean isTemplateCode(String code) {
+        // 일반적인 템플릿 텍스트들
+        String[] templateTexts = {
+            "// 코드를 여기에 입력하세요",
+            "# 코드를 여기에 입력하세요",
+            "<!-- 코드를 여기에 입력하세요 -->",
+            "/* 코드를 여기에 입력하세요 */",
+            "// TODO: 구현하세요",
+            "# TODO: 구현하세요",
+            "<!-- TODO: 구현하세요 -->",
+            "/* TODO: 구현하세요 */",
+            "// Write your code here",
+            "# Write your code here",
+            "<!-- Write your code here -->",
+            "/* Write your code here */",
+            "print('Hello World')",
+            "console.log('Hello World')",
+            "System.out.println(\"Hello World\")",
+            "printf(\"Hello World\");",
+            "<html></html>",
+            "body { }",
+            "function() { }",
+            "def function():",
+            "public static void main"
+        };
+        
+        String lowerCode = code.toLowerCase();
+        for (String template : templateTexts) {
+            if (lowerCode.contains(template.toLowerCase())) {
+                return true;
+            }
+        }
+        
+        // 너무 간단한 코드들 (주석만 있거나, 빈 블록만 있는 경우)
+        String codeWithoutComments = code.replaceAll("//.*", "")
+                                        .replaceAll("/\\*.*?\\*/", "")
+                                        .replaceAll("#.*", "")
+                                        .replaceAll("<!--.*?-->", "")
+                                        .trim();
+        
+        if (codeWithoutComments.length() < 5) {
+            return true;
+        }
+        
+        return false;
+    }
 
     /**
      * 스니펫 코드 평가
@@ -155,23 +205,56 @@ public class AIController {
             @RequestBody AICodeEvaluationRequest request) {
 
         try {
-            // 임시 응답 데이터 (실제로는 AI 서비스를 호출해야 함)
+            // 코드 검증: 빈 코드 체크
+            String codeToEvaluate = request.getCode();
+            if (codeToEvaluate == null || codeToEvaluate.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("평가할 코드를 입력해주세요. 빈 코드는 평가할 수 없습니다."));
+            }
+            
+            // 템플릿 텍스트나 기본값 체크
+            String trimmedCode = codeToEvaluate.trim();
+            if (isTemplateCode(trimmedCode)) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("실제 코드를 입력해주세요. 기본 템플릿은 평가할 수 없습니다."));
+            }
+            
+            // 코드 길이 체크 (너무 짧은 코드)
+            if (trimmedCode.length() < 10) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("평가하기에는 코드가 너무 짧습니다. 최소 10자 이상의 코드를 입력해주세요."));
+            }
+            
+            // 언어 검증
+            if (request.getLanguage() == null || request.getLanguage().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("프로그래밍 언어를 지정해주세요."));
+            }
+            
+            // AI 서비스를 통한 실제 코드 평가
+            Problem problem = new Problem("코드 품질 평가", "코드 품질을 평가합니다.", null, null, null, null, null, null, null, ProblemDifficulty.MEDIUM, ProblemCategory.ALGORITHM, 1000, 128);
+            AICodeEvaluationService.CodeQualityReport qualityReport = 
+                aiCodeEvaluationService.evaluateCodeQuality(request.getCode(), request.getLanguage(), problem);
+            
+            // AI 응답을 그대로 사용 (각 세부 점수 포함)
             Object evaluationResult = Map.of(
-                "overallScore", 85,
-                "readabilityScore", 90,
-                "performanceScore", 80,
-                "securityScore", 85,
-                "suggestions", List.of(
-                    Map.of("type", "성능", "content", "변수명을 더 명확하게 작성하세요."),
-                    Map.of("type", "가독성", "content", "주석을 추가하여 코드의 의도를 명확히 하세요.")
-                ),
-                "improvedCode", request.getCode() + "\n// 개선된 코드 예시"
+                "overallScore", Math.round(qualityReport.getScore() * 10), // 8.5 -> 85점으로 변환
+                "readabilityScore", Math.round(qualityReport.getReadabilityScore() * 10), // AI 가독성 점수
+                "performanceScore", Math.round(qualityReport.getPerformanceScore() * 10), // AI 성능 점수
+                "securityScore", Math.round(qualityReport.getSecurityScore() * 10), // AI 보안 점수
+                "suggestions", qualityReport.getImprovements().stream()
+                    .map(improvement -> Map.of(
+                        "type", "💡", 
+                        "content", improvement
+                    )).toList(),
+                "feedback", qualityReport.getFeedback(),
+                "improvedCode", qualityReport.getImprovedCode() != null ? qualityReport.getImprovedCode() : "개선된 코드를 제공할 수 없습니다."
             );
             
             return ResponseEntity.ok(ApiResponse.success("코드 평가가 완료되었습니다.", evaluationResult));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("코드 평가 중 오류가 발생했습니다."));
+                .body(ApiResponse.error("코드 평가 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 } 

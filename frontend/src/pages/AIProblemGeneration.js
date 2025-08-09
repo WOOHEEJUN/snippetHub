@@ -77,7 +77,11 @@ function AIProblemGeneration() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(generatedProblem),
+        body: JSON.stringify({
+          ...generatedProblem,
+          // AI 생성 문제임을 명시
+          isAIGenerated: true
+        }),
       });
 
       if (!response.ok) {

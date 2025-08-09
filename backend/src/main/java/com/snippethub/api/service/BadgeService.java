@@ -173,6 +173,14 @@ public class BadgeService {
     }
 
     /**
+     * 전체 뱃지 목록 조회 (모든 사용자 공통)
+     */
+    @Transactional(readOnly = true)
+    public List<Badge> getAllBadges() {
+        return badgeRepository.findAll();
+    }
+
+    /**
      * 사용자의 뱃지 목록 조회
      */
     @Transactional(readOnly = true)
