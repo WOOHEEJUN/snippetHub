@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaCoins, FaPlus, FaMinus, FaCalendarAlt, FaInfoCircle } from 'react-icons/fa';
 import '../css/PointHistory.css';
@@ -260,10 +261,10 @@ function PointHistory() {
 
         {/* 포인트 획득 가이드 링크 */}
         <div className="guide-link-section">
-          <a href="/mypage/points-guide" className="guide-link">
+          <Link to="/mypage/points-guide" className="guide-link">
             <FaInfoCircle />
             포인트 획득 방법 보기
-          </a>
+          </Link>
         </div>
       </div>
     </div>

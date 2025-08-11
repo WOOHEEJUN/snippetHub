@@ -117,46 +117,7 @@ function LevelProgress({ userLevel, userPoints }) {
         </div>
       )}
 
-      <div className="level-benefits">
-        <h4>🎁 현재 레벨 혜택</h4>
-        <ul className="benefits-list">
-          {currentLevel.level >= 1 && (
-            <li>기본 기능 사용 가능</li>
-          )}
-          {currentLevel.level >= 2 && (
-            <li>스니펫 공개/비공개 설정</li>
-          )}
-          {currentLevel.level >= 3 && (
-            <li>AI 코드 평가 기능</li>
-          )}
-          {currentLevel.level >= 4 && (
-            <li>AI 문제 생성 기능</li>
-          )}
-          {currentLevel.level >= 5 && (
-            <li>모든 프리미엄 기능 사용</li>
-          )}
-        </ul>
-      </div>
-
-      {nextLevel && (
-        <div className="next-level-benefits">
-          <h4>🚀 다음 레벨 혜택</h4>
-          <ul className="benefits-list">
-            {nextLevel.level === 2 && (
-              <li>스니펫 공개/비공개 설정</li>
-            )}
-            {nextLevel.level === 3 && (
-              <li>AI 코드 평가 기능</li>
-            )}
-            {nextLevel.level === 4 && (
-              <li>AI 문제 생성 기능</li>
-            )}
-            {nextLevel.level === 5 && (
-              <li>모든 프리미엄 기능 사용</li>
-            )}
-          </ul>
-        </div>
-      )}
+     
     </div>
   );
 }
