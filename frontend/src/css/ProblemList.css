@@ -189,9 +189,15 @@
   gap: 10px;
 }
 
+.progress-bar span {
+  font-size: 0.75rem;
+  position: relative;
+  top: -6px;
+}
+
 .progress-fill {
-  height: 20px;
-  border-radius: 10px;
+  height: 22px;
+  border-radius: 11px;
   transition: width 0.3s ease;
 }
 
