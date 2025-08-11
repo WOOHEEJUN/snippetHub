@@ -75,7 +75,7 @@ public class ProblemSubmissionService {
 
         // 포인트 지급 (정답인 경우)
         if (result.getStatus() == SubmissionStatus.ACCEPTED) {
-            pointService.awardPointsForProblemSolved(userId, problem.getDifficulty());
+            pointService.awardPointsForProblemSolved(userId, problem.getDifficulty(), savedSubmission.getId());
         }
 
         log.info("사용자 {}가 문제 {}에 코드를 제출했습니다. 결과: {}", 

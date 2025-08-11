@@ -1,9 +1,9 @@
-.notification-bell {
+.app-notification-bell {
   position: relative;
   display: inline-block;
 }
 
-.bell-container {
+.app-bell-container {
   position: relative;
   cursor: pointer;
   padding: 8px;
@@ -11,16 +11,16 @@
   transition: background-color 0.2s;
 }
 
-.bell-container:hover {
+.app-bell-container:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.bell-icon {
+.app-bell-icon {
   font-size: 20px;
   color: #e0e0e0;
 }
 
-.notification-badge {
+.app-notification-badge {
   position: absolute;
   top: 0;
   right: 0;
@@ -37,6 +37,26 @@
   animation: pulse 2s infinite;
 }
 
+.websocket-status {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 8px;
+  padding: 2px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.websocket-status.connected {
+  background-color: #27ae60;
+  color: white;
+}
+
+.websocket-status.disconnected {
+  background-color: #e74c3c;
+  color: white;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -49,7 +69,7 @@
   }
 }
 
-.notification-dropdown {
+.app-notification-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
@@ -63,7 +83,7 @@
   overflow: hidden;
 }
 
-.notification-header {
+.app-notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -72,13 +92,13 @@
   background-color: #222222;
 }
 
-.notification-header h3 {
+.app-notification-header h3 {
   margin: 0;
   font-size: 16px;
   color: #e0e0e0;
 }
 
-.mark-all-read-btn {
+.app-mark-all-read-btn {
   background: none;
   border: none;
   color: #8ab0d1;
@@ -89,16 +109,16 @@
   transition: background-color 0.2s;
 }
 
-.mark-all-read-btn:hover {
+.app-mark-all-read-btn:hover {
   background-color: rgba(138, 176, 209, 0.1);
 }
 
-.notification-list {
+.app-notification-list {
   max-height: 300px;
   overflow-y: auto;
 }
 
-.notification-item {
+.app-notification-item {
   padding: 15px 20px;
   border-bottom: 1px solid #333333;
   cursor: pointer;
@@ -106,37 +126,37 @@
   position: relative;
 }
 
-.notification-item:hover {
+.app-notification-item:hover {
   background-color: #2a2a2a;
 }
 
-.notification-item.unread {
+.app-notification-item.unread {
   background-color: #2a2a2a;
 }
 
-.notification-item.unread:hover {
+.app-notification-item.unread:hover {
   background-color: #333333;
 }
 
-.notification-content {
+.app-notification-content {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.notification-message {
+.app-notification-message {
   margin: 0;
   font-size: 14px;
   color: #e0e0e0;
   line-height: 1.4;
 }
 
-.notification-time {
+.app-notification-time {
   font-size: 12px;
   color: #b0b0b0;
 }
 
-.unread-indicator {
+.app-unread-indicator {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -146,14 +166,14 @@
   border-radius: 50%;
 }
 
-.loading {
+.app-loading {
   padding: 20px;
   text-align: center;
   color: #b0b0b0;
   font-size: 14px;
 }
 
-.no-notifications {
+.app-no-notifications {
   padding: 40px 20px;
   text-align: center;
   color: #b0b0b0;
@@ -161,19 +181,19 @@
 }
 
 /* 스크롤바 스타일 */
-.notification-list::-webkit-scrollbar {
+.app-notification-list::-webkit-scrollbar {
   width: 6px;
 }
 
-.notification-list::-webkit-scrollbar-track {
+.app-notification-list::-webkit-scrollbar-track {
   background: #222222;
 }
 
-.notification-list::-webkit-scrollbar-thumb {
+.app-notification-list::-webkit-scrollbar-thumb {
   background: #555555;
   border-radius: 3px;
 }
 
-.notification-list::-webkit-scrollbar-thumb:hover {
+.app-notification-list::-webkit-scrollbar-thumb:hover {
   background: #777777;
 } 

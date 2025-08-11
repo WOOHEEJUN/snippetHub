@@ -14,6 +14,10 @@ public class NotificationDto {
     private String message;
     private boolean isRead;
     private LocalDateTime createdAt;
+    private String notificationType;
+    private String targetType;
+    private Long targetId;
+    private Long parentId;
 
     public static NotificationDto from(Notification notification) {
         return NotificationDto.builder()
@@ -21,6 +25,10 @@ public class NotificationDto {
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
                 .createdAt(notification.getCreatedAt())
+                .notificationType(notification.getNotificationType() != null ? notification.getNotificationType().name() : null)
+                .targetType(notification.getTargetType())
+                .targetId(notification.getTargetId())
+                .parentId(notification.getParentId())
                 .build();
     }
 }

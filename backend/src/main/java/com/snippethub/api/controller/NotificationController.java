@@ -1,6 +1,9 @@
 package com.snippethub.api.controller;
 
+import com.snippethub.api.domain.NotificationType;
+import com.snippethub.api.domain.User;
 import com.snippethub.api.dto.NotificationDto;
+import com.snippethub.api.repository.UserRepository;
 import com.snippethub.api.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +44,7 @@ public class NotificationController {
 class NotificationControllerV2 {
 
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     // 내 알림 목록 조회 (프론트엔드 호환성)
     @GetMapping
@@ -87,4 +91,10 @@ class NotificationControllerV2 {
         notificationService.markAllAsRead(userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
+
+
+
+
+
+
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import webSocketService from '../services/WebSocketService';
 import './NotificationBell.css';
 
 const NotificationBell = () => {
@@ -22,9 +23,15 @@ const NotificationBell = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        if (data.success) {
-          console.log("NotificationBell data:", data);
-          setNotifications(data.data || []);
+        console.log("NotificationBell raw response:", data);
+        
+        // 백엔드에서 직접 배열을 반환하므로 처리 방식 변경
+        if (Array.isArray(data)) {
+          setNotifications(data);
+        } else if (data.success && data.data) {
+          setNotifications(data.data);
+        } else {
+          setNotifications([]);
         }
       }
     } catch (error) {
@@ -43,8 +50,15 @@ const NotificationBell = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        if (data.success) {
+        console.log("Unread count response:", data);
+        
+        // 백엔드에서 직접 숫자를 반환하므로 처리 방식 변경
+        if (typeof data === 'number') {
+          setUnreadCount(data);
+        } else if (data.success && typeof data.data === 'number') {
           setUnreadCount(data.data);
+        } else {
+          setUnreadCount(0);
         }
       }
     } catch (error) {
@@ -111,11 +125,71 @@ const NotificationBell = () => {
     }
   };
 
+  // 테스트용 알림 생성
+  const createTestNotification = async () => {
+    try {
+      const response = await fetch('/api/notifications/test', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      if (response.ok) {
+        console.log("Test notification created successfully");
+        fetchNotifications();
+        fetchUnreadCount();
+      } else {
+        console.error("Failed to create test notification: ", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error creating test notification:", error);
+    }
+  };
+
   useEffect(() => {
+    console.log('NotificationBell useEffect triggered');
     fetchNotifications();
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+    
+    // 브라우저 알림 권한 요청
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    
+    // WebSocket 연결 시도
+    const userEmail = localStorage.getItem('userEmail');
+    console.log('User email from localStorage:', userEmail);
+    
+    if (userEmail) {
+      console.log('Attempting WebSocket connection for:', userEmail);
+      try {
+        webSocketService.connect(userEmail, (notification) => {
+          console.log('WebSocket notification received:', notification);
+          // 실시간 알림 수신 시 처리
+          setNotifications(prev => [notification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+          
+          // 브라우저 알림 표시 (선택사항)
+          if (Notification.permission === 'granted') {
+            new Notification('새로운 알림', {
+              body: notification.message,
+              icon: '/favicon.ico'
+            });
+          }
+        });
+      } catch (error) {
+        console.error('WebSocket connection failed:', error);
+      }
+    } else {
+      console.log('No user email found, skipping WebSocket connection');
+    }
+    
+    // 폴링 간격을 늘려서 WebSocket이 주 역할을 하도록 함
+    const interval = setInterval(fetchUnreadCount, 60000); // 1분으로 변경
+    
+    return () => {
+      clearInterval(interval);
+      webSocketService.disconnect();
+    };
   }, []);
 
   const formatDate = (dateString) => {
@@ -130,24 +204,42 @@ const NotificationBell = () => {
 
   return (
     <div className="app-notification-bell">
-      <div className="app-bell-container" onClick={() => setShowDropdown(!showDropdown)}>
+      <div className="app-bell-container" onClick={() => {
+        console.log('Bell clicked, current showDropdown:', showDropdown);
+        console.log('Current notifications:', notifications);
+        console.log('Current unreadCount:', unreadCount);
+        setShowDropdown(!showDropdown);
+      }}>
         <FaBell className="app-bell-icon" />
         {unreadCount > 0 && (
           <span className="app-notification-badge">{unreadCount}</span>
         )}
+        {/* WebSocket 연결 상태 표시 */}
+        <div className={`websocket-status ${webSocketService.isConnected() ? 'connected' : 'disconnected'}`}>
+          {webSocketService.isConnected() ? '🔗' : '🔌'}
+        </div>
       </div>
       {showDropdown && (
         <div className="app-notification-dropdown">
           <div className="app-notification-header">
-            <h3>알림</h3>
-            {unreadCount > 0 && (
+            <h3>알림 ({notifications.length}개)</h3>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <button 
                 className="app-mark-all-read-btn"
-                onClick={markAllAsRead}
+                onClick={createTestNotification}
+                style={{ fontSize: '10px', padding: '2px 6px' }}
               >
-                모두 읽음 처리
+                테스트 알림
               </button>
-            )}
+              {unreadCount > 0 && (
+                <button 
+                  className="app-mark-all-read-btn"
+                  onClick={markAllAsRead}
+                >
+                  모두 읽음 처리
+                </button>
+              )}
+            </div>
           </div>
           <div className="app-notification-list">
             {loading ? (

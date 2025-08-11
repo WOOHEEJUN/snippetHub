@@ -45,7 +45,14 @@ public class LikeService {
             // 알림 생성
             if (!post.getAuthor().getId().equals(user.getId())) { // 본인 게시물에 좋아요는 알림 X
                 String message = String.format("%s님이 회원님의 게시물 \"%s\"에 좋아요를 눌렀습니다.", user.getNickname(), post.getTitle());
-                notificationService.createNotification(post.getAuthor(), message);
+                notificationService.createNotification(
+                    post.getAuthor(), 
+                    message,
+                    com.snippethub.api.domain.NotificationType.LIKE,
+                    "POST",
+                    post.getId(), // 게시글 ID
+                    null         // 부모 ID 없음
+                );
             }
             return true; // 좋아요 추가
         });
@@ -70,7 +77,14 @@ public class LikeService {
             // 알림 생성
             if (!snippet.getAuthor().getId().equals(user.getId())) { // 본인 스니펫에 좋아요는 알림 X
                 String message = String.format("%s님이 회원님의 스니펫 \"%s\"에 좋아요를 눌렀습니다.", user.getNickname(), snippet.getTitle());
-                notificationService.createNotification(snippet.getAuthor(), message);
+                notificationService.createNotification(
+                    snippet.getAuthor(), 
+                    message,
+                    com.snippethub.api.domain.NotificationType.LIKE,
+                    "SNIPPET",
+                    snippet.getId(), // 스니펫 ID
+                    null           // 부모 ID 없음
+                );
             }
             return true; // 좋아요 추가
         });

@@ -121,7 +121,9 @@ public class User {
     public void updateLevel() {
         UserLevel newLevel = UserLevel.getLevelByPoints(this.points);
         if (newLevel != this.level) {
+            UserLevel oldLevel = this.level;
             this.level = newLevel;
+            // 레벨 업 알림은 PointService에서 처리 (순환 참조 방지)
         }
     }
 

@@ -132,7 +132,7 @@ function MyPage() {
           포인트 획득 기준
         </Link>
         <Link to="/point-history" className="btn btn-secondary-custom">
-          포인트 내역
+          포인트 히스토리
         </Link>
         <button className="btn btn-secondary-custom" onClick={handleLogout}>
           로그아웃

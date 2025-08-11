@@ -50,7 +50,7 @@ public class PostService {
         
         // 포인트 지급 및 뱃지 체크
         try {
-            pointService.awardPointsForPost(author.getId());
+            pointService.awardPointsForPost(author.getId(), savedPost.getId());
             badgeService.checkAndAwardBadges(author.getId());
         } catch (Exception e) {
             // 포인트/뱃지 시스템 오류가 게시글 작성에 영향을 주지 않도록 처리

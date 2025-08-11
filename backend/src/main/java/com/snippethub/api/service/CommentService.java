@@ -70,13 +70,27 @@ public class CommentService {
             // 대댓글인 경우 부모 댓글 작성자에게 알림
             if (!parentComment.getAuthor().getId().equals(user.getId())) {
                 String message = user.getNickname() + "님이 회원님의 댓글에 답글을 남겼습니다.";
-                notificationService.createNotification(parentComment.getAuthor(), message);
+                notificationService.createNotification(
+                    parentComment.getAuthor(), 
+                    message,
+                    com.snippethub.api.domain.NotificationType.COMMENT,
+                    "COMMENT",
+                    comment.getId(), // 댓글 ID
+                    post.getId()     // 게시글 ID (부모)
+                );
             }
         } else {
             // 원댓글인 경우 게시글 작성자에게 알림
             if (!post.getAuthor().getId().equals(user.getId())) {
                 String message = user.getNickname() + "님이 회원님의 게시글에 댓글을 남겼습니다: " + post.getTitle();
-                notificationService.createNotification(post.getAuthor(), message);
+                notificationService.createNotification(
+                    post.getAuthor(), 
+                    message,
+                    com.snippethub.api.domain.NotificationType.COMMENT,
+                    "POST",
+                    post.getId(),    // 게시글 ID
+                    null            // 부모 ID 없음
+                );
             }
         }
 
@@ -124,13 +138,27 @@ public class CommentService {
             // 대댓글인 경우 부모 댓글 작성자에게 알림
             if (!parentComment.getAuthor().getId().equals(user.getId())) {
                 String message = user.getNickname() + "님이 회원님의 댓글에 답글을 남겼습니다.";
-                notificationService.createNotification(parentComment.getAuthor(), message);
+                notificationService.createNotification(
+                    parentComment.getAuthor(), 
+                    message,
+                    com.snippethub.api.domain.NotificationType.COMMENT,
+                    "COMMENT",
+                    comment.getId(), // 댓글 ID
+                    snippet.getId()  // 스니펫 ID (부모)
+                );
             }
         } else {
             // 원댓글인 경우 스니펫 작성자에게 알림
             if (!snippet.getAuthor().getId().equals(user.getId())) {
                 String message = user.getNickname() + "님이 회원님의 스니펫에 댓글을 남겼습니다: " + snippet.getTitle();
-                notificationService.createNotification(snippet.getAuthor(), message);
+                notificationService.createNotification(
+                    snippet.getAuthor(), 
+                    message,
+                    com.snippethub.api.domain.NotificationType.COMMENT,
+                    "SNIPPET",
+                    snippet.getId(), // 스니펫 ID
+                    null           // 부모 ID 없음
+                );
             }
         }
 

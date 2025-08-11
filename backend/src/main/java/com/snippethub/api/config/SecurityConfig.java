@@ -39,6 +39,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .formLogin(form -> form.disable())
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/ws/**").permitAll() // WebSocket 엔드포인트 허용
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/ai/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()

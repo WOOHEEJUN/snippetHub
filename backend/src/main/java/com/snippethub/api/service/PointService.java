@@ -1,11 +1,19 @@
 package com.snippethub.api.service;
 
+import com.snippethub.api.domain.NotificationType;
+import com.snippethub.api.domain.PointHistory;
 import com.snippethub.api.domain.User;
+import com.snippethub.api.domain.UserLevel;
+import com.snippethub.api.repository.PointHistoryRepository;
 import com.snippethub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PointService {
 
     private final UserRepository userRepository;
+    private final PointHistoryRepository pointHistoryRepository;
+    private final NotificationService notificationService;
 
     // 포인트 획득 기준
     public static final int POINTS_FOR_POST = 10;           // 게시글 작성
@@ -34,13 +44,40 @@ public class PointService {
     /**
      * 게시글 작성 포인트 지급
      */
-    public void awardPointsForPost(Long userId) {
+    public void awardPointsForPost(Long userId, Long postId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
         
         user.addPoints(POINTS_FOR_POST);
         user.incrementTotalPosts();
         userRepository.save(user);
+        
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.POST_CREATE)
+                .pointChange(POINTS_FOR_POST)
+                .description("게시글 작성으로 포인트 획득")
+                .relatedId(postId)
+                .relatedType("POST")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 실시간 알림 생성
+        notificationService.createNotification(
+            user, 
+            String.format("게시글 작성으로 %d포인트를 획득했습니다!", POINTS_FOR_POST),
+            NotificationType.POINT_EARNED,
+            "POST",
+            postId,
+            null
+        );
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} points for posting", user.getNickname(), POINTS_FOR_POST);
     }
@@ -48,13 +85,30 @@ public class PointService {
     /**
      * 스니펫 작성 포인트 지급
      */
-    public void awardPointsForSnippet(Long userId) {
+    public void awardPointsForSnippet(Long userId, Long snippetId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
         
         user.addPoints(POINTS_FOR_SNIPPET);
         user.incrementTotalSnippets();
         userRepository.save(user);
+        
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.SNIPPET_CREATE)
+                .pointChange(POINTS_FOR_SNIPPET)
+                .description("스니펫 작성으로 포인트 획득")
+                .relatedId(snippetId)
+                .relatedType("SNIPPET")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} points for creating snippet", user.getNickname(), POINTS_FOR_SNIPPET);
     }
@@ -62,13 +116,30 @@ public class PointService {
     /**
      * 댓글 작성 포인트 지급
      */
-    public void awardPointsForComment(Long userId) {
+    public void awardPointsForComment(Long userId, Long commentId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
         
         user.addPoints(POINTS_FOR_COMMENT);
         user.incrementTotalComments();
         userRepository.save(user);
+        
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.COMMENT_CREATE)
+                .pointChange(POINTS_FOR_COMMENT)
+                .description("댓글 작성으로 포인트 획득")
+                .relatedId(commentId)
+                .relatedType("COMMENT")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} points for commenting", user.getNickname(), POINTS_FOR_COMMENT);
     }
@@ -76,13 +147,30 @@ public class PointService {
     /**
      * 좋아요 받음 포인트 지급
      */
-    public void awardPointsForLikeReceived(Long userId) {
+    public void awardPointsForLikeReceived(Long userId, Long likeId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
         
         user.addPoints(POINTS_FOR_LIKE_RECEIVED);
         user.incrementTotalLikesReceived();
         userRepository.save(user);
+        
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.LIKE_RECEIVE)
+                .pointChange(POINTS_FOR_LIKE_RECEIVED)
+                .description("좋아요를 받아서 포인트 획득")
+                .relatedId(likeId)
+                .relatedType("LIKE")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} points for receiving like", user.getNickname(), POINTS_FOR_LIKE_RECEIVED);
     }
@@ -90,13 +178,30 @@ public class PointService {
     /**
      * 코드 실행 포인트 지급
      */
-    public void awardPointsForCodeExecution(Long userId) {
+    public void awardPointsForCodeExecution(Long userId, Long executionId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
         
         user.addPoints(POINTS_FOR_CODE_EXECUTION);
         user.incrementTotalCodeExecutions();
         userRepository.save(user);
+        
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.CODE_EXECUTION)
+                .pointChange(POINTS_FOR_CODE_EXECUTION)
+                .description("코드 실행으로 포인트 획득")
+                .relatedId(executionId)
+                .relatedType("EXECUTION")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} points for code execution", user.getNickname(), POINTS_FOR_CODE_EXECUTION);
     }
@@ -104,9 +209,12 @@ public class PointService {
     /**
      * 문제 해결 포인트 지급 (난이도별)
      */
-    public void awardPointsForProblemSolved(Long userId, com.snippethub.api.domain.ProblemDifficulty difficulty) {
+    public void awardPointsForProblemSolved(Long userId, com.snippethub.api.domain.ProblemDifficulty difficulty, Long submissionId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
         
         int points = switch (difficulty) {
             case EASY -> POINTS_FOR_EASY_PROBLEM;
@@ -118,6 +226,20 @@ public class PointService {
         user.addPoints(points);
         userRepository.save(user);
         
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.PROBLEM_SOLVE)
+                .pointChange(points)
+                .description(difficulty.getDisplayName() + " 난이도 문제 해결로 포인트 획득")
+                .relatedId(submissionId)
+                .relatedType("SUBMISSION")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
+        
         log.info("User {} earned {} points for solving {} problem", user.getNickname(), points, difficulty.getDisplayName());
     }
 
@@ -128,23 +250,64 @@ public class PointService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
+        
         // 기존 로그인 통계 업데이트
         user.updateLoginStats();
         
         // 일일 로그인 포인트
         user.addPoints(POINTS_FOR_DAILY_LOGIN);
         
+        // 포인트 히스토리 저장 (일일 로그인)
+        PointHistory dailyLoginHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.DAILY_LOGIN)
+                .pointChange(POINTS_FOR_DAILY_LOGIN)
+                .description("일일 로그인으로 포인트 획득")
+                .relatedId(null)
+                .relatedType("LOGIN")
+                .build();
+        pointHistoryRepository.save(dailyLoginHistory);
+        
         // 연속 로그인 보너스 포인트
         int consecutiveDays = user.getConsecutiveLoginDays();
         if (consecutiveDays == 7) {
             user.addPoints(POINTS_FOR_WEEKLY_LOGIN);
+            
+            // 포인트 히스토리 저장 (주간 보너스)
+            PointHistory weeklyBonusHistory = PointHistory.builder()
+                    .user(user)
+                    .pointType(PointHistory.PointType.CONSECUTIVE_LOGIN)
+                    .pointChange(POINTS_FOR_WEEKLY_LOGIN)
+                    .description("7일 연속 로그인 보너스")
+                    .relatedId(null)
+                    .relatedType("LOGIN")
+                    .build();
+            pointHistoryRepository.save(weeklyBonusHistory);
+            
             log.info("User {} earned weekly login bonus: {} points", user.getNickname(), POINTS_FOR_WEEKLY_LOGIN);
         } else if (consecutiveDays == 30) {
             user.addPoints(POINTS_FOR_MONTHLY_LOGIN);
+            
+            // 포인트 히스토리 저장 (월간 보너스)
+            PointHistory monthlyBonusHistory = PointHistory.builder()
+                    .user(user)
+                    .pointType(PointHistory.PointType.CONSECUTIVE_LOGIN)
+                    .pointChange(POINTS_FOR_MONTHLY_LOGIN)
+                    .description("30일 연속 로그인 보너스")
+                    .relatedId(null)
+                    .relatedType("LOGIN")
+                    .build();
+            pointHistoryRepository.save(monthlyBonusHistory);
+            
             log.info("User {} earned monthly login bonus: {} points", user.getNickname(), POINTS_FOR_MONTHLY_LOGIN);
         }
         
         userRepository.save(user);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} points for daily login", user.getNickname(), POINTS_FOR_DAILY_LOGIN);
     }
@@ -156,8 +319,25 @@ public class PointService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
+        // 레벨 업 체크를 위한 이전 레벨 저장
+        UserLevel previousLevel = user.getCurrentLevel();
+        
         user.addPoints(points);
         userRepository.save(user);
+        
+        // 포인트 히스토리 저장
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.SPECIAL_AWARD)
+                .pointChange(points)
+                .description(reason)
+                .relatedId(null)
+                .relatedType("SPECIAL")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        // 레벨 업 알림 생성
+        checkAndCreateLevelUpNotification(user, previousLevel);
         
         log.info("User {} earned {} special points for: {}", user.getNickname(), points, reason);
     }
@@ -171,15 +351,27 @@ public class PointService {
         
         int currentPoints = user.getPoints();
         int newPoints = Math.max(0, currentPoints - points); // 포인트는 0 이하로 내려가지 않음
+        int actualDeduction = currentPoints - newPoints; // 실제 차감된 포인트
         
         user.addPoints(newPoints - currentPoints); // 음수 값을 더해서 차감 효과
         userRepository.save(user);
         
-        log.info("User {} lost {} points for: {}", user.getNickname(), points, reason);
+        // 포인트 히스토리 저장 (차감)
+        PointHistory pointHistory = PointHistory.builder()
+                .user(user)
+                .pointType(PointHistory.PointType.PENALTY)
+                .pointChange(-actualDeduction) // 음수로 저장
+                .description(reason)
+                .relatedId(null)
+                .relatedType("PENALTY")
+                .build();
+        pointHistoryRepository.save(pointHistory);
+        
+        log.info("User {} lost {} points for: {}", user.getNickname(), actualDeduction, reason);
     }
 
     /**
-     * 사용자의 포인트 히스토리 조회 (향후 구현)
+     * 사용자의 포인트 히스토리 조회
      */
     public PointHistoryDto getUserPointHistory(Long userId) {
         User user = userRepository.findById(userId)
@@ -196,6 +388,56 @@ public class PointService {
                 .totalLikesReceived(user.getTotalLikesReceived())
                 .totalCodeExecutions(user.getTotalCodeExecutions())
                 .consecutiveLoginDays(user.getConsecutiveLoginDays())
+                .build();
+    }
+
+    /**
+     * 사용자의 포인트 히스토리 상세 조회
+     */
+    public Page<PointHistory> getUserPointHistoryDetails(Long userId, Pageable pageable) {
+        return pointHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+    }
+
+    /**
+     * 레벨 업 알림 생성
+     */
+    private void checkAndCreateLevelUpNotification(User user, UserLevel previousLevel) {
+        UserLevel currentLevel = user.getCurrentLevel();
+        
+        // 레벨이 올라갔는지 확인
+        if (currentLevel != previousLevel) {
+            String message = String.format("🎉 축하합니다! %s에서 %s로 레벨업했습니다!", 
+                previousLevel.getDisplayName(), currentLevel.getDisplayName());
+            
+            notificationService.createNotification(
+                user,
+                message,
+                NotificationType.LEVEL_UP,
+                "USER",
+                user.getId(),
+                null
+            );
+            
+            log.info("User {} leveled up from {} to {}", 
+                user.getNickname(), previousLevel.getDisplayName(), currentLevel.getDisplayName());
+        }
+    }
+
+    /**
+     * 사용자의 포인트 통계 조회
+     */
+    public PointStatsDto getUserPointStats(Long userId) {
+        Integer totalEarned = pointHistoryRepository.getTotalEarnedPoints(userId);
+        Integer totalSpent = pointHistoryRepository.getTotalSpentPoints(userId);
+        List<Object[]> frequentTypes = pointHistoryRepository.getMostFrequentPointType(userId);
+        
+        String mostFrequentType = frequentTypes.isEmpty() ? "없음" : 
+            ((PointHistory.PointType) frequentTypes.get(0)[0]).getDisplayName();
+        
+        return PointStatsDto.builder()
+                .totalEarned(totalEarned != null ? totalEarned : 0)
+                .totalSpent(totalSpent != null ? totalSpent : 0)
+                .mostFrequentType(mostFrequentType)
                 .build();
     }
 
@@ -224,5 +466,17 @@ public class PointService {
         public int getTotalLikesReceived() { return totalLikesReceived; }
         public int getTotalCodeExecutions() { return totalCodeExecutions; }
         public int getConsecutiveLoginDays() { return consecutiveLoginDays; }
+    }
+
+    @lombok.Builder
+    public static class PointStatsDto {
+        private int totalEarned;
+        private int totalSpent;
+        private String mostFrequentType;
+
+        // Getters
+        public int getTotalEarned() { return totalEarned; }
+        public int getTotalSpent() { return totalSpent; }
+        public String getMostFrequentType() { return mostFrequentType; }
     }
 } 

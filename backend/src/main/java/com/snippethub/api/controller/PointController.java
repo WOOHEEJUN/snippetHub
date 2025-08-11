@@ -1,8 +1,13 @@
 package com.snippethub.api.controller;
 
+import com.snippethub.api.domain.PointHistory;
 import com.snippethub.api.dto.ApiResponse;
+import com.snippethub.api.dto.PageResponseDto;
 import com.snippethub.api.service.PointService;
+import com.snippethub.api.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class PointController {
 
     private final PointService pointService;
+    private final UserService userService;
 
     /**
      * 내 포인트 정보 조회
@@ -23,6 +29,33 @@ public class PointController {
         PointService.PointHistoryDto pointHistory = pointService.getUserPointHistory(userId);
         
         return ResponseEntity.ok(ApiResponse.success("포인트 정보를 조회했습니다.", pointHistory));
+    }
+
+    /**
+     * 내 포인트 히스토리 상세 조회
+     */
+    @GetMapping("/my/history")
+    public ResponseEntity<ApiResponse<PageResponseDto<PointHistoryResponseDto>>> getMyPointHistory(
+            Authentication authentication, Pageable pageable) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        Page<PointHistory> pointHistoryPage = pointService.getUserPointHistoryDetails(userId, pageable);
+        
+        PageResponseDto<PointHistoryResponseDto> responseDto = new PageResponseDto<>(
+                pointHistoryPage.map(PointHistoryResponseDto::new)
+        );
+        
+        return ResponseEntity.ok(ApiResponse.success("포인트 히스토리를 조회했습니다.", responseDto));
+    }
+
+    /**
+     * 내 포인트 통계 조회
+     */
+    @GetMapping("/my/stats")
+    public ResponseEntity<ApiResponse<PointService.PointStatsDto>> getMyPointStats(Authentication authentication) {
+        Long userId = getUserIdFromAuthentication(authentication);
+        PointService.PointStatsDto pointStats = pointService.getUserPointStats(userId);
+        
+        return ResponseEntity.ok(ApiResponse.success("포인트 통계를 조회했습니다.", pointStats));
     }
 
     /**
@@ -55,12 +88,50 @@ public class PointController {
     }
 
     private Long getUserIdFromAuthentication(Authentication authentication) {
-        // 실제 구현에서는 UserDetails에서 userId를 추출
-        // 여기서는 간단히 구현
-        return 1L; // 임시 구현
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Authentication required");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+            String email = ((org.springframework.security.core.userdetails.UserDetails) principal).getUsername();
+            return userService.getUserByEmail(email).getId();
+        }
+        throw new RuntimeException("Invalid authentication");
     }
 
     // DTO 클래스
+    public static class PointHistoryResponseDto {
+        private Long id;
+        private String pointType;
+        private String pointTypeDisplay;
+        private Integer pointChange;
+        private String description;
+        private Long relatedId;
+        private String relatedType;
+        private String createdAt;
+
+        public PointHistoryResponseDto(PointHistory pointHistory) {
+            this.id = pointHistory.getId();
+            this.pointType = pointHistory.getPointType().name();
+            this.pointTypeDisplay = pointHistory.getPointType().getDisplayName();
+            this.pointChange = pointHistory.getPointChange();
+            this.description = pointHistory.getDescription();
+            this.relatedId = pointHistory.getRelatedId();
+            this.relatedType = pointHistory.getRelatedType();
+            this.createdAt = pointHistory.getCreatedAt().toString();
+        }
+
+        // Getters
+        public Long getId() { return id; }
+        public String getPointType() { return pointType; }
+        public String getPointTypeDisplay() { return pointTypeDisplay; }
+        public Integer getPointChange() { return pointChange; }
+        public String getDescription() { return description; }
+        public Long getRelatedId() { return relatedId; }
+        public String getRelatedType() { return relatedType; }
+        public String getCreatedAt() { return createdAt; }
+    }
+
     public static class PointGuideDto {
         private int postPoints;
         private int snippetPoints;

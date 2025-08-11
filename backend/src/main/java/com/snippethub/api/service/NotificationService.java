@@ -1,11 +1,14 @@
 package com.snippethub.api.service;
 
 import com.snippethub.api.domain.Notification;
+import com.snippethub.api.domain.NotificationType;
 import com.snippethub.api.domain.User;
 import com.snippethub.api.dto.NotificationDto;
+import com.snippethub.api.dto.WebSocketNotificationDto;
 import com.snippethub.api.repository.NotificationRepository;
 import com.snippethub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,15 +21,58 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository; // UserRepository 주입
+    private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 알림 생성 (내부 호출용)
     public void createNotification(User user, String message) {
+        createNotification(user, message, null, null, null, null);
+    }
+
+    // 실시간 알림 생성 (WebSocket 포함)
+    public void createNotification(User user, String message, NotificationType type, String targetType, Long targetId, Long parentId) {
+        Notification notification = Notification.builder()
+                .user(user)
+                .message(message)
+                .isRead(false)
+                .notificationType(type)
+                .targetType(targetType)
+                .targetId(targetId)
+                .parentId(parentId)
+                .build();
+        
+        Notification savedNotification = notificationRepository.save(notification);
+        
+        // WebSocket을 통해 실시간 알림 전송
+        WebSocketNotificationDto wsNotification = WebSocketNotificationDto.builder()
+                .id(savedNotification.getId())
+                .message(savedNotification.getMessage())
+                .notificationType(savedNotification.getNotificationType() != null ? savedNotification.getNotificationType().name() : null)
+                .targetType(savedNotification.getTargetType())
+                .targetId(savedNotification.getTargetId())
+                .parentId(savedNotification.getParentId())
+                .createdAt(savedNotification.getCreatedAt())
+                .isRead(savedNotification.getIsRead())
+                .build();
+        
+        messagingTemplate.convertAndSendToUser(
+            user.getEmail(),
+            "/queue/notifications",
+            wsNotification
+        );
+    }
+
+    // 간단한 테스트 알림 생성 (WebSocket 없이)
+    public void createSimpleNotification(String userEmail, String message) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
         Notification notification = Notification.builder()
                 .user(user)
                 .message(message)
                 .isRead(false)
                 .build();
+        
         notificationRepository.save(notification);
     }
 
