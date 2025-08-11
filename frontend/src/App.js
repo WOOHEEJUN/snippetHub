@@ -25,6 +25,7 @@ import AICodeEvaluation from './pages/AICodeEvaluation';
 import DailyProblem from './pages/DailyProblem';
 import SubmissionHistory from './pages/SubmissionHistory';
 import BadgeGuide from './pages/BadgeGuide';
+import GradeGuide from './pages/GradeGuide';
 import ProblemList from './pages/ProblemList';
 import ProblemDetail from './pages/ProblemDetail';
 import PointHistory from './pages/PointHistory';
@@ -34,15 +35,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { getLevelBadgeImage } from './utils/badgeUtils';
 import './css/App.css';
 
-// 🚀 누락된 컴포넌트 임포트
+// 누락된 컴포넌트
 import MyBadges from './MyPage/MyBadges';
 import Ranking from './MyPage/Ranking';
 import PointsGuide from './MyPage/PointsGuide';
-
-// 🛠 파일이 아직 없다면 아래 주석 풀고 간단히 테스트용 컴포넌트 넣기
-// export default function MyBadges() { return <div>MyBadges placeholder</div>; }
-// export default function Ranking() { return <div>Ranking placeholder</div>; }
-// export default function PointsGuide() { return <div>PointsGuide placeholder</div>; }
 
 const AuthStatus = () => {
   const { user, logout, loading } = useAuth();
@@ -50,33 +46,40 @@ const AuthStatus = () => {
 
   if (loading) return <p>Loading...</p>;
 
-  if (!user) {
-    return (
-      <div className="auth-status d-flex align-items-center gap-3">
-        <Link to="/login" className="custom-btn-sm">로그인</Link>
-        <Link to="/register" className="custom-btn-sm">회원가입</Link>
-      </div>
-    );
-  }
+if (!user) {
   return (
     <div className="auth-status d-flex align-items-center gap-3">
-      <Notifications />
-      <span>
-        {user.level && <img src={getLevelBadgeImage(user.level)} alt={user.level} className="level-badge-header" />}
-        안녕하세요, {user.nickname || user.email}님!
-      </span>
-      <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
-      <button
-        onClick={() => {
-          logout();
-          navigate('/login');
-        }}
-        className="btn btn-outline-danger"
-      >
-        로그아웃
-      </button>
+      <Link to="/login" className="btn-gray">로그인</Link>
+      <Link to="/register" className="btn-gray">회원가입</Link>
     </div>
   );
+}
+
+return (
+  <div className="auth-status d-flex align-items-center gap-3">
+    <Notifications />
+    <span>
+      {user.level && (
+        <img
+          src={getLevelBadgeImage(user.level)}
+          alt={user.level}
+          className="level-badge-header"
+        />
+      )}
+      안녕하세요, {user.nickname || user.email}님!
+    </span>
+    <Link to="/mypage" className="btn-gray">마이페이지</Link>
+    <button
+      onClick={() => {
+        logout();
+        navigate('/login');
+      }}
+      className="btn-gray"
+    >
+      로그아웃
+    </button>
+  </div>
+);
 };
 
 function App() {
@@ -87,20 +90,28 @@ function App() {
           <nav className="nav-container">
             <div className="container">
               <div className="d-flex justify-content-between align-items-center w-100">
+                {/* 왼쪽: 로고 + hover 드롭다운 메뉴 */}
                 <div className="d-flex align-items-center" style={{ gap: '30px' }}>
                   <Link to="/" className="text-decoration-none">
                     <h3 className="mb-0">SNI</h3>
                   </Link>
-                  <ul className="nav-list d-flex align-items-center" style={{ gap: '20px', listStyle: 'none', margin: 0 }}>
-                    <li><Link to="/snippets">스니펫</Link></li>
-                    <li><Link to="/board">게시판</Link></li>
-                    <li><Link to="/problems">코딩 문제</Link></li>
-                    <li><Link to="/daily-problems">일일 문제</Link></li>
-                    <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
-                    <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
-                    <li><Link to="/badge-guide">뱃지 가이드</Link></li>
-                  </ul>
+
+                  {/* hover 드롭다운 - 로그인/회원가입/마이페이지 제외 */}
+                  <div className="nav-dropdown" tabIndex={0}>
+                    <div className="nav-summary">메뉴 ▾</div>
+                    <ul className="nav-menu">
+                      <li><Link to="/snippets">스니펫</Link></li>
+                      <li><Link to="/board">게시판</Link></li>
+                      <li><Link to="/problems">코딩 문제</Link></li>
+                      <li><Link to="/daily-problems">일일 문제</Link></li>
+                      <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
+                      <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
+                      <li><Link to="/badge-guide">뱃지 가이드</Link></li>
+                    </ul>
+                  </div>
                 </div>
+
+                {/* 오른쪽: 인증 영역 */}
                 <AuthStatus />
               </div>
             </div>
@@ -124,6 +135,7 @@ function App() {
             <Route path="/mypage/points-guide" element={<PointsGuide />} />
             <Route path="/mypage/saved-problems" element={<SavedProblems />} />
             <Route path="/badge-guide" element={<BadgeGuide />} />
+            <Route path="/grade-guide" element={<GradeGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
             <Route path="/snippets/write" element={<SnippetWrite />} />
             <Route path="/snippets/:snippetId" element={<SnippetDetail />} />

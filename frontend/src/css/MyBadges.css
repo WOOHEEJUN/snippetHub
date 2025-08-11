@@ -153,3 +153,17 @@
     height: 50px;
   }
 }
+
+.info-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.info-card-link .info-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card-link:hover .info-card {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}

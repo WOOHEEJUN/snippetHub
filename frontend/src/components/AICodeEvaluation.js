@@ -81,7 +81,7 @@ function AICodeEvaluation({ snippetId, code, language, onEvaluationComplete }) {
   return (
     <div className="ai-code-evaluation">
       <div className="evaluation-header">
-        <h4>🤖 AI 코드 평가</h4>
+        <h4> AI 코드 평가</h4>
         <button 
           onClick={evaluateCode} 
           disabled={loading}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/MyBadges.css';
 import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa'; // 아이콘 추가
@@ -104,10 +105,12 @@ function MyBadges() {
       <h2>마이페이지</h2>
 
       <div className="info-section">
-        <div className="info-card">
-          <div className="label"><FaCrown /> 등급</div>
-          <div className="value">{level ? `${level.levelName} (Lv.${level.level})` : '정보 없음'}</div>
-        </div>
+        <Link to="/grade-guide" className="info-card-link">
+          <div className="info-card">
+            <div className="label"><FaCrown /> 등급</div>
+            <div className="value">{level ? level.levelName : '정보 없음'}</div>
+          </div>
+        </Link>
         <div className="info-card">
           <div className="label"><FaCoins /> 포인트</div>
           <div className="value">{points ? `${points.point} P` : '정보 없음'}</div>

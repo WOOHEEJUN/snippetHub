@@ -79,14 +79,14 @@
   background-color: #1a1a1a;
   border: 1px solid #333333;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem; /* Reduced vertical padding */
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .sidebar-card h4 {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0; /* Further reduced margin-bottom */
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -430,4 +430,26 @@
   display: flex;
   justify-content: flex-end !important; /* 오른쪽 끝으로 */
   align-items: center;
+}
+.sidebar-card.info-card {
+  padding: 0.5rem 1rem !important; /* 세로 패딩 줄임 */
+}
+
+.sidebar-card.info-card h4 {
+  font-size: 1rem !important;      /* 제목 글씨 줄임 */
+  margin-bottom: 0.5rem !important;
+}
+
+.info-card ul {
+  gap: 0.4rem !important;          /* 항목 간격 줄임 */
+}
+
+.info-card li {
+  font-size: 0.85rem !important;   /* 항목 글씨 줄임 */
+}
+.ai-evaluation-section button {
+  width: auto !important;        /* 전체폭 대신 내용 크기에 맞춤 */
+  padding: 0.5rem 1rem !important; /* 패딩 줄임 */
+  font-size: 0.9rem !important;   /* 글씨 크기 살짝 줄임 */
+  border-radius: 6px !important;  /* 버튼 모서리 살짝 둥글게 */
 }
