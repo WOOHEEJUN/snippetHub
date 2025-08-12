@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import LevelProgress from '../components/LevelProgress';
 import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
 import '../css/Mypage.css';
 
 function MyPage() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('accessToken');
@@ -43,12 +45,11 @@ function MyPage() {
   };
 
   const handleLogout = () => {
-  localStorage.removeItem('accessToken');
-  sessionStorage.removeItem('accessToken'); 
-  setUserInfo(null); 
-
-  alert('로그아웃 되었습니다.');
-};
+    logout();
+    alert('로그아웃 되었습니다.');
+    window.scrollTo(0, 0);
+    navigate('/');
+  };
 
   if (loading) return <p className="loading-message">로딩 중...</p>;
 

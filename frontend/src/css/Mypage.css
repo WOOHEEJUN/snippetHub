@@ -119,6 +119,7 @@
   background-color: #d3d3d3;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333333;
 }
 
 /* 보조 액션 버튼 (프로필 수정, 로그아웃) */
@@ -138,6 +139,7 @@
 .btn-secondary-custom:hover {
   background-color: #d3d3d3;
   border-color: #d3d3d3;
+  color: #333333;
 }
 
 /* 로딩 및 오류 메시지 */

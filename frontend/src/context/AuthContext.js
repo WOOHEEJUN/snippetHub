@@ -141,6 +141,7 @@ export const AuthProvider = ({ children }) => {
       accessToken,
       refreshToken,
       user,
+      isAuthenticated: !!user && !!accessToken,
       login,
       logout,
       getAuthHeaders,

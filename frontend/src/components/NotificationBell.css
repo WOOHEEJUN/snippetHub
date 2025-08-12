@@ -124,6 +124,7 @@
   font-size: 0.9rem;
   margin-bottom: 5px;
   line-height: 1.4;
+  transition: color 0.2s ease;
 }
 
 .app-notification-time {
@@ -138,11 +139,27 @@
   border-radius: 50%;
   margin-left: 10px;
   flex-shrink: 0;
+  transition: opacity 0.2s ease;
 }
 
-.app-notification-item.unread .app-notification-message {
+/* 읽지 않은 알림 스타일 (read가 false일 때) */
+.app-notification-item:not([data-read="true"]) .app-notification-message {
   font-weight: bold;
   color: #eee;
+}
+
+/* 읽은 알림 스타일 (read가 true일 때) */
+.app-notification-item[data-read="true"] .app-notification-message {
+  color: #888;
+  font-weight: normal;
+}
+
+.app-notification-item[data-read="true"] .app-notification-time {
+  color: #666;
+}
+
+.app-notification-item[data-read="true"] .app-unread-indicator {
+  opacity: 0;
 }
 
 .app-no-notifications,
