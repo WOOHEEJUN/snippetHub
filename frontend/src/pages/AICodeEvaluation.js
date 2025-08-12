@@ -173,7 +173,6 @@ function AICodeEvaluation() {
   return (
     <div className="ai-code-evaluation">
       <div className="container">
-        <h1>AI 코드 평가</h1>
         <p className="description">
           AI가 코드의 품질을 평가하고, 최적화 방안을 제안하며, 코드에 대한 설명을 생성해드립니다.
         </p>
