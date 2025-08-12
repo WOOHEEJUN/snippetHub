@@ -173,180 +173,26 @@ const NotificationBell = () => {
       if (!(n.isRead ?? n.read)) {
         await markAsRead(n.id);
       }
-      
-             // 실제 게시글/스니펫 ID를 찾는 로직 개선
-       let actualPostId = null;
-       let actualSnippetId = null;
-       
-               // 1. targetId가 있으면 우선 사용
-        if (n.targetId && n.targetType === 'POST') {
-          actualPostId = n.targetId;
-        } else if (n.targetId && n.targetType === 'SNIPPET') {
-          actualSnippetId = n.targetId;
-        }
-        // 2. parentId가 있으면 사용 (댓글의 경우)
-        else if (n.parentId && n.targetType === 'POST') {
-          actualPostId = n.parentId;
-        } else if (n.parentId && n.targetType === 'SNIPPET') {
-          actualSnippetId = n.parentId;
-        }
-        // 3. 메시지에서 ID 추출
-        else if (n.message) {
-          const extractedIds = extractIdsFromMessage(n.message);
-          if (extractedIds.length > 0) {
-            // 메시지 내용으로 게시글인지 스니펫인지 판단
-            if (n.message.includes('스니펫')) {
-              actualSnippetId = extractedIds[0];
-            } else {
-              actualPostId = extractedIds[0];
-            }
-          }
-        }
-      
-      
-      
-             // 알림 타입 결정 (여러 방법으로)
-       const notificationType = n.notificationType || n.targetType || determineTypeFromMessage(n.message);
-      
+
       let targetPath = null;
-      
-                                  // 게시글 관련 알림인 경우, 실제 존재하는 게시글인지 확인
-       // 단, targetType이 SNIPPET이면 스니펫으로 처리
-       if ((['POST', 'COMMENT', 'LIKE'].includes(notificationType?.toUpperCase()) && n.targetType !== 'SNIPPET') || 
-           (n.message && (n.message.includes('게시글') || n.message.includes('댓글') || n.message.includes('좋아요')) && !n.message.includes('스니펫'))) {
-          
-                     if (actualPostId) {
-             // 게시글 존재 여부 확인
-             try {
-               const response = await fetch(`/api/posts/${actualPostId}`, {
-                 headers: getAuthHeaders(),
-                 credentials: 'include'
-               });
-               
-               if (response.ok) {
-                 // 게시글이 존재하면 해당 게시글로 이동
-                 targetPath = `/board/${actualPostId}`;
-               } else {
-                 // 게시글이 존재하지 않으면 게시글 목록으로 이동
-                 targetPath = '/board';
-                 alert('해당 게시글이 삭제되었거나 존재하지 않습니다. 게시글 목록으로 이동합니다.');
-               }
-             } catch (error) {
-               console.error('Error checking post existence:', error);
-               // 오류 발생 시 게시글 목록으로 이동
-               targetPath = '/board';
-             }
-           } else {
-             // ID가 없으면 게시글 목록으로 이동
-             targetPath = '/board';
-           }
-        } 
-               // 스니펫 관련 알림인 경우, 실제 존재하는 스니펫인지 확인
-       else if (['SNIPPET'].includes(notificationType?.toUpperCase()) || 
-                n.targetType === 'SNIPPET' ||
-                (n.message && n.message.includes('스니펫'))) {
-          
-                     if (actualSnippetId) {
-             // 스니펫 존재 여부 확인
-             try {
-               const response = await fetch(`/api/snippets/${actualSnippetId}`, {
-                 headers: getAuthHeaders(),
-                 credentials: 'include'
-               });
-               
-               if (response.ok) {
-                 // 스니펫이 존재하면 해당 스니펫으로 이동
-                 targetPath = `/snippets/${actualSnippetId}`;
-               } else {
-                 // 스니펫이 존재하지 않으면 스니펫 목록으로 이동
-                 targetPath = '/snippets';
-                 alert('해당 스니펫이 삭제되었거나 존재하지 않습니다. 스니펫 목록으로 이동합니다.');
-               }
-             } catch (error) {
-               console.error('Error checking snippet existence:', error);
-               // 오류 발생 시 스니펫 목록으로 이동
-               targetPath = '/snippets';
-             }
-           } else {
-             // ID가 없으면 스니펫 목록으로 이동
-             targetPath = '/snippets';
-           }
-        } else {
-                 // 타입별 경로 결정
-         switch (notificationType?.toUpperCase()) {
-           case 'SNIPPET':
-             // 스니펫 관련 알림
-             if (actualPostId) {
-               targetPath = `/snippets/${actualPostId}`;
-             }
-             break;
-             
-           case 'POINT_EARNED':
-           case 'POINT':
-             targetPath = '/point-history';
-             break;
-             
-           case 'LEVEL_UP':
-           case 'LEVEL':
-             targetPath = '/mypage';
-             break;
-             
-           case 'BADGE_EARNED':
-           case 'BADGE':
-             targetPath = '/mypage/badges';
-             break;
-             
-           case 'NEW_PROBLEM':
-           case 'AI_EVALUATION':
-           case 'PROBLEM_SOLVE':
-           case 'PROBLEM':
-             if (actualPostId) {
-               targetPath = `/problems/${actualPostId}`;
-             } else {
-               targetPath = '/problems';
-             }
-             break;
-             
-           case 'DAILY_LOGIN':
-           case 'CONSECUTIVE_LOGIN':
-             targetPath = '/';
-             break;
-             
-           default:
-             // 메시지 내용으로 타입 추정
-             const message = n.message || '';
-             if (message.includes('스니펫')) {
-               if (actualPostId) {
-                 targetPath = `/snippets/${actualPostId}`;
-               }
-             } else if (message.includes('포인트')) {
-               targetPath = '/point-history';
-             } else if (message.includes('레벨')) {
-               targetPath = '/mypage';
-             } else if (message.includes('뱃지')) {
-               targetPath = '/mypage/badges';
-             } else if (message.includes('문제')) {
-               if (actualPostId) {
-                 targetPath = `/problems/${actualPostId}`;
-               } else {
-                 targetPath = '/problems';
-               }
-             } else {
-               // 기본적으로 메인 페이지로 이동
-               targetPath = '/';
-             }
-             break;
-         }
+
+      // targetType과 targetId를 우선적으로 사용
+      if (n.targetType && n.targetId) {
+        if (n.targetType === 'POST' || n.targetType === 'COMMENT' || n.targetType === 'LIKE') {
+          targetPath = `/board/${n.targetId}`;
+        } else if (n.targetType === 'SNIPPET') {
+          targetPath = `/snippets/${n.targetId}`;
+        }
       }
-      
-             // 경로가 설정되었으면 이동
-       if (targetPath) {
-         navigate(targetPath);
-       }
-      
+
+      // targetPath가 있으면 이동
+      if (targetPath) {
+        navigate(targetPath);
+      }
+
       // 드롭다운 닫기
       setShowDropdown(false);
-      
+
     } catch (error) {
       console.error('Error handling notification click:', error);
       // 오류 발생 시 메인 페이지로 이동

@@ -1,3 +1,4 @@
+// LevelProgress.jsx
 import React from 'react';
 import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
 import '../css/LevelProgress.css';
@@ -11,62 +12,46 @@ function LevelProgress({ userLevel, userPoints }) {
     { level: 5, name: 'DIAMOND', minPoints: 2500, maxPoints: 5000, color: '#b9f2ff' },
     { level: 6, name: 'MASTER', minPoints: 5000, maxPoints: 10000, color: '#800080' },
     { level: 7, name: 'GRANDMASTER', minPoints: 10000, maxPoints: 20000, color: '#ff4500' },
-    { level: 8, name: 'LEGEND', minPoints: 20000, maxPoints: Infinity, color: '#00bfff' }
+    { level: 8, name: 'LEGEND', minPoints: 20000, maxPoints: Infinity, color: '#00bfff' },
   ];
 
-  const getCurrentLevelInfo = () => {
-    const currentLevel = levels.find(level => 
-      userPoints >= level.minPoints && userPoints < level.maxPoints
-    ) || levels[levels.length - 1];
-    
-    return currentLevel;
-  };
+  const getCurrentLevelInfo = () =>
+    levels.find(l => userPoints >= l.minPoints && userPoints < l.maxPoints) || levels[levels.length - 1];
 
   const getNextLevelInfo = () => {
-    const currentLevel = getCurrentLevelInfo();
-    const nextLevel = levels.find(level => level.level === currentLevel.level + 1);
-    return nextLevel;
+    const cur = getCurrentLevelInfo();
+    return levels.find(l => l.level === cur.level + 1);
   };
 
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
   const getProgressPercentage = () => {
-    const currentLevel = getCurrentLevelInfo();
-    const nextLevel = getNextLevelInfo();
-    
-    if (!nextLevel) return 100; // 최고 레벨인 경우
-    
-    const currentLevelPoints = userPoints - currentLevel.minPoints;
-    const pointsNeededForNextLevel = nextLevel.minPoints - currentLevel.minPoints;
-    
-    return Math.min(100, (currentLevelPoints / pointsNeededForNextLevel) * 100);
+    const cur = getCurrentLevelInfo();
+    const next = getNextLevelInfo();
+    if (!next || !isFinite(next.minPoints - cur.minPoints)) return 100;
+    const have = userPoints - cur.minPoints;
+    const need = next.minPoints - cur.minPoints;
+    return clamp((have / need) * 100, 0, 100);
   };
 
   const getLevelIcon = (levelName) => {
     switch (levelName) {
-      case 'BRONZE':
-        return <FaStar style={{ color: '#cd7f32' }} />;
-      case 'SILVER':
-        return <FaStar style={{ color: '#c0c0c0' }} />;
-      case 'GOLD':
-        return <FaTrophy style={{ color: '#ffd700' }} />;
-      case 'PLATINUM':
-        return <FaCrown style={{ color: '#e5e4e2' }} />;
-      case 'DIAMOND':
-        return <FaCrown style={{ color: '#b9f2ff' }} />;
-      case 'MASTER':
-        return <FaCrown style={{ color: '#9370db' }} />;
-      case 'GRANDMASTER':
-        return <FaCrown style={{ color: '#ff4500' }} />;
-      case 'LEGEND':
-        return <FaCrown style={{ color: '#00bfff' }} />;
-      default:
-        return <FaStar />;
+      case 'BRONZE': return <FaStar style={{ color: '#cd7f32' }} />;
+      case 'SILVER': return <FaStar style={{ color: '#c0c0c0' }} />;
+      case 'GOLD': return <FaTrophy style={{ color: '#ffd700' }} />;
+      case 'PLATINUM': return <FaCrown style={{ color: '#e5e4e2' }} />;
+      case 'DIAMOND': return <FaCrown style={{ color: '#b9f2ff' }} />;
+      case 'MASTER': return <FaCrown style={{ color: '#9370db' }} />;
+      case 'GRANDMASTER': return <FaCrown style={{ color: '#ff4500' }} />;
+      case 'LEGEND': return <FaCrown style={{ color: '#00bfff' }} />;
+      default: return <FaStar />;
     }
   };
 
   const currentLevel = getCurrentLevelInfo();
   const nextLevel = getNextLevelInfo();
-  const progressPercentage = getProgressPercentage();
-  const pointsToNextLevel = nextLevel ? nextLevel.minPoints - userPoints : 0;
+  const progressPercentage = Math.round(getProgressPercentage());
+  const pointsToNextLevel = nextLevel ? Math.max(0, nextLevel.minPoints - userPoints) : 0;
 
   return (
     <div className="level-progress">
@@ -75,9 +60,7 @@ function LevelProgress({ userLevel, userPoints }) {
       </div>
 
       <div className="current-level-info">
-        <div className="level-icon">
-          {getLevelIcon(currentLevel.name)}
-        </div>
+        <div className="level-icon">{getLevelIcon(currentLevel.name)}</div>
         <div className="level-details">
           <div className="level-name">{currentLevel.name}</div>
           <div className="level-number">Level {currentLevel.level}</div>
@@ -85,30 +68,35 @@ function LevelProgress({ userLevel, userPoints }) {
         </div>
       </div>
 
-      {nextLevel && (
+      {nextLevel ? (
         <div className="next-level-info">
           <div className="progress-section">
             <div className="progress-header">
               <span>다음 레벨: {nextLevel.name}</span>
               <span>{pointsToNextLevel} P 더 필요</span>
             </div>
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ 
+
+            {/* ✅ 단일 채움 바로 변경 */}
+            <div
+              className="progress-bar"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progressPercentage}
+            >
+              <div
+                className="progress-fill"
+                style={{
                   width: `${progressPercentage}%`,
-                  backgroundColor: '#8ab0d1'
+                  background: `linear-gradient(90deg, ${currentLevel.color}, #8ab0d1)`,
                 }}
-              ></div>
+              />
             </div>
-            <div className="progress-text">
-              {Math.round(progressPercentage)}% 완료
-            </div>
+
+            <div className="progress-text">{progressPercentage}% 완료</div>
           </div>
         </div>
-      )}
-
-      {!nextLevel && (
+      ) : (
         <div className="max-level-info">
           <div className="max-level-badge">
             <FaCrown style={{ color: '#ffd700', fontSize: '2rem' }} />
@@ -116,10 +104,8 @@ function LevelProgress({ userLevel, userPoints }) {
           </div>
         </div>
       )}
-
-     
     </div>
   );
 }
 
-export default LevelProgress; 
+export default LevelProgress;

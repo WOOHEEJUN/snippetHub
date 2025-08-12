@@ -52,7 +52,7 @@ const Home = () => {
   };
 
   return (
-    <>
+    <div className="home-page">
       {/* Hero Section */}
       <section className="hero-section text-start">
   <div className="container hero-container">
@@ -245,7 +245,7 @@ const Home = () => {
           )}
         </div>
       </section>
-    </>
+    </div>
   );
 };
 
