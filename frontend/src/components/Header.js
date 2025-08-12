@@ -47,6 +47,8 @@ const Header = () => {
                 <ul className="submenu">
                   <li><Link to="/problems">코딩문제</Link></li>
                   <li><Link to="/daily-problems">일일문제</Link></li>
+                  <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
+                  <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
                 </ul>
               </li>
 
@@ -133,6 +135,8 @@ const Header = () => {
                   <ul>
                     <li><Link to="/problems" onClick={toggleHamburger}>코딩문제</Link></li>
                     <li><Link to="/daily-problems" onClick={toggleHamburger}>일일문제</Link></li>
+                    <li><Link to="/ai-problem-generation" onClick={toggleHamburger}>AI 문제 생성</Link></li>
+                    <li><Link to="/ai-code-evaluation" onClick={toggleHamburger}>AI 코드 평가</Link></li>
                   </ul>
                 </div>
                 
