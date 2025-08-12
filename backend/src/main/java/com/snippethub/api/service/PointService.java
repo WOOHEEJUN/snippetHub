@@ -35,6 +35,10 @@ public class PointService {
     public static final int POINTS_FOR_WEEKLY_LOGIN = 20;   // 주간 로그인 (7일 연속)
     public static final int POINTS_FOR_MONTHLY_LOGIN = 100; // 월간 로그인 (30일 연속)
     
+    // 첫 작성 보상 포인트 (10배)
+    public static final int POINTS_FOR_FIRST_POST = 100;    // 첫 게시글 작성
+    public static final int POINTS_FOR_FIRST_SNIPPET = 150; // 첫 스니펫 작성
+    
     // 문제 해결 포인트 (난이도별)
     public static final int POINTS_FOR_EASY_PROBLEM = 10;   // 쉬운 문제 해결
     public static final int POINTS_FOR_MEDIUM_PROBLEM = 20; // 보통 문제 해결
@@ -51,35 +55,41 @@ public class PointService {
         // 레벨 업 체크를 위한 이전 레벨 저장
         UserLevel previousLevel = user.getCurrentLevel();
         
-        user.addPoints(POINTS_FOR_POST);
+        // 첫 게시글 작성인지 확인
+        boolean isFirstPost = user.getTotalPosts() == 0;
+        int pointsToAward = isFirstPost ? POINTS_FOR_FIRST_POST : POINTS_FOR_POST;
+        
+        user.addPoints(pointsToAward);
         user.incrementTotalPosts();
         userRepository.save(user);
         
         // 포인트 히스토리 저장
         PointHistory pointHistory = PointHistory.builder()
                 .user(user)
-                .pointType(PointHistory.PointType.POST_CREATE)
-                .pointChange(POINTS_FOR_POST)
-                .description("게시글 작성으로 포인트 획득")
+                .pointType(isFirstPost ? PointHistory.PointType.SPECIAL_AWARD : PointHistory.PointType.POST_CREATE)
+                .pointChange(pointsToAward)
+                .description(isFirstPost ? "첫 게시글 작성으로 특별 보상 포인트 획득!" : "게시글 작성으로 포인트 획득")
                 .relatedId(postId)
                 .relatedType("POST")
                 .build();
         pointHistoryRepository.save(pointHistory);
         
-        // 실시간 알림 생성
-        notificationService.createNotification(
-            user, 
-            String.format("게시글 작성으로 %d포인트를 획득했습니다!", POINTS_FOR_POST),
-            NotificationType.POINT_EARNED,
-            "POST",
-            postId,
-            null
-        );
+        // 실시간 알림 생성 (첫 게시글인 경우에만)
+        if (isFirstPost) {
+            notificationService.createNotification(
+                user, 
+                String.format("축하합니다! 첫 게시글 작성으로 %d포인트를 획득했습니다! 🎉", pointsToAward),
+                NotificationType.POINT_EARNED,
+                "POST",
+                postId,
+                null
+            );
+        }
         
         // 레벨 업 알림 생성
         checkAndCreateLevelUpNotification(user, previousLevel);
         
-        log.info("User {} earned {} points for posting", user.getNickname(), POINTS_FOR_POST);
+        log.info("User {} earned {} points for posting (first post: {})", user.getNickname(), pointsToAward, isFirstPost);
     }
 
     /**
@@ -92,25 +102,41 @@ public class PointService {
         // 레벨 업 체크를 위한 이전 레벨 저장
         UserLevel previousLevel = user.getCurrentLevel();
         
-        user.addPoints(POINTS_FOR_SNIPPET);
+        // 첫 스니펫 작성인지 확인
+        boolean isFirstSnippet = user.getTotalSnippets() == 0;
+        int pointsToAward = isFirstSnippet ? POINTS_FOR_FIRST_SNIPPET : POINTS_FOR_SNIPPET;
+        
+        user.addPoints(pointsToAward);
         user.incrementTotalSnippets();
         userRepository.save(user);
         
         // 포인트 히스토리 저장
         PointHistory pointHistory = PointHistory.builder()
                 .user(user)
-                .pointType(PointHistory.PointType.SNIPPET_CREATE)
-                .pointChange(POINTS_FOR_SNIPPET)
-                .description("스니펫 작성으로 포인트 획득")
+                .pointType(isFirstSnippet ? PointHistory.PointType.SPECIAL_AWARD : PointHistory.PointType.SNIPPET_CREATE)
+                .pointChange(pointsToAward)
+                .description(isFirstSnippet ? "첫 스니펫 작성으로 특별 보상 포인트 획득!" : "스니펫 작성으로 포인트 획득")
                 .relatedId(snippetId)
                 .relatedType("SNIPPET")
                 .build();
         pointHistoryRepository.save(pointHistory);
         
+        // 실시간 알림 생성 (첫 스니펫인 경우에만)
+        if (isFirstSnippet) {
+            notificationService.createNotification(
+                user, 
+                String.format("축하합니다! 첫 스니펫 작성으로 %d포인트를 획득했습니다! 🎉", pointsToAward),
+                NotificationType.POINT_EARNED,
+                "SNIPPET",
+                snippetId,
+                null
+            );
+        }
+        
         // 레벨 업 알림 생성
         checkAndCreateLevelUpNotification(user, previousLevel);
         
-        log.info("User {} earned {} points for creating snippet", user.getNickname(), POINTS_FOR_SNIPPET);
+        log.info("User {} earned {} points for creating snippet (first snippet: {})", user.getNickname(), pointsToAward, isFirstSnippet);
     }
 
     /**
