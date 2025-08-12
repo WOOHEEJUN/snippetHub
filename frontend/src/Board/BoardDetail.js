@@ -541,7 +541,13 @@ function BoardDetail() {
             <FaUser /> 작성자
           </h4>
           <div className="author-info">
-            <img src={post.author?.profileImage || '/default-profile.png'} alt={post.author?.nickname} />
+          {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
             {post.author?.userId ? (
               <Link to={`/users/${post.author.userId}`}>
                 {post.author?.level && (
