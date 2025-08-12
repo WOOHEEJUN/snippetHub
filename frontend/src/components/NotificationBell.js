@@ -8,12 +8,14 @@ import './NotificationBell.css';
 const NotificationBell = () => {
   const { getAuthHeaders } = useAuth();
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const [hideTimeout, setHideTimeout] = useState(null);
   const navigate = useNavigate();
+
+  // 읽지 않은 알림 개수를 알림 목록에서 직접 계산
+  const unreadCount = notifications.filter(notification => !notification.read).length;
 
   // 마우스 호버 핸들러
   const handleMouseEnter = () => {
@@ -59,31 +61,6 @@ const NotificationBell = () => {
     }
   };
 
-  // 읽지 않은 알림 개수 가져오기
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await fetch('/api/notifications/unread-count', {
-        headers: getAuthHeaders(),
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Unread count response:", data);
-        
-        // 백엔드에서 직접 숫자를 반환하므로 처리 방식 변경
-        if (typeof data === 'number') {
-          setUnreadCount(data);
-        } else if (data.success && typeof data.data === 'number') {
-          setUnreadCount(data.data);
-        } else {
-          setUnreadCount(0);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch unread count:", error);
-    }
-  };
-
   // 알림 읽음 처리 및 이동
   const handleNotificationClick = async (notification) => {
     
@@ -101,7 +78,6 @@ const NotificationBell = () => {
         }
         // 읽음 처리 후 목록/카운트 갱신
         fetchNotifications();
-        fetchUnreadCount();
       } catch (error) {
         console.error("Failed to mark notification as read:", error);
       }
@@ -134,7 +110,6 @@ const NotificationBell = () => {
       });
       if (response.ok) {
         fetchNotifications();
-        fetchUnreadCount();
       } else {
         console.error("Failed to mark all notifications as read: ", response.statusText);
       }
@@ -145,8 +120,9 @@ const NotificationBell = () => {
 
   useEffect(() => {
     console.log('NotificationBell useEffect triggered');
+    
+    // 초기 데이터 로딩
     fetchNotifications();
-    fetchUnreadCount();
     
     // 브라우저 알림 권한 요청
     if (Notification.permission === 'default') {
@@ -162,7 +138,8 @@ const NotificationBell = () => {
       try {
         webSocketService.connect(userEmail, (notification) => {
           console.log('WebSocket notification received:', notification);
-          // 실시간 알림 수신 시 처리 - 중복 방지
+          
+          // 실시간 알림 수신 시 처리 - 강화된 중복 방지
           setNotifications(prev => {
             // 이미 같은 ID의 알림이 있는지 확인
             const isDuplicate = prev.some(existing => existing.id === notification.id);
@@ -178,9 +155,6 @@ const NotificationBell = () => {
             }
             return newNotifications;
           });
-          
-          // 읽지 않은 알림 개수 증가
-          setUnreadCount(prev => prev + 1);
           
           // 브라우저 알림 표시 (선택사항)
           if (Notification.permission === 'granted') {
@@ -212,22 +186,26 @@ const NotificationBell = () => {
     };
   }, []);
 
-  // WebSocket 연결 상태에 따른 폴링 설정
+  // WebSocket 연결 상태에 따른 폴링 설정 (별도 useEffect)
   useEffect(() => {
     let interval;
     
     if (!isWebSocketConnected) {
       // WebSocket이 연결되지 않은 경우에만 폴링 실행
-      interval = setInterval(fetchUnreadCount, 60000); // 1분마다
+      interval = setInterval(() => {
+        console.log('Polling for notifications (WebSocket not connected)');
+        fetchNotifications();
+      }, 60000); // 1분마다
       console.log('WebSocket not connected, using polling fallback');
     } else {
-      // WebSocket이 연결된 경우 폴링 중단
-      console.log('WebSocket connected, skipping polling');
+      // WebSocket이 연결된 경우 폴링 완전 중단
+      console.log('WebSocket connected, skipping polling completely');
     }
     
     return () => {
       if (interval) {
         clearInterval(interval);
+        console.log('Polling interval cleared');
       }
     };
   }, [isWebSocketConnected]);

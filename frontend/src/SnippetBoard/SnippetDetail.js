@@ -455,7 +455,13 @@ function SnippetDetail() {
         <div className="sidebar-card author-card">
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
-            <img src={snippet.author?.profileImage || '/default-profile.png'} alt={snippet.author?.nickname} />
+          {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
             {snippet.author?.userId ? (
               <Link to={`/users/${snippet.author.userId}`}>
                 {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
