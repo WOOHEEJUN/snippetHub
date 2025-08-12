@@ -6,33 +6,40 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
-  height: 100%;
-}
-
 body {
   font-family: 'Noto Sans KR', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  color: #e0e0e0;           /* 밝은 회색 텍스트 */
+  color: #e0e0e0; /* 밝은 회색 텍스트 */
   background-color: #1a1a1a; /* 어두운 배경 */
 }
 
 a {
   text-decoration: none;
-  color: #99ccff;          /* 밝은 파란색 링크 */
+  color: #99ccff; /* 밝은 파란색 링크 */
 }
 
 a:hover {
   color: #66b3ff;
 }
 
-/* 유틸리티 */
-.text-center { text-align: center; }
-.mt-3 { margin-top: 1rem; }
-.mb-3 { margin-bottom: 1rem; }
-.p-3  { padding: 1rem; }
+/* 유틸리티 클래스 */
+.text-center {
+  text-align: center;
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.p-3 {
+  padding: 1rem;
+}
 
 .container {
   padding-left: 15px;
@@ -40,17 +47,31 @@ a:hover {
 }
 
 /* 스크롤바 */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #333333; border-radius: 10px; }
-::-webkit-scrollbar-thumb { background: #555555; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #777777; }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #333333;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555555;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777777;
+}
 
 /* code 태그 */
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* === 공통 버튼 === */
+/* custom-btn-sm */
 .custom-btn-sm {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -58,14 +79,17 @@ code {
   line-height: 1.5;
   border-radius: 0.2rem;
   color: #333333;
-  background-color: #e0e0e0;
+  background-color: #e0e0e0; /* 밝은 회색 */
   border-color: #e0e0e0;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
   user-select: none;
-  transition: color .15s, background-color .15s, border-color .15s, box-shadow .15s;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
 .custom-btn-sm:hover {
   color: #333333;
   background-color: #d3d3d3;
@@ -74,168 +98,62 @@ code {
 
 .btn-outline-danger {
   background-color: #e0e0e0;
-  color: #333333;
+  color: #333333; /* 밝은 회색 */
   border-color: #e0e0e0;
 }
+
 .btn-outline-danger:hover {
   background-color: #d3d3d3;
   color: #333333;
   border-color: #d3d3d3;
 }
 
-<<<<<<< HEAD
 /* 뱃지 이미지 스타일 (공통) */
-=======
-/* === 헤더/네비 === */
-.nav-container {
-  min-width: 900px;       /* 필요시 조정 */
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: transparent;  /* 부모에서 배경 처리 시 투명 유지 */
-}
-
-.auth-status > * {
-  flex-shrink: 0;         /* 버튼 줄어듦 방지 */
-}
-
-/* 뱃지 이미지 */
-.level-badge-header,
->>>>>>> a4402f3f37885a239a7fd822d6c93568aadf704d
 .level-badge-mypage,
 .level-badge-ranking,
 .level-badge-profile {
-  width: 20px;
+  width: 20px; /* 뱃지 이미지 크기 */
   height: 20px;
-  vertical-align: middle;
-  margin-right: 5px;
+  vertical-align: middle; /* 텍스트와 정렬 */
+  margin-right: 5px; /* 닉네임과의 간격 */
 }
-<<<<<<< HEAD
-=======
-
-/* === 드롭다운 (제어형) === */
-.nav-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.nav-summary {
-  cursor: pointer;
-  padding: 8px 12px;
-  background: #222;
-  color: #e0e0e0;
-  border: 1px solid #333;
-  border-radius: 8px;
-  font-weight: 600;
-  line-height: 1;
-  user-select: none;
-}
-
-/* 메뉴: 기본 숨김 */
-.nav-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  min-width: 220px;
-  background: #1f1f1f;
-  border: 1px solid #333;
-  border-radius: 10px;
-  list-style: none;
-  padding: 8px;
-  margin: 0;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-  z-index: 1000;
-
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-/* ✅ 열림 상태 */
-.nav-dropdown.open .nav-menu {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* 항목 */
-.nav-menu li { border-radius: 8px; }
->>>>>>> a4402f3f37885a239a7fd822d6c93568aadf704d
 .nav-menu a {
   display: block;
   padding: 10px 12px;
   color: #cfd8dc;
   border-radius: 8px;
 }
-.nav-menu a:hover {
-  background: #2a2a2a;
-  color: #fff;
-}
+.nav-menu a:hover { background: #2a2a2a; color: #fff; }
 
-/* === 마이페이지/공통 회색 버튼 === */
-.btn-gray {
-  padding: 8px 16px;
-  background: #dcdcdc;
-  color: #000;
-  font-weight: 600;
-  border: none;
-  border-radius: 30px;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-.btn-gray:hover {
-  background: #c0c0c0;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-}
-
-/* === 반응형 === */
-@media (max-width: 1200px) {
-  .nav-list { gap: 10px !important; }
-}
-
-@media (max-width: 992px) {
-  .auth-status { gap: 10px !important; }
-  .auth-status span { font-size: 0.9em; }
-}
-
+/* 모바일에서 가로폭 대응 */
 @media (max-width: 768px) {
-  .nav-container .container > div {
-    flex-direction: column;
-    align-items: flex-start !important;
-  }
-  .nav-list {
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
-  .auth-status {
-    margin-top: 10px;
-    width: 100%;
-    justify-content: flex-start !important;
-  }
-
-  /* 모바일 드롭다운: 아래로 자연스럽게 */
   .nav-menu {
     position: static;
     width: 100%;
     box-shadow: none;
     margin-top: 8px;
-    opacity: 0;
-    transform: none;
   }
-  .nav-dropdown.open .nav-menu {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
   .nav-summary {
     width: 100%;
     justify-content: space-between;
     display: flex;
     align-items: center;
   }
- .auth-status .btn-gray:last-child {
-  margin-top: 10px !important; /* 원하는 만큼 조정 (예: 8px) */
 }
+/* === 마이페이지 버튼 === */
+.btn-gray {
+  padding: 8px 16px;
+  background: #dcdcdc; /* 연한 회색 */
+  color: #000; /* 검은 글씨 */
+  font-weight: 600;
+  border: none;
+  border-radius: 30px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-gray:hover {
+  background: #c0c0c0; /* 진한 회색 */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
 }
