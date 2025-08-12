@@ -386,11 +386,15 @@ function BoardDetail() {
 
               return (
                 <div key={comment.commentId} className="comment-item">
+                  
                   <div className="comment-author">
-                    <img
-                      src={comment.author?.profileImage || '/default-profile.png'}
-                      alt={authorName}
-                    />
+                  {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
                     {authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
                         {comment.author?.level && (
@@ -481,10 +485,13 @@ function BoardDetail() {
                                 }}
                               >
                                 <div className="comment-author">
-                                  <img
-                                    src={reply.author?.profileImage || '/default-profile.png'}
-                                    alt={rAuthorName}
-                                  />
+                                {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
                                   {rAuthorId ? (
                                     <Link to={`/users/${rAuthorId}`} className="author-link">
                                       {reply.author?.level && (

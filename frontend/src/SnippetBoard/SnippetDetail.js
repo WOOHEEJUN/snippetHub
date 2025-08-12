@@ -354,7 +354,13 @@ function SnippetDetail() {
             {comments.map((comment) => (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                  <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
+                {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
                   {comment.author?.userId ? (
                     <Link to={`/users/${comment.author.userId}`} className="author-link">
                       {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
@@ -416,7 +422,13 @@ function SnippetDetail() {
                             style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
                           >
                             <div className="comment-author">
-                              <img src={reply.author?.profileImage || '/default-profile.png'} alt={reply.author?.nickname || '사용자'} />
+                            {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
                               {reply.author?.userId ? (
                                 <Link to={`/users/${reply.author.userId}`} className="author-link">
                                   {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
