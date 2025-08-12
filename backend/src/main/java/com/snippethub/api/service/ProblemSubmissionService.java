@@ -75,7 +75,12 @@ public class ProblemSubmissionService {
 
         // 포인트 지급 (정답인 경우)
         if (result.getStatus() == SubmissionStatus.ACCEPTED) {
-            pointService.awardPointsForProblemSolved(userId, problem.getDifficulty(), savedSubmission.getId());
+            try {
+                pointService.awardPointsForProblemSolved(userId, problem.getDifficulty(), savedSubmission.getId());
+            } catch (Exception e) {
+                // 포인트 시스템 오류가 제출에 영향을 주지 않도록 처리
+                log.error("포인트 지급 중 오류 발생: {}", e.getMessage());
+            }
         }
 
         log.info("사용자 {}가 문제 {}에 코드를 제출했습니다. 결과: {}", 

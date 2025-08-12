@@ -41,6 +41,7 @@ public class AuthService {
     private final EmailService emailService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PointService pointService;
 
     @Transactional
     public User register(UserRegisterRequestDto requestDto) {
@@ -94,6 +95,14 @@ public class AuthService {
         
         refreshToken.updateToken(tokenDto.getRefreshToken(), tokenProvider.getRefreshTokenExpiryDate());
         refreshTokenRepository.save(refreshToken);
+
+        // 로그인 포인트 지급
+        try {
+            pointService.awardPointsForLogin(user.getId());
+        } catch (Exception e) {
+            // 포인트 시스템 오류가 로그인에 영향을 주지 않도록 처리
+            System.err.println("로그인 포인트 지급 중 오류 발생: " + e.getMessage());
+        }
         
         return new AbstractMap.SimpleEntry<>(tokenDto, user);
     }

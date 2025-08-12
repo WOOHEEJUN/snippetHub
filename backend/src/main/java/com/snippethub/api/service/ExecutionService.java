@@ -14,12 +14,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +37,7 @@ public class ExecutionService {
     private final CodeExecutionRepository codeExecutionRepository;
     private final UserRepository userRepository;
     private final SnippetRepository snippetRepository;
+    private final PointService pointService;
 
     public ExecutionResponse execute(ExecutionRequest request, String email) {
         User user = null;
@@ -68,10 +77,11 @@ public class ExecutionService {
                         .build();
         }
 
+        // 코드 실행 기록 저장
         CodeExecution codeExecution = CodeExecution.builder()
                 .user(user)
                 .snippet(snippet)
-                .language(request.getLanguage())
+                .language(language)
                 .code(request.getCode())
                 .input(request.getInput())
                 .output(response.getOutput())
@@ -80,9 +90,20 @@ public class ExecutionService {
                 .memoryUsed(response.getMemoryUsed())
                 .status(CodeExecution.Status.valueOf(response.getStatus()))
                 .build();
+
         codeExecutionRepository.save(codeExecution);
 
-        return ExecutionResponse.from(codeExecution);
+        // 포인트 지급 (로그인한 사용자인 경우에만)
+        if (user != null) {
+            try {
+                pointService.awardPointsForCodeExecution(user.getId(), codeExecution.getId());
+            } catch (Exception e) {
+                // 포인트 시스템 오류가 코드 실행에 영향을 주지 않도록 처리
+                System.err.println("포인트 지급 중 오류 발생: " + e.getMessage());
+            }
+        }
+
+        return response;
     }
 
     private ExecutionResponse executeJava(String code, String input) {
