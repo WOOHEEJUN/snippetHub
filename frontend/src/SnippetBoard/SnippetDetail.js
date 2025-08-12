@@ -62,6 +62,7 @@ function SnippetDetail() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
+  const [isAIExpanded, setIsAIExpanded] = useState(false); // AI 평가 섹션 확장 상태 추가
 
   // ------ helpers ------
   const removeCommentFromTree = (list, targetId) => {
@@ -329,13 +330,45 @@ function SnippetDetail() {
         </div>
 
         {/* AI 코드 평가 섹션 */}
-        <div className="ai-evaluation-section">
-          <AICodeEvaluation
-            snippetId={snippetId}
-            code={snippet.code}
-            language={snippet.language}
-            onEvaluationComplete={() => {}}
-          />
+        <div className={`ai-evaluation-section ${isAIExpanded ? 'expanded' : 'collapsed'}`}>
+          {!isAIExpanded ? (
+            <div className="ai-evaluation-collapsed">
+              <h4>AI 코드 평가</h4>
+              <button 
+                onClick={() => {
+                  setIsAIExpanded(true);
+                  // 바로 평가 시작
+                  setTimeout(() => {
+                    const evaluateBtn = document.querySelector('.evaluate-btn');
+                    if (evaluateBtn) {
+                      evaluateBtn.click();
+                    }
+                  }, 100);
+                }}
+                className="expand-ai-btn"
+              >
+                평가 시작하기
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="ai-evaluation-header">
+                <h4>코드 평가 결과</h4>
+                <button 
+                  onClick={() => setIsAIExpanded(false)}
+                  className="collapse-ai-btn"
+                >
+                  접기
+                </button>
+              </div>
+              <AICodeEvaluation
+                snippetId={snippetId}
+                code={snippet.code}
+                language={snippet.language}
+                onEvaluationComplete={() => {}}
+              />
+            </>
+          )}
         </div>
 
         <div className="comment-section">
