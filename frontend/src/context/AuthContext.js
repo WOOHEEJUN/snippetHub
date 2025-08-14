@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
         const userData = await res.json();
+        console.log("userData.data:", userData.data);
         setUser(userData.data);
         localStorage.setItem('user', JSON.stringify(userData.data));
         localStorage.setItem('userEmail', userData.data.email);
@@ -98,13 +99,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (tokens) => {
+    console.log('AuthContext login 함수 호출됨:', tokens);
     
 
+    console.log('localStorage에 토큰 저장 시작');
     localStorage.setItem('accessToken', tokens.token.accessToken);
     localStorage.setItem('refreshToken', tokens.token.refreshToken);
     localStorage.setItem('user', JSON.stringify(tokens.user));
     localStorage.setItem('userId', tokens.user.userId);
+    console.log('localStorage에 토큰 저장 완료');
+    console.log(localStorage.getItem('accessToken'));
+    console.log(localStorage.getItem('refreshToken'));
+    console.log(localStorage.getItem('user'));
+    console.log(localStorage.getItem('userId'));
 
+    
     setAccessToken(tokens.token.accessToken);
     setRefreshToken(tokens.token.refreshToken);
     setUser(tokens.user);

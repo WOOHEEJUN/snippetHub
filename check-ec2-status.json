@@ -1,0 +1,12 @@
+{
+  "commands": [
+    "echo '=== Application Status ==='",
+    "ps aux | grep java | grep -v grep",
+    "echo '=== Port Status ==='",
+    "sudo ss -tlnp | grep 8080",
+    "echo '=== Health Check ==='",
+    "curl -f http://localhost:8080/actuator/health || echo 'Health check failed'",
+    "echo '=== Application Log (Last 10 lines) ==='",
+    "tail -10 app.log || echo 'No log file found'"
+  ]
+}

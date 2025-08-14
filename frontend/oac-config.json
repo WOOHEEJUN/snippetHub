@@ -1,0 +1,6 @@
+{
+    "Name": "snippethub-oac",
+    "SigningBehavior": "always",
+    "SigningProtocol": "sigv4",
+    "OriginAccessControlOriginType": "s3"
+}

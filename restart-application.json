@@ -1,0 +1,20 @@
+{
+  "DocumentName": "AWS-RunShellScript",
+  "Parameters": {
+    "commands": [
+      "echo '=== 애플리케이션 재시작 시작 ==='",
+      "pkill -f java",
+      "sleep 5",
+      "cd ~/app",
+      "nohup java -jar api-0.0.1-SNAPSHOT.jar > app.log 2>&1 &",
+      "sleep 30",
+      "echo '=== 애플리케이션 상태 확인 ==='",
+      "ps aux | grep java | grep -v grep",
+      "echo '=== 포트 8080 리스닝 상태 확인 ==='",
+      "sudo ss -tlnp | grep 8080",
+      "echo '=== 헬스체크 테스트 ==='",
+      "curl -s http://localhost:8080/api/health",
+      "echo '=== 재시작 완료 ==='"
+    ]
+  }
+}

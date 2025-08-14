@@ -13,8 +13,7 @@ import { getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/SnippetDetail.css';
 
 // ======== API 설정 (여기만 맞추면 전부 반영됨) ========
-const API_ORIGIN = process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080'; // 백엔드 포트
-const API_BASE   = '/api'; // 백엔드 prefix (/api 또는 /api/v1)
+const API_BASE = '/api'; // 백엔드 prefix (/api 또는 /api/v1)
 
 const ENDPOINTS = {
   snippet: (id) => `${API_BASE}/snippets/${id}`,                         // GET/DELETE
@@ -24,14 +23,13 @@ const ENDPOINTS = {
   comment: (commentId) => `${API_BASE}/comments/${commentId}`,           // PUT/DELETE
 };
 
-// 공통 fetch (항상 절대 URL로 요청 + 에러 본문 로그)
+// 공통 fetch (상대 경로 사용 + 에러 본문 로그)
 const apiFetch = async (path, init = {}) => {
-  const url = `${API_ORIGIN}${path}`;
-  const res = await fetch(url, init);
+  const res = await fetch(path, { ...init, credentials: 'include' });
   if (!res.ok) {
     let bodyText = '';
     try { bodyText = await res.clone().text(); } catch {}
-    console.error(`[API ERROR] ${init.method || 'GET'} ${url} -> ${res.status}`, bodyText);
+    console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}`, bodyText);
   }
   return res;
 };

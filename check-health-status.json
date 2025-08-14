@@ -1,0 +1,17 @@
+{
+  "DocumentName": "AWS-RunShellScript",
+  "Parameters": {
+    "commands": [
+      "echo '=== 애플리케이션 상태 확인 ==='",
+      "ps aux | grep java",
+      "echo '=== 포트 8080 리스닝 상태 확인 ==='",
+      "sudo ss -tlnp | grep 8080",
+      "echo '=== Actuator 헬스체크 테스트 ==='",
+      "curl -s http://localhost:8080/actuator/health",
+      "echo '=== HTTP 상태 코드 확인 ==='",
+      "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/actuator/health",
+      "echo '=== ALB 타겟 그룹 상태 확인 ==='",
+      "aws elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:ap-northeast-2:604723771686:targetgroup/snippethub-tg/5c60900d25059f90 --query 'TargetHealthDescriptions[0].TargetHealth' --output table"
+    ]
+  }
+}

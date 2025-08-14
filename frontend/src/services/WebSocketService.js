@@ -8,14 +8,28 @@ class WebSocketService {
     this.subscriptions = new Map();
   }
 
+  // WebSocket URL을 환경에 맞게 동적으로 생성
+  getWebSocketUrl() {
+    // 개발 환경 체크
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8080/ws';
+    }
+    
+    // 프로덕션 환경에서는 현재 도메인과 프로토콜 사용
+    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+    return `${protocol}//${window.location.host}/ws`;
+  }
+
   connect(userEmail, onNotificationReceived) {
     if (this.connected) {
       console.log('WebSocket already connected');
       return;
     }
 
-    console.log('Attempting to connect to WebSocket...');
-    const socket = new SockJS('http://localhost:8080/ws');
+    const wsUrl = this.getWebSocketUrl();
+    console.log('Attempting to connect to WebSocket at:', wsUrl);
+    
+    const socket = new SockJS(wsUrl);
     this.stompClient = Stomp.over(socket);
     
     // STOMP 설정 개선

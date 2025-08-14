@@ -1,0 +1,9 @@
+{
+    "DocumentName": "AWS-RunShellScript",
+    "Parameters": {
+        "commands": [
+            "cd ~/app",
+            "tail -n 50 app.log | grep -E '(profile|JWT|JwtRequestFilter|302|login)'"
+        ]
+    }
+}

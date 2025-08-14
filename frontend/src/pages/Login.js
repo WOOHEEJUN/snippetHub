@@ -68,7 +68,15 @@ const Login = () => {
         return;
       }
 
+      console.log('로그인 응답 데이터:', data);
+      console.log('login 함수 호출 전');
       await login(data.data);
+      console.log('login 함수 호출 후');
+      console.log('localStorage 확인:', {
+        accessToken: localStorage.getItem('accessToken'),
+        refreshToken: localStorage.getItem('refreshToken'),
+        user: localStorage.getItem('user')
+      });
       navigate('/');
     } catch (error) {
       
