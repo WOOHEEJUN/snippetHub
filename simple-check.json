@@ -1,6 +1,0 @@
-{
-  "commands": [
-    "ps aux | grep java",
-    "curl -f http://localhost:8080/actuator/health"
-  ]
-}
