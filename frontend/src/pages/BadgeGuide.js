@@ -1,6 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
+import { Medal } from 'iconoir-react';
+
+const getBadgeIcon = (badgeName) => {
+  if (!badgeName) {
+    return <Medal color="lightgray" width="100%" height="100%" />;
+  }
+  const lowerCaseBadgeName = badgeName.toLowerCase();
+  let color = 'lightgray';
+
+  if (lowerCaseBadgeName.includes('bronze')) {
+    color = '#cd7f32';
+  } else if (lowerCaseBadgeName.includes('silver')) {
+    color = '#c0c0c0';
+  } else if (lowerCaseBadgeName.includes('gold')) {
+    color = '#ffd700';
+  } else if (lowerCaseBadgeName.includes('platinum')) {
+    color = '#e5e4e2';
+  } else if (lowerCaseBadgeName.includes('diamond')) {
+    color = '#b9f2ff';
+  }
+
+  return <Medal color={color} width="100%" height="100%" />;
+};
 
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
@@ -11,42 +34,37 @@ function BadgeGuide() {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
   useEffect(() => {
-    const fetchBadges = async () => {
+    const fetchBadgesAndUser = async () => {
       try {
-        // 실제 백엔드 API에서 뱃지 목록 조회
+        // 1) 뱃지 목록
         const response = await fetch('/api/badges', {
           headers: getAuthHeaders(),
           credentials: 'include'
         });
-
-        if (!response.ok) {
-          throw new Error('뱃지 목록을 불러오는 중 오류가 발생했습니다.');
-        }
-
+        if (!response.ok) throw new Error('뱃지 목록을 불러오는 중 오류가 발생했습니다.');
         const data = await response.json();
-        if (data.success && data.data) {
-          setBadges(data.data);
-        } else {
-          // 백엔드 데이터가 없을 경우에만 fallback 사용
-          console.warn('백엔드에서 뱃지 데이터를 불러오지 못했습니다.');
-          setBadges([]);
-        }
 
-        // 사용자 뱃지 목록도 조회
+        let serverBadges = [];
+        if (data.success && data.data) {
+          serverBadges = data.data;
+        } else {
+          console.warn('백엔드에서 뱃지 데이터를 불러오지 못했습니다.');
+        }
+        setBadges(serverBadges);
+
+        // 2) 사용자 보유 뱃지
         const userResponse = await fetch('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include'
         });
-
         if (userResponse.ok) {
           const userData = await userResponse.json();
           if (userData.success && userData.data) {
             setUserBadges(userData.data);
           }
         }
-      } catch (error) {
-        console.error('뱃지 목록 불러오기 실패:', error);
-        // 오류 발생 시 빈 배열로 설정
+      } catch (err) {
+        console.error('뱃지 목록 불러오기 실패:', err);
         setBadges([]);
         setError('뱃지 정보를 불러오는 중 오류가 발생했습니다.');
       } finally {
@@ -54,7 +72,7 @@ function BadgeGuide() {
       }
     };
 
-    fetchBadges();
+    fetchBadgesAndUser();
   }, [getAuthHeaders]);
 
   const categories = [
@@ -65,9 +83,11 @@ function BadgeGuide() {
     { value: 'EVENT', label: '이벤트' }
   ];
 
-  const filteredBadges = selectedCategory === 'ALL' 
-    ? badges 
-    : badges.filter(badge => badge.category === selectedCategory);
+  const filteredBadges = useMemo(() => {
+    return selectedCategory === 'ALL'
+      ? badges
+      : badges.filter(badge => badge.category === selectedCategory);
+  }, [badges, selectedCategory]);
 
   const isOwned = (badgeId) => {
     return userBadges.some(userBadge => userBadge.badgeId === badgeId);
@@ -76,11 +96,14 @@ function BadgeGuide() {
   const getProgressInfo = (badge) => {
     const userBadge = userBadges.find(ub => ub.badgeId === badge.badgeId);
     if (!userBadge) return null;
-    
+
     return {
       current: userBadge.currentProgress || 0,
       required: badge.requiredCount || 1,
-      percentage: Math.min(100, ((userBadge.currentProgress || 0) / (badge.requiredCount || 1)) * 100)
+      percentage: Math.min(
+        100,
+        ((userBadge.currentProgress || 0) / (badge.requiredCount || 1)) * 100
+      )
     };
   };
 
@@ -93,7 +116,6 @@ function BadgeGuide() {
         <div className="page-header">
           <h1>🏅 뱃지 가이드</h1>
           <p>다양한 활동을 통해 뱃지를 획득하고 성장해보세요!</p>
-          
         </div>
 
         <div className="stats-section">
@@ -106,7 +128,9 @@ function BadgeGuide() {
             <div className="stats-label">전체 뱃지</div>
           </div>
           <div className="stats-card">
-            <div className="stats-number">{Math.round((userBadges.length / badges.length) * 100)}%</div>
+            <div className="stats-number">
+              {badges.length ? Math.round((userBadges.length / badges.length) * 100) : 0}%
+            </div>
             <div className="stats-label">달성률</div>
           </div>
         </div>
@@ -130,20 +154,22 @@ function BadgeGuide() {
           {filteredBadges.map(badge => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
-            
+
             return (
               <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'}`}>
                 <div className="badge-image">
-                  <img src={badge.imageUrl} alt={badge.name} />
+                  <div className="badge-icon-container">
+                    {getBadgeIcon(badge.name)}
+                  </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
-                
+
                 <div className="badge-info">
                   <h4 className="badge-name">{badge.name}</h4>
                   <p className="badge-description">{badge.description}</p>
-                  
+
                   <div className="badge-category">
-                    <span className={`category-tag category-${badge.category.toLowerCase()}`}>
+                    <span className={`category-tag category-${String(badge.category || '').toLowerCase()}`}>
                       {categories.find(c => c.value === badge.category)?.label || badge.category}
                     </span>
                   </div>
@@ -153,10 +179,10 @@ function BadgeGuide() {
                       {progress ? (
                         <>
                           <div className="progress-bar">
-                            <div 
-                              className="progress-fill" 
+                            <div
+                              className="progress-fill"
                               style={{ width: `${progress.percentage}%` }}
-                            ></div>
+                            />
                           </div>
                           <div className="progress-text">
                             {progress.current} / {progress.required}
@@ -205,4 +231,4 @@ function BadgeGuide() {
   );
 }
 
-export default BadgeGuide; 
+export default BadgeGuide;

@@ -71,6 +71,7 @@ const Header = () => {
                   <li><Link to="/mypage/badges">등급보기</Link></li>
                   <li><Link to="/mypage/edit">개인정보수정</Link></li>
                   <li><Link to="/mypage/ranking">랭킹보기</Link></li>
+                  <li><Link to="/badge-guide">뱃지 가이드</Link></li>
                   <li><Link to="/submission-history">제출 이력</Link></li>
                   <li><Link to="/mypage/posts">게시물 목록 보기</Link></li>
                   <li><Link to="/mypage/snippets">스니펫 목록 보기</Link></li>
@@ -153,6 +154,7 @@ const Header = () => {
                         <li><Link to="/mypage/badges" onClick={toggleHamburger}>등급보기</Link></li>
                         <li><Link to="/mypage/edit" onClick={toggleHamburger}>개인정보수정</Link></li>
                         <li><Link to="/mypage/ranking" onClick={toggleHamburger}>랭킹보기</Link></li>
+                        <li><Link to="/badge-guide" onClick={toggleHamburger}>뱃지 가이드</Link></li>
                         <li><Link to="/submission-history" onClick={toggleHamburger}>제출 이력</Link></li>
                         <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
                         <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
