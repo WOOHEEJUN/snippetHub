@@ -28,6 +28,8 @@ public class CommentService {
     private final PostRepository postRepository;
     private final SnippetRepository snippetRepository;
     private final NotificationService notificationService; // 알림 서비스 주입
+    private final PointService pointService;
+    private final BadgeService badgeService;
 
     // 게시글에 댓글 생성
     public CommentDto.CommentResponseDto createPostComment(Long postId, CommentDto.CommentRequestDto requestDto, String userEmail) {
@@ -63,7 +65,18 @@ public class CommentService {
                 .depth(depth)
                 .build();
 
-        commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        // 포인트 지급 및 뱃지 체크 (원댓글인 경우에만)
+        if (parentComment == null) {
+            try {
+                pointService.awardPointsForComment(user.getId(), savedComment.getId());
+                badgeService.checkAndAwardBadges(user.getId());
+            } catch (Exception e) {
+                // 포인트/뱃지 시스템 오류가 댓글 작성에 영향을 주지 않도록 처리
+                System.err.println("포인트/뱃지 시스템 오류: " + e.getMessage());
+            }
+        }
 
         // 알림 생성 (자기 자신에게는 보내지 않음)
         if (parentComment != null) {
@@ -94,7 +107,7 @@ public class CommentService {
             }
         }
 
-        return CommentDto.CommentResponseDto.from(comment);
+        return CommentDto.CommentResponseDto.from(savedComment);
     }
 
     // 스니펫에 댓글 생성
@@ -131,7 +144,18 @@ public class CommentService {
                 .depth(depth)
                 .build();
 
-        commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        // 포인트 지급 및 뱃지 체크 (원댓글인 경우에만)
+        if (parentComment == null) {
+            try {
+                pointService.awardPointsForComment(user.getId(), savedComment.getId());
+                badgeService.checkAndAwardBadges(user.getId());
+            } catch (Exception e) {
+                // 포인트/뱃지 시스템 오류가 댓글 작성에 영향을 주지 않도록 처리
+                System.err.println("포인트/뱃지 시스템 오류: " + e.getMessage());
+            }
+        }
 
         // 알림 생성 (자기 자신에게는 보내지 않음)
         if (parentComment != null) {
@@ -162,7 +186,7 @@ public class CommentService {
             }
         }
 
-        return CommentDto.CommentResponseDto.from(comment);
+        return CommentDto.CommentResponseDto.from(savedComment);
     }
 
     // 댓글 수정

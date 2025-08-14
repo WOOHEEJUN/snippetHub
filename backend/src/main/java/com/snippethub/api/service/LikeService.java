@@ -25,6 +25,7 @@ public class LikeService {
     private final PostRepository postRepository;
     private final SnippetRepository snippetRepository;
     private final NotificationService notificationService;
+    private final PointService pointService;
 
     @Transactional
     public boolean toggleLikeForPost(Long postId, String email) {
@@ -39,8 +40,16 @@ public class LikeService {
             return false; // 좋아요 취소
         }).orElseGet(() -> {
             Like newLike = Like.builder().user(user).post(post).build();
-            likeRepository.save(newLike);
+            Like savedLike = likeRepository.save(newLike);
             post.increaseLikeCount();
+
+            // 좋아요 받은 사용자에게 포인트 지급
+            try {
+                pointService.awardPointsForLikeReceived(post.getAuthor().getId(), savedLike.getId());
+            } catch (Exception e) {
+                // 포인트 시스템 오류가 좋아요에 영향을 주지 않도록 처리
+                System.err.println("포인트 지급 중 오류 발생: " + e.getMessage());
+            }
 
             // 알림 생성
             if (!post.getAuthor().getId().equals(user.getId())) { // 본인 게시물에 좋아요는 알림 X
@@ -71,8 +80,16 @@ public class LikeService {
             return false; // 좋아요 취소
         }).orElseGet(() -> {
             Like newLike = Like.builder().user(user).snippet(snippet).build();
-            likeRepository.save(newLike);
+            Like savedLike = likeRepository.save(newLike);
             snippet.increaseLikeCount();
+
+            // 좋아요 받은 사용자에게 포인트 지급
+            try {
+                pointService.awardPointsForLikeReceived(snippet.getAuthor().getId(), savedLike.getId());
+            } catch (Exception e) {
+                // 포인트 시스템 오류가 좋아요에 영향을 주지 않도록 처리
+                System.err.println("포인트 지급 중 오류 발생: " + e.getMessage());
+            }
 
             // 알림 생성
             if (!snippet.getAuthor().getId().equals(user.getId())) { // 본인 스니펫에 좋아요는 알림 X

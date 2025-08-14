@@ -5,8 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import '../css/ProfileEdit.css';
 
 // ===== API 설정 =====
-const API_ORIGIN = process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080';
-const API_BASE   = '/api'; // 필요 시 '/api/v1'로 변경
+const API_BASE = '/api'; // 필요 시 '/api/v1'로 변경
 
 const ENDPOINTS = {
   profile: `${API_BASE}/users/profile`,   // PUT (json)
@@ -14,14 +13,13 @@ const ENDPOINTS = {
   me: `${API_BASE}/users/me`,             // GET (선택)
 };
 
-// 공통 fetch (절대 URL + 에러 본문 콘솔 출력)
+// 공통 fetch (상대 경로 사용 + 에러 본문 콘솔 출력)
 const apiFetch = async (path, init = {}) => {
-  const url = `${API_ORIGIN}${path}`;
-  const res = await fetch(url, init);
+  const res = await fetch(path, { ...init, credentials: 'include' });
   if (!res.ok) {
     let bodyText = '';
     try { bodyText = await res.clone().text(); } catch {}
-    console.error(`[API ERROR] ${init.method || 'GET'} ${url} -> ${res.status}`, bodyText);
+    console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}`, bodyText);
   }
   return res;
 };

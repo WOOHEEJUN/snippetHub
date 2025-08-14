@@ -6,6 +6,7 @@ import com.snippethub.api.dto.ApiResponse;
 import com.snippethub.api.dto.token.TokenDto;
 import com.snippethub.api.dto.user.UserDto;
 import com.snippethub.api.dto.user.UserLoginResponseDto;
+import com.snippethub.api.service.PointService;
 import com.snippethub.api.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final TokenProvider tokenProvider;
     private final UserService userService;
     private final ObjectMapper objectMapper;
+    private final PointService pointService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -64,16 +66,23 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         ApiResponse<UserLoginResponseDto> apiResponse = ApiResponse.success("소셜 로그인 성공", responseDto);
 
-        // 프론트엔드로 리다이렉트 (토큰을 URL 파라미터로 전달)
-        String redirectUrl = UriComponentsBuilder
-                .fromUriString("http://localhost:3000/oauth2/redirect")
-                .queryParam("accessToken", tokenDto.getAccessToken())
-                .queryParam("refreshToken", tokenDto.getRefreshToken())
-                .queryParam("user", objectMapper.writeValueAsString(userDto))
-                .build()
-                .encode()
-                .toUriString();
+        // 로그인 포인트 지급
+        try {
+            pointService.awardPointsForLogin(user.getId());
+        } catch (Exception e) {
+            // 포인트 시스템 오류가 로그인에 영향을 주지 않도록 처리
+            log.error("소셜 로그인 포인트 지급 중 오류 발생: {}", e.getMessage());
+        }
 
+        // 프론트엔드로 리다이렉트 (토큰을 URL 파라미터로 전달)
+        String redirectUrl = String.format(
+            "http://localhost:3000/oauth2/callback?accessToken=%s&refreshToken=%s&user=%s",
+            tokenDto.getAccessToken(),
+            tokenDto.getRefreshToken(),
+            java.net.URLEncoder.encode(objectMapper.writeValueAsString(userDto), "UTF-8")
+        );
+
+        log.info("OAuth2 로그인 성공 - 리다이렉트 URL: {}", redirectUrl);
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
     

@@ -26,6 +26,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  height: fit-content; /* 높이를 내용에 맞춤 */
+  position: sticky; /* 스크롤 시 고정 */
+  top: 2rem; /* 상단에서 2rem 떨어진 위치에 고정 */
+  align-self: flex-start; /* 상단 정렬 */
 }
 
 /* Header */
@@ -163,14 +167,15 @@
   background-color: #1a1a1a;
   border: 1px solid #333333;
   border-radius: 12px;
-  padding: 1.8rem;
+  padding: 1rem; /* 패딩 줄임 */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.5rem; /* 카드 간 간격 줄임 */
 }
 
 .sidebar-card h4 {
-  font-size: 1.3rem;
+  font-size: 1.1rem; /* 폰트 크기 줄임 */
   font-weight: 700;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.5rem; /* 마진 줄임 */
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -180,12 +185,12 @@
 .author-card .author-info {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem; /* 간격 줄임 */
 }
 
 .author-card img {
-  width: 48px;
-  height: 48px;
+  width: 40px; /* 크기 줄임 */
+  height: 40px; /* 크기 줄임 */
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #8ab0d1;
@@ -194,7 +199,7 @@
 .author-card span {
   font-weight: 600;
   color: #d3d3d3;
-  font-size: 1.1rem;
+  font-size: 1rem; /* 폰트 크기 줄임 */
 }
 
 .author-link {
@@ -209,7 +214,69 @@
   text-decoration: underline;
 }
 
-/* ... rest unchanged ... */
+/* 액션 카드 스타일 추가 */
+.actions-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 간격 줄임 */
+}
+
+.action-button {
+  width: 100%;
+  padding: 0.6rem; /* 패딩 줄임 */
+  border-radius: 5px;
+  border: 1px solid #000000;
+  background-color: #000000;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem; /* 폰트 크기 줄임 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+  color: #e0e0e0;
+}
+
+.action-button:hover {
+  background-color: #333333;
+}
+
+.edit-button {
+  background-color: #000000;
+  color: #e0e0e0;
+  border-color: #000000;
+}
+
+.delete-button {
+  background-color: #000000;
+  color: #e0e0e0;
+  border-color: #000000;
+}
+
+.back-button {
+  background-color: #000000;
+  color: #e0e0e0;
+  border-color: #000000;
+}
+
+/* 정보 카드 스타일 추가 */
+.info-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 간격 줄임 */
+}
+
+.info-card li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #b0b0b0;
+  font-size: 0.9rem; /* 폰트 크기 줄임 */
+}
 
 /* Replies (Nested Comments) */
 .replies-container {

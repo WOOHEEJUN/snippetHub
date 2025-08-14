@@ -32,6 +32,7 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<UserProfileResponseDto>> getUserProfile(org.springframework.security.core.Authentication authentication) {
+        System.out.println("getUserProfile 호출");
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new com.snippethub.api.exception.BusinessException(com.snippethub.api.exception.ErrorCode.LOGIN_INPUT_INVALID);
         }

@@ -1,7 +1,0 @@
-{
-  "email": "testuser@example.com",
-  "password": "password123",
-  "confirmPassword": "password123",
-  "nickname": "TestUser",
-  "agreeToTerms": true
-}

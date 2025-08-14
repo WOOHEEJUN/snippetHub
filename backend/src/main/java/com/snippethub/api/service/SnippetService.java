@@ -29,6 +29,8 @@ public class SnippetService {
     private final UserRepository userRepository;
     private final FileService fileService;
     private final TagService tagService;
+    private final PointService pointService;
+    private final BadgeService badgeService;
 
     @Transactional
     public Snippet createSnippet(SnippetCreateRequestDto requestDto, String email) {
@@ -73,6 +75,15 @@ public class SnippetService {
                     fileService.uploadFile(file, "SNIPPET_ATTACHMENT", author.getEmail(), savedSnippet);
                 }
                 System.out.println("파일 업로드 완료");
+            }
+
+            // 포인트 지급 및 뱃지 체크
+            try {
+                pointService.awardPointsForSnippet(author.getId(), savedSnippet.getId());
+                badgeService.checkAndAwardBadges(author.getId());
+            } catch (Exception e) {
+                // 포인트/뱃지 시스템 오류가 스니펫 작성에 영향을 주지 않도록 처리
+                System.err.println("포인트/뱃지 시스템 오류: " + e.getMessage());
             }
 
             System.out.println("=== 스니펫 생성 서비스 완료 ===");

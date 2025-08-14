@@ -47,6 +47,8 @@ const Header = () => {
                 <ul className="submenu">
                   <li><Link to="/problems">코딩문제</Link></li>
                   <li><Link to="/daily-problems">일일문제</Link></li>
+                  <li><Link to="/ai-problem-generation">AI 문제 생성</Link></li>
+                  <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
                 </ul>
               </li>
 
@@ -104,68 +106,72 @@ const Header = () => {
               </span>
               <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
               <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
-              
-              {/* 햄버거 메뉴 */}
-              <div className="hamburger-container">
-                <button 
-                  className={`hamburger-btn ${isHamburgerOpen ? 'active' : ''}`}
-                  onClick={toggleHamburger}
-                  aria-label="메뉴 열기"
-                >
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </button>
+            </>
+          )}
+          
+          {/* 햄버거 메뉴 - 로그인 상태와 상관없이 항상 표시 */}
+          <div className="hamburger-container">
+            <button 
+              className={`hamburger-btn ${isHamburgerOpen ? 'active' : ''}`}
+              onClick={toggleHamburger}
+              aria-label="메뉴 열기"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            
+            {/* 햄버거 드롭다운 메뉴 */}
+            {isHamburgerOpen && (
+              <div className="hamburger-dropdown">
+                <div className="hamburger-menu-section">
+                  <h4>게시판</h4>
+                  <ul>
+                    <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
+                  </ul>
+                </div>
                 
-                {/* 햄버거 드롭다운 메뉴 */}
-                {isHamburgerOpen && (
-                  <div className="hamburger-dropdown">
-                    <div className="hamburger-menu-section">
-                      <h4>게시판</h4>
-                      <ul>
-                        <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
-                      </ul>
-                    </div>
-                    
-                    <div className="hamburger-menu-section">
-                      <h4>문제풀이</h4>
-                      <ul>
-                        <li><Link to="/problems" onClick={toggleHamburger}>코딩문제</Link></li>
-                        <li><Link to="/daily-problems" onClick={toggleHamburger}>일일문제</Link></li>
-                      </ul>
-                    </div>
-                    
-                    <div className="hamburger-menu-section">
-                      <h4>스니펫</h4>
-                      <ul>
-                        <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
-                        <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
-                        <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
-                        <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>
-                        <li><Link to="/snippets?language=HTML&sort=LATEST&page=0" onClick={toggleHamburger}>HTML</Link></li>
-                        <li><Link to="/snippets?language=Java&sort=LATEST&page=0" onClick={toggleHamburger}>Java</Link></li>
-                      </ul>
-                    </div>
-                    
-                    <div className="hamburger-menu-section">
-                      <h4>마이페이지</h4>
-                      <ul>
-                        <li><Link to="/mypage" onClick={toggleHamburger}>마이페이지</Link></li>
-                        <li><Link to="/mypage/badges" onClick={toggleHamburger}>등급보기</Link></li>
-                        <li><Link to="/mypage/edit" onClick={toggleHamburger}>개인정보수정</Link></li>
-                        <li><Link to="/mypage/ranking" onClick={toggleHamburger}>랭킹보기</Link></li>
-                        <li><Link to="/badge-guide" onClick={toggleHamburger}>뱃지 가이드</Link></li>
-                        <li><Link to="/submission-history" onClick={toggleHamburger}>제출 이력</Link></li>
-                        <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
-                        <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
-                        <li><Link to="/mypage/saved-problems" onClick={toggleHamburger}>저장한 문제보기</Link></li>
-                      </ul>
-                    </div>
+                <div className="hamburger-menu-section">
+                  <h4>문제풀이</h4>
+                  <ul>
+                    <li><Link to="/problems" onClick={toggleHamburger}>코딩문제</Link></li>
+                    <li><Link to="/daily-problems" onClick={toggleHamburger}>일일문제</Link></li>
+                    <li><Link to="/ai-problem-generation" onClick={toggleHamburger}>AI 문제 생성</Link></li>
+                    <li><Link to="/ai-code-evaluation" onClick={toggleHamburger}>AI 코드 평가</Link></li>
+                  </ul>
+                </div>
+                
+                <div className="hamburger-menu-section">
+                  <h4>스니펫</h4>
+                  <ul>
+                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
+                    <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
+                    <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
+                    <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>
+                    <li><Link to="/snippets?language=HTML&sort=LATEST&page=0" onClick={toggleHamburger}>HTML</Link></li>
+                    <li><Link to="/snippets?language=Java&sort=LATEST&page=0" onClick={toggleHamburger}>Java</Link></li>
+                  </ul>
+                </div>
+                
+                {isAuthenticated && (
+                  <div className="hamburger-menu-section">
+                    <h4>마이페이지</h4>
+                    <ul>
+                      <li><Link to="/mypage" onClick={toggleHamburger}>마이페이지</Link></li>
+                      <li><Link to="/mypage/badges" onClick={toggleHamburger}>등급보기</Link></li>
+                      <li><Link to="/mypage/edit" onClick={toggleHamburger}>개인정보수정</Link></li>
+                      <li><Link to="/mypage/ranking" onClick={toggleHamburger}>랭킹보기</Link></li>
+                      <li><Link to="/badge-guide" onClick={toggleHamburger}>뱃지 가이드</Link></li>
+                      <li><Link to="/submission-history" onClick={toggleHamburger}>제출 이력</Link></li>
+                      <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
+                      <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
+                      <li><Link to="/mypage/saved-problems" onClick={toggleHamburger}>저장한 문제보기</Link></li>
+                    </ul>
                   </div>
                 )}
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>

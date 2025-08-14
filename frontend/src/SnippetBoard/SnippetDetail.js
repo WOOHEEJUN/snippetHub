@@ -13,8 +13,7 @@ import { getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/SnippetDetail.css';
 
 // ======== API 설정 (여기만 맞추면 전부 반영됨) ========
-const API_ORIGIN = process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080'; // 백엔드 포트
-const API_BASE   = '/api'; // 백엔드 prefix (/api 또는 /api/v1)
+const API_BASE = '/api'; // 백엔드 prefix (/api 또는 /api/v1)
 
 const ENDPOINTS = {
   snippet: (id) => `${API_BASE}/snippets/${id}`,                         // GET/DELETE
@@ -24,14 +23,13 @@ const ENDPOINTS = {
   comment: (commentId) => `${API_BASE}/comments/${commentId}`,           // PUT/DELETE
 };
 
-// 공통 fetch (항상 절대 URL로 요청 + 에러 본문 로그)
+// 공통 fetch (상대 경로 사용 + 에러 본문 로그)
 const apiFetch = async (path, init = {}) => {
-  const url = `${API_ORIGIN}${path}`;
-  const res = await fetch(url, init);
+  const res = await fetch(path, { ...init, credentials: 'include' });
   if (!res.ok) {
     let bodyText = '';
     try { bodyText = await res.clone().text(); } catch {}
-    console.error(`[API ERROR] ${init.method || 'GET'} ${url} -> ${res.status}`, bodyText);
+    console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}`, bodyText);
   }
   return res;
 };
@@ -62,6 +60,7 @@ function SnippetDetail() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
+  const [isAIExpanded, setIsAIExpanded] = useState(false); // AI 평가 섹션 확장 상태 추가
 
   // ------ helpers ------
   const removeCommentFromTree = (list, targetId) => {
@@ -329,13 +328,45 @@ function SnippetDetail() {
         </div>
 
         {/* AI 코드 평가 섹션 */}
-        <div className="ai-evaluation-section">
-          <AICodeEvaluation
-            snippetId={snippetId}
-            code={snippet.code}
-            language={snippet.language}
-            onEvaluationComplete={() => {}}
-          />
+        <div className={`ai-evaluation-section ${isAIExpanded ? 'expanded' : 'collapsed'}`}>
+          {!isAIExpanded ? (
+            <div className="ai-evaluation-collapsed">
+              <h4>AI 코드 평가</h4>
+              <button 
+                onClick={() => {
+                  setIsAIExpanded(true);
+                  // 바로 평가 시작
+                  setTimeout(() => {
+                    const evaluateBtn = document.querySelector('.evaluate-btn');
+                    if (evaluateBtn) {
+                      evaluateBtn.click();
+                    }
+                  }, 100);
+                }}
+                className="expand-ai-btn"
+              >
+                평가 시작하기
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="ai-evaluation-header">
+                <h4>코드 평가 결과</h4>
+                <button 
+                  onClick={() => setIsAIExpanded(false)}
+                  className="collapse-ai-btn"
+                >
+                  접기
+                </button>
+              </div>
+              <AICodeEvaluation
+                snippetId={snippetId}
+                code={snippet.code}
+                language={snippet.language}
+                onEvaluationComplete={() => {}}
+              />
+            </>
+          )}
         </div>
 
         <div className="comment-section">
@@ -354,7 +385,13 @@ function SnippetDetail() {
             {comments.map((comment) => (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                  <img src={comment.author?.profileImage || '/default-profile.png'} alt={comment.author?.nickname || '사용자'} />
+                {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
                   {comment.author?.userId ? (
                     <Link to={`/users/${comment.author.userId}`} className="author-link">
                       {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
@@ -416,7 +453,13 @@ function SnippetDetail() {
                             style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
                           >
                             <div className="comment-author">
-                              <img src={reply.author?.profileImage || '/default-profile.png'} alt={reply.author?.nickname || '사용자'} />
+                            {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
                               {reply.author?.userId ? (
                                 <Link to={`/users/${reply.author.userId}`} className="author-link">
                                   {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
@@ -455,7 +498,13 @@ function SnippetDetail() {
         <div className="sidebar-card author-card">
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
-            <img src={snippet.author?.profileImage || '/default-profile.png'} alt={snippet.author?.nickname} />
+          {user?.level && (
+                  <img
+                    src={getLevelBadgeImage(user.level)}
+                    alt={user.level}
+                    className="level-badge-header"
+                  />
+                )}
             {snippet.author?.userId ? (
               <Link to={`/users/${snippet.author.userId}`}>
                 {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}

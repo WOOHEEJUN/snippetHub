@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -24,7 +25,24 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // WebSocket 연결 엔드포인트 설정
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // 개발 환경에서는 모든 origin 허용
-                .withSockJS(); // SockJS 지원 추가
+                .setAllowedOriginPatterns(
+                    "http://localhost:3000",
+                    "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
+                    "https://d3vxt1w788wnw4.cloudfront.net",
+                    "https://snippethub.co.kr"
+                )
+                .withSockJS()
+                .setHeartbeatTime(25000)
+                .setDisconnectDelay(5000)
+                .setHttpMessageCacheSize(1000)
+                .setWebSocketEnabled(true)
+                .setSessionCookieNeeded(false);
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(64 * 1024) // 64KB
+                   .setSendBufferSizeLimit(512 * 1024) // 512KB
+                   .setSendTimeLimit(20000); // 20초
     }
 }
