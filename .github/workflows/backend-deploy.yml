@@ -82,42 +82,41 @@ jobs:
         
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem -J ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} ${{ secrets.EC2_USERNAME }}@10.0.3.74 << 'EOF'
-          # Stop existing application
-          sudo systemctl stop snippethub-backend || true
-          
-          # Create app directory if not exists
-          mkdir -p ~/app
-          
-          # Download new JAR from S3
-          aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar
-          
-          # Create systemd service file if not exists
-          sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
-          [Unit]
-          Description=SnippetHub Backend Application
-          After=network.target
-          
-          [Service]
-          Type=simple
-          User=ubuntu
-          WorkingDirectory=/home/ubuntu/app
-          ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
-          Restart=always
-          RestartSec=10
-          
-          [Install]
-          WantedBy=multi-user.target
-          SERVICEEOF
-          
-          # Reload systemd and start service
-          sudo systemctl daemon-reload
-          sudo systemctl enable snippethub-backend
-          sudo systemctl start snippethub-backend
-          
-          # Check service status
-          sudo systemctl status snippethub-backend
-        EOF
+        # Create deployment script
+        cat > deploy.sh << 'SCRIPTEOF'
+        #!/bin/bash
+        sudo systemctl stop snippethub-backend || true
+        mkdir -p ~/app
+        aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar
+        
+        sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
+        [Unit]
+        Description=SnippetHub Backend Application
+        After=network.target
+        
+        [Service]
+        Type=simple
+        User=ubuntu
+        WorkingDirectory=/home/ubuntu/app
+        ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
+        Restart=always
+        RestartSec=10
+        
+        [Install]
+        WantedBy=multi-user.target
+        SERVICEEOF
+        
+        sudo systemctl daemon-reload
+        sudo systemctl enable snippethub-backend
+        sudo systemctl start snippethub-backend
+        sudo systemctl status snippethub-backend
+        SCRIPTEOF
+        
+        # Copy script to NAT instance
+        scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem deploy.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
+        
+                 # Execute script on backend EC2
+         ssh -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "ssh -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-KeyPair.pem ${{ secrets.EC2_USERNAME }}@10.0.3.74 'bash -s' < ~/deploy.sh"
         
     - name: Verify deployment
       run: |
