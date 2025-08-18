@@ -83,20 +83,38 @@ jobs:
     - name: Deploy to EC2
       run: |
         # Create deployment script
-                 cat > deploy.sh << 'SCRIPTEOF'
-         #!/bin/bash
-         set -e
-         echo "Starting deployment script..."
-         
-         echo "Stopping existing service..."
-         sudo systemctl stop snippethub-backend || echo "Service was not running"
-         
-         echo "Creating app directory..."
-         mkdir -p ~/app
-         
-         echo "Downloading JAR from S3..."
-         aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar
+        cat > deploy.sh << 'SCRIPTEOF'
+        #!/bin/bash
+        set -e
+        echo "Starting deployment script..."
         
+        echo "Installing AWS CLI..."
+        sudo apt-get update
+        sudo apt-get install -y awscli
+        
+        echo "Configuring AWS credentials..."
+        mkdir -p ~/.aws
+        cat > ~/.aws/credentials << 'CREDEOF'
+        [default]
+        aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        CREDEOF
+        
+        cat > ~/.aws/config << 'CONFEOF'
+        [default]
+        region = ${{ secrets.AWS_REGION }}
+        CONFEOF
+        
+        echo "Stopping existing service..."
+        sudo systemctl stop snippethub-backend || echo "Service was not running"
+        
+        echo "Creating app directory..."
+        mkdir -p ~/app
+        
+        echo "Downloading JAR from S3..."
+        aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar --region ${{ secrets.AWS_REGION }}
+        
+        echo "Creating systemd service file..."
         sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
         [Unit]
         Description=SnippetHub Backend Application
@@ -114,44 +132,26 @@ jobs:
         WantedBy=multi-user.target
         SERVICEEOF
         
-                 echo "Creating systemd service file..."
-         sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
-         [Unit]
-         Description=SnippetHub Backend Application
-         After=network.target
-         
-         [Service]
-         Type=simple
-         User=ubuntu
-         WorkingDirectory=/home/ubuntu/app
-         ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
-         Restart=always
-         RestartSec=10
-         
-         [Install]
-         WantedBy=multi-user.target
-         SERVICEEOF
-         
-         echo "Reloading systemd..."
-         sudo systemctl daemon-reload
-         
-         echo "Enabling service..."
-         sudo systemctl enable snippethub-backend
-         
-         echo "Starting service..."
-         sudo systemctl start snippethub-backend
-         
-         echo "Checking service status..."
-         sudo systemctl status snippethub-backend
-         
-         echo "Deployment completed successfully!"
+        echo "Reloading systemd..."
+        sudo systemctl daemon-reload
+        
+        echo "Enabling service..."
+        sudo systemctl enable snippethub-backend
+        
+        echo "Starting service..."
+        sudo systemctl start snippethub-backend
+        
+        echo "Checking service status..."
+        sudo systemctl status snippethub-backend
+        
+        echo "Deployment completed successfully!"
         SCRIPTEOF
         
-                 # Copy script to NAT instance
-         scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem deploy.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
-         
-         # Execute script on backend EC2 with timeout and keep-alive
-         ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i ~/.ssh/snippethub-KeyPair.pem ${{ secrets.EC2_USERNAME }}@10.0.3.74 'bash -s' < ~/deploy.sh"
+        # Copy script to NAT instance
+        scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem deploy.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
+        
+        # Execute script on backend EC2 with timeout and keep-alive
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i ~/.ssh/snippethub-KeyPair.pem ${{ secrets.EC2_USERNAME }}@10.0.3.74 'bash -s' < ~/deploy.sh"
         
     - name: Verify deployment
       run: |
