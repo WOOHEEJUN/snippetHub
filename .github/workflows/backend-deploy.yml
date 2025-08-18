@@ -114,6 +114,11 @@ jobs:
         echo "JAR downloaded to NAT instance successfully!"
         ls -la ~/snippethub-backend.jar
         
+        echo "Copying JAR directly to backend EC2..."
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-KeyPair.pem ~/snippethub-backend.jar ${{ secrets.EC2_USERNAME }}@10.0.3.74:~/app/snippethub-backend.jar
+        
+        echo "JAR copied to backend EC2 successfully!"
+        
         echo "NAT instance deployment script completed!"
         NATSCRIPTEOF
         
@@ -129,23 +134,8 @@ jobs:
         echo "Creating app directory..."
         mkdir -p ~/app
         
-        echo "Setting up SSH key for NAT instance access..."
-        mkdir -p ~/.ssh
-        chmod 700 ~/.ssh
-        
-        # Copy SSH key from NAT instance to backend EC2
-        echo "Copying SSH key from NAT instance..."
-        scp -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/snippethub-key.pem ~/.ssh/snippethub-key.pem
-        chmod 600 ~/.ssh/snippethub-key.pem
-        
-        echo "Testing SSH connection to NAT instance from backend EC2..."
-        ssh -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SSH connection test successful'"
-        
-        echo "Copying JAR from NAT instance..."
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/snippethub-backend.jar ~/app/snippethub-backend.jar
-        
-        echo "JAR copied successfully!"
-        ls -la ~/app/
+        echo "Checking if JAR file exists..."
+        ls -la ~/app/snippethub-backend.jar
         
         echo "Creating systemd service file..."
         sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
@@ -182,9 +172,6 @@ jobs:
         
         # Copy scripts to NAT instance
         scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem nat-deploy.sh backend-deploy.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
-        
-        # Copy SSH key to NAT instance for backend EC2 to use
-        scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
         
         # Execute NAT instance script first
         echo "Executing NAT instance script..."
