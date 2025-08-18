@@ -49,7 +49,7 @@ jobs:
     - name: Upload JAR to S3
       run: |
         ls -la backend/build/libs/
-        aws s3 cp backend/build/libs/*.jar s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar
+        aws s3 cp backend/build/libs/api-0.0.1-SNAPSHOT.jar s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar
         
     - name: Setup SSH
       run: |
