@@ -54,9 +54,11 @@ jobs:
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/snippethub-key.pem
+        echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/snippethub-key.pem
         chmod 600 ~/.ssh/snippethub-key.pem
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        ls -la ~/.ssh/
+        echo "SSH key setup completed"
         
     - name: Deploy to EC2
       run: |
