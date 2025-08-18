@@ -48,7 +48,8 @@ jobs:
         
     - name: Upload JAR to S3
       run: |
-        aws s3 cp backend/build/libs/*.jar s3://${{ secrets.S3_BUCKET }}/backend/snippethub-backend.jar
+        ls -la backend/build/libs/
+        aws s3 cp backend/build/libs/*.jar s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar
         
     - name: Setup SSH
       run: |
@@ -63,8 +64,11 @@ jobs:
           # Stop existing application
           sudo systemctl stop snippethub-backend || true
           
+          # Create app directory if not exists
+          mkdir -p ~/app
+          
           # Download new JAR from S3
-          aws s3 cp s3://${{ secrets.S3_BUCKET }}/backend/snippethub-backend.jar /home/ubuntu/snippethub-backend.jar
+          aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar
           
           # Create systemd service file if not exists
           sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
@@ -75,8 +79,8 @@ jobs:
           [Service]
           Type=simple
           User=ubuntu
-          WorkingDirectory=/home/ubuntu
-          ExecStart=/usr/bin/java -jar /home/ubuntu/snippethub-backend.jar
+          WorkingDirectory=/home/ubuntu/app
+          ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
           Restart=always
           RestartSec=10
           
