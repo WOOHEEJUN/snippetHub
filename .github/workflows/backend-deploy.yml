@@ -51,52 +51,37 @@ jobs:
         ls -la backend/build/libs/
         aws s3 cp backend/build/libs/api-0.0.1-SNAPSHOT.jar s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar
         
-    - name: Setup SSH
-      run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/snippethub-key.pem
-        chmod 600 ~/snippethub-key.pem
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
-        ls -la ~/snippethub-key.pem
-        echo "SSH key setup completed"
-        
     - name: Deploy to EC2
       run: |
-        ssh -i ~/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-          # Stop existing application
-          sudo systemctl stop snippethub-backend || true
-          
-          # Create app directory if not exists
-          mkdir -p ~/app
-          
-          # Download new JAR from S3
-          aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar
-          
-          # Create systemd service file if not exists
-          sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
-          [Unit]
-          Description=SnippetHub Backend Application
-          After=network.target
-          
-          [Service]
-          Type=simple
-          User=ubuntu
-          WorkingDirectory=/home/ubuntu/app
-          ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
-          Restart=always
-          RestartSec=10
-          
-          [Install]
-          WantedBy=multi-user.target
-          SERVICEEOF
-          
-          # Reload systemd and start service
-          sudo systemctl daemon-reload
-          sudo systemctl enable snippethub-backend
-          sudo systemctl start snippethub-backend
-          
-          # Check service status
-          sudo systemctl status snippethub-backend
-        EOF
+        aws ssm send-command \
+          --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --parameters 'commands=[
+            "sudo systemctl stop snippethub-backend || true",
+            "mkdir -p ~/app",
+            "aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/app/snippethub-backend.jar",
+            "sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << \"EOF\"",
+            "[Unit]",
+            "Description=SnippetHub Backend Application",
+            "After=network.target",
+            "",
+            "[Service]",
+            "Type=simple",
+            "User=ubuntu",
+            "WorkingDirectory=/home/ubuntu/app",
+            "ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar",
+            "Restart=always",
+            "RestartSec=10",
+            "",
+            "[Install]",
+            "WantedBy=multi-user.target",
+            "EOF",
+            "sudo systemctl daemon-reload",
+            "sudo systemctl enable snippethub-backend",
+            "sudo systemctl start snippethub-backend",
+            "sudo systemctl status snippethub-backend"
+          ]' \
+          --region ${{ secrets.AWS_REGION }}
         
     - name: Verify deployment
       run: |
