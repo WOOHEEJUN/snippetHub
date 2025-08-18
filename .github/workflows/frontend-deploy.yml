@@ -29,6 +29,8 @@ jobs:
       
     - name: Build frontend
       working-directory: ./frontend
+      env:
+        CI: false
       run: npm run build
       
     - name: Configure AWS credentials
