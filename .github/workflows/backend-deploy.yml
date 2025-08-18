@@ -129,8 +129,20 @@ jobs:
         echo "Creating app directory..."
         mkdir -p ~/app
         
+        echo "Setting up SSH key for NAT instance access..."
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        
+        # Copy SSH key from NAT instance to backend EC2
+        echo "Copying SSH key from NAT instance..."
+        scp -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/snippethub-key.pem ~/.ssh/snippethub-key.pem
+        chmod 600 ~/.ssh/snippethub-key.pem
+        
+        echo "Testing SSH connection to NAT instance from backend EC2..."
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'SSH connection test successful'"
+        
         echo "Copying JAR from NAT instance..."
-        scp -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/snippethub-backend.jar ~/app/snippethub-backend.jar
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/snippethub-backend.jar ~/app/snippethub-backend.jar
         
         echo "JAR copied successfully!"
         ls -la ~/app/
@@ -170,6 +182,9 @@ jobs:
         
         # Copy scripts to NAT instance
         scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem nat-deploy.sh backend-deploy.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
+        
+        # Copy SSH key to NAT instance for backend EC2 to use
+        scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
         
         # Execute NAT instance script first
         echo "Executing NAT instance script..."
