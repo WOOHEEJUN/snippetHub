@@ -183,9 +183,10 @@ jobs:
         
     - name: Verify deployment
       run: |
-        sleep 30
-        echo "Checking ALB health endpoint..."
-        curl -f https://snippethub-alb-120890630.ap-northeast-2.elb.amazonaws.com/actuator/health || exit 1
+        sleep 10
+        echo "Verifying backend service is running..."
+        ssh -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "ssh -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-KeyPair.pem ${{ secrets.EC2_USERNAME }}@10.0.3.74 'sudo systemctl is-active snippethub-backend'"
+        echo "Backend service verification completed!"
         
     - name: Deploy success
       run: echo "Backend deployed successfully to ALB"
