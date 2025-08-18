@@ -53,16 +53,15 @@ jobs:
         
     - name: Setup SSH
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/snippethub-key.pem
-        chmod 600 ~/.ssh/snippethub-key.pem
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-        ls -la ~/.ssh/
+        echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/snippethub-key.pem
+        chmod 600 ~/snippethub-key.pem
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+        ls -la ~/snippethub-key.pem
         echo "SSH key setup completed"
         
     - name: Deploy to EC2
       run: |
-        ssh -i ~/.ssh/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -i ~/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
           # Stop existing application
           sudo systemctl stop snippethub-backend || true
           
