@@ -54,8 +54,9 @@ jobs:
     - name: Setup SSH
       run: |
         echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/snippethub-key.pem
-        chmod 600 ~/snippethub-key.pem
+        chmod 400 ~/snippethub-key.pem
         mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
         ssh-keyscan -H 10.0.3.74 >> ~/.ssh/known_hosts 2>/dev/null || true
         ls -la ~/snippethub-key.pem
@@ -67,6 +68,8 @@ jobs:
         echo ""
         echo "SSH key line count:"
         wc -l ~/snippethub-key.pem
+        echo "SSH key fingerprint:"
+        ssh-keygen -lf ~/snippethub-key.pem || echo "Failed to get fingerprint"
         echo "SSH key setup completed"
         
     - name: Test SSH connection
