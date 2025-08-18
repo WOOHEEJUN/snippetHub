@@ -148,27 +148,32 @@ public class BadgeService {
     }
 
     private void awardBadge(User user, String badgeName) {
-        Optional<Badge> badgeOpt = badgeRepository.findByName(badgeName);
-        if (badgeOpt.isPresent()) {
-            Badge badge = badgeOpt.get();
-            
-            // 이미 획득한 뱃지인지 확인
-            if (!userBadgeRepository.existsByUserIdAndBadgeId(user.getId(), badge.getId())) {
-                UserBadge userBadge = UserBadge.builder()
-                        .user(user)
-                        .badge(badge)
-                        .build();
+        try {
+            Optional<Badge> badgeOpt = badgeRepository.findFirstByName(badgeName);
+            if (badgeOpt.isPresent()) {
+                Badge badge = badgeOpt.get();
                 
-                userBadgeRepository.save(userBadge);
-                
-                // 포인트 보상 지급
-                if (badge.getPointsReward() > 0) {
-                    user.addPoints(badge.getPointsReward());
-                    userRepository.save(user);
+                // 이미 획득한 뱃지인지 확인
+                if (!userBadgeRepository.existsByUserIdAndBadgeId(user.getId(), badge.getId())) {
+                    UserBadge userBadge = UserBadge.builder()
+                            .user(user)
+                            .badge(badge)
+                            .build();
+                    
+                    userBadgeRepository.save(userBadge);
+                    
+                    // 포인트 보상 지급
+                    if (badge.getPointsReward() > 0) {
+                        user.addPoints(badge.getPointsReward());
+                        userRepository.save(user);
+                    }
+                    
+                    log.info("User {} earned badge: {}", user.getNickname(), badge.getName());
                 }
-                
-                log.info("User {} earned badge: {}", user.getNickname(), badge.getName());
             }
+        } catch (Exception e) {
+            log.error("뱃지 지급 중 오류 발생: {}", e.getMessage());
+            // 뱃지 지급 실패해도 댓글 작성은 계속 진행
         }
     }
 

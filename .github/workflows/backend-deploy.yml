@@ -1,0 +1,91 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Build backend with Gradle
+      working-directory: ./backend
+      run: |
+        chmod +x ./gradlew
+        ./gradlew build -x test
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        
+    - name: Upload JAR to S3
+      run: |
+        aws s3 cp backend/build/libs/*.jar s3://${{ secrets.S3_BUCKET }}/backend/snippethub-backend.jar
+        
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/snippethub-key.pem
+        chmod 600 ~/.ssh/snippethub-key.pem
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        
+    - name: Deploy to EC2
+      run: |
+        ssh -i ~/.ssh/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
+          # Stop existing application
+          sudo systemctl stop snippethub-backend || true
+          
+          # Download new JAR from S3
+          aws s3 cp s3://${{ secrets.S3_BUCKET }}/backend/snippethub-backend.jar /home/ubuntu/snippethub-backend.jar
+          
+          # Create systemd service file if not exists
+          sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
+          [Unit]
+          Description=SnippetHub Backend Application
+          After=network.target
+          
+          [Service]
+          Type=simple
+          User=ubuntu
+          WorkingDirectory=/home/ubuntu
+          ExecStart=/usr/bin/java -jar /home/ubuntu/snippethub-backend.jar
+          Restart=always
+          RestartSec=10
+          
+          [Install]
+          WantedBy=multi-user.target
+          SERVICEEOF
+          
+          # Reload systemd and start service
+          sudo systemctl daemon-reload
+          sudo systemctl enable snippethub-backend
+          sudo systemctl start snippethub-backend
+          
+          # Check service status
+          sudo systemctl status snippethub-backend
+        EOF
+        
+    - name: Verify deployment
+      run: |
+        sleep 30
+        curl -f http://${{ secrets.EC2_HOST }}:8080/actuator/health || exit 1
+        
+    - name: Deploy success
+      run: echo "Backend deployed successfully to http://${{ secrets.EC2_HOST }}:8080"

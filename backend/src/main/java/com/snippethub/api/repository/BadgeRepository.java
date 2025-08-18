@@ -23,5 +23,8 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
                                            @Param("count") int count, 
                                            @Param("userId") Long userId);
     
-    Optional<Badge> findByName(String name);
+    Optional<Badge> findFirstByName(String name);
+    
+    @Query("SELECT b FROM Badge b WHERE b.name = :name ORDER BY b.id ASC")
+    List<Badge> findAllByName(@Param("name") String name);
 } 
