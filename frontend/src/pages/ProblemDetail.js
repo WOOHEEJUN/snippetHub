@@ -116,7 +116,7 @@ function ProblemDetail() {
       case 'WRONG_ANSWER': return '#dc3545';
       case 'TIME_LIMIT': return '#ffc107';
       case 'MEMORY_LIMIT': return '#fd7e14';
-      case 'RUNTIME_ERROR': return '#6f42c1';
+      case 'RUNTIME_ERROR': return '#333333';
       default: return '#6c757d';
     }
   };

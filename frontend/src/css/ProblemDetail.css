@@ -1,7 +1,7 @@
 .problem-detail {
   padding: 20px 0;
   min-height: calc(100vh - 80px);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #222222 100%);
 }
 
 .problem-detail .container {
@@ -9,7 +9,7 @@
 }
 
 .problem-section {
-  background: white;
+  background: #222222;
   border-radius: 15px;
   padding: 30px;
   margin-bottom: 20px;
@@ -24,9 +24,7 @@
 }
 
 .problem-header h1 {
-  color: #2c3e50;
-  margin-bottom: 15px;
-  font-weight: 700;
+  color: #e0e0e0;
 }
 
 .problem-meta {
@@ -53,15 +51,11 @@
 }
 
 .problem-content h3 {
-  color: #2c3e50;
-  margin: 25px 0 15px 0;
-  font-weight: 600;
-  border-left: 4px solid #667eea;
-  padding-left: 15px;
+  color: #e0e0e0;
 }
 
 .problem-content p {
-  color: #555;
+  color: #e0e0e0;
   line-height: 1.6;
   margin-bottom: 15px;
 }
@@ -72,7 +66,7 @@
 .constraints,
 .sample-input,
 .sample-output {
-  background: #f8f9fa;
+  background: #333333;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 15px;
@@ -88,7 +82,7 @@
   margin: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
-  color: #495057;
+  color: #e0e0e0;
   font-family: 'Courier New', monospace;
   font-size: 0.9em;
   line-height: 1.4;
@@ -96,7 +90,7 @@
 
 /* 코드 작성 섹션 */
 .code-section {
-  background: white;
+  background: #222222;
   border-radius: 15px;
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -113,9 +107,7 @@
 }
 
 .code-header h3 {
-  color: #2c3e50;
-  margin: 0;
-  font-weight: 600;
+  color: #e0e0e0;
 }
 
 .language-selector {
@@ -162,7 +154,7 @@
 
 /* 제출 결과 */
 .submission-result {
-  background: #f8f9fa;
+  background: #333333;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 20px;
@@ -170,9 +162,7 @@
 }
 
 .submission-result h4 {
-  color: #2c3e50;
-  margin-bottom: 15px;
-  font-weight: 600;
+  color: #e0e0e0;
 }
 
 .result-info {
@@ -193,7 +183,7 @@
 
 .execution-time,
 .memory-used {
-  color: #6c757d;
+  color: #e0e0e0;
   font-size: 0.9em;
   font-weight: 500;
 }
@@ -205,14 +195,14 @@
 
 .output-section h5,
 .error-section h5 {
-  color: #2c3e50;
+  color: #e0e0e0;
   margin-bottom: 10px;
   font-weight: 600;
 }
 
 .output-content,
 .error-content {
-  background: white;
+  background: #333333;
   border: 1px solid #dee2e6;
   border-radius: 5px;
   padding: 10px;
@@ -228,7 +218,7 @@
 
 .error-content {
   color: #dc3545;
-  background: #fff5f5;
+  background: #443333;
   border-color: #f5c6cb;
 }
 

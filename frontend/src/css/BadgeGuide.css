@@ -130,11 +130,16 @@
   margin-bottom: 20px;
 }
 
-.badge-image img {
+.badge-icon-container {
   width: 80px;
   height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* 아이콘도 원형으로 */
+  background-color: #333; /* 아이콘 배경색 */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2); /* 아이콘 그림자 */
 }
 
 .owned-badge {

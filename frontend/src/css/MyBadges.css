@@ -90,11 +90,13 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.badge-item img {
+.badge-icon-container {
   width: 60px;
   height: 60px;
-  object-fit: contain;
-  margin-bottom: 0.5rem;
+  margin: 0 auto 0.5rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .badge-item .badge-name {
