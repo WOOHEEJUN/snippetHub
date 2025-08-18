@@ -62,12 +62,20 @@ jobs:
         echo "SSH key content (first 50 chars):"
         head -c 50 ~/snippethub-key.pem
         echo ""
+        echo "SSH key content (last 50 chars):"
+        tail -c 50 ~/snippethub-key.pem
+        echo ""
+        echo "SSH key line count:"
+        wc -l ~/snippethub-key.pem
         echo "SSH key setup completed"
         
     - name: Test SSH connection
       run: |
         echo "Testing SSH connection to NAT instance..."
-        ssh -o StrictHostKeyChecking=no -i ~/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'NAT instance connection successful'"
+        echo "SSH key fingerprint:"
+        ssh-keygen -lf ~/snippethub-key.pem || echo "Failed to get fingerprint"
+        echo "Attempting SSH connection..."
+        ssh -v -o StrictHostKeyChecking=no -i ~/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'NAT instance connection successful'"
         
     - name: Deploy to EC2
       run: |
