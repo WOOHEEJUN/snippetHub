@@ -29,7 +29,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         }
         
         String redirectUrl = UriComponentsBuilder
-                .fromUriString("https://snippet.co.kr/login")
+                .fromUriString("https://snippethub.co.kr/login")
                 .queryParam("error", "oauth2_failed")
                 .queryParam("message", errorMessage)
                 .build()

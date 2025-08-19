@@ -45,7 +45,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if (email == null) {
             // 이메일이 없는 경우 에러 페이지로 리다이렉트
             getRedirectStrategy().sendRedirect(request, response, 
-                "https://snippet.co.kr/login?error=email_required");
+                "https://snippethub.co.kr/login?error=email_required");
             return;
         }
 
@@ -76,7 +76,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 프론트엔드로 리다이렉트 (토큰을 URL 파라미터로 전달)
         String redirectUrl = String.format(
-            "https://snippet.co.kr/oauth2/callback?accessToken=%s&refreshToken=%s&user=%s",
+            "https://snippethub.co.kr/oauth2/callback?accessToken=%s&refreshToken=%s&user=%s",
             tokenDto.getAccessToken(),
             tokenDto.getRefreshToken(),
             java.net.URLEncoder.encode(objectMapper.writeValueAsString(userDto), "UTF-8")
