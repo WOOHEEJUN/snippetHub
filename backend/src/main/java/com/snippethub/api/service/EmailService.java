@@ -19,7 +19,7 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject("SnippetHub 회원가입 이메일 인증");
             helper.setText("다음 링크를 클릭하여 회원가입을 완료해주세요: "
-                    + "http://localhost:8080/api/auth/verify?token=" + token);
+                    + "https://snippethub.co.kr/api/auth/verify?token=" + token);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
             throw new RuntimeException("이메일 전송 중 오류 발생", e);
@@ -33,7 +33,7 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject("SnippetHub 비밀번호 재설정");
             helper.setText("다음 링크를 클릭하여 비밀번호를 재설정해주세요: "
-                    + "http://localhost:8080/reset-password?token=" + token);
+                    + "https://snippethub.co.kr/reset-password?token=" + token);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
             throw new RuntimeException("이메일 전송 중 오류 발생", e);

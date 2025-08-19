@@ -18,4 +18,10 @@ export default defineConfig({
       },
     },
   },
+  // 프로덕션 빌드 설정
+  build: {
+    outDir: 'build',
+    sourcemap: false,
+  },
 });
+

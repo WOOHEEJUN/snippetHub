@@ -95,7 +95,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
-            "https://snippethub.co.kr" // CloudFront 도메인 (실제 도메인으로 변경 필요)
+            "https://snippethub.co.kr"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
