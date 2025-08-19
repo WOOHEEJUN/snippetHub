@@ -80,17 +80,7 @@ jobs:
         echo "Attempting SSH connection..."
         ssh -v -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'NAT instance connection successful'"
         
-    - name: Install SSM Agent on Backend Instance
-      run: |
-        echo "Installing SSM Agent on backend instance..."
-        ssh -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
-          # Install SSM Agent on backend instance
-          aws ssm send-command \
-            --instance-ids i-05492716fb861ab1b \
-            --document-name 'AWS-RunShellScript' \
-            --parameters 'commands=[\"sudo yum install -y amazon-ssm-agent\",\"sudo systemctl enable amazon-ssm-agent\",\"sudo systemctl start amazon-ssm-agent\"]' \
-            --region ap-northeast-2 || echo 'SSM Agent installation failed, continuing...'
-        "
+
         
     - name: Deploy to EC2
       run: |
@@ -134,20 +124,25 @@ jobs:
         echo "NAT instance deployment script completed!"
         NATSCRIPTEOF
         
-        # Create deployment script for backend EC2
-        cat > backend-deploy.sh << 'BACKENDSCRIPTEOF'
-        #!/bin/bash
-        set -e
-        echo "Starting backend EC2 deployment script..."
-        
-        echo "Stopping existing service..."
-        sudo systemctl stop snippethub-backend || echo "Service was not running"
-        
-        echo "Creating app directory..."
-        mkdir -p ~/app
-        
-        echo "Checking if JAR file exists..."
-        ls -la ~/app/snippethub-backend.jar
+                 # Create deployment script for backend EC2
+         cat > backend-deploy.sh << 'BACKENDSCRIPTEOF'
+         #!/bin/bash
+         set -e
+         echo "Starting backend EC2 deployment script..."
+         
+         echo "Installing SSM Agent..."
+         sudo yum install -y amazon-ssm-agent || echo "SSM Agent installation failed"
+         sudo systemctl enable amazon-ssm-agent || echo "SSM Agent enable failed"
+         sudo systemctl start amazon-ssm-agent || echo "SSM Agent start failed"
+         
+         echo "Stopping existing service..."
+         sudo systemctl stop snippethub-backend || echo "Service was not running"
+         
+         echo "Creating app directory..."
+         mkdir -p ~/app
+         
+         echo "Checking if JAR file exists..."
+         ls -la ~/app/snippethub-backend.jar
         
         echo "Creating systemd service file..."
         sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
