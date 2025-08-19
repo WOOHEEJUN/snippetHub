@@ -59,7 +59,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                                                 .getProviderDetails()
                                                 .getUserInfoEndpoint()
                                                 .getUserNameAttributeName();
-        // attributes.put("provider", registrationId); // 되돌림: provider를 attributes에 추가하지 않음
+        
+        // OAuth2User에 이메일 정보 추가
+        attributes.put("email", email);
+        attributes.put("provider", registrationId);
+        
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes,

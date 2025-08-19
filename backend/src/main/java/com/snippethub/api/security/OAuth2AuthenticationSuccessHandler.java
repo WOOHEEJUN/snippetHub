@@ -49,10 +49,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return;
         }
 
-        // 사용자 정보 조회
-        final String finalEmail = email;
+        // 사용자 정보 조회 - OAuth2User에서 직접 추출
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found after OAuth2 login"));
+                .orElseThrow(() -> new RuntimeException("User not found after OAuth2 login: " + email));
 
         // JWT 토큰 생성
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
