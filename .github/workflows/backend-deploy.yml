@@ -128,6 +128,11 @@ jobs:
         set -e
         echo "Starting backend EC2 deployment script..."
         
+        echo "Installing SSM Agent..."
+        sudo yum install -y amazon-ssm-agent || echo "SSM Agent installation failed"
+        sudo systemctl enable amazon-ssm-agent || echo "SSM Agent enable failed"
+        sudo systemctl start amazon-ssm-agent || echo "SSM Agent start failed"
+        
         echo "Stopping existing service..."
         sudo systemctl stop snippethub-backend || echo "Service was not running"
         
