@@ -1,0 +1,192 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'gradle'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+        
+    - name: Build backend with Gradle
+      working-directory: ./backend
+      run: |
+        chmod +x ./gradlew
+        ./gradlew build -x test --no-daemon
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        
+    - name: Upload JAR to S3
+      run: |
+        ls -la backend/build/libs/
+        aws s3 cp backend/build/libs/api-0.0.1-SNAPSHOT.jar s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar
+        
+    - name: Setup SSH
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > /tmp/snippethub-key.pem
+        chmod 400 /tmp/snippethub-key.pem
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+        ssh-keyscan -H 10.0.3.74 >> ~/.ssh/known_hosts 2>/dev/null || true
+        ls -la /tmp/snippethub-key.pem
+        echo "SSH key content (first 50 chars):"
+        head -c 50 /tmp/snippethub-key.pem
+        echo ""
+        echo "SSH key content (last 50 chars):"
+        tail -c 50 /tmp/snippethub-key.pem
+        echo ""
+        echo "SSH key line count:"
+        wc -l /tmp/snippethub-key.pem
+        echo "SSH key fingerprint:"
+        ssh-keygen -lf /tmp/snippethub-key.pem || echo "Failed to get fingerprint"
+        echo "SSH key setup completed"
+        
+    - name: Test SSH connection
+      run: |
+        echo "Testing SSH connection to NAT instance..."
+        echo "SSH key fingerprint:"
+        ssh-keygen -lf /tmp/snippethub-key.pem || echo "Failed to get fingerprint"
+        echo "Attempting SSH connection..."
+        ssh -v -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'NAT instance connection successful'"
+        
+    - name: Deploy to EC2
+      run: |
+        # Create deployment script for NAT instance
+        cat > nat-deploy.sh << 'NATSCRIPTEOF'
+        #!/bin/bash
+        set -e
+        echo "Starting NAT instance deployment script..."
+        
+        echo "Installing AWS CLI on NAT instance..."
+        sudo apt-get update || echo "apt-get update failed, continuing..."
+        sudo apt-get install -y awscli || echo "awscli installation failed, continuing..."
+        
+        echo "Configuring AWS credentials on NAT instance..."
+        mkdir -p ~/.aws
+        cat > ~/.aws/credentials << 'CREDEOF'
+        [default]
+        aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        CREDEOF
+        
+        cat > ~/.aws/config << 'CONFEOF'
+        [default]
+        region = ${{ secrets.AWS_REGION }}
+        CONFEOF
+        
+        echo "Downloading JAR from S3 to NAT instance..."
+        timeout 60s aws s3 cp s3://${{ secrets.S3_BUCKET }}/snippethub-backend.jar ~/snippethub-backend.jar --region ${{ secrets.AWS_REGION }} || {
+          echo "S3 download failed on NAT instance"
+          exit 1
+        }
+        
+        echo "JAR downloaded to NAT instance successfully!"
+        ls -la ~/snippethub-backend.jar
+        
+        echo "Copying JAR directly to backend EC2..."
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-KeyPair.pem ~/snippethub-backend.jar ${{ secrets.EC2_USERNAME }}@10.0.3.74:~/app/snippethub-backend.jar
+        
+        echo "JAR copied to backend EC2 successfully!"
+        
+        echo "NAT instance deployment script completed!"
+        NATSCRIPTEOF
+        
+        # Create deployment script for backend EC2
+        cat > backend-deploy.sh << 'BACKENDSCRIPTEOF'
+        #!/bin/bash
+        set -e
+        echo "Starting backend EC2 deployment script..."
+        
+        echo "Stopping existing service..."
+        sudo systemctl stop snippethub-backend || echo "Service was not running"
+        
+        echo "Creating app directory..."
+        mkdir -p ~/app
+        
+        echo "Checking if JAR file exists..."
+        ls -la ~/app/snippethub-backend.jar
+        
+        echo "Creating systemd service file..."
+        sudo tee /etc/systemd/system/snippethub-backend.service > /dev/null << 'SERVICEEOF'
+        [Unit]
+        Description=SnippetHub Backend Application
+        After=network.target
+        
+        [Service]
+        Type=simple
+        User=ubuntu
+        WorkingDirectory=/home/ubuntu/app
+        ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
+        Restart=always
+        RestartSec=10
+        
+        [Install]
+        WantedBy=multi-user.target
+        SERVICEEOF
+        
+        echo "Reloading systemd..."
+        sudo systemctl daemon-reload
+        
+        echo "Enabling service..."
+        sudo systemctl enable snippethub-backend
+        
+        echo "Starting service..."
+        sudo systemctl start snippethub-backend
+        
+        echo "Checking service status..."
+        sudo systemctl status snippethub-backend
+        
+        echo "Backend deployment completed successfully!"
+        BACKENDSCRIPTEOF
+        
+        # Copy scripts to NAT instance
+        scp -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem nat-deploy.sh backend-deploy.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/
+        
+        # Execute NAT instance script first
+        echo "Executing NAT instance script..."
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "bash ~/nat-deploy.sh"
+        
+        # Execute backend EC2 script
+        echo "Executing backend EC2 script..."
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i ~/.ssh/snippethub-KeyPair.pem ${{ secrets.EC2_USERNAME }}@10.0.3.74 'bash -s' < ~/backend-deploy.sh"
+        
+    - name: Verify deployment
+      run: |
+        sleep 10
+        echo "Verifying backend service is running..."
+        ssh -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "ssh -o StrictHostKeyChecking=no -i ~/.ssh/snippethub-KeyPair.pem ${{ secrets.EC2_USERNAME }}@10.0.3.74 'sudo systemctl is-active snippethub-backend'"
+        echo "Backend service verification completed!"
+        
+    - name: Deploy success
+      run: echo "Backend deployed successfully to ALB"
