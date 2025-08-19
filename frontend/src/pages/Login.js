@@ -142,10 +142,10 @@ const Login = () => {
           </div>
 
           <div className="d-grid gap-2">
-            <a href="/oauth2/authorization/kakao" className="btn social-login-btn kakao-btn">
+            <a href="https://snippet.co.kr/oauth2/authorization/kakao" className="btn social-login-btn kakao-btn">
               <i className="bi bi-chat-fill me-2"></i> 카카오로 로그인
             </a>
-            <a href="/oauth2/authorization/google" className="btn social-login-btn google-btn">
+            <a href="https://snippet.co.kr/oauth2/authorization/google" className="btn social-login-btn google-btn">
               <svg className="me-2" width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" fillRule="evenodd">
                     <path d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4818h4.8436c-.2086 1.125-.8427 2.0782-1.7772 2.7218v2.2591h2.9082c1.7018-1.5664 2.6836-3.8736 2.6836-6.6218z" fill="#4285F4"/>
