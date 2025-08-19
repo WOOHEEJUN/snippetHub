@@ -80,6 +80,18 @@ jobs:
         echo "Attempting SSH connection..."
         ssh -v -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "echo 'NAT instance connection successful'"
         
+    - name: Install SSM Agent on Backend Instance
+      run: |
+        echo "Installing SSM Agent on backend instance..."
+        ssh -o StrictHostKeyChecking=no -i /tmp/snippethub-key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+          # Install SSM Agent on backend instance
+          aws ssm send-command \
+            --instance-ids i-05492716fb861ab1b \
+            --document-name 'AWS-RunShellScript' \
+            --parameters 'commands=[\"sudo yum install -y amazon-ssm-agent\",\"sudo systemctl enable amazon-ssm-agent\",\"sudo systemctl start amazon-ssm-agent\"]' \
+            --region ap-northeast-2 || echo 'SSM Agent installation failed, continuing...'
+        "
+        
     - name: Deploy to EC2
       run: |
         # Create deployment script for NAT instance
