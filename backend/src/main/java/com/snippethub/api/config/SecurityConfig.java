@@ -95,9 +95,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
-            "https://snippethub.co.kr",
-            "https://snippet.co.kr", // 프로덕션 도메인
-            "https://snippethub-alb-120890630.ap-northeast-2.elb.amazonaws.com" // 백엔드 ALB
+            "https://snippethub.co.kr"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

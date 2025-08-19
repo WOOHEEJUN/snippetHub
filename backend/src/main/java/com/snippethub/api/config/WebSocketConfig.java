@@ -25,14 +25,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // WebSocket 연결 엔드포인트 설정
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns(
-                    "http://localhost:3000",
-                    "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
-                    "https://d3vxt1w788wnw4.cloudfront.net",
-                    "https://snippethub.co.kr",
-                    "https://snippet.co.kr",
-                    "https://snippethub-alb-120890630.ap-northeast-2.elb.amazonaws.com"
-                )
+                                    .setAllowedOriginPatterns(
+                        "http://localhost:3000",
+                        "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
+                        "https://d3vxt1w788wnw4.cloudfront.net",
+                        "https://snippethub.co.kr"
+                    )
                 .withSockJS()
                 .setHeartbeatTime(25000)
                 .setDisconnectDelay(5000)
