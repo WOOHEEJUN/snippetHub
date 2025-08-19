@@ -6,9 +6,9 @@ const Register = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '', // confirmPassword 상태 추가
+    confirmPassword: '', 
     nickname: '',
-    agreeToTerms: false, // agreeToTerms 상태 추가
+    agreeToTerms: false, 
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +84,7 @@ const Register = () => {
   } finally {
         setIsLoading(false);
       }
-    }; // <-- 이 중괄호가 handleSubmit 함수를 닫습니다.
+    }; 
 
   return (
     <div className="login-container">
@@ -194,4 +194,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;

@@ -1,4 +1,3 @@
-// frontend/src/SnippetBoard/SnippetDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -12,18 +11,18 @@ import AICodeEvaluation from '../components/AICodeEvaluation';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/SnippetDetail.css';
 
-// ======== API 설정 (여기만 맞추면 전부 반영됨) ========
-const API_BASE = '/api'; // 백엔드 prefix (/api 또는 /api/v1)
+
+const API_BASE = '/api'; 
 
 const ENDPOINTS = {
-  snippet: (id) => `${API_BASE}/snippets/${id}`,                         // GET/DELETE
-  snippetLike: (id) => `${API_BASE}/snippets/${id}/like`,                // POST
-  commentsAllBySnippet: (id) => `${API_BASE}/snippets/${id}/comments/all`, // GET
-  commentsBySnippet: (id) => `${API_BASE}/snippets/${id}/comments`,      // POST
-  comment: (commentId) => `${API_BASE}/comments/${commentId}`,           // PUT/DELETE
+  snippet: (id) => `${API_BASE}/snippets/${id}`,                         
+  snippetLike: (id) => `${API_BASE}/snippets/${id}/like`,                
+  commentsAllBySnippet: (id) => `${API_BASE}/snippets/${id}/comments/all`, 
+  commentsBySnippet: (id) => `${API_BASE}/snippets/${id}/comments`,      
+  comment: (commentId) => `${API_BASE}/comments/${commentId}`,           
 };
 
-// 공통 fetch (상대 경로 사용 + 에러 본문 로그)
+
 const apiFetch = async (path, init = {}) => {
   const res = await fetch(path, { ...init, credentials: 'include' });
   if (!res.ok) {
@@ -60,9 +59,9 @@ function SnippetDetail() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
-  const [isAIExpanded, setIsAIExpanded] = useState(false); // AI 평가 섹션 확장 상태 추가
+  const [isAIExpanded, setIsAIExpanded] = useState(false); 
 
-  // ------ helpers ------
+  
   const removeCommentFromTree = (list, targetId) => {
     return list
       .filter(item => item.commentId !== targetId)
@@ -96,7 +95,7 @@ function SnippetDetail() {
     }
   };
 
-  // ------ fetchers ------
+  
   const fetchSnippet = useCallback(async () => {
     try {
       const res = await apiFetch(ENDPOINTS.snippet(snippetId), { headers: getAuthHeaders() });
@@ -127,7 +126,7 @@ function SnippetDetail() {
     fetchComments();
   }, [fetchSnippet, fetchComments]);
 
-  // ------ snippet actions ------
+  
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
   const handleDelete = async () => {
@@ -195,7 +194,7 @@ function SnippetDetail() {
     }
   };
 
-  // ------ comment actions ------
+  
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -286,7 +285,7 @@ function SnippetDetail() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  // ------ render ------
+  
   if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
   if (error) return <div className="error-container">{error}</div>;
   if (!snippet) return <div className="error-container">스니펫이 존재하지 않습니다.</div>;
@@ -308,7 +307,7 @@ function SnippetDetail() {
           </button>
            <button
   onClick={handleLike}
-  className={`like-button ${snippet.isLiked ? 'liked' : ''}`} // action-button 제거
+  className={`like-button ${snippet.isLiked ? 'liked' : ''}`} 
   style={{
     background: 'none',
     border: 'none',
@@ -327,7 +326,7 @@ function SnippetDetail() {
 </button>
         </div>
 
-        {/* AI 코드 평가 섹션 */}
+        
         <div className={`ai-evaluation-section ${isAIExpanded ? 'expanded' : 'collapsed'}`}>
           {!isAIExpanded ? (
             <div className="ai-evaluation-collapsed">
@@ -335,7 +334,7 @@ function SnippetDetail() {
               <button 
                 onClick={() => {
                   setIsAIExpanded(true);
-                  // 바로 평가 시작
+                  
                   setTimeout(() => {
                     const evaluateBtn = document.querySelector('.evaluate-btn');
                     if (evaluateBtn) {

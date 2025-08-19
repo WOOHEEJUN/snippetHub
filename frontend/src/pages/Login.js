@@ -37,7 +37,6 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // OAuth2 에러 메시지 처리
   useEffect(() => {
     const error = searchParams.get('error');
     const message = searchParams.get('message');

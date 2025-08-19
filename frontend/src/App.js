@@ -1,4 +1,4 @@
-// src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
@@ -36,7 +36,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { getLevelBadgeImage } from './utils/badgeUtils';
 import './css/App.css';
 
-// 누락된 컴포넌트
+
 import MyBadges from './MyPage/MyBadges';
 import Ranking from './MyPage/Ranking';
 import PointsGuide from './MyPage/PointsGuide';

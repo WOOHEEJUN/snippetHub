@@ -9,13 +9,11 @@ function AICodeEvaluation({ snippetId, code, language, onEvaluationComplete }) {
   const [error, setError] = useState(null);
 
   const evaluateCode = async () => {
-    // 코드 검증
     if (!code || code.trim().length === 0) {
       setError('평가할 코드를 입력해주세요. 빈 코드는 평가할 수 없습니다.');
       return;
     }
     
-    // 템플릿 코드 체크
     const trimmedCode = code.trim().toLowerCase();
     const templateTexts = [
       '// 코드를 여기에 입력하세요',

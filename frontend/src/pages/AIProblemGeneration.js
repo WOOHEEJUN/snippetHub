@@ -29,12 +29,12 @@ function AIProblemGeneration() {
     setGeneratedProblem(null);
 
     try {
-      // 백엔드 API 호출 시도
+      
       const params = new URLSearchParams();
       params.append('difficulty', formData.difficulty);
       params.append('category', formData.category);
       
-      // 사용자가 입력한 설명이 있으면 추가
+      
       if (formData.description && formData.description.trim()) {
         params.append('description', formData.description);
       }
@@ -54,7 +54,7 @@ function AIProblemGeneration() {
         const data = await response.json();
         setGeneratedProblem(data.data);
       } else {
-        // 백엔드 API 실패 시 에러 메시지 표시
+        
         const errorData = await response.json();
         setError(errorData.message || '문제 생성에 실패했습니다.');
       }
@@ -79,7 +79,7 @@ function AIProblemGeneration() {
         credentials: 'include',
         body: JSON.stringify({
           ...generatedProblem,
-          // AI 생성 문제임을 명시
+          
           isAIGenerated: true
         }),
       });
@@ -273,4 +273,4 @@ function AIProblemGeneration() {
   );
 }
 
-export default AIProblemGeneration; 
+export default AIProblemGeneration;

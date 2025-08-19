@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
+import { getLevelBadgeImage } from '../utils/badgeUtils';
+
 import '../css/Board.css';
 
 const Board = () => {
@@ -15,7 +16,7 @@ const Board = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('LATEST');
-  const [selectedCategory, setSelectedCategory] = useState(''); // 카테고리 상태 추가
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const fetchPosts = (page = 0, term = '', sort = 'LATEST', category = '') => {
     setLoading(true);

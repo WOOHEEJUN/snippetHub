@@ -21,7 +21,7 @@ const SnippetBoard = () => {
   const [searchLanguage, setSearchLanguage] = useState('');
   const [sortOrder, setSortOrder] = useState('LATEST');
 
-  // 스니펫 목록 요청
+  
   const fetchSnippets = useCallback((page = 0, term = '', lang = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
@@ -70,7 +70,7 @@ const SnippetBoard = () => {
     if (searchTerm) params.set('search', searchTerm);
     if (searchLanguage) params.set('language', searchLanguage);
     if (sortOrder) params.set('sort', sortOrder);
-    params.set('page', 0); // 검색 시 1페이지로
+    params.set('page', 0); 
 
     navigate(`/snippets?${params.toString()}`);
   };
@@ -98,7 +98,7 @@ const SnippetBoard = () => {
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <form className="d-flex search-form" onSubmit={handleSearch}>
-          {/* 키워드 검색 */}
+          
           <input
             type="text"
             className="form-control"
@@ -107,7 +107,7 @@ const SnippetBoard = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
-          {/* 언어 선택 */}
+          
           <select
             className="form-select"
             style={{ width: '150px', marginLeft: '8px' }}
@@ -122,7 +122,7 @@ const SnippetBoard = () => {
             ))}
           </select>
 
-          {/* 정렬 */}
+          
           <select
             className="form-select"
             style={{ width: '150px', marginLeft: '8px' }}

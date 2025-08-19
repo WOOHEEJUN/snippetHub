@@ -29,16 +29,16 @@ function ProblemList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // 필터 상태
+  
   const [selectedDifficulty, setSelectedDifficulty] = useState('ALL');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('latest'); // latest, difficulty, success_rate
+  const [sortBy, setSortBy] = useState('latest'); 
   
-  // 새로운 상태들
+  
   const [recommendedProblems, setRecommendedProblems] = useState([]);
   const [userStats, setUserStats] = useState(null);
-  const [activeTab, setActiveTab] = useState('all'); // all, recommended, progress
+  const [activeTab, setActiveTab] = useState('all'); 
 
   useEffect(() => {
     fetchProblems();
@@ -55,7 +55,7 @@ function ProblemList() {
       if (selectedDifficulty !== 'ALL') params.append('difficulty', selectedDifficulty);
       if (selectedCategory !== 'ALL') params.append('category', selectedCategory);
       if (searchQuery) params.append('search', searchQuery);
-      // sort 파라미터 제거 - 백엔드에서 기본적으로 최신순으로 정렬됨
+      
       
       const response = await fetch(`/api/problems?${params.toString()}`, {
         headers: getAuthHeaders(),
@@ -155,7 +155,7 @@ function ProblemList() {
           <p>다양한 알고리즘 문제를 풀어보고 실력을 향상시켜보세요!</p>
         </div>
 
-        {/* 탭 네비게이션 */}
+        
         <div className="tab-navigation">
           <button 
             className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
@@ -177,7 +177,7 @@ function ProblemList() {
           </button>
         </div>
 
-        {/* 사용자 통계 섹션 */}
+        
         {userStats && (
           <div className="user-stats-section">
             <div className="stats-grid">
@@ -201,7 +201,7 @@ function ProblemList() {
           </div>
         )}
 
-        {/* 검색 및 필터 섹션 */}
+        
         <div className="search-filter-section">
           <form onSubmit={handleSearch} className="search-form">
             <div className="search-input-group">
@@ -268,7 +268,7 @@ function ProblemList() {
           </div>
         </div>
 
-        {/* 문제 목록 */}
+        
         {activeTab === 'all' && (
           <div className="problems-grid">
             {problems.length === 0 ? (
@@ -330,7 +330,7 @@ function ProblemList() {
           </div>
         )}
 
-        {/* 추천 문제 섹션 */}
+        
         {activeTab === 'recommended' && (
           <div className="recommended-problems">
             <div className="section-header">
@@ -397,7 +397,7 @@ function ProblemList() {
           </div>
         )}
 
-        {/* 학습 진도 섹션 */}
+        
         {activeTab === 'progress' && (
           <div className="learning-progress">
             <div className="section-header">
@@ -447,7 +447,7 @@ function ProblemList() {
           </div>
         )}
 
-        {/* 문제 생성 링크 */}
+        
         <div className="create-problem-section">
           <Link to="/ai-problem-generation" className="create-problem-btn">
             <FaCode />
@@ -459,4 +459,4 @@ function ProblemList() {
   );
 }
 
-export default ProblemList; 
+export default ProblemList;

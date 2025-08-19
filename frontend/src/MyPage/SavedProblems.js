@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../css/MyContentList.css'; // 기존 MyContentList.css 재활용
+import '../css/MyContentList.css';
 
 function SavedProblems() {
   const [savedProblems, setSavedProblems] = useState([]);

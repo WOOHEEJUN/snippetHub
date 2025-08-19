@@ -6,7 +6,7 @@ const OAuth2Callback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login } = useAuth();
-  const handled = useRef(false); // 중복 방지 플래그
+  const handled = useRef(false);
 
   useEffect(() => {
     if (handled.current) return;

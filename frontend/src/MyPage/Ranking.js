@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
+import { getLevelBadgeImage } from '../utils/badgeUtils'; 
 import '../css/Ranking.css';
 
 function Ranking() {
@@ -10,9 +10,9 @@ function Ranking() {
   const [rankingData, setRankingData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [levelFilter, setLevelFilter] = useState(''); // 등급 필터
+  const [levelFilter, setLevelFilter] = useState(''); 
   const [page, setPage] = useState(0);
-  const [size] = useState(10); // 페이지당 항목 수
+  const [size] = useState(10); 
   const [totalPages, setTotalPages] = useState(0);
 
   const fetchRanking = useCallback(async () => {
@@ -54,7 +54,7 @@ function Ranking() {
 
   const handleLevelFilterChange = (e) => {
     setLevelFilter(e.target.value);
-    setPage(0); // 필터 변경 시 페이지 초기화
+    setPage(0); 
   };
 
   const handlePageChange = (newPage) => {
@@ -72,7 +72,7 @@ function Ranking() {
         <label htmlFor="levelFilter">등급 필터:</label>
         <select id="levelFilter" value={levelFilter} onChange={handleLevelFilterChange}>
           <option value="">전체</option>
-          {/* TODO: 실제 등급 목록으로 채우기 */}
+          
           <option value="Bronze">Bronze</option>
           <option value="Silver">Silver</option>
           <option value="Gold">Gold</option>

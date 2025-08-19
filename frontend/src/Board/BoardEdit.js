@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../css/BoardForm.css'; // 폼 디자인을 위해 BoardForm.css 재활용
+import '../css/BoardForm.css'; 
 
 function BoardEdit() {
   const { postId } = useParams();
@@ -27,9 +27,9 @@ function BoardEdit() {
       });
       if (!response.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
       const responseData = await response.json();
-      const postData = responseData.data; // 실제 게시글 데이터는 responseData.data에 있습니다.
+      const postData = responseData.data; 
 
-      // 권한 확인
+      
       if (user?.userId !== postData.author?.userId) {
         alert('수정 권한이 없습니다.');
         navigate(`/board/${postId}`);
@@ -38,7 +38,7 @@ function BoardEdit() {
 
       setTitle(postData.title);
       setContent(postData.content);
-      setCategory(postData.category || 'GENERAL'); // 기본값 설정
+      setCategory(postData.category || 'GENERAL'); 
       setTags(postData.tags || []);
       setIsPublic(postData.isPublic);
       setImageUrl(postData.imageUrl || '');
@@ -51,7 +51,7 @@ function BoardEdit() {
   }, [postId, navigate, getAuthHeaders, user]);
 
   useEffect(() => {
-    if (user) { // user 정보가 로드된 후에 게시글 불러오기
+    if (user) { 
       fetchPost();
     }
   }, [fetchPost, user]);
@@ -77,7 +77,7 @@ function BoardEdit() {
     setError(null);
 
     try {
-      let finalImageUrl = imageUrl; // 기존 이미지 URL 유지
+      let finalImageUrl = imageUrl; 
 
       if (imageFile) {
         const formData = new FormData();
@@ -94,7 +94,7 @@ function BoardEdit() {
         }
 
         const uploadData = await uploadRes.json();
-        finalImageUrl = uploadData.url; // 서버에서 반환된 이미지 URL
+        finalImageUrl = uploadData.url; 
       }
 
       const response = await fetch(`/api/posts/${postId}`, {

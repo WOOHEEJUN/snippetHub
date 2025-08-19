@@ -310,9 +310,9 @@ function SubmissionHistory() {
                       <button 
                         className="btn btn-sm btn-outline-primary"
                         onClick={() => {
-                          // 코드 보기 기능 (모달 또는 새 페이지)
                           console.log('코드 보기:', submission.id);
                         }}
+                      >
                       >
                         코드 보기
                       </button>

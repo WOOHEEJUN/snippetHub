@@ -1,19 +1,18 @@
-// src/ProfileEdit.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/ProfileEdit.css';
 
-// ===== API 설정 =====
-const API_BASE = '/api'; // 필요 시 '/api/v1'로 변경
+
+const API_BASE = '/api'; 
 
 const ENDPOINTS = {
-  profile: `${API_BASE}/users/profile`,   // PUT (json)
-  password: `${API_BASE}/users/password`, // PUT (json)
-  me: `${API_BASE}/users/me`,             // GET (선택)
+  profile: `${API_BASE}/users/profile`,   
+  password: `${API_BASE}/users/password`, 
+  me: `${API_BASE}/users/me`,             
 };
 
-// 공통 fetch (상대 경로 사용 + 에러 본문 콘솔 출력)
+
 const apiFetch = async (path, init = {}) => {
   const res = await fetch(path, { ...init, credentials: 'include' });
   if (!res.ok) {
@@ -44,23 +43,23 @@ export default function ProfileEdit() {
   const [pwdSaving, setPwdSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // 최초 값 주입
+  
   useEffect(() => {
     if (user) setNickname(user.nickname || '');
   }, [user]);
 
-  // (선택) 서버에서 최신 me를 받고 싶으면 주석 해제
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const res = await apiFetch(ENDPOINTS.me, { headers: getAuthHeaders() });
-  //       const data = await parseJsonSafe(res);
-  //       const me = data?.data ?? data;
-  //       if (me) setNickname(me.nickname || '');
-  //     } catch {}
-  //   })();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -144,7 +143,7 @@ export default function ProfileEdit() {
     <div className="profile-edit-container">
       <h2>⚙️ 개인정보 수정</h2>
 
-      {/* 닉네임 변경 */}
+      
       <form onSubmit={handleProfileUpdate} className="edit-form-card">
         <h4>닉네임 변경</h4>
 
@@ -167,7 +166,7 @@ export default function ProfileEdit() {
         </button>
       </form>
 
-      {/* 비밀번호 변경 */}
+      
       <form onSubmit={handlePasswordSubmit} className="edit-form-card">
         <h4>비밀번호 변경</h4>
 

@@ -10,7 +10,6 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-c';
 import 'prismjs/themes/prism.css';
-import '../css/SnippetWrite.css'; // Write CSS 재활용
 
 const languageMap = {
   c: languages.c,

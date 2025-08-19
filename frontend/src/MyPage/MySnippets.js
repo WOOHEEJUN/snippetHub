@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../css/MyContentList.css'; // 공통 CSS 임포트
+import '../css/MyContentList.css';
 
 function MySnippets() {
   const navigate = useNavigate();

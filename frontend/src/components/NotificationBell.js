@@ -3,7 +3,7 @@ import { FaBell } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import webSocketService from '../services/WebSocketService';
-import './NotificationBell.css';
+import '../css/NotificationBell.css';
 
 const NotificationBell = () => {
   const { getAuthHeaders } = useAuth();
@@ -14,10 +14,10 @@ const NotificationBell = () => {
   const [hideTimeout, setHideTimeout] = useState(null);
   const navigate = useNavigate();
 
-  // 읽지 않은 알림 개수를 알림 목록에서 직접 계산
+  
   const unreadCount = notifications.filter(notification => !notification.read).length;
 
-  // 마우스 호버 핸들러
+  
   const handleMouseEnter = () => {
     if (hideTimeout) {
       clearTimeout(hideTimeout);
@@ -29,11 +29,11 @@ const NotificationBell = () => {
   const handleMouseLeave = () => {
     const timeout = setTimeout(() => {
       setShowDropdown(false);
-    }, 200); // 200ms 지연
+    }, 200); 
     setHideTimeout(timeout);
   };
 
-  // 알림 목록 가져오기
+  
   const fetchNotifications = async () => {
     try {
       setLoading(true);
@@ -45,7 +45,7 @@ const NotificationBell = () => {
         const data = await response.json();
         console.log("NotificationBell raw response:", data);
         
-        // 백엔드에서 직접 배열을 반환하므로 처리 방식 변경
+        
         if (Array.isArray(data)) {
           setNotifications(data);
         } else if (data.success && data.data) {
@@ -61,7 +61,7 @@ const NotificationBell = () => {
     }
   };
 
-  // 알림 읽음 처리 및 이동
+  
   const handleNotificationClick = async (notification) => {
     
     if (!notification.read) {
@@ -76,13 +76,13 @@ const NotificationBell = () => {
         } else {
           
         }
-        // 읽음 처리 후 목록/카운트 갱신
+        
         fetchNotifications();
       } catch (error) {
         console.error("Failed to mark notification as read:", error);
       }
     }
-    // 게시글로 이동 (알림에 postId, snippetId, commentId 등 포함되어야 함)
+    
     if (notification.targetType === 'POST' && notification.targetId) {
       const path = `/board/${notification.targetId}`;
       
@@ -92,15 +92,15 @@ const NotificationBell = () => {
       
       navigate(path);
     } else if (notification.targetType === 'COMMENT' && notification.targetId && notification.parentId) {
-      // 예시: 댓글 알림이면 해당 게시글/스니펫으로 이동
+      
       const path = `/board/${notification.parentId}#comment-${notification.targetId}`;
       
       navigate(path);
     }
-    // 필요시 다른 타입도 추가
+    
   };
 
-  // 모든 알림 읽음 처리
+  
   const markAllAsRead = async () => {
     try {
       const response = await fetch('/api/notifications/read-all', {
@@ -121,15 +121,15 @@ const NotificationBell = () => {
   useEffect(() => {
     console.log('NotificationBell useEffect triggered');
     
-    // 초기 데이터 로딩
+    
     fetchNotifications();
     
-    // 브라우저 알림 권한 요청
+    
     if (Notification.permission === 'default') {
       Notification.requestPermission();
     }
     
-    // WebSocket 연결 시도
+    
     const userEmail = localStorage.getItem('userEmail');
     console.log('User email from localStorage:', userEmail);
     
@@ -139,16 +139,16 @@ const NotificationBell = () => {
         webSocketService.connect(userEmail, (notification) => {
           console.log('WebSocket notification received:', notification);
           
-          // 실시간 알림 수신 시 처리 - 강화된 중복 방지
+          
           setNotifications(prev => {
-            // 이미 같은 ID의 알림이 있는지 확인
+            
             const isDuplicate = prev.some(existing => existing.id === notification.id);
             if (isDuplicate) {
               console.log('Duplicate notification detected, skipping:', notification.id);
               return prev;
             }
             
-            // 중복이 아니면 새 알림을 앞에 추가하고 최대 50개까지만 유지
+            
             const newNotifications = [notification, ...prev];
             if (newNotifications.length > 50) {
               return newNotifications.slice(0, 50);
@@ -156,7 +156,7 @@ const NotificationBell = () => {
             return newNotifications;
           });
           
-          // 브라우저 알림 표시 (선택사항)
+          
           if (Notification.permission === 'granted') {
             new Notification('새로운 알림', {
               body: notification.message,
@@ -165,7 +165,7 @@ const NotificationBell = () => {
           }
         });
         
-        // WebSocket 연결 성공 시 상태 업데이트
+        
         setIsWebSocketConnected(true);
         console.log('WebSocket connected successfully');
       } catch (error) {
@@ -186,19 +186,19 @@ const NotificationBell = () => {
     };
   }, []);
 
-  // WebSocket 연결 상태에 따른 폴링 설정 (별도 useEffect)
+  
   useEffect(() => {
     let interval;
     
     if (!isWebSocketConnected) {
-      // WebSocket이 연결되지 않은 경우에만 폴링 실행
+      
       interval = setInterval(() => {
         console.log('Polling for notifications (WebSocket not connected)');
         fetchNotifications();
-      }, 60000); // 1분마다
+      }, 60000); 
       console.log('WebSocket not connected, using polling fallback');
     } else {
-      // WebSocket이 연결된 경우 폴링 완전 중단
+      
       console.log('WebSocket connected, skipping polling completely');
     }
     

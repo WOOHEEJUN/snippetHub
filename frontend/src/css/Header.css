@@ -1,47 +1,41 @@
-/* 공통 헤더 */
+/* Header.css */
+
 .header {
-  background-color: #0d0d0d; /* 더 어두운 배경 */
-  border-bottom: 1px solid #222222; /* 더 어두운 경계선 */
+  background-color: #0d0d0d;
+  border-bottom: 1px solid #222222;
   padding: 1rem 0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7); /* 더 진한 그림자 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
 }
 
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2.5rem;
+  padding: 0 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* 헤더 왼쪽 영역 */
 .header-left {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 
-/* 로고 */
 .logo {
   font-family: 'Poppins', sans-serif;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #d3d3d3; /* 밝은 회색 로고 */
+  color: #d3d3d3;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  letter-spacing: -0.05em;
 }
 
 .logo span:first-child {
-  color: #777777; /* 강조 색상도 어둡게 */
+  color: #777777;
 }
 
-/* 메인 네비게이션 */
 .main-nav {
-  display: flex;
-  align-items: center;
+  display: none; /* Hidden on mobile */
 }
 
 .nav-menu-horizontal {
@@ -49,11 +43,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 2rem;
-}
-
-.nav-item {
-  position: relative;
+  gap: 1rem;
 }
 
 .nav-link-main {
@@ -64,10 +54,6 @@
   padding: 0.4rem 0.8rem;
   border-radius: 0.5rem;
   transition: all 0.3s ease;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .nav-link-main:hover {
@@ -75,7 +61,6 @@
   color: #ffffff;
 }
 
-/* 서브메뉴 */
 .submenu {
   position: absolute;
   top: 100%;
@@ -101,10 +86,6 @@
   transform: translateY(0);
 }
 
-.submenu li {
-  margin: 0;
-}
-
 .submenu a {
   display: block;
   padding: 0.6rem 1rem;
@@ -112,9 +93,6 @@
   text-decoration: none;
   transition: background-color 0.2s ease;
   font-size: 0.9rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .submenu a:hover {
@@ -122,56 +100,27 @@
   color: #ffffff;
 }
 
-/* 사용자 정보 */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #e0e0e0;
-  font-size: 0.9rem;
-}
-
-/* 뱃지 이미지 스타일 */
-.level-badge-header {
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-  margin-right: 5px;
-}
-
-/* 인증 버튼 */
 .auth-buttons {
   display: flex;
-  gap: 2.5rem;
-  flex-shrink: 0;
   align-items: center;
+  gap: 1rem;
 }
 
 .btn {
   font-weight: 500;
-  padding: 0.4rem 1rem;
+  padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
   border-radius: 0.5rem;
   text-decoration: none;
   border: 1px solid transparent;
   transition: all 0.3s ease-in-out;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 80px; /* 최소 너비 설정 */
 }
 
 .btn-outline-primary {
   background-color: #e0e0e0;
-  color: #333333; /* 밝은 회색 */
-  border-color: #e0e0e0;
-}
-
-.btn-outline-primary:hover {
-  background-color: #d3d3d3;
-  border-color: #d3d3d3;
   color: #333333;
+  border-color: #e0e0e0;
 }
 
 .btn-primary {
@@ -180,275 +129,37 @@
   border-color: #007bff;
 }
 
-.btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-  color: #ffffff;
-}
-
-/* 햄버거 메뉴 */
-.hamburger-container {
-  position: relative;
-  display: inline-block;
-}
-
-.hamburger-btn {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 10;
-  margin-left: 1rem;
-}
-
-.hamburger-btn span {
-  width: 100%;
-  height: 3px;
-  background: #e0e0e0;
-  border-radius: 2px;
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.hamburger-btn.active span:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.hamburger-btn.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger-btn.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-
-/* 햄버거 드롭다운 메뉴 */
-.hamburger-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 400px;
-  background: #1f1f1f;
-  border: 1px solid #333;
-  border-radius: 8px 0 0 8px;
-  box-shadow: -4px 8px 24px rgba(0,0,0,0.35);
-  z-index: 1000;
-  margin-top: 0.5rem;
-  padding: 1.5rem;
-  max-height: 80vh;
-  overflow-y: auto;
-  right: -20px;
-  width: calc(100vw - 20px);
-  max-width: 500px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-}
-
-.hamburger-menu-section {
-  margin-bottom: 0;
-}
-
-.hamburger-menu-section:last-child {
-  margin-bottom: 0;
-}
-
-.hamburger-menu-section h4 {
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #ffffff;
-}
-
-.hamburger-menu-section ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.hamburger-menu-section li {
-  margin: 0;
-}
-
-.hamburger-menu-section a {
-  display: block;
-  padding: 0.75rem 1rem;
-  color: #e0e0e0;
-  text-decoration: none;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  margin-bottom: 0.25rem;
-}
-
-.hamburger-menu-section a:hover {
-  background-color: #333;
-  color: #ffffff;
-  transform: translateX(5px);
-}
-
-/* 스크롤바 스타일 */
-.hamburger-dropdown::-webkit-scrollbar {
-  width: 6px;
-}
-
-.hamburger-dropdown::-webkit-scrollbar-track {
-  background: #2a2a2a;
-  border-radius: 3px;
-}
-
-.hamburger-dropdown::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 3px;
-}
-
-.hamburger-dropdown::-webkit-scrollbar-thumb:hover {
-  background: #777;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 1200px) {
-  .nav-menu-horizontal {
-    gap: 1.5rem;
-  }
-  
-  .auth-buttons {
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 992px) {
-  .nav-menu-horizontal {
-    gap: 1rem;
-  }
-  
-  .auth-buttons {
-    gap: 1rem;
-  }
-  
-  .user-info {
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 1100px) {
-  /* 1100px 이하에서 가로 메뉴바 숨김 */
-  .nav-menu-horizontal {
-    display: none;
-  }
-  
-  .header-left {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 768px) {
+/* Media Queries */
+@media (min-width: 768px) {
   .header-container {
-    flex-direction: column;
-    gap: 1rem;
+    padding: 0 2.5rem;
   }
-  
-  .header-left {
-    width: 100%;
-    justify-content: space-between;
+
+  .logo {
+    font-size: 2rem;
   }
-  
-  .auth-buttons {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
+
+  .main-nav {
+    display: flex; /* Shown on desktop */
   }
-  
-  .user-info {
-    width: 100%;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-  }
-  
-  /* 모바일에서 햄버거 메뉴 1열로 변경 */
-  .hamburger-dropdown {
-    grid-template-columns: 1fr;
+}
+
+@media (min-width: 992px) {
+  .nav-menu-horizontal {
     gap: 1.5rem;
-    width: calc(100vw - 40px);
-    right: -30px;
+  }
+
+  .auth-buttons {
+    gap: 1.5rem;
   }
 }
 
-@media (max-width: 480px) {
-  .hamburger-dropdown {
-    width: calc(100vw - 20px);
-    right: -10px;
-    padding: 1rem;
+@media (min-width: 1200px) {
+  .nav-menu-horizontal {
+    gap: 2rem;
   }
-  
-  .hamburger-menu-section h4 {
-    font-size: 1rem;
+
+  .auth-buttons {
+    gap: 2.5rem;
   }
-  
-  .hamburger-menu-section a {
-    font-size: 0.9rem;
-    padding: 0.6rem 0.8rem;
-  }
-}
-
-
-
-.notification-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
-  z-index: 1000;
-  margin-top: 10px;
-}
-
-.notification-dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.notification-dropdown li {
-  padding: 12px 15px;
-  border-bottom: 1px solid #333;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  color: #ccc;
-  font-size: 0.9rem;
-}
-
-.notification-dropdown li:last-child {
-  border-bottom: none;
-}
-
-.notification-dropdown li:hover {
-  background-color: #2a2a2a;
-}
-
-.notification-dropdown li.read {
-  color: #777;
-}
-
-.notification-dropdown li.unread {
-  font-weight: bold;
-  color: #eee;
-}
-
-.no-notifications {
-  padding: 20px;
-  text-align: center;
-  color: #888;
 }

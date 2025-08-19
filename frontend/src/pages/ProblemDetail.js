@@ -31,7 +31,7 @@ function ProblemDetail() {
         const data = await response.json();
         if (data.success) {
           setProblem(data.data);
-          // 기본 코드 템플릿 설정
+          
           if (data.data.solutionTemplate) {
             setCode(data.data.solutionTemplate);
           }
@@ -164,7 +164,7 @@ function ProblemDetail() {
     <div className="problem-detail">
       <div className="container">
         <div className="row">
-          {/* 문제 설명 섹션 */}
+          
           <div className="col-md-6">
             <div className="problem-section">
               <div className="problem-header">
@@ -217,7 +217,7 @@ function ProblemDetail() {
             </div>
           </div>
 
-          {/* 코드 작성 섹션 */}
+          
           <div className="col-md-6">
             <div className="code-section">
               <div className="code-header">
@@ -262,7 +262,7 @@ function ProblemDetail() {
                 </button>
               </div>
 
-              {/* 제출 결과 */}
+              
               {result && (
                 <div className="submission-result">
                   <h4>제출 결과</h4>
