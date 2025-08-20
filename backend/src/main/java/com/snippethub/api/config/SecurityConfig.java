@@ -38,35 +38,38 @@ public class SecurityConfig {
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
             .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/ws/**").permitAll() // WebSocket 엔드포인트 허용
+                // API 엔드포인트들
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/ai/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/v1/posts/**").permitAll() // 게시글 관련 API 비회원 허용
-                .requestMatchers("/api/posts/**").permitAll() // 프론트엔드 호환성
+                .requestMatchers("/api/v1/posts/**").permitAll()
+                .requestMatchers("/api/posts/**").permitAll()
                 .requestMatchers("/api/v1/snippets/**", "/api/v1/execute").permitAll()
-                .requestMatchers("/api/snippets/**").permitAll() // 프론트엔드 호환성
-                .requestMatchers("/api/daily-problems/**").permitAll() // 일일 문제 API 허용
-                .requestMatchers("/api/problems/**").permitAll() // 문제 목록 API 허용
+                .requestMatchers("/api/snippets/**").permitAll()
+                .requestMatchers("/api/daily-problems/**").permitAll()
+                .requestMatchers("/api/problems/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId}/comments").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/snippets/{snippetId}/comments").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/snippets/{snippetId}/comments").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/notifications").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/api/notifications/{notificationId}/read").authenticated()
-                    .requestMatchers(HttpMethod.GET, "/api/notifications/unread-count").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/api/notifications/read-all").authenticated()
-                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/profile").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/posts").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/snippets").permitAll()
-                .requestMatchers(
-    "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-resources/**",
-                "/swagger-ui.html"
-                ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/snippets/{snippetId}/comments").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/notifications").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/notifications/{notificationId}/read").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/notifications/unread-count").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/notifications/read-all").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/users/{userId}/profile").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/{userId}/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/{userId}/snippets").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html").permitAll()
+                
+                // OAuth2 관련 경로들
+                .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/login/oauth2/code/**").permitAll()
+                
+                // 나머지는 인증 필요
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -91,7 +94,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // 개발 환경과 프로덕션 환경 모두 지원
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",

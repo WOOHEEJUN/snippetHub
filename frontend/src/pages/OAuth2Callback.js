@@ -12,29 +12,55 @@ const OAuth2Callback = () => {
     if (handled.current) return;
     handled.current = true;
 
+    console.log('=== OAuth2Callback 디버깅 시작 ===');
     console.log('OAuth2Callback useEffect 실행됨');
+    console.log('현재 URL:', window.location.href);
     console.log('OAuth2Callback - URL 파라미터:', Object.fromEntries(searchParams.entries()));
     
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
     const userStr = searchParams.get('user');
 
+    console.log('accessToken 존재:', !!accessToken);
+    console.log('refreshToken 존재:', !!refreshToken);
+    console.log('userStr 존재:', !!userStr);
+
     if (accessToken && refreshToken) {
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      if (userStr) {
-        try {
-          const user = JSON.parse(decodeURIComponent(userStr));
-          localStorage.setItem('user', JSON.stringify(user));
-        } catch (error) {
-          console.error('사용자 정보 파싱 오류:', error);
+      console.log('토큰이 존재하므로 로그인 처리 시작');
+      
+      try {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        console.log('토큰을 localStorage에 저장 완료');
+        
+        if (userStr) {
+          try {
+            const user = JSON.parse(decodeURIComponent(userStr));
+            localStorage.setItem('user', JSON.stringify(user));
+            console.log('사용자 정보 파싱 및 저장 완료:', user);
+          } catch (error) {
+            console.error('사용자 정보 파싱 오류:', error);
+          }
         }
+        
+        console.log('login 함수 호출 시작');
+        login({ accessToken, refreshToken });
+        console.log('login 함수 호출 완료');
+        
+        console.log('홈페이지로 리다이렉트 시작');
+        navigate('/', { replace: true });
+        console.log('홈페이지로 리다이렉트 완료');
+      } catch (error) {
+        console.error('로그인 처리 중 오류 발생:', error);
+        alert('로그인 처리 중 오류가 발생했습니다.');
+        navigate('/login', { replace: true });
       }
-      login({ accessToken, refreshToken });
-      navigate('/', { replace: true });
     } else {
+      console.log('토큰이 없으므로 에러 처리');
       const error = searchParams.get('error');
       const message = searchParams.get('message');
+      console.log('에러 정보:', { error, message });
+      
       if (error === 'email_required') {
         alert('카카오 계정에서 이메일 정보를 제공해주세요.');
       } else if (error === 'oauth2_failed') {
