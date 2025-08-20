@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://snippethub.co.kr",
   "proxy": "http://localhost:8080",
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",
