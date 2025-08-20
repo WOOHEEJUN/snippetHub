@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -60,13 +61,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                                                 .getUserInfoEndpoint()
                                                 .getUserNameAttributeName();
         
-        // OAuth2User에 이메일 정보 추가
-        attributes.put("email", email);
-        attributes.put("provider", registrationId);
+        // OAuth2User에 이메일 정보 추가 (수정 가능한 맵으로 복사)
+        Map<String, Object> newAttributes = new HashMap<>(attributes);
+        newAttributes.put("email", email);
+        newAttributes.put("provider", registrationId);
         
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                attributes,
+                newAttributes,
                 userNameAttributeName
         );
     }
