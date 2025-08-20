@@ -75,7 +75,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 프론트엔드로 리다이렉트 (토큰을 URL 파라미터로 전달)
         String redirectUrl = String.format(
-            "https://snippethub.co.kr/oauth2/callback?accessToken=%s&refreshToken=%s&user=%s",
+            "https://snippethub.co.kr/oauth2/redirect?accessToken=%s&refreshToken=%s&user=%s",
             tokenDto.getAccessToken(),
             tokenDto.getRefreshToken(),
             java.net.URLEncoder.encode(objectMapper.writeValueAsString(userDto), "UTF-8")

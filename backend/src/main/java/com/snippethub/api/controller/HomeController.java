@@ -1,7 +1,6 @@
 package com.snippethub.api.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
@@ -32,18 +31,6 @@ public class HomeController {
             "status", "UP",
             "message", "SnippetHub API is healthy",
             "timestamp", System.currentTimeMillis()
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/oauth2/callback")
-    public ResponseEntity<Map<String, Object>> oauth2Callback(
-            @RequestParam(required = false) String accessToken,
-            @RequestParam(required = false) String refreshToken,
-            @RequestParam(required = false) String user) {
-        Map<String, Object> response = Map.of(
-            "message", "OAuth2 callback received",
-            "status", "success"
         );
         return ResponseEntity.ok(response);
     }
