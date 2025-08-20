@@ -330,11 +330,19 @@
 
 /* 모바일에서 살짝 더 작게 */
 @media (max-width: 767px){
-  .level-badge-header{
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-    margin-right: 4px;
-  }
+  .level-badge-header {
+  width: 24px !important;     /* 고정 폭 */
+  height: 24px !important;    /* 고정 높이 */
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  flex: 0 0 24px !important;  /* flexbox 강제 고정 */
+  object-fit: contain !important;
+  image-rendering: -webkit-optimize-contrast;
+  vertical-align: middle;
+  margin-right: 6px;
+  border-radius: 50%;
+}
 }
 }
