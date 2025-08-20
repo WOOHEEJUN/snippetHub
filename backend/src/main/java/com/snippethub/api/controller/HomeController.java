@@ -3,10 +3,9 @@ package com.snippethub.api.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import java.util.Map;
 
-@Controller
+@RestController
 public class HomeController {
 
     @GetMapping("/")
@@ -34,36 +33,5 @@ public class HomeController {
             "timestamp", System.currentTimeMillis()
         );
         return ResponseEntity.ok(response);
-    }
-
-    // 프론트엔드 라우팅을 위한 메서드들
-    @GetMapping("/login")
-    public String login() {
-        return "forward:/index.html";
-    }
-
-    @GetMapping("/register")
-    public String register() {
-        return "forward:/index.html";
-    }
-
-    @GetMapping("/oauth2/callback")
-    public String oauth2Callback() {
-        return "forward:/index.html";
-    }
-
-    @GetMapping("/mypage/**")
-    public String mypage() {
-        return "forward:/index.html";
-    }
-
-    @GetMapping("/board/**")
-    public String board() {
-        return "forward:/index.html";
-    }
-
-    @GetMapping("/snippets/**")
-    public String snippets() {
-        return "forward:/index.html";
     }
 } 

@@ -65,30 +65,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/users/{userId}/snippets").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html").permitAll()
                 
-                // 프론트엔드 라우팅 - 명시적으로 허용
-                .requestMatchers("/").permitAll()
-                .requestMatchers("/login").permitAll()
-                .requestMatchers("/register").permitAll()
-                .requestMatchers("/oauth2/callback").permitAll()
-                .requestMatchers("/oauth2/redirect").permitAll()
-                .requestMatchers("/mypage/**").permitAll()
-                .requestMatchers("/board/**").permitAll()
-                .requestMatchers("/snippets/**").permitAll()
-                .requestMatchers("/code-test").permitAll()
-                .requestMatchers("/ai-problem-generation").permitAll()
-                .requestMatchers("/ai-code-evaluation").permitAll()
-                .requestMatchers("/daily-problems").permitAll()
-                .requestMatchers("/submission-history").permitAll()
-                .requestMatchers("/problems/**").permitAll()
-                .requestMatchers("/point-history").permitAll()
-                .requestMatchers("/badge-guide").permitAll()
-                .requestMatchers("/grade-guide").permitAll()
-                .requestMatchers("/notifications").permitAll()
-                .requestMatchers("/users/**").permitAll()
-                
-                // 정적 리소스들
-                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                .requestMatchers("/index.html").permitAll()
+                // OAuth2 관련 경로들
+                .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/login/oauth2/code/**").permitAll()
                 
                 // 나머지는 인증 필요
                 .anyRequest().authenticated()
@@ -98,7 +77,6 @@ public class SecurityConfig {
             )
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .oauth2Login(oauth2 -> oauth2
-                .loginPage("/nonexistent") // 기본 로그인 페이지 비활성화
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )
