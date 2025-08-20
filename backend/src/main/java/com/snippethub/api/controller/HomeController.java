@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.servlet.view.RedirectView;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -38,10 +39,11 @@ public class HomeController {
     }
 
     @GetMapping("/oauth2/redirect")
-    public RedirectView oauth2Redirect(
+    public void oauth2Redirect(
             @RequestParam(value = "accessToken", required = false) String accessToken,
             @RequestParam(value = "refreshToken", required = false) String refreshToken,
-            @RequestParam(value = "user", required = false) String user) {
+            @RequestParam(value = "user", required = false) String user,
+            HttpServletResponse response) throws IOException {
         
         // 파라미터가 있으면 프론트엔드로 직접 리다이렉트 (무한 루프 방지)
         if (accessToken != null && refreshToken != null && user != null) {
@@ -51,14 +53,10 @@ public class HomeController {
                 accessToken, refreshToken, user
             );
             
-            RedirectView redirectView = new RedirectView();
-            redirectView.setUrl(frontendUrl);
-            return redirectView;
+            response.sendRedirect(frontendUrl);
         } else {
             // 파라미터가 없으면 홈페이지로 리다이렉트
-            RedirectView redirectView = new RedirectView();
-            redirectView.setUrl("https://snippethub.co.kr/");
-            return redirectView;
+            response.sendRedirect("https://snippethub.co.kr/");
         }
     }
 } 
