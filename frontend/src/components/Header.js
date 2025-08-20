@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
@@ -16,15 +16,14 @@ const Header = () => {
     navigate('/');
   };
 
-  const toggleHamburger = () => {
-    setIsHamburgerOpen(!isHamburgerOpen);
-  };
+  const toggleHamburger = () => setIsHamburgerOpen((v) => !v);
 
   if (loading) return <p>Loading...</p>;
 
   return (
     <header className="header">
       <div className="header-container">
+        {/* LEFT */}
         <div className="header-left">
           <Link to="/" className="logo">
             <span>SNI</span>
@@ -38,6 +37,7 @@ const Header = () => {
                   <li><Link to="/board">자유게시판</Link></li>
                 </ul>
               </li>
+
               <li className="nav-item">
                 <span className="nav-link-main">문제풀이</span>
                 <ul className="submenu">
@@ -47,6 +47,7 @@ const Header = () => {
                   <li><Link to="/ai-code-evaluation">AI 코드 평가</Link></li>
                 </ul>
               </li>
+
               <li className="nav-item">
                 <span className="nav-link-main">스니펫</span>
                 <ul className="submenu">
@@ -58,6 +59,7 @@ const Header = () => {
                   <li><Link to="/snippets?language=Java&sort=LATEST&page=0">Java</Link></li>
                 </ul>
               </li>
+
               <li className="nav-item">
                 <span className="nav-link-main">마이페이지</span>
                 <ul className="submenu">
@@ -76,6 +78,7 @@ const Header = () => {
           </nav>
         </div>
 
+        {/* RIGHT */}
         <div className="header-right">
           <div className="auth-buttons">
             {!isAuthenticated ? (
@@ -92,6 +95,8 @@ const Header = () => {
                       src={getLevelBadgeImage(user.level)}
                       alt={user.level}
                       className="level-badge-header"
+                      width={24}
+                      height={24}
                     />
                   )}
                   안녕하세요, {user?.nickname || user?.email}님!
@@ -103,7 +108,7 @@ const Header = () => {
           </div>
 
           <div className="hamburger-container">
-            <button 
+            <button
               className={`hamburger-btn ${isHamburgerOpen ? 'active' : ''}`}
               onClick={toggleHamburger}
               aria-label="메뉴 열기"
@@ -117,10 +122,9 @@ const Header = () => {
               <div className="hamburger-dropdown">
                 <div className="hamburger-menu-section">
                   <h4>게시판</h4>
-                  <ul>
-                    <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
-                  </ul>
+                  <ul><li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li></ul>
                 </div>
+
                 <div className="hamburger-menu-section">
                   <h4>문제풀이</h4>
                   <ul>
@@ -130,6 +134,7 @@ const Header = () => {
                     <li><Link to="/ai-code-evaluation" onClick={toggleHamburger}>AI 코드 평가</Link></li>
                   </ul>
                 </div>
+
                 <div className="hamburger-menu-section">
                   <h4>스니펫</h4>
                   <ul>
@@ -141,6 +146,7 @@ const Header = () => {
                     <li><Link to="/snippets?language=Java&sort=LATEST&page=0" onClick={toggleHamburger}>Java</Link></li>
                   </ul>
                 </div>
+
                 {isAuthenticated ? (
                   <div className="hamburger-menu-section">
                     <h4>마이페이지</h4>
