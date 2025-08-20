@@ -67,6 +67,8 @@ public class SecurityConfig {
                 "/swagger-resources/**",
                 "/swagger-ui.html"
                 ).permitAll()
+                // 프론트엔드 라우팅 허용
+                .requestMatchers("/", "/login", "/register", "/board/**", "/snippets/**", "/mypage/**", "/oauth2/callback", "/oauth2/redirect", "/notifications", "/users/**", "/code-test", "/ai-problem-generation", "/ai-code-evaluation", "/daily-problems", "/submission-history", "/problems/**", "/point-history", "/badge-guide", "/grade-guide").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
