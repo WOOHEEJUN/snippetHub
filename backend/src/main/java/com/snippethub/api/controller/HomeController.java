@@ -39,18 +39,25 @@ public class HomeController {
 
     @GetMapping("/oauth2/redirect")
     public RedirectView oauth2Redirect(
-            @RequestParam("accessToken") String accessToken,
-            @RequestParam("refreshToken") String refreshToken,
-            @RequestParam("user") String user) {
+            @RequestParam(value = "accessToken", required = false) String accessToken,
+            @RequestParam(value = "refreshToken", required = false) String refreshToken,
+            @RequestParam(value = "user", required = false) String user) {
         
-        // 프론트엔드로 토큰을 전달하면서 리다이렉트
-        String frontendUrl = String.format(
-            "https://snippethub.co.kr/oauth2/redirect?accessToken=%s&refreshToken=%s&user=%s",
-            accessToken, refreshToken, user
-        );
-        
-        RedirectView redirectView = new RedirectView();
-        redirectView.setUrl(frontendUrl);
-        return redirectView;
+        // 파라미터가 있으면 프론트엔드로 토큰을 전달하면서 리다이렉트
+        if (accessToken != null && refreshToken != null && user != null) {
+            String frontendUrl = String.format(
+                "https://snippethub.co.kr/oauth2/redirect?accessToken=%s&refreshToken=%s&user=%s",
+                accessToken, refreshToken, user
+            );
+            
+            RedirectView redirectView = new RedirectView();
+            redirectView.setUrl(frontendUrl);
+            return redirectView;
+        } else {
+            // 파라미터가 없으면 홈페이지로 리다이렉트
+            RedirectView redirectView = new RedirectView();
+            redirectView.setUrl("https://snippethub.co.kr/");
+            return redirectView;
+        }
     }
 } 
