@@ -43,10 +43,11 @@ public class HomeController {
             @RequestParam(value = "refreshToken", required = false) String refreshToken,
             @RequestParam(value = "user", required = false) String user) {
         
-        // 파라미터가 있으면 프론트엔드로 토큰을 전달하면서 리다이렉트
+        // 파라미터가 있으면 프론트엔드로 직접 리다이렉트 (무한 루프 방지)
         if (accessToken != null && refreshToken != null && user != null) {
+            // 프론트엔드의 /oauth2/callback 경로로 리다이렉트
             String frontendUrl = String.format(
-                "https://snippethub.co.kr/oauth2/redirect?accessToken=%s&refreshToken=%s&user=%s",
+                "https://snippethub.co.kr/oauth2/callback?accessToken=%s&refreshToken=%s&user=%s",
                 accessToken, refreshToken, user
             );
             
