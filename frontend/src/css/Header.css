@@ -306,5 +306,35 @@
   }
   .auth-buttons {
     gap: 2rem;
+  }/* === Level badge in header: fix oversize === */
+.level-badge-header{
+  width: 24px;               /* 고정 폭 */
+  height: 24px;              /* 고정 높이 */
+  flex: 0 0 24px;            /* flex 수축/확장 방지 */
+  object-fit: contain;       /* 원본 비율 유지 */
+  image-rendering: -webkit-optimize-contrast;
+  vertical-align: middle;
+  margin-right: 6px;         /* 닉네임과 간격 */
+  border-radius: 50%;        /* 필요하면 둥글게 표시 */
+}
+
+/* 배지와 텍스트 정렬 보정 */
+.user-info{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+/* 모바일에서 살짝 더 작게 */
+@media (max-width: 767px){
+  .level-badge-header{
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    margin-right: 4px;
   }
+}
 }
