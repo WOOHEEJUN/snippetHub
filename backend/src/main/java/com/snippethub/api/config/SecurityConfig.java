@@ -38,37 +38,59 @@ public class SecurityConfig {
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
             .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/ws/**").permitAll() // WebSocket 엔드포인트 허용
+                // API 엔드포인트들
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/ai/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/v1/posts/**").permitAll() // 게시글 관련 API 비회원 허용
-                .requestMatchers("/api/posts/**").permitAll() // 프론트엔드 호환성
+                .requestMatchers("/api/v1/posts/**").permitAll()
+                .requestMatchers("/api/posts/**").permitAll()
                 .requestMatchers("/api/v1/snippets/**", "/api/v1/execute").permitAll()
-                .requestMatchers("/api/snippets/**").permitAll() // 프론트엔드 호환성
-                .requestMatchers("/api/daily-problems/**").permitAll() // 일일 문제 API 허용
-                .requestMatchers("/api/problems/**").permitAll() // 문제 목록 API 허용
+                .requestMatchers("/api/snippets/**").permitAll()
+                .requestMatchers("/api/daily-problems/**").permitAll()
+                .requestMatchers("/api/problems/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/{postId}/comments").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/snippets/{snippetId}/comments").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/snippets/{snippetId}/comments").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/notifications").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/api/notifications/{notificationId}/read").authenticated()
-                    .requestMatchers(HttpMethod.GET, "/api/notifications/unread-count").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/api/notifications/read-all").authenticated()
-                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/profile").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/posts").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/users/{userId}/snippets").permitAll()
-                .requestMatchers(
-    "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-resources/**",
-                "/swagger-ui.html"
-                ).permitAll()
-                // 프론트엔드 라우팅 허용
-                .requestMatchers("/", "/login", "/register", "/board/**", "/snippets/**", "/mypage/**", "/oauth2/callback", "/oauth2/redirect", "/notifications", "/users/**", "/code-test", "/ai-problem-generation", "/ai-code-evaluation", "/daily-problems", "/submission-history", "/problems/**", "/point-history", "/badge-guide", "/grade-guide").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/snippets/{snippetId}/comments").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/notifications").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/notifications/{notificationId}/read").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/notifications/unread-count").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/notifications/read-all").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/users/{userId}/profile").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/{userId}/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/{userId}/snippets").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui.html").permitAll()
+                
+                // 프론트엔드 라우팅 - 명시적으로 허용
+                .requestMatchers("/").permitAll()
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/register").permitAll()
+                .requestMatchers("/oauth2/callback").permitAll()
+                .requestMatchers("/oauth2/redirect").permitAll()
+                .requestMatchers("/mypage/**").permitAll()
+                .requestMatchers("/board/**").permitAll()
+                .requestMatchers("/snippets/**").permitAll()
+                .requestMatchers("/code-test").permitAll()
+                .requestMatchers("/ai-problem-generation").permitAll()
+                .requestMatchers("/ai-code-evaluation").permitAll()
+                .requestMatchers("/daily-problems").permitAll()
+                .requestMatchers("/submission-history").permitAll()
+                .requestMatchers("/problems/**").permitAll()
+                .requestMatchers("/point-history").permitAll()
+                .requestMatchers("/badge-guide").permitAll()
+                .requestMatchers("/grade-guide").permitAll()
+                .requestMatchers("/notifications").permitAll()
+                .requestMatchers("/users/**").permitAll()
+                
+                // 정적 리소스들
+                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/index.html").permitAll()
+                
+                // 나머지는 인증 필요
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -93,7 +115,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // 개발 환경과 프로덕션 환경 모두 지원
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
