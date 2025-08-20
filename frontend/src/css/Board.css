@@ -1,179 +1,213 @@
-.board-container {
-  padding: 3rem 0;
-  background-color: #1a1a1a; 
-}
+/* =========================================================
+   Board Toolbar – Left(검색폼) / Right(글쓰기), No wrap, No scroll
+   ========================================================= */
 
-.board-header {
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #444444;
-  margin-bottom: 2rem;
-}
-
-.board-header h2 {
-  font-weight: 700;
-  color: #e0e0e0;
-}
-
-.board-header p {
-  color: #ffffff;
-}
-
-.table {
-  background-color: #000000;
-  color: #e0e0e0;
-}
-
-.table-hover tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.05); 
-  cursor: pointer;
-}
-
-.table th {
-  font-weight: 600;
-  color: #b0b0b0;
-}
-
-.table td {
-  vertical-align: middle;
-  color: #e0e0e0;
-  border-left: 5px solid #ffffff; 
-}
-
-.post-title {
-  font-weight: 500;
-  color: #e0e0e0;
-  text-decoration: none;
-}
-
-.post-title:hover {
-  color: #99ccff; 
-}
-
-.pagination .page-link {
-  color: #99ccff; 
-  background-color: #333333;
-  border-color: #444444;
-}
-
-.pagination .page-item.active .page-link {
-  z-index: 3;
-  color: #333333; 
-  background-color: #e0e0e0; 
-  border-color: #e0e0e0;
-}
-
-.search-form .form-control {
-  margin-right: 0.5rem;
-  background-color: #333333;
-  border: 1px solid #555555;
-  color: #e0e0e0;
-}
-
-.search-form .btn {
-  white-space: nowrap;
-  text-align: center;
-  background-color: #e0e0e0;
-  color: #000000;
-  border: 1px solid #e0e0e0;
-}
-
-.board-write-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #222222;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.2);
-}
-
-.board-write-container h2 {
-  font-weight: 700;
-  margin-bottom: 2rem;
-  color: #e0e0e0;
-}
-
-
-.post-detail-container {
-  padding: 3rem 0;
-  position: relative; 
-}
-
-
-
-.like-section {
-  position: absolute; 
-  bottom: 180px; 
-  right: 20px; 
+/* 래퍼: 이미 .d-flex.justify-content-between.align-items-center.mb-4 사용 중 */
+.board-container .d-flex.justify-content-between.align-items-center.mb-4{
   display: flex;
   align-items: center;
-  gap: 0.5rem; 
-  z-index: 100; 
+  justify-content: space-between;   /* 왼쪽(폼) / 오른쪽(글쓰기) */
+  gap: 16px;
+  /* 절대 가로 스크롤 금지 */
+  overflow: hidden;                 
 }
 
-.like-button {
-  background: transparent; 
-  border: none; 
-  outline: none; 
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
+/* 왼쪽: 검색 폼 */
+.board-container .search-form{
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;                /* 한 줄 고정 */
+  min-width: 0;                     /* 내부 아이템이 수축 가능 */
+  gap: 12px;
+  margin: 0;
+  overflow: hidden;                 /* 혹시 모를 넘침 방지 */
 }
 
-.like-button:focus {
-  outline: none; 
-  box-shadow: none; 
+/* 오른쪽: 글쓰기 버튼(오른쪽 끝 고정) */
+.board-container .d-flex.justify-content-between.align-items-center.mb-4 > .btn-primary{
+  margin-left: auto;                /* 오른쪽으로 밀기 */
+  flex: 0 0 auto;
 }
 
-.like-button i {
-  font-size: 1.5rem; 
-  color: #b0b0b0; 
-  transition: color 0.2s, transform 0.2s;
+/* ---------------- 공통 규격(기본) ---------------- */
+:root{
+  --ctl-h: 34px;
+  --ctl-radius: 8px;
+  --ctl-font: 13px;
+  --gap: 12px;
+  --input-min: 180px;               /* 입력 최소폭 */
+  --input-ideal: 280px;             /* 입력 권장폭 */
+  --sel-w: 110px;                   /* 셀렉트 폭 */
+  --btn-w: 80px;                    /* 검색 버튼 폭 */
+  --write-w: 92px;                  /* 글쓰기 폭 */
 }
 
-.like-button.liked i {
-  color: #DC3545; 
+/* 모든 컨트롤 공통 */
+.board-container .search-form .form-control,
+.board-container .search-form .form-select,
+.board-container .search-form .btn,
+.board-container .btn-primary{
+  height: var(--ctl-h);
+  border-radius: var(--ctl-radius);
+  font-size: var(--ctl-font);
+  line-height: 1.2;
+  padding: 0 10px;
 }
 
-.like-button:hover i {
-  transform: scale(1.1);
+/* 입력창: 주변 여백을 줄이며 유연하게 축소 */
+.board-container .search-form .form-control{
+  flex: 1 1 clamp(var(--input-min), var(--input-ideal), 32vw);
+  min-width: var(--input-min);
+  background:#1a1a1a; color:#d3d3d3; border:1px solid #444;
+}
+.board-container .search-form .form-control::placeholder{ color:#808080; }
+
+/* 셀렉트 2개: 동일 폭, 고정 */
+.board-container .search-form .form-select{
+  flex: 0 0 var(--sel-w);
+  width: var(--sel-w);
+  background:#1a1a1a; color:#d3d3d3; border:1px solid #444;
+  appearance:none; -webkit-appearance:none; -moz-appearance:none;
 }
 
-.like-count {
-  font-size: 1rem; 
-  font-weight: 600;
-  color: #e0e0e0;
+/* 검색 버튼: 검은색 */
+.board-container .search-form .btn{
+  flex: 0 0 var(--btn-w);
+  width: var(--btn-w);
+  background:#000; color:#fff; border:1px solid #000;
+}
+.board-container .search-form .btn:hover{ background:#222; border-color:#222; }
+
+/* 글쓰기 버튼(오른쪽) */
+.board-container .btn-primary{
+  flex: 0 0 var(--write-w);
+  width: var(--write-w);
+  background:#e0e0e0; color:#333; border:1px solid #e0e0e0;
+}
+.board-container .btn-primary:hover{ background:#d3d3d3; }
+
+/* 폼 내부 간격 */
+.board-container .search-form{ gap: var(--gap); }
+
+/* =========================================================
+   반응형 – 스크롤 없이 ‘작게 작게’ 줄어들도록 변수만 단계적으로 축소
+   ========================================================= */
+
+/* 중간 화면 */
+@media (max-width: 900px){
+  :root{
+    --ctl-h: 32px;
+    --ctl-font: 12.5px;
+    --gap: 10px;
+    --input-min: 150px;
+    --input-ideal: 240px;
+    --sel-w: 100px;
+    --btn-w: 74px;
+    --write-w: 84px;
+  }
 }
 
-.comment-section {
-  margin-top: 3rem;
+/* 작은 화면 */
+@media (max-width: 700px){
+  :root{
+    --ctl-h: 30px;
+    --ctl-font: 12px;
+    --gap: 8px;
+    --input-min: 130px;
+    --input-ideal: 200px;
+    --sel-w: 92px;
+    --btn-w: 70px;
+    --write-w: 78px;
+  }
+  /* 입력이 너무 길면 더 수축 */
+  .board-container .search-form .form-control{
+    flex-basis: clamp(var(--input-min), var(--input-ideal), 38vw);
+  }
 }
 
-.comment-section h4 {
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #e0e0e0;
+/* 극소 화면(아이폰 SE 등) */
+@media (max-width: 380px){
+  :root{
+    --ctl-h: 28px;
+    --ctl-font: 11.5px;
+    --gap: 6px;
+    --input-min: 110px;
+    --input-ideal: 170px;
+    --sel-w: 84px;
+    --btn-w: 66px;
+    --write-w: 72px;
+  }
+  .board-container .search-form .form-control{
+    flex-basis: clamp(var(--input-min), var(--input-ideal), 40vw);
+  }
 }
 
-.comment-form textarea {
-  resize: none;
-  background-color: #333333;
-  border: 1px solid #555555;
-  color: #e0e0e0;
+/* =========================================================
+   안전장치 – 절대 가로 스크롤/줄바꿈 방지
+   ========================================================= */
+.board-container .search-form,
+.board-container .d-flex.justify-content-between.align-items-center.mb-4{
+  white-space: nowrap;
+  overflow: hidden;            /* 스크롤 금지 */
+}
+/* === 1) 폼은 overflow 숨기지 않도록 (버튼 잘림 방지) === */
+.board-container .search-form{
+  overflow: visible !important;     /* <- 여기가 핵심 */
+  gap: 12px !important;
+  min-width: 0 !important;          /* flex 수축 허용 */
 }
 
-.comment {
-  padding: 1rem;
-  background-color: #222222; 
-  border-radius: 0.5rem;
-  border: 1px solid #444444;
+/* === 2) 검색 인풋은 가장 많이 줄어드는 요소로 === */
+.board-container .search-form .form-control{
+  flex: 1 1 0 !important;           /* 폭을 최우선으로 줄임 */
+  min-width: 90px !important;       /* 최저 폭만 보장 */
 }
 
-.comment-author {
-  font-weight: 600;
-  color: #e0e0e0;
+/* === 3) 셀렉트/버튼은 고정폭 + 수축 금지 === */
+.board-container .search-form .form-select{
+  flex: 0 0 var(--sel-w) !important;
+  width: var(--sel-w) !important;
+}
+.board-container .search-form .btn{
+  flex: 0 0 var(--btn-w) !important;
+  width: var(--btn-w) !important;
 }
 
-.comment-date {
-  font-size: 0.85rem;
-  color: #b0b0b0;
+/* === 4) 글쓰기 버튼은 오른쪽 고정 === */
+.board-container .d-flex.justify-content-between.align-items-center.mb-4{
+  justify-content: space-between !important;
+}
+.board-container .d-flex.justify-content-between.align-items-center.mb-4 > .btn-primary{
+  margin-left: 12px !important;
+  flex: 0 0 var(--write-w) !important;
+  width: var(--write-w) !important;
+}
+
+/* === 5) 작은 화면일수록 변수로 더 '작게 작게' === */
+@media (max-width: 900px){
+  :root{
+    --sel-w: 100px;
+    --btn-w: 74px;
+    --write-w: 84px;
+  }
+}
+
+@media (max-width: 700px){
+  :root{
+    --sel-w: 92px;
+    --btn-w: 68px;
+    --write-w: 78px;
+  }
+  .board-container .search-form{ gap: 10px !important; }
+  .board-container .search-form .form-control{ min-width: 80px !important; }
+}
+
+@media (max-width: 380px){
+  :root{
+    --sel-w: 84px;
+    --btn-w: 62px;
+    --write-w: 72px;
+  }
+  .board-container .search-form{ gap: 8px !important; }
+  .board-container .search-form .form-control{ min-width: 70px !important; }
 }
