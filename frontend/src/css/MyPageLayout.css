@@ -64,17 +64,18 @@
 
 /* ===== 마이페이지 화살표 버튼 ===== */
 .mypage-hamburger-btn {
+  display: none; /* Hidden by default */
   position: fixed;
   top: calc(var(--header-height) + 8px);
   left: 12px;
   background: rgba(26,26,26,0.92);
   border: 1px solid #2a2a2a;
-  border-radius: 8px;              /* 살짝 더 작게 */
+  border-radius: 8px;
   cursor: pointer;
-  padding: 4px 6px;                /* ↓ 패딩 축소 */
+  padding: 4px 6px;
   z-index: 2000;
   line-height: 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* 그림자도 조금 줄임 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   transition: box-shadow 0.2s ease, transform 0.12s ease, background 0.2s ease;
 }
 

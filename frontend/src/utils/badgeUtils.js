@@ -1,7 +1,8 @@
-export const getLevelBadgeImage = (levelName) => {
-  if (!levelName) {
+export const getLevelBadgeImage = (level) => {
+  if (level === undefined || level === null) {
     return null;
   }
+  const levelName = getLevelName(level); // getLevelName 함수를 사용하여 등급 이름으로 변환
   const normalizedLevelName = levelName.toLowerCase();
 
   switch (normalizedLevelName) {
@@ -15,8 +16,7 @@ export const getLevelBadgeImage = (levelName) => {
       return '/badges/platinum.png';
     case '다이아몬드':
       return '/badges/diamond.png';
-    
     default:
-      return null; 
+      return null;
   }
 };
