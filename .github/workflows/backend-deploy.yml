@@ -147,6 +147,12 @@ jobs:
         Type=simple
         User=ubuntu
         WorkingDirectory=/home/ubuntu/app
+        Environment="JWT_SECRET=${{ secrets.JWT_SECRET }}"
+        Environment="DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}"
+        Environment="OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}"
+        Environment="KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}"
+        Environment="GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}"
+        Environment="EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}"
         ExecStart=/usr/bin/java -jar /home/ubuntu/app/snippethub-backend.jar
         Restart=always
         RestartSec=10
