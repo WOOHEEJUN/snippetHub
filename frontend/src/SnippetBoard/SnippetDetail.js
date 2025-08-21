@@ -45,29 +45,51 @@ const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
   return <img src={src} alt={typeof level === 'string' ? level : 'level-badge'} className={className} />;
 };
 
+const removeCommentFromTree = (comments, commentId) => {
+  return comments.filter(comment => {
+    if (comment.commentId === commentId) {
+      return false;
+    }
+    if (comment.replies && comment.replies.length > 0) {
+      comment.replies = removeCommentFromTree(comment.replies, commentId);
+    }
+    return true;
+  });
+};
+
 function SnippetDetail() {
   const { snippetId } = useParams();
   const navigate = useNavigate();
   const { user, getAuthHeaders } = useAuth();
 
+  const [snippet, setSnippet] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [editContent, setEditContent] = useState('');
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const [isAIExpanded, setIsAIExpanded] = useState(false);
   const [authorLevels, setAuthorLevels] = useState({}); // New state to store author levels from ranking
 
-  const apiFetch = async (path, init = {}) => {
-    const res = await fetch(path, { ...init, credentials: 'include' });
-    if (!res.ok) {
-      let bodyText = '';
-      try { bodyText = await res.clone().text(); } catch {}
-      console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}`, bodyText);
-    }
-    return res;
-  };
-
-  const parseJsonSafe = async (res) => {
+  const deleteCommentById = async (commentId) => {
     try {
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('application/json')) return await res.json();
-    } catch (_) {}
-    return null;
+      const res = await apiFetch(ENDPOINTS.comment(commentId), {
+        method: 'DELETE',
+        headers: { ...getAuthHeaders() },
+      });
+      const body = await parseJsonSafe(res);
+      const msg = body?.message || res.statusText || '';
+      if (res.ok) {
+        return { ok: true, msg: msg || '삭제되었습니다.' };
+      }
+      return { ok: false, msg };
+    } catch (err) {
+      return { ok: false, msg: '댓글 삭제 중 오류가 발생했습니다.' };
+    }
   };
 
   const fetchRankingData = useCallback(async () => {
@@ -516,7 +538,5 @@ function SnippetDetail() {
     </div>
   );
 }
-
-export default SnippetDetail;
 
 export default SnippetDetail;

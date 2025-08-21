@@ -63,6 +63,10 @@ export const getLevelName = (level) => {
   return '';
 };
 
+/**
+ * 등급별 배지 이미지 반환
+ * - /public/badges/ 디렉토리에 이미지 파일 배치 필요
+ */
 export const getLevelBadgeImage = (level) => {
   if (level === undefined || level === null) return null;
 
@@ -80,13 +84,12 @@ export const getLevelBadgeImage = (level) => {
       return '/badges/platinum.png';
     case '다이아몬드':
       return '/badges/diamond.png';
-    // 필요 시 아래 주석 해제 후 배지 이미지 추가
-    // case '마스터':
-    //   return '/badges/master.png';
-    // case '그랜드마스터':
-    //   return '/badges/grandmaster.png';
-    // case '레전드':
-    //   return '/badges/legend.png';
+    case '마스터':
+      return '/badges/master.png';
+    case '그랜드마스터':
+      return '/badges/grandmaster.png';
+    case '레전드':
+      return '/badges/legend.png';
     default:
       return null;
   }

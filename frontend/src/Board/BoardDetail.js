@@ -31,6 +31,14 @@ function BoardDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [error, setError] = useState(null);
+  const [newComment, setNewComment] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentContent, setEditingCommentContent] = useState('');
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
   const [authorLevels, setAuthorLevels] = useState({}); // New state to store author levels from ranking
 
   const getAuthHeaders = () => {
@@ -51,7 +59,7 @@ function BoardDetail() {
     } catch (err) {
       console.error("Failed to fetch ranking data:", err);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   const fetchPostData = useCallback(async () => {
     try {
@@ -74,7 +82,7 @@ function BoardDetail() {
     } catch (err) {
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
     }
-  }, [postId, getAuthHeaders]);
+  }, [postId]);
 
   useEffect(() => {
     fetchPostData();
@@ -608,7 +616,5 @@ function BoardDetail() {
     </div>
   );
 }
-
-export default BoardDetail;
 
 export default BoardDetail;

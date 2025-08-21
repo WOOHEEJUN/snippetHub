@@ -1,120 +1,88 @@
-// src/components/LevelProgress.jsx
-import React, { useEffect, useMemo, useState } from 'react';
-import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
-import { levelsMeta as LEVELS } from '../utils/levels';
-import '../css/LevelProgress.css';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import LevelProgress from '../components/LevelProgress';
+import { getLevelBadgeImage } from '../utils/badgeUtils';
+import '../css/Mypage.css';
 
-function LevelProgress({ userLevel, userPoints = 0 }) {
-  // 아이콘 매핑
-  const iconByName = useMemo(() => ({
-    BRONZE:    <FaStar   style={{ color: '#cd7f32' }} />,
-    SILVER:    <FaStar   style={{ color: '#c0c0c0' }} />,
-    GOLD:      <FaTrophy style={{ color: '#ffd700' }} />,
-    PLATINUM:  <FaCrown  style={{ color: '#e5e4e2' }} />,
-    DIAMOND:   <FaCrown  style={{ color: '#b9f2ff' }} />,
-    MASTER:    <FaCrown  style={{ color: '#9370db' }} />,
-    GRANDMASTER:<FaCrown style={{ color: '#ff4500' }} />,
-    LEGEND:    <FaCrown  style={{ color: '#00bfff' }} />,
-  }), []);
+function MyPage() {
+  const { user } = useAuth();
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('accessToken');
 
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-  // 현재 레벨을 points 기반으로 계산 (userLevel이 주어지면 우선 적용)
-  const currentLevel = useMemo(() => {
-    if (typeof userLevel === 'number') {
-      // 숫자 레벨이 들어온 경우(1~8) 신뢰
-      const found = LEVELS.find(l => l.level === userLevel);
-      if (found) return found;
-    }
-    // 포인트로 계산
-    return (
-      LEVELS.find(l => userPoints >= l.minPoints && userPoints < l.maxPoints) ||
-      LEVELS[LEVELS.length - 1]
-    );
-  }, [userLevel, userPoints]);
-
-  const nextLevel = useMemo(
-    () => LEVELS.find(l => l.level === currentLevel.level + 1) || null,
-    [currentLevel]
-  );
-
-  // 진행도 계산
-  const progressPercentage = useMemo(() => {
-    if (!nextLevel || !isFinite(nextLevel.minPoints - currentLevel.minPoints)) return 100;
-    const have = userPoints - currentLevel.minPoints;
-    const need = nextLevel.minPoints - currentLevel.minPoints;
-    return clamp(Math.round((have / need) * 100), 0, 100);
-  }, [currentLevel, nextLevel, userPoints]);
-
-  const pointsToNextLevel = useMemo(
-    () => (nextLevel ? Math.max(0, nextLevel.minPoints - userPoints) : 0),
-    [nextLevel, userPoints]
-  );
-
-  // 채워지는 애니메이션(부드럽게)
-  const [animatedProgress, setAnimatedProgress] = useState(0);
   useEffect(() => {
-    const t = setTimeout(() => setAnimatedProgress(progressPercentage), 80);
-    return () => clearTimeout(t);
-  }, [progressPercentage]);
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-  const getLevelIcon = (name) => iconByName[name] || <FaStar />;
+    fetch('/api/users/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.ok ? res.json() : Promise.reject('유저 정보 불러오기 실패'))
+      .then((data) => {
+        setUserInfo(data.data);
+      })
+      .catch((err) => {
+        alert('유저 정보를 불러오는 데 실패했습니다.');
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  if (loading) return <p className="loading-message">로딩 중...</p>;
 
   return (
-    <div className="level-progress">
-      <div className="level-header">
-        <h3>🏆 레벨 정보</h3>
-      </div>
-
-      <div className="current-level-info">
-        <div className="level-icon">{getLevelIcon(currentLevel.name)}</div>
-        <div className="level-details">
-          <div className="level-name">{currentLevel.name}</div>
-          <div className="level-number">Level {currentLevel.level}</div>
-          <div className="current-points">{userPoints} P</div>
-        </div>
-      </div>
-
-      {nextLevel ? (
-        <div className="next-level-info">
-          <div className="progress-section">
-            <div className="progress-header">
-              <span>다음 레벨: {nextLevel.name}</span>
-              <span>{pointsToNextLevel} P 더 필요</span>
+    <>
+      {userInfo ? (
+        <>
+          <div className="mypage-card user-info-card">
+            <h3 className="card-title">내 정보</h3>
+            <div className="user-info-details">
+              <p><strong>이메일:</strong> {userInfo.email}</p>
+              <p><strong>닉네임:</strong> 
+                {userInfo.level && <img src={getLevelBadgeImage(userInfo.level)} alt={userInfo.level} className="level-badge-mypage" />}
+                {userInfo.nickname}
+              </p>
+              <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
             </div>
-
-            {/* 왼쪽 기준 정렬 막대 */}
-            <div
-              className="progress-bar"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={progressPercentage}
-              aria-label="경험치 진행도"
-              title={`${progressPercentage}%`}
-            >
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${animatedProgress}%`,
-                  background: '#8BC34A',
-                }}
-              />
-            </div>
-
-            <div className="progress-text">{progressPercentage}% 완료</div>
           </div>
-        </div>
+
+          <LevelProgress 
+            userLevel={userInfo.level} 
+            userPoints={userInfo.points || 0} 
+          />
+
+          <div className="mypage-card activity-card">
+            <h3 className="card-title">내 활동</h3>
+            <div className="activity-stats-grid">
+              <div className="stat-item">
+                <span className="stat-label">총 게시물</span>
+                <span className="stat-value">{userInfo.stats?.totalPosts ?? 0}개</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">총 스니펫</span>
+                <span className="stat-value">{userInfo.stats?.totalSnippets ?? 0}개</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">총 댓글</span>
+                <span className="stat-value">{userInfo.stats?.totalComments ?? 0}개</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">총 좋아요</span>
+                <span className="stat-value">{userInfo.stats?.totalLikes ?? 0}개</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">총 조회수</span>
+                <span className="stat-value">{userInfo.stats?.totalViews ?? 0}회</span>
+              </div>
+            </div>
+          </div>
+        </>
       ) : (
-        <div className="max-level-info">
-          <div className="max-level-badge">
-            <FaCrown style={{ color: '#ffd700', fontSize: '2rem' }} />
-            <span>최고 레벨 달성!</span>
-          </div>
-        </div>
+        <p className="error-message">유저 정보를 불러올 수 없습니다.</p>
       )}
-    </div>
+    </>
   );
 }
 
-export default LevelProgress;
+export default MyPage;
