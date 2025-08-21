@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
 import '../css/LevelProgress.css';
 
@@ -48,9 +48,21 @@ function LevelProgress({ userLevel, userPoints }) {
     }
   };
 
+  const [animatedProgress, setAnimatedProgress] = useState(0); // New state for animation
+
+  const progressPercentage = getProgressPercentage(); // Keep this for calculation
+
+  useEffect(() => {
+    // When progressPercentage changes, update animatedProgress after a short delay
+    const timer = setTimeout(() => {
+      setAnimatedProgress(progressPercentage);
+    }, 100); // 100ms delay
+
+    return () => clearTimeout(timer); // Cleanup timer
+  }, [progressPercentage]); // Re-run effect when progressPercentage changes
+
   const currentLevel = getCurrentLevelInfo();
   const nextLevel = getNextLevelInfo();
-  const progressPercentage = getProgressPercentage();
   const pointsToNextLevel = nextLevel ? Math.max(0, nextLevel.minPoints - userPoints) : 0;
 
   return (
@@ -88,7 +100,7 @@ function LevelProgress({ userLevel, userPoints }) {
               <div
                 className="progress-fill"
                 style={{
-                  width: `${progressPercentage}%`,
+                  width: `${animatedProgress}%`,
                   background: '#8BC34A',
                 }}
               />

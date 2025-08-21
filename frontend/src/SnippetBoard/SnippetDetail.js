@@ -372,17 +372,20 @@ function SnippetDetail() {
             {comments.map((comment) => (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                  {comment.author?.userId ? (
-                    <Link to={`/users/${comment.author.userId}`} className="author-link">
-                      <LevelBadgeImg level={comment.author?.level} />
-                      <span className="nickname">{comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}</span>
-                    </Link>
-                  ) : (
-                    <span className="author-link">
-                      <LevelBadgeImg level={comment.author?.level} />
-                      <span className="nickname">{comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}</span>
-                    </span>
-                  )}
+                  {(() => {
+                    const displayLevel = (user?.userId === comment.author?.userId && user?.level) ? user.level : comment.author?.level;
+                    return comment.author?.userId ? (
+                      <Link to={`/users/${comment.author.userId}`} className="author-link">
+                        {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      </Link>
+                    ) : (
+                      <span className="author-link">
+                        {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {editCommentId === comment.commentId ? (
@@ -432,17 +435,20 @@ function SnippetDetail() {
                             style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
                           >
                             <div className="comment-author">
-                              {reply.author?.userId ? (
-                                <Link to={`/users/${reply.author.userId}`} className="author-link">
-                                  <LevelBadgeImg level={reply.author?.level} />
-                                  <span className="nickname">{reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}</span>
-                                </Link>
-                              ) : (
-                                <span className="author-link">
-                                  <LevelBadgeImg level={reply.author?.level} />
-                                  <span className="nickname">{reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}</span>
-                                </span>
-                              )}
+                              {(() => {
+                                const displayLevel = (user?.userId === reply.author?.userId && user?.level) ? user.level : reply.author?.level;
+                                return reply.author?.userId ? (
+                                  <Link to={`/users/${reply.author.userId}`} className="author-link">
+                                    {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                                    {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                  </Link>
+                                ) : (
+                                  <span className="author-link">
+                                    {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                                    {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                  </span>
+                                );
+                              })()}
                             </div>
 
                             <p className="comment-content">{reply.content}</p>
@@ -470,17 +476,20 @@ function SnippetDetail() {
         <div className="sidebar-card author-card">
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
-            {snippet.author?.userId ? (
-              <Link to={`/users/${snippet.author.userId}`} className="author-link">
-                <LevelBadgeImg level={snippet.author?.level} />
-                <span className="nickname">{snippet.author?.nickname}</span>
-              </Link>
-            ) : (
-              <span className="author-link">
-                <LevelBadgeImg level={snippet.author?.level} />
-                <span className="nickname">{snippet.author?.nickname}</span>
-              </span>
-            )}
+            {(() => {
+              const displayLevel = (user?.userId === snippet.author?.userId && user?.level) ? user.level : snippet.author?.level;
+              return snippet.author?.userId ? (
+                <Link to={`/users/${snippet.author.userId}`}>
+                  {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                  <span>{snippet.author?.nickname}</span>
+                </Link>
+              ) : (
+                <>
+                  {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                  <span>{snippet.author?.nickname}</span>
+                </>
+              );
+            })()}
           </div>
         </div>
 

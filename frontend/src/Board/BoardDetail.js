@@ -285,17 +285,32 @@ function BoardDetail() {
             </span>
             <span className="author-info-inline">
               <FaUser />
-              {post.author?.userId ? (
-                <Link to={`/users/${post.author.userId}`} className="author-link">
-                  <LevelBadgeImg level={post.author?.level} />
-                  <span className="nickname">{post.author?.nickname}</span>
-                </Link>
-              ) : (
-                <span className="author-link">
-                  <LevelBadgeImg level={post.author?.level} />
-                  <span className="nickname">{post.author?.nickname}</span>
-                </span>
-              )}
+              {(() => {
+                const displayLevel = (user?.userId === post.author?.userId && user?.level) ? user.level : post.author?.level;
+                return post.author?.userId ? (
+                  <Link to={`/users/${post.author.userId}`}>
+                    {displayLevel && (
+                      <img
+                        src={getLevelBadgeImage(displayLevel)}
+                        alt={displayLevel}
+                        className="level-badge-inline"
+                      />
+                    )}
+                    {post.author?.nickname}
+                  </Link>
+                ) : (
+                  <>
+                    {displayLevel && (
+                      <img
+                        src={getLevelBadgeImage(displayLevel)}
+                        alt={displayLevel}
+                        className="level-badge-inline"
+                      />
+                    )}
+                    {post.author?.nickname}
+                  </>
+                );
+              })()}
             </span>
             <span className="date-info-inline">
               <FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}
@@ -365,17 +380,32 @@ function BoardDetail() {
               return (
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
-                    {authorId ? (
-                      <Link to={`/users/${authorId}`} className="author-link">
-                        <LevelBadgeImg level={comment.author?.level} />
-                        <span className="nickname">{authorName}</span>
-                      </Link>
-                    ) : (
-                      <span className="author-link">
-                        <LevelBadgeImg level={comment.author?.level} />
-                        <span className="nickname">{authorName}</span>
-                      </span>
-                    )}
+                    {(() => {
+                      const displayLevel = (user?.userId === authorId && user?.level) ? user.level : comment.author?.level;
+                      return authorId ? (
+                        <Link to={`/users/${authorId}`} className="author-link">
+                          {displayLevel && (
+                            <img
+                              src={getLevelBadgeImage(displayLevel)}
+                              alt={displayLevel}
+                              className="level-badge-inline"
+                            />
+                          )}
+                          {authorName}
+                        </Link>
+                      ) : (
+                        <span className="author-link">
+                          {displayLevel && (
+                            <img
+                              src={getLevelBadgeImage(displayLevel)}
+                              alt={displayLevel}
+                              className="level-badge-inline"
+                            />
+                          )}
+                          {authorName}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   {editingCommentId === comment.commentId ? (
@@ -443,17 +473,32 @@ function BoardDetail() {
                                 }}
                               >
                                 <div className="comment-author">
-                                  {rAuthorId ? (
-                                    <Link to={`/users/${rAuthorId}`} className="author-link">
-                                      <LevelBadgeImg level={reply.author?.level} />
-                                      <span className="nickname">{rAuthorName}</span>
-                                    </Link>
-                                  ) : (
-                                    <span className="author-link">
-                                      <LevelBadgeImg level={reply.author?.level} />
-                                      <span className="nickname">{rAuthorName}</span>
-                                    </span>
-                                  )}
+                                  {(() => {
+                                    const displayLevel = (user?.userId === rAuthorId && user?.level) ? user.level : reply.author?.level;
+                                    return rAuthorId ? (
+                                      <Link to={`/users/${rAuthorId}`} className="author-link">
+                                        {displayLevel && (
+                                          <img
+                                            src={getLevelBadgeImage(displayLevel)}
+                                            alt={displayLevel}
+                                            className="level-badge-inline"
+                                          />
+                                        )}
+                                        {rAuthorName}
+                                      </Link>
+                                    ) : (
+                                      <span className="author-link">
+                                        {displayLevel && (
+                                          <img
+                                            src={getLevelBadgeImage(displayLevel)}
+                                            alt={displayLevel}
+                                            className="level-badge-inline"
+                                          />
+                                        )}
+                                        {rAuthorName}
+                                      </span>
+                                    );
+                                  })()}
                                 </div>
 
                                 <p className="comment-content">{reply.content}</p>
@@ -487,17 +532,32 @@ function BoardDetail() {
             <FaUser /> 작성자
           </h4>
           <div className="author-info">
-            {post.author?.userId ? (
-              <Link to={`/users/${post.author.userId}`} className="author-link">
-                <LevelBadgeImg level={post.author?.level} />
-                <span className="nickname">{post.author?.nickname}</span>
-              </Link>
-            ) : (
-              <span className="author-link">
-                <LevelBadgeImg level={post.author?.level} />
-                <span className="nickname">{post.author?.nickname}</span>
-              </span>
-            )}
+            {(() => {
+              const displayLevel = (user?.userId === post.author?.userId && user?.level) ? user.level : post.author?.level;
+              return post.author?.userId ? (
+                <Link to={`/users/${post.author.userId}`}>
+                  {displayLevel && (
+                    <img
+                      src={getLevelBadgeImage(displayLevel)}
+                      alt={displayLevel}
+                      className="level-badge-inline"
+                    />
+                  )}
+                  <span>{post.author?.nickname}</span>
+                </Link>
+              ) : (
+                <>
+                  {displayLevel && (
+                    <img
+                      src={getLevelBadgeImage(displayLevel)}
+                      alt={displayLevel}
+                      className="level-badge-inline"
+                    />
+                  )}
+                  <span>{post.author?.nickname}</span>
+                </>
+              );
+            })()}
           </div>
         </div>
 
