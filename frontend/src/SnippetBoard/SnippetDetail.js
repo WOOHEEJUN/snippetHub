@@ -11,17 +11,14 @@ import AICodeEvaluation from '../components/AICodeEvaluation';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/SnippetDetail.css';
 
-
-const API_BASE = '/api'; 
-
+const API_BASE = '/api';
 const ENDPOINTS = {
-  snippet: (id) => `${API_BASE}/snippets/${id}`,                         
-  snippetLike: (id) => `${API_BASE}/snippets/${id}/like`,                
-  commentsAllBySnippet: (id) => `${API_BASE}/snippets/${id}/comments/all`, 
-  commentsBySnippet: (id) => `${API_BASE}/snippets/${id}/comments`,      
-  comment: (commentId) => `${API_BASE}/comments/${commentId}`,           
+  snippet: (id) => `${API_BASE}/snippets/${id}`,
+  snippetLike: (id) => `${API_BASE}/snippets/${id}/like`,
+  commentsAllBySnippet: (id) => `${API_BASE}/snippets/${id}/comments/all`,
+  commentsBySnippet: (id) => `${API_BASE}/snippets/${id}/comments`,
+  comment: (commentId) => `${API_BASE}/comments/${commentId}`,
 };
-
 
 const apiFetch = async (path, init = {}) => {
   const res = await fetch(path, { ...init, credentials: 'include' });
@@ -34,15 +31,19 @@ const apiFetch = async (path, init = {}) => {
 };
 
 const parseJsonSafe = async (res) => {
-  
   try {
     const ct = res.headers.get('content-type') || '';
     if (ct.includes('application/json')) return await res.json();
   } catch (_) {}
   return null;
-  
 };
 
+// 닉네임 앞에 붙일 배지 이미지
+const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
+  const src = getLevelBadgeImage(level);
+  if (!src) return null;
+  return <img src={src} alt={typeof level === 'string' ? level : 'level-badge'} className={className} />;
+};
 
 function SnippetDetail() {
   const { snippetId } = useParams();
@@ -59,9 +60,8 @@ function SnippetDetail() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
-  const [isAIExpanded, setIsAIExpanded] = useState(false); 
+  const [isAIExpanded, setIsAIExpanded] = useState(false);
 
-  
   const removeCommentFromTree = (list, targetId) => {
     return list
       .filter(item => item.commentId !== targetId)
@@ -90,12 +90,10 @@ function SnippetDetail() {
       return { ok: false, msg: msg || `삭제 실패 (status: ${res.status})` };
     } catch (e) {
       console.error(e);
-
       return { ok: false, msg: '삭제 중 오류가 발생했습니다.' };
     }
   };
 
-  
   const fetchSnippet = useCallback(async () => {
     try {
       const res = await apiFetch(ENDPOINTS.snippet(snippetId), { headers: getAuthHeaders() });
@@ -126,7 +124,6 @@ function SnippetDetail() {
     fetchComments();
   }, [fetchSnippet, fetchComments]);
 
-  
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
   const handleDelete = async () => {
@@ -194,7 +191,6 @@ function SnippetDetail() {
     }
   };
 
-  
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -285,7 +281,6 @@ function SnippetDetail() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  
   if (loading) return <div className="loading-container"><div className="spinner"></div></div>;
   if (error) return <div className="error-container">{error}</div>;
   if (!snippet) return <div className="error-container">스니펫이 존재하지 않습니다.</div>;
@@ -302,44 +297,42 @@ function SnippetDetail() {
           <SyntaxHighlighter language={snippet.language?.toLowerCase()} style={solarizedlight} showLineNumbers>
             {snippet.code}
           </SyntaxHighlighter>
+
           <button onClick={copyToClipboard} className="copy-button">
             {isCopied ? <><FaCopy /> 복사됨!</> : <><FaCopy /> 복사</>}
           </button>
-           <button
-  onClick={handleLike}
-  className={`like-button ${snippet.isLiked ? 'liked' : ''}`} 
-  style={{
-    background: 'none',
-    border: 'none',
-    outline: 'none',
-    cursor: 'pointer',
-    fontSize: 24,
-    color: snippet.isLiked ? '#e74c3c' : '#aaa',
-    transition: 'color 0.2s'
-  }}
-  aria-label={snippet.isLiked ? '좋아요 취소' : '좋아요'}
->
-  {snippet.isLiked
-    ? <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
-    : <FaRegHeart />}
-  <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>{snippet.likeCount}</span>
-</button>
+
+          <button
+            onClick={handleLike}
+            className={`like-button ${snippet.isLiked ? 'liked' : ''}`}
+            style={{
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              fontSize: 24,
+              color: snippet.isLiked ? '#e74c3c' : '#aaa',
+              transition: 'color 0.2s'
+            }}
+            aria-label={snippet.isLiked ? '좋아요 취소' : '좋아요'}
+          >
+            {snippet.isLiked
+              ? <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
+              : <FaRegHeart />}
+            <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>{snippet.likeCount}</span>
+          </button>
         </div>
 
-        
         <div className={`ai-evaluation-section ${isAIExpanded ? 'expanded' : 'collapsed'}`}>
           {!isAIExpanded ? (
             <div className="ai-evaluation-collapsed">
               <h4>AI 코드 평가</h4>
-              <button 
+              <button
                 onClick={() => {
                   setIsAIExpanded(true);
-                  
                   setTimeout(() => {
                     const evaluateBtn = document.querySelector('.evaluate-btn');
-                    if (evaluateBtn) {
-                      evaluateBtn.click();
-                    }
+                    if (evaluateBtn) evaluateBtn.click();
                   }, 100);
                 }}
                 className="expand-ai-btn"
@@ -351,12 +344,7 @@ function SnippetDetail() {
             <>
               <div className="ai-evaluation-header">
                 <h4>코드 평가 결과</h4>
-                <button 
-                  onClick={() => setIsAIExpanded(false)}
-                  className="collapse-ai-btn"
-                >
-                  접기
-                </button>
+                <button onClick={() => setIsAIExpanded(false)} className="collapse-ai-btn">접기</button>
               </div>
               <AICodeEvaluation
                 snippetId={snippetId}
@@ -386,23 +374,20 @@ function SnippetDetail() {
                 <div className="comment-author">
                   {comment.author?.userId ? (
                     <Link to={`/users/${comment.author.userId}`} className="author-link">
-                      {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
-                      {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      <LevelBadgeImg level={comment.author?.level} />
+                      <span className="nickname">{comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}</span>
                     </Link>
                   ) : (
                     <span className="author-link">
-                      {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
-                      {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
+                      <LevelBadgeImg level={comment.author?.level} />
+                      <span className="nickname">{comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}</span>
                     </span>
                   )}
                 </div>
 
                 {editCommentId === comment.commentId ? (
                   <div className="comment-edit-form">
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                    />
+                    <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
                     <button onClick={() => handleCommentEdit(comment.commentId)}>저장</button>
                     <button onClick={() => setEditCommentId(null)}>취소</button>
                   </div>
@@ -415,7 +400,9 @@ function SnippetDetail() {
                         <button onClick={() => setReplyingToCommentId(comment.commentId)}>답글</button>
                         {(user?.userId === comment.author?.userId || user?.userId === comment.authorId) && (
                           <>
-                            <button onClick={() => { setEditCommentId(comment.commentId); setEditContent(comment.content); }}><FaEdit /> 수정</button>
+                            <button onClick={() => { setEditCommentId(comment.commentId); setEditContent(comment.content); }}>
+                              <FaEdit /> 수정
+                            </button>
                             <button onClick={() => handleCommentDelete(comment.commentId)}><FaTrash /> 삭제</button>
                           </>
                         )}
@@ -431,7 +418,7 @@ function SnippetDetail() {
                             placeholder="답글을 입력하세요..."
                           />
                           <button type="submit">답글 작성</button>
-                          <button type="button" onClick={handleCancelReply}>취소</button>
+                          <button type="button" onClick={() => { setReplyingToCommentId(null); setReplyContent(''); }}>취소</button>
                         </form>
                       </div>
                     )}
@@ -447,13 +434,13 @@ function SnippetDetail() {
                             <div className="comment-author">
                               {reply.author?.userId ? (
                                 <Link to={`/users/${reply.author.userId}`} className="author-link">
-                                  {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
-                                  {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                  <LevelBadgeImg level={reply.author?.level} />
+                                  <span className="nickname">{reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}</span>
                                 </Link>
                               ) : (
                                 <span className="author-link">
-                                  {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
-                                  {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
+                                  <LevelBadgeImg level={reply.author?.level} />
+                                  <span className="nickname">{reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}</span>
                                 </span>
                               )}
                             </div>
@@ -484,15 +471,15 @@ function SnippetDetail() {
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
             {snippet.author?.userId ? (
-              <Link to={`/users/${snippet.author.userId}`}>
-                {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
-                <span>{snippet.author?.nickname}</span>
+              <Link to={`/users/${snippet.author.userId}`} className="author-link">
+                <LevelBadgeImg level={snippet.author?.level} />
+                <span className="nickname">{snippet.author?.nickname}</span>
               </Link>
             ) : (
-              <>
-                {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
-                <span>{snippet.author?.nickname}</span>
-              </>
+              <span className="author-link">
+                <LevelBadgeImg level={snippet.author?.level} />
+                <span className="nickname">{snippet.author?.nickname}</span>
+              </span>
             )}
           </div>
         </div>
@@ -500,7 +487,6 @@ function SnippetDetail() {
         <div className="sidebar-card info-card">
           <h4><FaCode /> 스니펫 정보</h4>
           <ul>
-           
             <li><FaEye /> 조회수 {snippet.viewCount}</li>
             <li><FaCalendarAlt /> {new Date(snippet.createdAt).toLocaleDateString()}</li>
             <li><strong>Language:</strong> {snippet.language}</li>
@@ -515,7 +501,6 @@ function SnippetDetail() {
         </div>
 
         <div className="sidebar-card actions-card">
-
           {user?.userId === snippet.author?.userId && (
             <>
               <button onClick={handleEdit} className="action-button edit-button"><FaEdit /> 수정하기</button>

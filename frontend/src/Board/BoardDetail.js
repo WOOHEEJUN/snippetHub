@@ -1,21 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  FaComment, 
-  FaEye, 
-  FaUser, 
-  FaCalendarAlt, 
-  FaEdit, 
-  FaTrash, 
-  FaThumbsUp, 
-  FaTag,
-  FaHeart,         
-  FaRegHeart       
+import {
+  FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag,
+  FaHeart, FaRegHeart
 } from 'react-icons/fa';
-import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
-
 import '../css/BoardDetail.css';
 
 const MOCK_ENABLED = false;
@@ -27,6 +17,13 @@ const normalizeComments = (payload) => {
   if (Array.isArray(payload.content)) return payload.content;
   if (payload.data?.content && Array.isArray(payload.data.content)) return payload.data.content;
   return [];
+};
+
+// 닉네임 앞에 붙일 배지 이미지 (level 형식이 숫자/영문/한글 모두 OK)
+const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
+  const src = getLevelBadgeImage(level);
+  if (!src) return null;
+  return <img src={src} alt={typeof level === 'string' ? level : 'level-badge'} className={className} />;
 };
 
 function BoardDetail() {
@@ -43,7 +40,6 @@ function BoardDetail() {
   const [replyingToCommentId, setReplyingToCommentId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
 
-  
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -120,14 +116,12 @@ function BoardDetail() {
         throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
       }
 
-      
       const body = await res.json().catch(() => null);
 
       setPost(prev => ({
         ...prev,
         isLiked: body?.data?.isLiked ?? !prev.isLiked,
-        likeCount:
-          body?.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1),
+        likeCount: body?.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1),
       }));
     } catch (err) {
       alert(err.message);
@@ -160,7 +154,6 @@ function BoardDetail() {
       if (created) {
         setComments(prev => [...prev, created]);
       } else {
-        
         fetchPostData();
       }
       setNewComment('');
@@ -255,7 +248,6 @@ function BoardDetail() {
       });
       if (!res.ok) throw new Error('답글 작성 실패');
 
-      
       await fetchPostData();
       setReplyContent('');
       setReplyingToCommentId(null);
@@ -294,27 +286,15 @@ function BoardDetail() {
             <span className="author-info-inline">
               <FaUser />
               {post.author?.userId ? (
-                <Link to={`/users/${post.author.userId}`}>
-                  {post.author?.level && (
-                    <img
-                      src={getLevelBadgeImage(post.author.level)}
-                      alt={post.author.level}
-                      className="level-badge-inline"
-                    />
-                  )}
-                  {post.author?.nickname}
+                <Link to={`/users/${post.author.userId}`} className="author-link">
+                  <LevelBadgeImg level={post.author?.level} />
+                  <span className="nickname">{post.author?.nickname}</span>
                 </Link>
               ) : (
-                <>
-                  {post.author?.level && (
-                    <img
-                      src={getLevelBadgeImage(post.author.level)}
-                      alt={post.author.level}
-                      className="level-badge-inline"
-                    />
-                  )}
-                  {post.author?.nickname}
-                </>
+                <span className="author-link">
+                  <LevelBadgeImg level={post.author?.level} />
+                  <span className="nickname">{post.author?.nickname}</span>
+                </span>
               )}
             </span>
             <span className="date-info-inline">
@@ -336,31 +316,31 @@ function BoardDetail() {
         </div>
 
         <div className="post-actions-top">
-  <button
-    onClick={handleLike}
-    style={{
-      background: 'none',     
-      border: 'none',         
-      outline: 'none',
-      cursor: 'pointer',
-      fontSize: 24,
-      display: 'flex',
-      alignItems: 'center',
-      color: post.isLiked ? '#e74c3c' : '#aaa',
-      transition: 'color 0.2s'
-    }}
-    aria-label={post.isLiked ? '좋아요 취소' : '좋아요'}
-  >
-    {post.isLiked ? (
-      <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
-    ) : (
-      <FaRegHeart />
-    )}
-    <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>
-      {post.likeCount}
-    </span>
-  </button>
-</div>
+          <button
+            onClick={handleLike}
+            style={{
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              fontSize: 24,
+              display: 'flex',
+              alignItems: 'center',
+              color: post.isLiked ? '#e74c3c' : '#aaa',
+              transition: 'color 0.2s'
+            }}
+            aria-label={post.isLiked ? '좋아요 취소' : '좋아요'}
+          >
+            {post.isLiked ? (
+              <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
+            ) : (
+              <FaRegHeart />
+            )}
+            <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>
+              {post.likeCount}
+            </span>
+          </button>
+        </div>
 
         <div className="comment-section">
           <h3>
@@ -384,29 +364,16 @@ function BoardDetail() {
 
               return (
                 <div key={comment.commentId} className="comment-item">
-                  
                   <div className="comment-author">
                     {authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
-                        {comment.author?.level && (
-                          <img
-                            src={getLevelBadgeImage(comment.author.level)}
-                            alt={comment.author.level}
-                            className="level-badge-inline"
-                          />
-                        )}
-                        {authorName}
+                        <LevelBadgeImg level={comment.author?.level} />
+                        <span className="nickname">{authorName}</span>
                       </Link>
                     ) : (
                       <span className="author-link">
-                        {comment.author?.level && (
-                          <img
-                            src={getLevelBadgeImage(comment.author.level)}
-                            alt={comment.author.level}
-                            className="level-badge-inline"
-                          />
-                        )}
-                        {authorName}
+                        <LevelBadgeImg level={comment.author?.level} />
+                        <span className="nickname">{authorName}</span>
                       </span>
                     )}
                   </div>
@@ -478,25 +445,13 @@ function BoardDetail() {
                                 <div className="comment-author">
                                   {rAuthorId ? (
                                     <Link to={`/users/${rAuthorId}`} className="author-link">
-                                      {reply.author?.level && (
-                                        <img
-                                          src={getLevelBadgeImage(reply.author.level)}
-                                          alt={reply.author.level}
-                                          className="level-badge-inline"
-                                        />
-                                      )}
-                                      {rAuthorName}
+                                      <LevelBadgeImg level={reply.author?.level} />
+                                      <span className="nickname">{rAuthorName}</span>
                                     </Link>
                                   ) : (
                                     <span className="author-link">
-                                      {reply.author?.level && (
-                                        <img
-                                          src={getLevelBadgeImage(reply.author.level)}
-                                          alt={reply.author.level}
-                                          className="level-badge-inline"
-                                        />
-                                      )}
-                                      {rAuthorName}
+                                      <LevelBadgeImg level={reply.author?.level} />
+                                      <span className="nickname">{rAuthorName}</span>
                                     </span>
                                   )}
                                 </div>
@@ -533,27 +488,15 @@ function BoardDetail() {
           </h4>
           <div className="author-info">
             {post.author?.userId ? (
-              <Link to={`/users/${post.author.userId}`}>
-                {post.author?.level && (
-                  <img
-                    src={getLevelBadgeImage(post.author.level)}
-                    alt={post.author.level}
-                    className="level-badge-inline"
-                  />
-                )}
-                <span>{post.author?.nickname}</span>
+              <Link to={`/users/${post.author.userId}`} className="author-link">
+                <LevelBadgeImg level={post.author?.level} />
+                <span className="nickname">{post.author?.nickname}</span>
               </Link>
             ) : (
-              <>
-                {post.author?.level && (
-                  <img
-                    src={getLevelBadgeImage(post.author.level)}
-                    alt={post.author.level}
-                    className="level-badge-inline"
-                  />
-                )}
-                <span>{post.author?.nickname}</span>
-              </>
+              <span className="author-link">
+                <LevelBadgeImg level={post.author?.level} />
+                <span className="nickname">{post.author?.nickname}</span>
+              </span>
             )}
           </div>
         </div>
