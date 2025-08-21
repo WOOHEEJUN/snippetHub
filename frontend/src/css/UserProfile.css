@@ -12,7 +12,7 @@
   padding: 40px; /* Increased padding */
   background-color: #222222;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); /* Stronger shadow */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); /* Softer shadow */
   margin-bottom: 30px;
   /* border: 1px solid #333333; Removed border */
 }
@@ -28,6 +28,7 @@
   font-weight: bold;
   color: #e0e0e0;
   margin: 0 0 10px 0;
+  letter-spacing: 0.5px; /* Added letter-spacing */
 }
 
 .profile-bio {
@@ -60,8 +61,8 @@
 }
 
 .stat-value {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 20px; /* Slightly larger */
+  font-weight: 700; /* Bolder */
   color: #e0e0e0;
 }
 
@@ -81,7 +82,7 @@
 
 .tab-navigation {
   display: flex;
-  border-bottom: 1px solid #444444;
+  border-bottom: 1px solid #3a3a3a;
 }
 
 .tab-button {
@@ -104,7 +105,7 @@
 .tab-button.active {
   color: #ffffff; /* Brighter text */
   border-bottom-color: #8ab0d1;
-  background-color: #444444; /* Darker background for more contrast */
+  background-color: #555555; /* Darker background for more contrast */
   font-weight: bold; /* Make text bold */
 }
 
@@ -138,6 +139,7 @@
   margin: 0 0 10px 0;
   transition: color 0.2s;
   line-height: 1.4;
+  letter-spacing: 0.2px;
 }
 
 .content-link:hover .content-title {
@@ -236,4 +238,11 @@
   width: 80px; /* Size of the badge inside the circle */
   height: 80px;
   object-fit: contain; /* Ensure the image fits */
+}
+
+.profile-level,
+.profile-points {
+  font-size: 15px;
+  color: #c0c0c0;
+  margin-top: 5px; /* Add some top margin for spacing */
 }
