@@ -1,19 +1,20 @@
-
 import React from 'react';
 import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
 import '../css/LevelProgress.css';
 
 function LevelProgress({ userLevel, userPoints }) {
   const levels = [
-    { level: 1, name: 'BRONZE', minPoints: 0, maxPoints: 100, color: '#cd7f32' },
-    { level: 2, name: 'SILVER', minPoints: 100, maxPoints: 500, color: '#c0c0c0' },
-    { level: 3, name: 'GOLD', minPoints: 500, maxPoints: 1000, color: '#ffd700' },
-    { level: 4, name: 'PLATINUM', minPoints: 1000, maxPoints: 2500, color: '#e5e4e2' },
-    { level: 5, name: 'DIAMOND', minPoints: 2500, maxPoints: 5000, color: '#b9f2ff' },
-    { level: 6, name: 'MASTER', minPoints: 5000, maxPoints: 10000, color: '#800080' },
-    { level: 7, name: 'GRANDMASTER', minPoints: 10000, maxPoints: 20000, color: '#ff4500' },
-    { level: 8, name: 'LEGEND', minPoints: 20000, maxPoints: Infinity, color: '#00bfff' },
+    { level: 1, name: 'BRONZE',      minPoints: 0,     maxPoints: 100,    color: '#cd7f32' },
+    { level: 2, name: 'SILVER',      minPoints: 100,   maxPoints: 500,    color: '#c0c0c0' },
+    { level: 3, name: 'GOLD',        minPoints: 500,   maxPoints: 1000,   color: '#ffd700' },
+    { level: 4, name: 'PLATINUM',    minPoints: 1000,  maxPoints: 2500,   color: '#e5e4e2' },
+    { level: 5, name: 'DIAMOND',     minPoints: 2500,  maxPoints: 5000,   color: '#b9f2ff' },
+    { level: 6, name: 'MASTER',      minPoints: 5000,  maxPoints: 10000,  color: '#800080' },
+    { level: 7, name: 'GRANDMASTER', minPoints: 10000, maxPoints: 20000,  color: '#ff4500' },
+    { level: 8, name: 'LEGEND',      minPoints: 20000, maxPoints: Infinity, color: '#00bfff' },
   ];
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
   const getCurrentLevelInfo = () =>
     levels.find(l => userPoints >= l.minPoints && userPoints < l.maxPoints) || levels[levels.length - 1];
@@ -23,15 +24,14 @@ function LevelProgress({ userLevel, userPoints }) {
     return levels.find(l => l.level === cur.level + 1);
   };
 
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
   const getProgressPercentage = () => {
     const cur = getCurrentLevelInfo();
     const next = getNextLevelInfo();
     if (!next || !isFinite(next.minPoints - cur.minPoints)) return 100;
     const have = userPoints - cur.minPoints;
     const need = next.minPoints - cur.minPoints;
-    return clamp((have / need) * 100, 0, 100);
+    const pct = (have / need) * 100;
+    return clamp(Math.round(pct), 0, 100);
   };
 
   const getLevelIcon = (levelName) => {
@@ -50,7 +50,7 @@ function LevelProgress({ userLevel, userPoints }) {
 
   const currentLevel = getCurrentLevelInfo();
   const nextLevel = getNextLevelInfo();
-  const progressPercentage = Math.round(getProgressPercentage());
+  const progressPercentage = getProgressPercentage();
   const pointsToNextLevel = nextLevel ? Math.max(0, nextLevel.minPoints - userPoints) : 0;
 
   return (
@@ -76,24 +76,27 @@ function LevelProgress({ userLevel, userPoints }) {
               <span>{pointsToNextLevel} P 더 필요</span>
             </div>
 
-            
+            {/* 왼쪽 기준 정렬 막대 */}
             <div
               className="progress-bar"
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={progressPercentage}
+              aria-label="경험치 진행도"
             >
               <div
-                  className="progress-fill"
-                  style={{
-                    width: `${progressPercentage}%`,
-                    background: `#8BC34A`,
-                  }}
-                />
+                className="progress-fill"
+                style={{
+                  width: `${progressPercentage}%`,
+                  background: '#8BC34A',
+                }}
+              />
             </div>
 
-            <div className="progress-text">{progressPercentage}% 완료</div>
+            <div className="progress-text">
+              {progressPercentage}% 완료
+            </div>
           </div>
         </div>
       ) : (
