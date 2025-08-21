@@ -50,49 +50,40 @@ function SnippetDetail() {
   const navigate = useNavigate();
   const { user, getAuthHeaders } = useAuth();
 
-  const [snippet, setSnippet] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [editCommentId, setEditCommentId] = useState(null);
-  const [editContent, setEditContent] = useState('');
-  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [isCopied, setIsCopied] = useState(false);
-  const [isAIExpanded, setIsAIExpanded] = useState(false);
+  const [authorLevels, setAuthorLevels] = useState({}); // New state to store author levels from ranking
 
-  const removeCommentFromTree = (list, targetId) => {
-    return list
-      .filter(item => item.commentId !== targetId)
-      .map(item => ({
-        ...item,
-        replies: item.replies ? removeCommentFromTree(item.replies, targetId) : []
-      }));
-  };
-
-  const deleteCommentById = async (commentId) => {
-    try {
-      const res = await apiFetch(ENDPOINTS.comment(commentId), {
-        method: 'DELETE',
-        headers: { ...getAuthHeaders() },
-      });
-
-      if (res.ok || res.status === 204) return { ok: true };
-
-      const body = await parseJsonSafe(res);
-      const msg = body?.message || res.statusText || '';
-
-      if (res.status === 401) return { ok: false, msg: msg || '로그인이 필요합니다.' };
-      if (res.status === 403) return { ok: false, msg: msg || '삭제 권한이 없습니다.' };
-      if (res.status === 404) return { ok: false, msg: msg || '해당 댓글을 찾을 수 없습니다.' };
-
-      return { ok: false, msg: msg || `삭제 실패 (status: ${res.status})` };
-    } catch (e) {
-      console.error(e);
-      return { ok: false, msg: '삭제 중 오류가 발생했습니다.' };
+  const apiFetch = async (path, init = {}) => {
+    const res = await fetch(path, { ...init, credentials: 'include' });
+    if (!res.ok) {
+      let bodyText = '';
+      try { bodyText = await res.clone().text(); } catch {}
+      console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}`, bodyText);
     }
+    return res;
   };
+
+  const parseJsonSafe = async (res) => {
+    try {
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) return await res.json();
+    } catch (_) {}
+    return null;
+  };
+
+  const fetchRankingData = useCallback(async () => {
+    try {
+      const res = await apiFetch(`/api/users/ranking?size=1000`, { headers: getAuthHeaders() }); // Fetch a large enough size
+      if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
+      const data = await parseJsonSafe(res);
+      const levelMap = {};
+      data.data.content.forEach(user => {
+        levelMap[user.userId] = user.currentLevel;
+      });
+      setAuthorLevels(levelMap);
+    } catch (err) {
+      console.error("Failed to fetch ranking data:", err);
+    }
+  }, [getAuthHeaders]);
 
   const fetchSnippet = useCallback(async () => {
     try {
@@ -122,7 +113,8 @@ function SnippetDetail() {
   useEffect(() => {
     fetchSnippet();
     fetchComments();
-  }, [fetchSnippet, fetchComments]);
+    fetchRankingData(); // Fetch ranking data on component mount
+  }, [fetchSnippet, fetchComments, fetchRankingData, snippetId]);
 
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
@@ -373,10 +365,10 @@ function SnippetDetail() {
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
                   {(() => {
-                    const displayLevel = (user?.userId === comment.author?.userId && user?.level) ? user.level : comment.author?.level;
-                    console.log('SnippetDetail - Comment Author displayLevel:', displayLevel);
-                    return comment.author?.userId ? (
-                      <Link to={`/users/${comment.author.userId}`} className="author-link">
+                    const authorId = comment.author?.userId ?? comment.authorId;
+                    const displayLevel = authorLevels[authorId] || comment.author?.level; // Fallback to comment.author.level
+                    return authorId ? (
+                      <Link to={`/users/${authorId}`} className="author-link">
                         {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
                         {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
                       </Link>
@@ -437,8 +429,8 @@ function SnippetDetail() {
                           >
                             <div className="comment-author">
                               {(() => {
-                                const displayLevel = (user?.userId === reply.author?.userId && user?.level) ? user.level : reply.author?.level;
-                                console.log('SnippetDetail - Reply Author displayLevel:', displayLevel);
+                                const rAuthorId = reply.author?.userId ?? reply.authorId;
+                                const displayLevel = authorLevels[rAuthorId] || reply.author?.level; // Fallback to reply.author.level
                                 return reply.author?.userId ? (
                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
                                     {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
@@ -479,15 +471,14 @@ function SnippetDetail() {
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
             {(() => {
-              const displayLevel = (user?.userId === snippet.author?.userId && user?.level) ? user.level : snippet.author?.level;
-              console.log('SnippetDetail - Snippet Author displayLevel:', displayLevel);
+              const displayLevel = authorLevels[snippet.author?.userId] || snippet.author?.level; // Fallback to snippet.author.level
               return snippet.author?.userId ? (
                 <Link to={`/users/${snippet.author.userId}`}>
                   {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
                   <span>{snippet.author?.nickname}</span>
                 </Link>
               ) : (
-                <>
+                <> 
                   {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
                   <span>{snippet.author?.nickname}</span>
                 </>
@@ -525,5 +516,7 @@ function SnippetDetail() {
     </div>
   );
 }
+
+export default SnippetDetail;
 
 export default SnippetDetail;

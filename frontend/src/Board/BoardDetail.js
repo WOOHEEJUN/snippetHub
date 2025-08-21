@@ -31,19 +31,27 @@ function BoardDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [post, setPost] = useState(null);
-  const [error, setError] = useState('');
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [editingCommentId, setEditingCommentId] = useState(null);
-  const [editingCommentContent, setEditingCommentContent] = useState('');
-  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
+  const [authorLevels, setAuthorLevels] = useState({}); // New state to store author levels from ranking
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
+
+  const fetchRankingData = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/users/ranking?size=1000`, { headers: getAuthHeaders(), credentials: 'include' }); // Fetch a large enough size
+      if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
+      const data = await res.json();
+      const levelMap = {};
+      data.data.content.forEach(user => {
+        levelMap[user.userId] = user.currentLevel;
+      });
+      setAuthorLevels(levelMap);
+    } catch (err) {
+      console.error("Failed to fetch ranking data:", err);
+    }
+  }, [getAuthHeaders]);
 
   const fetchPostData = useCallback(async () => {
     try {
@@ -66,11 +74,12 @@ function BoardDetail() {
     } catch (err) {
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
     }
-  }, [postId]);
+  }, [postId, getAuthHeaders]);
 
   useEffect(() => {
     fetchPostData();
-  }, [fetchPostData, postId]);
+    fetchRankingData(); // Fetch ranking data on component mount
+  }, [fetchPostData, fetchRankingData, postId]);
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 
@@ -192,11 +201,15 @@ function BoardDetail() {
       const body = await res.json().catch(() => null);
       const updated = body?.data ?? body ?? null;
 
-      setComments(prev =>
-        prev.map(c =>
-          c.commentId === commentId ? (updated || { ...c, content: editingCommentContent }) : c
-        )
-      );
+      if (updated) {
+        setComments(prev =>
+          prev.map(c =>
+            c.commentId === commentId ? (updated || { ...c, content: editingCommentContent }) : c
+          )
+        );
+      } else {
+        fetchPostData();
+      }
       setEditingCommentId(null);
       setEditingCommentContent('');
     } catch (err) {
@@ -286,8 +299,8 @@ function BoardDetail() {
             <span className="author-info-inline">
               <FaUser />
               {(() => {
-                const displayLevel = (user?.userId === post.author?.userId && user?.level) ? user.level : post.author?.level;
-                console.log('BoardDetail - Post Author displayLevel:', displayLevel);
+                // Use authorLevels map
+                const displayLevel = authorLevels[post.author?.userId] || post.author?.level; // Fallback to post.author.level if not in ranking
                 return post.author?.userId ? (
                   <Link to={`/users/${post.author.userId}`}>
                     {displayLevel && (
@@ -382,8 +395,8 @@ function BoardDetail() {
                 <div key={comment.commentId} className="comment-item">
                   <div className="comment-author">
                     {(() => {
-                      const displayLevel = (user?.userId === authorId && user?.level) ? user.level : comment.author?.level;
-                      console.log('BoardDetail - Comment Author displayLevel:', displayLevel);
+                      // Use authorLevels map
+                      const displayLevel = authorLevels[authorId] || comment.author?.level; // Fallback to comment.author.level
                       return authorId ? (
                         <Link to={`/users/${authorId}`} className="author-link">
                           {displayLevel && (
@@ -476,8 +489,8 @@ function BoardDetail() {
                               >
                                 <div className="comment-author">
                                   {(() => {
-                                    const displayLevel = (user?.userId === rAuthorId && user?.level) ? user.level : reply.author?.level;
-                                    console.log('BoardDetail - Reply Author displayLevel:', displayLevel);
+                                    // Use authorLevels map
+                                    const displayLevel = authorLevels[rAuthorId] || reply.author?.level; // Fallback to reply.author.level
                                     return rAuthorId ? (
                                       <Link to={`/users/${rAuthorId}`} className="author-link">
                                         {displayLevel && (
@@ -536,7 +549,8 @@ function BoardDetail() {
           </h4>
           <div className="author-info">
             {(() => {
-              const displayLevel = (user?.userId === post.author?.userId && user?.level) ? user.level : post.author?.level;
+              // Use authorLevels map
+              const displayLevel = authorLevels[post.author?.userId] || post.author?.level; // Fallback to post.author.level
               return post.author?.userId ? (
                 <Link to={`/users/${post.author.userId}`}>
                   {displayLevel && (
@@ -594,5 +608,7 @@ function BoardDetail() {
     </div>
   );
 }
+
+export default BoardDetail;
 
 export default BoardDetail;
