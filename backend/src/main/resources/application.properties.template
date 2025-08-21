@@ -62,6 +62,7 @@ server.servlet.encoding.charset=UTF-8
 server.servlet.encoding.force=true
 server.servlet.encoding.enabled=true
 
+# OAuth2 Configuration
 spring.security.oauth2.client.registration.kakao.client-id=${KAKAO_CLIENT_ID:2b650368467b26a1dae27086b4fabb9c}
 spring.security.oauth2.client.registration.kakao.client-secret=${KAKAO_CLIENT_SECRET}
 spring.security.oauth2.client.registration.kakao.redirect-uri=${KAKAO_REDIRECT_URI:https://snippethub.co.kr/login/oauth2/code/kakao}
