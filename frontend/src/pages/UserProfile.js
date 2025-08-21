@@ -104,18 +104,18 @@ const UserProfile = () => {
   return (
     <div className="user-profile-container">
       <div className="profile-header">
-        <div className="profile-avatar">
-          <img 
-            src={user.profileImage || '/default-profile.png'} 
-            alt={user.nickname}
-            onError={(e) => {
-              e.target.src = '/default-profile.png';
-            }}
-          />
+        <div className="profile-level-display"> {/* New div for level badge */}
+          {user.level && (
+            <img
+              src={getLevelBadgeImage(user.level)}
+              alt={user.level}
+              className="profile-level-badge-large" /* New class for styling */
+            />
+          )}
         </div>
         <div className="profile-info">
           <h1 className="profile-nickname">
-            {user.level && <img src={getLevelBadgeImage(user.level)} alt={user.level} className="level-badge-profile" />}
+            {/* Removed level badge from here */}
             {user.nickname}
           </h1>
           {user.levelName && user.level && <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>}
