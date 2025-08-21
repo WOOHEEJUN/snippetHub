@@ -144,3 +144,35 @@
   font-weight: 700;
   color: #8ab0d1; /* A distinct color for values */
 }
+
+/* Styles for the new level definitions card */
+.level-definitions-card {
+  margin-top: 20px; /* Add some space above this card */
+}
+
+.level-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.level-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 0.9rem;
+}
+
+.level-item:last-child {
+  border-bottom: none;
+}
+
+.level-name {
+  font-weight: 600;
+  color: #e0e0e0; /* Default color, will be overridden by inline style */
+}
+
+.level-points {
+  color: #b0b0b0;
+}
