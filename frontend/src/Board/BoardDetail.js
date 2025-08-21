@@ -1,4 +1,3 @@
-// frontend/src/Board/BoardDetail.js
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,8 +10,8 @@ import {
   FaTrash, 
   FaThumbsUp, 
   FaTag,
-  FaHeart,         // 추가
-  FaRegHeart       // 추가
+  FaHeart,         
+  FaRegHeart       
 } from 'react-icons/fa';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
@@ -21,7 +20,6 @@ import '../css/BoardDetail.css';
 
 const MOCK_ENABLED = false;
 
-// 응답 정규화 유틸
 const normalizeComments = (payload) => {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
@@ -45,7 +43,7 @@ function BoardDetail() {
   const [replyingToCommentId, setReplyingToCommentId] = useState(null);
   const [replyContent, setReplyContent] = useState('');
 
-  // 토큰 헤더
+  
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -122,7 +120,7 @@ function BoardDetail() {
         throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
       }
 
-      // 204 대비
+      
       const body = await res.json().catch(() => null);
 
       setPost(prev => ({
@@ -162,7 +160,7 @@ function BoardDetail() {
       if (created) {
         setComments(prev => [...prev, created]);
       } else {
-        // 응답 스키마 모를 때 전체 리프레시
+        
         fetchPostData();
       }
       setNewComment('');
@@ -257,7 +255,7 @@ function BoardDetail() {
       });
       if (!res.ok) throw new Error('답글 작성 실패');
 
-      // 구조가 복잡할 수 있으니 전체 새로고침
+      
       await fetchPostData();
       setReplyContent('');
       setReplyingToCommentId(null);
@@ -341,8 +339,8 @@ function BoardDetail() {
   <button
     onClick={handleLike}
     style={{
-      background: 'none',     // 배경 없음
-      border: 'none',         // 테두리 없음
+      background: 'none',     
+      border: 'none',         
       outline: 'none',
       cursor: 'pointer',
       fontSize: 24,

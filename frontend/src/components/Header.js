@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
@@ -16,24 +16,21 @@ const Header = () => {
     navigate('/');
   };
 
-  const toggleHamburger = () => {
-    setIsHamburgerOpen(!isHamburgerOpen);
-  };
+  const toggleHamburger = () => setIsHamburgerOpen((v) => !v);
 
   if (loading) return <p>Loading...</p>;
 
   return (
     <header className="header">
       <div className="header-container">
+        {/* LEFT */}
         <div className="header-left">
           <Link to="/" className="logo">
             <span>SNI</span>
           </Link>
 
-          {/* 가로 메뉴바 */}
           <nav className="main-nav">
             <ul className="nav-menu-horizontal">
-              {/* 게시판 */}
               <li className="nav-item">
                 <span className="nav-link-main">게시판</span>
                 <ul className="submenu">
@@ -41,7 +38,6 @@ const Header = () => {
                 </ul>
               </li>
 
-              {/* 문제풀이 */}
               <li className="nav-item">
                 <span className="nav-link-main">문제풀이</span>
                 <ul className="submenu">
@@ -52,7 +48,6 @@ const Header = () => {
                 </ul>
               </li>
 
-              {/* 스니펫 */}
               <li className="nav-item">
                 <span className="nav-link-main">스니펫</span>
                 <ul className="submenu">
@@ -65,7 +60,6 @@ const Header = () => {
                 </ul>
               </li>
 
-              {/* 마이페이지 */}
               <li className="nav-item">
                 <span className="nav-link-main">마이페이지</span>
                 <ul className="submenu">
@@ -84,34 +78,37 @@ const Header = () => {
           </nav>
         </div>
 
-        {/* 인증 영역 */}
-        <div className="auth-buttons">
-          {!isAuthenticated ? (
-            <>
-              <Link to="/login" className="btn btn-outline-primary">로그인</Link>
-              <Link to="/register" className="btn btn-primary">회원가입</Link>
-            </>
-          ) : (
-            <>
-              <NotificationBell />
-              <span className="user-info">
-                {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
-                안녕하세요, {user?.nickname || user?.email}님!
-              </span>
-              <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
-              <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
-            </>
-          )}
-          
-          {/* 햄버거 메뉴 - 로그인 상태와 상관없이 항상 표시 */}
+        {/* RIGHT */}
+        <div className="header-right">
+          <div className="auth-buttons">
+            {!isAuthenticated ? (
+              <>
+                <Link to="/login" className="btn btn-outline-primary">로그인</Link>
+                <Link to="/register" className="btn btn-primary">회원가입</Link>
+              </>
+            ) : (
+              <>
+                <NotificationBell />
+                <span className="user-info">
+                  {user?.level && (
+                    <img
+                      src={getLevelBadgeImage(user.level)}
+                      alt={user.level}
+                      className="level-badge-header"
+                      width={24}
+                      height={24}
+                    />
+                  )}
+                  안녕하세요, {user?.nickname || user?.email}님!
+                </span>
+                <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
+                <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
+              </>
+            )}
+          </div>
+
           <div className="hamburger-container">
-            <button 
+            <button
               className={`hamburger-btn ${isHamburgerOpen ? 'active' : ''}`}
               onClick={toggleHamburger}
               aria-label="메뉴 열기"
@@ -120,17 +117,14 @@ const Header = () => {
               <span></span>
               <span></span>
             </button>
-            
-            {/* 햄버거 드롭다운 메뉴 */}
+
             {isHamburgerOpen && (
               <div className="hamburger-dropdown">
                 <div className="hamburger-menu-section">
                   <h4>게시판</h4>
-                  <ul>
-                    <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
-                  </ul>
+                  <ul><li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li></ul>
                 </div>
-                
+
                 <div className="hamburger-menu-section">
                   <h4>문제풀이</h4>
                   <ul>
@@ -140,7 +134,7 @@ const Header = () => {
                     <li><Link to="/ai-code-evaluation" onClick={toggleHamburger}>AI 코드 평가</Link></li>
                   </ul>
                 </div>
-                
+
                 <div className="hamburger-menu-section">
                   <h4>스니펫</h4>
                   <ul>
@@ -152,8 +146,8 @@ const Header = () => {
                     <li><Link to="/snippets?language=Java&sort=LATEST&page=0" onClick={toggleHamburger}>Java</Link></li>
                   </ul>
                 </div>
-                
-                {isAuthenticated && (
+
+                {isAuthenticated ? (
                   <div className="hamburger-menu-section">
                     <h4>마이페이지</h4>
                     <ul>
@@ -166,6 +160,15 @@ const Header = () => {
                       <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
                       <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
                       <li><Link to="/mypage/saved-problems" onClick={toggleHamburger}>저장한 문제보기</Link></li>
+                      <li><button onClick={() => { handleLogout(); toggleHamburger(); }} className="btn btn-primary">로그아웃</button></li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="hamburger-menu-section">
+                    <h4>계정</h4>
+                    <ul>
+                      <li><Link to="/login" onClick={toggleHamburger}>로그인</Link></li>
+                      <li><Link to="/register" onClick={toggleHamburger}>회원가입</Link></li>
                     </ul>
                   </div>
                 )}

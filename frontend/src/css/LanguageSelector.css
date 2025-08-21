@@ -144,7 +144,7 @@
   box-shadow: none;
 }
 
-/* 스크롤바 스타일링 */
+
 .language-dropdown::-webkit-scrollbar {
   width: 6px;
 }

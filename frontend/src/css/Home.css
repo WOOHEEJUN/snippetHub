@@ -1,74 +1,42 @@
 /* Hero Section */
 .hero-section {
-  padding: 6rem 0;
+  padding: 4rem 1rem;
   background: #222222;
   color: #e0e0e0;
+  text-align: center;
 }
 
 .hero-section .display-4 {
   font-weight: 700;
+  font-size: 2.5rem;
 }
 
 .hero-section .lead {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: #b0b0b0;
 }
 
 .hero-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .hero-text {
-  flex: 1 1 50%;
+  margin-bottom: 2rem;
 }
 
 .hero-visual {
-  flex: 1 1 40%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 2rem;
+  display: none; /* Hide the code logo on smaller screens */
 }
-
-/* 코드 로고 박스 */
-.code-logo {
-  font-size: 10rem;
-  font-weight: 700;
-  color: #e0e0e0;
-  font-family: 'Fira Code', monospace;
-
-  animation: float 4s ease-in-out infinite;
-  transition: transform 0.3s ease;
-  text-shadow:
-    0 0 10px rgba(255, 255, 255, 0.2),
-}
-
-.code-logo:hover {
-  transform: scale(1.1);
-}
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-
 
 /* Search Card */
 .search-card {
   border: none;
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   background-color: #333333;
   color: #e0e0e0;
-}
-
-.search-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.4);
 }
 
 .search-card .form-control,
@@ -91,36 +59,13 @@
   box-shadow: none;
 }
 
-.text-muted {
-  color: #6c757d !important; /* Bootstrap's default muted color */
-}
-
-.bg-light .text-muted {
-  color: #212529 !important; /* Black for light backgrounds */
-}
-
-.bg-light h2 {
-  color: #000000 !important; /* 인기 스니펫 제목 검은색 */
-}
-
-.bg-light .text-center p {
-  color: #000000 !important;
-}
-
-.hero-section .text-muted,
-.search-card .text-muted,
-.snippet-card .text-muted,
-.cta-section .text-muted {
-  color: #adb5bd !important; /* Lighter gray for dark backgrounds */
-}
-
-/* Snippet 카드 */
+/* Snippet Card */
 .snippet-card {
   border: 1px solid #444444;
   border-radius: 0.5rem;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   background-color: #333333;
   color: #e0e0e0;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .snippet-card:hover {
@@ -128,7 +73,7 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
 }
 
-/* 언어 배지 */
+/* Language Badge */
 .language-badge {
   font-size: 0.8rem;
   font-weight: 600;
@@ -144,60 +89,63 @@
 .badge-c { background-color: #a8b9cc; color: black; }
 .badge-default { background-color: #6c757d; color: white; }
 
-/* 게시글 hover 효과 */
-.list-group-item-action:hover {
-  background-color: #444444;
-}
-
 /* Call to Action */
 .cta-section {
   background: #333333;
   color: #e0e0e0;
-  padding: 5rem 0;
+  padding: 4rem 1rem;
   text-align: center;
 }
 
-.cta-section .btn-light {
-  font-weight: 600;
-  background-color: #e0e0e0;
-  color: #333333;
-  border-color: #e0e0e0;
-}
+/* Media Queries */
+@media (min-width: 768px) {
+  .hero-section {
+    padding: 6rem 0;
+    text-align: left;
+  }
 
-.cta-section .btn-light:hover {
-  background-color: #d3d3d3;
-  border-color: #d3d3d3;
-  color: #333333;
-}
+  .hero-section .display-4 {
+    font-size: 3.5rem;
+  }
 
-/* Custom Button Styles */
-.home-page .btn-primary,
-.home-page .btn-outline-secondary,
-.home-page .btn-outline-primary,
-.home-page .btn-light {
-  background-color: #cccccc !important;
-  border-color: #cccccc !important;
-  color: #212529 !important;
-}
+  .hero-section .lead {
+    font-size: 1.25rem;
+  }
 
-.home-page .btn-primary:hover,
-.home-page .btn-outline-secondary:hover,
-.home-page .btn-outline-primary:hover,
-.home-page .btn-light:hover {
-  background-color: #b0b0b0 !important;
-  border-color: #b0b0b0 !important;
-  color: #212529 !important;
-}
+  .hero-container {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 
-.home-page .snippet-card a {
-  background-color: #333333 !important;
-  color: #e0e0e0 !important;
-  padding: 0.2rem 0.4rem !important;
-  border-radius: 0.2rem !important;
-  text-decoration: none !important;
-}
+  .hero-text {
+    flex: 1 1 50%;
+    margin-bottom: 0;
+  }
 
-.home-page .snippet-card a:hover {
-  background-color: #555555 !important;
-  color: #ffffff !important;
+  .hero-visual {
+    display: flex;
+    flex: 1 1 40%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .code-logo {
+    font-size: 10rem;
+    font-weight: 700;
+    color: #e0e0e0;
+    font-family: 'Fira Code', monospace;
+    animation: float 4s ease-in-out infinite;
+    transition: transform 0.3s ease;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+
+  .code-logo:hover {
+    transform: scale(1.1);
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+  }
 }

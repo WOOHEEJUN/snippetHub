@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/MyBadges.css';
-import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa'; // 아이콘 추가
+import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa'; 
 import { Medal } from 'iconoir-react';
 
 const getBadgeIcon = (badgeName) => {
@@ -33,7 +33,7 @@ function MyBadges() {
   const [points, setPoints] = useState(null);
   const [badges, setBadges] = useState([]);
   const [featuredBadges, setFeaturedBadges] = useState([]);
-  const [badgeStats, setBadgeStats] = useState(null); // 뱃지 통계 상태 추가
+  const [badgeStats, setBadgeStats] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -52,7 +52,7 @@ function MyBadges() {
           fetch('/api/users/profile', { headers: getAuthHeaders(), credentials: 'include' }),
           fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include' }),
           fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include' }),
-          // fetch('/api/badges/statistics', { headers: getAuthHeaders(), credentials: 'include' }) // 뱃지 통계 API 호출
+          
         ]);
 
         const profileData = await profileRes.json();
@@ -62,7 +62,7 @@ function MyBadges() {
         if (profileData.data) {
           setLevel({
             levelName: profileData.data.level,
-            level: profileData.data.level // Assuming numeric level is not provided, using string for both
+            level: profileData.data.level 
           });
           setPoints({
             point: profileData.data.points
@@ -73,7 +73,7 @@ function MyBadges() {
         }
         setBadges(badgesData.data || []);
         setFeaturedBadges(featuredBadgesData.data || []);
-        // setBadgeStats(statsData.data); // 뱃지 통계 상태 업데이트
+        
 
       } catch (err) {
         console.error('데이터 불러오기 실패:', err);
@@ -89,10 +89,10 @@ function MyBadges() {
   const handleToggleFeatured = useCallback(async (badgeId) => {
     try {
       const isCurrentlyFeatured = featuredBadges.some(b => b.badgeId === badgeId);
-      const newFeaturedStatus = !isCurrentlyFeatured; // 현재 상태의 반대로 설정
+      const newFeaturedStatus = !isCurrentlyFeatured; 
 
       const response = await fetch(`/api/badges/${badgeId}/feature?featured=${newFeaturedStatus}`, {
-        method: 'PUT', // PUT 메서드 사용
+        method: 'PUT', 
         headers: getAuthHeaders(),
         credentials: 'include',
       });
@@ -102,14 +102,14 @@ function MyBadges() {
         throw new Error(errorData.message || '대표 뱃지 설정/해제 실패');
       }
 
-      // 상태 업데이트
+      
       setFeaturedBadges(prev => {
         if (newFeaturedStatus) {
-          // 대표 뱃지로 설정하는 경우
+          
           const badgeToFeature = badges.find(b => b.badgeId === badgeId);
           return badgeToFeature ? [...prev, badgeToFeature] : prev;
         } else {
-          // 대표 뱃지에서 해제하는 경우
+          
           return prev.filter(b => b.badgeId !== badgeId);
         }
       });
@@ -118,7 +118,7 @@ function MyBadges() {
       alert(err.message);
       console.error('대표 뱃지 토글 실패:', err);
     }
-  }, [getAuthHeaders, badges, featuredBadges]); // featuredBadges를 의존성 배열에 추가
+  }, [getAuthHeaders, badges, featuredBadges]); 
 
   if (loading) return <div className="loading-message">데이터를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
@@ -140,11 +140,11 @@ function MyBadges() {
         </div>
       </div>
 
-      {/* 뱃지 통계 섹션 추가 */}
+      
       {badgeStats && (
         <div className="badge-section">
           <h3>뱃지 통계</h3>
-          <div className="info-section"> {/* info-section 재활용 */}
+          <div className="info-section"> 
             <div className="info-card">
               <div className="label"><FaAward /> 획득 뱃지 수</div>
               <div className="value">{badgeStats.totalBadgesOwned}개</div>

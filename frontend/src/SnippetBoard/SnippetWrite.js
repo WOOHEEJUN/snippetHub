@@ -35,7 +35,7 @@ const SnippetWrite = () => {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('');
   const [description, setDescription] = useState('');
-  const [tags, setTags] = useState(''); // 콤마로 구분된 문자열 입력
+  const [tags, setTags] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [code, setCode] = useState('');
   const [error, setError] = useState(null);

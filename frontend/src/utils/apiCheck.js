@@ -1,5 +1,3 @@
-// 백엔드 API 상태 확인 유틸리티
-
 export const checkBackendStatus = async () => {
   try {
     console.log('🔍 백엔드 서버 상태 확인 중...');
@@ -64,4 +62,4 @@ export const logEnvironmentInfo = () => {
   console.log('- REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
   console.log('- 현재 시간:', new Date().toISOString());
   console.log('- User Agent:', navigator.userAgent);
-}; 
+};

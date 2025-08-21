@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../css/BoardForm.css'; // 폼 디자인을 위해 BoardForm.css 재활용
+import '../css/BoardForm.css'; 
 
 function BoardWrite() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ function BoardWrite() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('GENERAL'); // 카테고리 상태 추가, 기본값 GENERAL
+  const [category, setCategory] = useState('GENERAL'); 
   const [imageFile, setImageFile] = useState(null);
   const [previewImageUrl, setPreviewImageUrl] = useState('');
   const [error, setError] = useState(null);
@@ -66,7 +66,7 @@ function BoardWrite() {
         body: JSON.stringify({
           title,
           content,
-          imageUrl: finalImageUrl, // 이미지 URL 추가
+          imageUrl: finalImageUrl, 
           category: category,        
           tags: [],                      
         }),

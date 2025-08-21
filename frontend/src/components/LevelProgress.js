@@ -1,4 +1,4 @@
-// LevelProgress.jsx
+
 import React from 'react';
 import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
 import '../css/LevelProgress.css';
@@ -76,7 +76,7 @@ function LevelProgress({ userLevel, userPoints }) {
               <span>{pointsToNextLevel} P 더 필요</span>
             </div>
 
-            {/* ✅ 단일 채움 바로 변경 */}
+            
             <div
               className="progress-bar"
               role="progressbar"

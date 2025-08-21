@@ -14,14 +14,14 @@ function CodeTest() {
   const [htmlCode, setHtmlCode] = useState('');
   const [cssCode, setCssCode] = useState('');
   const [jsCode, setJsCode] = useState('');
-  const [output, setOutput] = useState(''); // Added for backend execution output
-  const [language, setLanguage] = useState('html'); // Added for language selection
-  const [code, setCode] = useState(''); // Added for current code in editor
+  const [output, setOutput] = useState(''); 
+  const [language, setLanguage] = useState('html'); 
+  const [code, setCode] = useState(''); 
   const iframeRef = useRef(null);
 
   const handleRun = async () => {
     setOutput('');
-    iframeRef.current.src = ''; // Clear iframe for server-side languages
+    iframeRef.current.src = ''; 
 
     if (language === 'html') {
       const blob = new Blob([code], { type: 'text/html' });
@@ -41,7 +41,7 @@ function CodeTest() {
       setOutput('코드 실행 중...');
       try {
         const response = await axios.post('/api/code/execute', { language, code });
-        const data = response.data.data; // Access data property
+        const data = response.data.data; 
         let result = '';
         if (data.output) result += data.output;
         if (data.error) result += `에러:
@@ -54,7 +54,7 @@ ${data.error}`;
     } else if (language === 'jsp') {
       setOutput('⚠️ JSP는 브라우저에서 직접 실행할 수 없습니다. 백엔드 연동이 필요합니다.');
     } else {
-      // For HTML/CSS/JS combination (from original runCode)
+      
       const safeJsCode = jsCode.replace(/<\/script>/gi, '<\\/script>');
       const combinedCode = `
         <html>
@@ -80,11 +80,11 @@ ${data.error}`;
 
   const handleLanguageChange = (e) => {
     setLanguage(e.target.value);
-    // Reset code based on language selection if needed
+    
     if (e.target.value === 'html' || e.target.value === 'css' || e.target.value === 'jsp') {
-      setCode(''); // Clear code for these languages as they use separate editors
+      setCode(''); 
     } else {
-      setCode(''); // Clear code for other languages
+      setCode(''); 
     }
   };
 

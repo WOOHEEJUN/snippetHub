@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaUser, FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
-import { getLevelBadgeImage } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
+import { getLevelBadgeImage } from '../utils/badgeUtils'; 
 import '../css/UserProfile.css';
 
 const UserProfile = () => {
@@ -21,7 +21,7 @@ const UserProfile = () => {
     };
   };
 
-  // 사용자 프로필 정보 가져오기
+  
   const fetchUserProfile = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/profile`);
@@ -36,7 +36,7 @@ const UserProfile = () => {
     }
   };
 
-  // 사용자 게시글 가져오기
+  
   const fetchUserPosts = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/posts?page=0&size=10`);
@@ -48,7 +48,7 @@ const UserProfile = () => {
     }
   };
 
-  // 사용자 스니펫 가져오기
+  
   const fetchUserSnippets = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/snippets?page=0&size=10`);

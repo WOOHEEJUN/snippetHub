@@ -1,4 +1,3 @@
-// src/components/NavDropdown.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -8,10 +7,10 @@ export default function NavDropdown() {
   const menuRef = useRef(null);
   const location = useLocation();
 
-  // 라우트 변경 시 자동 닫기
+  
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
-  // 외부 클릭 닫기
+  
   useEffect(() => {
     function onDocClick(e) {
       if (!open) return;
@@ -26,7 +25,7 @@ export default function NavDropdown() {
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [open]);
 
-  // ESC 닫기
+  
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') setOpen(false); }
     if (open) document.addEventListener('keydown', onKey);

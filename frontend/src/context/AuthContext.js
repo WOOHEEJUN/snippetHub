@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userEmail', userData.data.email);
         localStorage.setItem('userId', userData.data.userId);
       } catch (err) {
-        
         logout();
       } finally {
         setLoading(false);
@@ -92,7 +91,6 @@ export const AuthProvider = ({ children }) => {
 
       return newAccessToken;
     } catch (error) {
-      
       logout();
       throw error;
     }
@@ -101,7 +99,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (tokens) => {
     console.log('AuthContext login 함수 호출됨:', tokens);
     
-
     console.log('localStorage에 토큰 저장 시작');
     localStorage.setItem('accessToken', tokens.token.accessToken);
     localStorage.setItem('refreshToken', tokens.token.refreshToken);
@@ -113,7 +110,6 @@ export const AuthProvider = ({ children }) => {
     console.log(localStorage.getItem('user'));
     console.log(localStorage.getItem('userId'));
 
-    
     setAccessToken(tokens.token.accessToken);
     setRefreshToken(tokens.token.refreshToken);
     setUser(tokens.user);

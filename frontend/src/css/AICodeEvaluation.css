@@ -268,12 +268,12 @@
   font-weight: 500;
 }
 
-/* 새로운 feedback 스타일 */
+
 .feedback-section {
   margin-top: 2rem;
 }
 
-/* AI 분석 결과 스타일 */
+
 .ai-feedback {
   background-color: #333333;
   padding: 1.5rem;
@@ -334,7 +334,7 @@
   writing-mode: horizontal-tb;
 }
 
-/* 개선된 코드 섹션 */
+
 .improved-code-section {
   margin-top: 2rem;
 }
@@ -361,7 +361,7 @@
   white-space: pre-wrap;
 }
 
-/* 평가 헤더 스타일 */
+
 .evaluation-header {
   display: flex;
   justify-content: space-between;
@@ -399,7 +399,7 @@
   transform: none;
 }
 
-/* 점수 섹션 개선 */
+
 .score-section h5 {
   color: #e0e0e0;
   margin-bottom: 1.5rem;
@@ -459,4 +459,4 @@
   .evaluation-result {
     padding: 1.5rem;
   }
-} 
+}

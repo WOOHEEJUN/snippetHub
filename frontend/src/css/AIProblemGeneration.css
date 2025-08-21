@@ -259,7 +259,7 @@
   word-break: break-word;
 }
 
-/* 기존 스타일들은 제거하고 새로운 스타일로 대체 */
+
 
 @media (max-width: 768px) {
   .ai-problem-generation {
@@ -315,4 +315,4 @@
     line-height: 1.7;
     font-size: 14px;
   }
-} 
+}

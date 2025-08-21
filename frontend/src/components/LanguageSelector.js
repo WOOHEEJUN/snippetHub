@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FaCode, FaChevronDown } from 'react-icons/fa';
-import './LanguageSelector.css';
+import '../css/LanguageSelector.css';
 
 function LanguageSelector({ selectedLanguage, onLanguageChange, placeholder = "언어 선택" }) {
   const { getAuthHeaders } = useAuth();
@@ -26,7 +26,6 @@ function LanguageSelector({ selectedLanguage, onLanguageChange, placeholder = "�
         const data = await response.json();
         setLanguages(data);
       } else {
-        // 백엔드 API가 없는 경우 기본 언어 목록 사용
         setLanguages([
           { id: 1, name: 'Java', extension: 'java', syntax: 'java' },
           { id: 2, name: 'Python', extension: 'py', syntax: 'python' },

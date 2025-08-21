@@ -1,4 +1,4 @@
-/* App.css - 전역 스타일 */
+
 
 * {
   margin: 0;
@@ -11,20 +11,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  color: #e0e0e0; /* 밝은 회색 텍스트 */
-  background-color: #1a1a1a; /* 어두운 배경 */
+  color: #e0e0e0; 
+  background-color: #1a1a1a; 
 }
 
 a {
   text-decoration: none;
-  color: #99ccff; /* 밝은 파란색 링크 */
+  color: #99ccff; 
 }
 
 a:hover {
   color: #66b3ff;
 }
 
-/* 유틸리티 클래스 */
+
 .text-center {
   text-align: center;
 }
@@ -46,7 +46,7 @@ a:hover {
   padding-right: 15px;
 }
 
-/* 스크롤바 */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -66,12 +66,12 @@ a:hover {
   background: #777777;
 }
 
-/* code 태그 */
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* custom-btn-sm */
+
 .custom-btn-sm {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -79,7 +79,7 @@ code {
   line-height: 1.5;
   border-radius: 0.2rem;
   color: #333333;
-  background-color: #e0e0e0; /* 밝은 회색 */
+  background-color: #e0e0e0; 
   border-color: #e0e0e0;
   text-align: center;
   vertical-align: middle;
@@ -98,7 +98,7 @@ code {
 
 .btn-outline-danger {
   background-color: #e0e0e0;
-  color: #333333; /* 밝은 회색 */
+  color: #333333; 
   border-color: #e0e0e0;
 }
 
@@ -108,14 +108,14 @@ code {
   border-color: #d3d3d3;
 }
 
-/* 뱃지 이미지 스타일 (공통) */
+
 .level-badge-mypage,
 .level-badge-ranking,
 .level-badge-profile {
-  width: 20px; /* 뱃지 이미지 크기 */
+  width: 20px; 
   height: 20px;
-  vertical-align: middle; /* 텍스트와 정렬 */
-  margin-right: 5px; /* 닉네임과의 간격 */
+  vertical-align: middle; 
+  margin-right: 5px; 
 }
 .nav-menu a {
   display: block;
@@ -125,7 +125,7 @@ code {
 }
 .nav-menu a:hover { background: #2a2a2a; color: #fff; }
 
-/* 모바일에서 가로폭 대응 */
+
 @media (max-width: 768px) {
   .nav-menu {
     position: static;
@@ -140,11 +140,11 @@ code {
     align-items: center;
   }
 }
-/* === 마이페이지 버튼 === */
+
 .btn-gray {
   padding: 8px 16px;
-  background: #dcdcdc; /* 연한 회색 */
-  color: #000; /* 검은 글씨 */
+  background: #dcdcdc; 
+  color: #000; 
   font-weight: 600;
   border: none;
   border-radius: 30px;
@@ -153,7 +153,7 @@ code {
 }
 
 .btn-gray:hover {
-  background: #c0c0c0; /* 진한 회색 */
+  background: #c0c0c0; 
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
 }

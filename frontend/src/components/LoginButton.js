@@ -1,4 +1,4 @@
-// src/components/KakaoLoginButton.js
+
 import React from 'react';
 
 const KAKAO_AUTH_URL = "/oauth2/authorization/kakao";

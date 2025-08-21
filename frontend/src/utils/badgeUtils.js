@@ -15,8 +15,8 @@ export const getLevelBadgeImage = (levelName) => {
       return '/badges/platinum.png';
     case '다이아몬드':
       return '/badges/diamond.png';
-    // 필요에 따라 다른 등급 추가
+    
     default:
-      return null; // 또는 기본 뱃지 이미지
+      return null; 
   }
 };

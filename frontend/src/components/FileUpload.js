@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FaUpload, FaFile, FaImage, FaTimes } from 'react-icons/fa';
-import './FileUpload.css';
+import '../css/FileUpload.css';
 
 function FileUpload({ onFileUploaded, acceptedTypes = ['image/*', '.pdf', '.txt', '.doc', '.docx'], maxSize = 20 }) {
   const { getAuthHeaders } = useAuth();
@@ -43,13 +43,11 @@ function FileUpload({ onFileUploaded, acceptedTypes = ['image/*', '.pdf', '.txt'
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // 파일 크기 검증
       if (file.size > maxSize * 1024 * 1024) {
         setError(`파일 크기는 ${maxSize}MB 이하여야 합니다: ${file.name}`);
         continue;
       }
 
-      // 파일 타입 검증
       const isValidType = acceptedTypes.some(type => {
         if (type.startsWith('.')) {
           return file.name.toLowerCase().endsWith(type);

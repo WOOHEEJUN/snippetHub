@@ -1,7 +1,7 @@
-// src/MyPage/MyPosts.js
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../css/MyContentList.css'; // 공통 CSS 임포트
+import '../css/MyContentList.css';
 
 function MyPosts() {
   const location = useLocation();
