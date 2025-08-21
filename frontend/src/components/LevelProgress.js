@@ -100,7 +100,7 @@ function LevelProgress({ userLevel, userPoints }) {
               <div
                 className="progress-fill"
                 style={{
-                  width: `${animatedProgress}%`,
+                  height: `${animatedProgress}%`,
                   background: '#8BC34A',
                 }}
               />
