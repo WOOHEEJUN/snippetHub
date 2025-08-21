@@ -107,24 +107,22 @@
 .hamburger-menu-section a:hover{ background:#333; color:#fff; transform:translateX(4px); }
 
 /* 반응형 */
-@media (max-width: 767px){
-  .main-nav{ display:none; }
-  .auth-buttons{ display:flex; order:1; }
-  .hamburger-container{ order:2; }
-  .header-right{ gap:.5rem; justify-content:flex-end; }
-  .hamburger-dropdown{ width:calc(100vw - 20px); right:0; }
+@media (max-width: 991px) {
+  .main-nav { display: none; }
+  .hamburger-container { display: block; }
+  .header-right { gap: .5rem; justify-content: flex-end; }
+  .hamburger-dropdown { width: calc(100vw - 20px); right: 0; }
 }
-@media (min-width: 768px){
-  .header-container{ padding:0 2.5rem; }
-  .logo{ font-size:2rem; }
-  .main-nav{ display:flex; }
-  .auth-buttons{ display:flex; order:1; }
-  .hamburger-container{ display:block; order:2; }
+
+@media (min-width: 992px) {
+  .main-nav { display: flex; }
+  .hamburger-container { display: none; }
+  .header-container { padding: 0 2.5rem; }
+  .logo { font-size: 2rem; }
+  .nav-menu-horizontal { gap: 1.5rem; }
+  .auth-buttons { gap: 1.5rem; }
 }
-@media (min-width: 992px){
-  .nav-menu-horizontal{ gap:1.5rem; }
-  .auth-buttons{ gap:1.5rem; }
-}
+
 @media (min-width: 1200px){
   .nav-menu-horizontal{ gap:2rem; }
   .auth-buttons{ gap:2rem; }

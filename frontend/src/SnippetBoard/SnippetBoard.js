@@ -90,56 +90,51 @@ const SnippetBoard = () => {
   };
 
   return (
-    <div className="container snippet-board-container">
+    <div className="container snippet-board-container board-container">
       <div className="board-header">
         <h2 className="mb-3">스니펫</h2>
         <p className="text-muted">다양한 코드 스니펫을 탐색하고 공유하세요.</p>
       </div>
 
-{/* compact, responsive toolbar */}
-<div className="search-toolbar mb-4">
-  {/* 왼쪽: 검색/필터/검색 버튼 */}
-  <form className="search-fields" onSubmit={handleSearch}>
-    <input
-      type="text"
-      className="form-control"
-      placeholder="검색..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <form className="search-form" onSubmit={handleSearch}>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="검색어 입력"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
 
-    <select
-      className="form-select"
-      value={searchLanguage}
-      onChange={(e) => setSearchLanguage(e.target.value)}
-    >
-      <option value="">모든 언어</option>
-      {LANGUAGE_OPTIONS.map((lang) => (
-        <option key={lang} value={lang}>{lang}</option>
-      ))}
-    </select>
+          <select
+            className="form-select"
+            value={searchLanguage}
+            onChange={(e) => setSearchLanguage(e.target.value)}
+          >
+            <option value="">모든 언어</option>
+            {LANGUAGE_OPTIONS.map((lang) => (
+              <option key={lang} value={lang}>{lang}</option>
+            ))}
+          </select>
 
-    <select
-      className="form-select"
-      value={sortOrder}
-      onChange={(e) => setSortOrder(e.target.value)}
-    >
-      <option value="LATEST">최신순</option>
-      <option value="POPULAR">인기순</option>
-    </select>
+          <select
+            className="form-select"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="LATEST">최신순</option>
+            <option value="POPULAR">인기순</option>
+          </select>
 
-    <button className="btn btn-outline-secondary" type="submit">
-      검색
-    </button>
-  </form>
+          <button className="btn btn-dark" type="submit">
+            검색
+          </button>
+        </form>
 
-  {/* 오른쪽: 스니펫 작성 (작은 화면에서는 2번째 줄 오른쪽) */}
-  <div className="search-actions">
-    <button className="btn btn-primary write-btn" onClick={handleWrite}>
-      스니펫 작성
-    </button>
-  </div>
-</div>
+        <button className="btn btn-primary write-btn" onClick={handleWrite}>
+          스니펫 작성
+        </button>
+      </div>
 
       {loading && (
         <div className="text-center">

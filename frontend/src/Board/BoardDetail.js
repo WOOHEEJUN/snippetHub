@@ -386,13 +386,6 @@ function BoardDetail() {
                 <div key={comment.commentId} className="comment-item">
                   
                   <div className="comment-author">
-                  {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
                     {authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
                         {comment.author?.level && (
@@ -483,13 +476,6 @@ function BoardDetail() {
                                 }}
                               >
                                 <div className="comment-author">
-                                {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
                                   {rAuthorId ? (
                                     <Link to={`/users/${rAuthorId}`} className="author-link">
                                       {reply.author?.level && (
@@ -546,13 +532,6 @@ function BoardDetail() {
             <FaUser /> 작성자
           </h4>
           <div className="author-info">
-          {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
             {post.author?.userId ? (
               <Link to={`/users/${post.author.userId}`}>
                 {post.author?.level && (

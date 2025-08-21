@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LevelProgress from '../components/LevelProgress';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/Mypage.css';
 
 function MyPage() {
-  const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem('accessToken');
@@ -26,37 +24,15 @@ function MyPage() {
         setUserInfo(data.data);
       })
       .catch((err) => {
-        
         alert('유저 정보를 불러오는 데 실패했습니다.');
       })
       .finally(() => setLoading(false));
   }, [token]);
 
-  const goToMyPosts = () => {
-    navigate('/mypage/posts', { state: { accessToken: token } });
-  };
-
-  const goToMySnippets = () => {
-    navigate('/mypage/snippets', { state: { accessToken: token } });
-  };
-
-  const goToEditProfile = () => {
-    navigate('/mypage/edit', { state: { accessToken: token } });
-  };
-
-  const handleLogout = () => {
-    logout();
-    alert('로그아웃 되었습니다.');
-    window.scrollTo(0, 0);
-    navigate('/');
-  };
-
   if (loading) return <p className="loading-message">로딩 중...</p>;
 
   return (
-    <div className="mypage-container">
-      <h2>마이페이지</h2>
-
+    <>
       {userInfo ? (
         <>
           <div className="mypage-card user-info-card">
@@ -68,11 +44,9 @@ function MyPage() {
                 {userInfo.nickname}
               </p>
               <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
-              <Link to="/mypage/badges" className="btn btn-primary-custom mt-3">등급보기</Link>
             </div>
           </div>
 
-          
           <LevelProgress 
             userLevel={userInfo.level} 
             userPoints={userInfo.points || 0} 
@@ -102,44 +76,12 @@ function MyPage() {
                 <span className="stat-value">{userInfo.stats?.totalViews ?? 0}회</span>
               </div>
             </div>
-            <div className="mypage-actions">
-              <Link to="/submission-history" className="btn btn-primary-custom">
-                제출 이력
-              </Link>
-              <button className="btn btn-primary-custom" onClick={goToMyPosts}>
-                게시물 목록 보기
-              </button>
-              <button className="btn btn-primary-custom" onClick={goToMySnippets}>
-                스니펫 목록 보기
-              </button>
-              <Link to="/mypage/saved-problems" className="btn btn-primary-custom">
-                저장한 문제 보기
-              </Link>
-            </div>
           </div>
         </>
       ) : (
         <p className="error-message">유저 정보를 불러올 수 없습니다.</p>
       )}
-
-      <div className="mypage-controls">
-        <button className="btn btn-secondary-custom" onClick={goToEditProfile}>
-          개인정보 수정
-        </button>
-        <Link to="/mypage/ranking" className="btn btn-secondary-custom">
-          랭킹 보기
-        </Link>
-        <Link to="/mypage/points-guide" className="btn btn-secondary-custom">
-          포인트 획득 기준
-        </Link>
-        <Link to="/point-history" className="btn btn-secondary-custom">
-          포인트 히스토리
-        </Link>
-        <button className="btn btn-secondary-custom" onClick={handleLogout}>
-          로그아웃
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
 

@@ -85,12 +85,12 @@ function LevelProgress({ userLevel, userPoints }) {
               aria-valuenow={progressPercentage}
             >
               <div
-                className="progress-fill"
-                style={{
-                  width: `${progressPercentage}%`,
-                  background: `linear-gradient(90deg, ${currentLevel.color}, #8ab0d1)`,
-                }}
-              />
+                  className="progress-fill"
+                  style={{
+                    width: `${progressPercentage}%`,
+                    background: `#8BC34A`,
+                  }}
+                />
             </div>
 
             <div className="progress-text">{progressPercentage}% 완료</div>

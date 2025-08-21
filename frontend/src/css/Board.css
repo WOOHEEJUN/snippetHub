@@ -211,3 +211,32 @@
   .board-container .search-form{ gap: 8px !important; }
   .board-container .search-form .form-control{ min-width: 70px !important; }
 }
+
+/* Board Header Description Text */
+.board-header p {
+  color: #fff !important;
+}
+/* =========================================================
+   Board Specific Styles (to match SnippetBoard)
+   ========================================================= */
+
+.board-container {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #0d0d0d;
+  color: #d3d3d3;
+}
+
+.board-header {
+  border-bottom: 1px solid #222222;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.board-header h2 {
+  font-weight: 700;
+  color: #d3d3d3;
+}
+/* Empty Board Message */
+.empty-board-message {
+  color: #fff !important; /* Use !important to override text-muted */
+}

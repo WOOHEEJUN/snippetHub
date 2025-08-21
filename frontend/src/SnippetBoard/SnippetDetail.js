@@ -384,13 +384,6 @@ function SnippetDetail() {
             {comments.map((comment) => (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
                   {comment.author?.userId ? (
                     <Link to={`/users/${comment.author.userId}`} className="author-link">
                       {comment.author?.level && <img src={getLevelBadgeImage(comment.author.level)} alt={comment.author.level} className="level-badge-inline" />}
@@ -452,13 +445,6 @@ function SnippetDetail() {
                             style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
                           >
                             <div className="comment-author">
-                            {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
                               {reply.author?.userId ? (
                                 <Link to={`/users/${reply.author.userId}`} className="author-link">
                                   {reply.author?.level && <img src={getLevelBadgeImage(reply.author.level)} alt={reply.author.level} className="level-badge-inline" />}
@@ -497,13 +483,6 @@ function SnippetDetail() {
         <div className="sidebar-card author-card">
           <h4><FaUser /> 작성자</h4>
           <div className="author-info">
-          {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
             {snippet.author?.userId ? (
               <Link to={`/users/${snippet.author.userId}`}>
                 {snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" />}
