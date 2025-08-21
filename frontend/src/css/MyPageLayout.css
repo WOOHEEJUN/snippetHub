@@ -1,9 +1,17 @@
+/* 헤더 높이(추정). 필요하면 실제 헤더 높이에 맞게 조절해 주세요. */
+:root {
+  --header-height: 64px;
+  --sidebar-width: 250px; /* 추가: 모바일 사이드바 너비와 동일해야 함 */
+}
+
+/* ===== 레이아웃 ===== */
 .mypage-layout-container {
   display: flex;
   max-width: 1200px;
   margin: 2rem auto;
   gap: 2rem;
   align-items: flex-start;
+  position: relative;
 }
 
 .mypage-sidebar {
@@ -23,12 +31,7 @@
   border-bottom: 1px solid #333;
 }
 
-.sidebar-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
+.sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
 .sidebar-nav a {
   display: block;
   padding: 0.75rem 1rem;
@@ -38,17 +41,8 @@
   transition: all 0.2s ease;
   font-weight: 500;
 }
-
-.sidebar-nav a:hover {
-  background-color: #2a2a2a;
-  color: #fff;
-}
-
-.sidebar-nav a.active {
-  background-color: #007bff;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
-}
+.sidebar-nav a:hover { background-color: #2a2a2a; color: #fff; }
+.sidebar-nav a.active { background-color: #007bff; color: #fff; box-shadow: 0 4px 12px rgba(0,123,255,0.2); }
 
 .mypage-content {
   flex: 1 1 auto;
@@ -56,4 +50,107 @@
   padding: 2rem;
   border-radius: 8px;
   border: 1px solid #2a2a2a;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 오버레이 ===== */
+.mypage-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1500; /* 콘텐츠 위, 사이드바 아래, 버튼 아래 */
+}
+
+/* ===== 마이페이지 화살표 버튼 ===== */
+.mypage-hamburger-btn {
+  position: fixed;
+  top: calc(var(--header-height) + 8px);
+  left: 12px;
+  background: rgba(26,26,26,0.92);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;              /* 살짝 더 작게 */
+  cursor: pointer;
+  padding: 4px 6px;                /* ↓ 패딩 축소 */
+  z-index: 2000;
+  line-height: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* 그림자도 조금 줄임 */
+  transition: box-shadow 0.2s ease, transform 0.12s ease, background 0.2s ease;
+}
+
+.mypage-hamburger-btn .icon-stage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;    /* ↓ 아이콘 영역 축소 */
+  height: 18px;
+  position: relative;
+}
+
+.chev {
+  position: absolute;
+  font-size: 1.2rem;  /* ↓ 아이콘 크기 줄임 (기존 1.6rem → 1.2rem) */
+  color: #ffffff;
+  opacity: 0;
+  transform: scale(0.7);
+  animation: iconIn 220ms ease forwards;
+}
+@keyframes iconIn {
+  from { opacity: 0; transform: scale(0.7) rotate(-15deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* 버튼이 열림 상태로 바뀔 때 팝 효과 */
+.mypage-hamburger-btn.open .icon-stage { animation: popOnce 220ms ease; }
+@keyframes popOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* ===== 모바일 동작 ===== */
+@media (max-width: 767px) {
+  .mypage-layout-container {
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    min-height: 100vh;
+  }
+
+  .mypage-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    transform: translateX(-100%); /* 기본: 화면 밖 */
+    transition: transform 280ms cubic-bezier(.22,.61,.36,1);
+    z-index: 1600; /* 오버레이(1500)보다 위, 버튼(2000)보다 아래 */
+    box-shadow: 2px 0 16px rgba(0,0,0,0.5);
+    padding-top: 1.5rem;
+    background-color: #1a1a1a;
+    border-right: 1px solid #2a2a2a;
+    border-radius: 0;
+  }
+  .mypage-sidebar.open { transform: translateX(0); }
+
+  /* 버튼은 모바일에서만 보이도록 */
+  .mypage-hamburger-btn { display: inline-flex; }
+
+  .mypage-content {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+/* 초소형 기기 */
+@media (max-width: 576px) {
+  .mypage-content { padding: 0.8rem; }
+  .sidebar-title { font-size: 1.3rem; }
+  .sidebar-nav a { padding: 0.6rem 0.8rem; font-size: 0.95rem; }
+}
+.mypage-layout-container.sidebar-open .mypage-hamburger-btn {
+  left: calc(var(--sidebar-width) + 12px);
 }
