@@ -287,6 +287,7 @@ function BoardDetail() {
               <FaUser />
               {(() => {
                 const displayLevel = (user?.userId === post.author?.userId && user?.level) ? user.level : post.author?.level;
+                console.log('BoardDetail - Post Author displayLevel:', displayLevel);
                 return post.author?.userId ? (
                   <Link to={`/users/${post.author.userId}`}>
                     {displayLevel && (
@@ -382,6 +383,7 @@ function BoardDetail() {
                   <div className="comment-author">
                     {(() => {
                       const displayLevel = (user?.userId === authorId && user?.level) ? user.level : comment.author?.level;
+                      console.log('BoardDetail - Comment Author displayLevel:', displayLevel);
                       return authorId ? (
                         <Link to={`/users/${authorId}`} className="author-link">
                           {displayLevel && (
@@ -475,6 +477,7 @@ function BoardDetail() {
                                 <div className="comment-author">
                                   {(() => {
                                     const displayLevel = (user?.userId === rAuthorId && user?.level) ? user.level : reply.author?.level;
+                                    console.log('BoardDetail - Reply Author displayLevel:', displayLevel);
                                     return rAuthorId ? (
                                       <Link to={`/users/${rAuthorId}`} className="author-link">
                                         {displayLevel && (

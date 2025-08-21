@@ -374,6 +374,7 @@ function SnippetDetail() {
                 <div className="comment-author">
                   {(() => {
                     const displayLevel = (user?.userId === comment.author?.userId && user?.level) ? user.level : comment.author?.level;
+                    console.log('SnippetDetail - Comment Author displayLevel:', displayLevel);
                     return comment.author?.userId ? (
                       <Link to={`/users/${comment.author.userId}`} className="author-link">
                         {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
@@ -437,6 +438,7 @@ function SnippetDetail() {
                             <div className="comment-author">
                               {(() => {
                                 const displayLevel = (user?.userId === reply.author?.userId && user?.level) ? user.level : reply.author?.level;
+                                console.log('SnippetDetail - Reply Author displayLevel:', displayLevel);
                                 return reply.author?.userId ? (
                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
                                     {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
@@ -478,6 +480,7 @@ function SnippetDetail() {
           <div className="author-info">
             {(() => {
               const displayLevel = (user?.userId === snippet.author?.userId && user?.level) ? user.level : snippet.author?.level;
+              console.log('SnippetDetail - Snippet Author displayLevel:', displayLevel);
               return snippet.author?.userId ? (
                 <Link to={`/users/${snippet.author.userId}`}>
                   {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}

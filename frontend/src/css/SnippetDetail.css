@@ -546,8 +546,8 @@
 }
 
 .level-badge-inline {
-  width: 18px;         /* 필요 시 16~20px 조절 */
-  height: 18px;
+  width: 24px;         /* Increased size for better visibility */
+  height: 24px;
   object-fit: contain;
   vertical-align: middle;
 }
