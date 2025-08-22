@@ -3,47 +3,94 @@ import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 import { getBadgeImagePath } from '../utils/badgeUtils';
 
+/** 안전 JSON 파서 */
+const parseJsonSafe = async (res) => {
+  try {
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return await res.json();
+  } catch (_) {}
+  return null;
+};
+
+/** 여러 응답 스키마에서 배열을 뽑아내기 */
+const extractArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  return [];
+};
+
+/** 뱃지 객체 정규화 */
+const normalizeBadge = (b, idx = 0) => {
+  const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER')
+    .toString()
+    .toUpperCase();
+
+  return {
+    badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
+    name: b.name ?? b.title ?? b.badgeName ?? '이름 없음',
+    description: b.description ?? b.desc ?? '',
+    category,
+    requiredCount: b.requiredCount ?? b.requirementCount ?? b.goal ?? 1,
+    requirements: b.requirements ?? b.requirementList ?? [],
+    rewards: b.rewards ?? b.rewardList ?? [],
+    currentProgress: b.currentProgress ?? b.progress ?? 0,
+    owned: b.owned ?? b.isOwned ?? false,
+  };
+};
+
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
+
   const [badges, setBadges] = useState([]);
   const [userBadges, setUserBadges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
+  const categories = [
+    { value: 'ALL', label: '전체' },
+    { value: 'ACTIVITY', label: '활동' },
+    { value: 'ACHIEVEMENT', label: '업적' },
+    { value: 'SPECIAL', label: '특별' },
+    { value: 'EVENT', label: '이벤트' },
+  ];
+
   useEffect(() => {
     const fetchBadgesAndUser = async () => {
       try {
-        // 1) 뱃지 목록
-        const response = await fetch('/api/badges', {
-          headers: getAuthHeaders(),
-          credentials: 'include'
-        });
-        if (!response.ok) throw new Error('뱃지 목록을 불러오는 중 오류가 발생했습니다.');
-        const data = await response.json();
+        setLoading(true);
+        setError(null);
 
-        let serverBadges = [];
-        if (data.success && data.data) {
-          serverBadges = data.data;
+        // 1) 전체 뱃지
+        const resAll = await fetch('/api/badges', {
+          headers: getAuthHeaders(),
+          credentials: 'include',
+        });
+        if (!resAll.ok) throw new Error('뱃지 목록 조회 실패');
+
+        const jsonAll = await parseJsonSafe(resAll);
+        const rawBadges = extractArray(jsonAll);
+        const normalized = rawBadges.map((b, i) => normalizeBadge(b, i));
+        setBadges(normalized);
+
+        // 2) 내가 가진 뱃지
+        const resMine = await fetch('/api/badges/my', {
+          headers: getAuthHeaders(),
+          credentials: 'include',
+        });
+        if (resMine.ok) {
+          const jsonMine = await parseJsonSafe(resMine);
+          const mine = extractArray(jsonMine).map((b, i) => normalizeBadge(b, i));
+          setUserBadges(mine);
         } else {
-          console.warn('백엔드에서 뱃지 데이터를 불러오지 못했습니다.');
-        }
-        setBadges(serverBadges);
-
-        // 2) 사용자 보유 뱃지
-        const userResponse = await fetch('/api/badges/my', {
-          headers: getAuthHeaders(),
-          credentials: 'include'
-        });
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          if (userData.success && userData.data) {
-            setUserBadges(userData.data);
-          }
+          setUserBadges([]);
         }
       } catch (err) {
-        console.error('뱃지 목록 불러오기 실패:', err);
+        console.error(err);
         setBadges([]);
+        setUserBadges([]);
         setError('뱃지 정보를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
@@ -53,35 +100,26 @@ function BadgeGuide() {
     fetchBadgesAndUser();
   }, [getAuthHeaders]);
 
-  const categories = [
-    { value: 'ALL', label: '전체' },
-    { value: 'ACTIVITY', label: '활동' },
-    { value: 'ACHIEVEMENT', label: '업적' },
-    { value: 'SPECIAL', label: '특별' },
-    { value: 'EVENT', label: '이벤트' }
-  ];
-
+  /** 필터링 (대소문자 불일치 내성) */
   const filteredBadges = useMemo(() => {
-    return selectedCategory === 'ALL'
-      ? badges
-      : badges.filter(badge => badge.category === selectedCategory);
+    if (selectedCategory === 'ALL') return badges;
+    const target = selectedCategory.toUpperCase();
+    return badges.filter((b) => (b.category || '').toUpperCase() === target);
   }, [badges, selectedCategory]);
 
-  const isOwned = (badgeId) => {
-    return userBadges.some(userBadge => userBadge.badgeId === badgeId);
-  };
+  /** 보유 여부 */
+  const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
 
+  /** 진행도 계산 */
   const getProgressInfo = (badge) => {
-    const userBadge = userBadges.find(ub => ub.badgeId === badge.badgeId);
-    if (!userBadge) return null;
-
+    const ub = userBadges.find((x) => x.badgeId === badge.badgeId);
+    if (!ub) return null;
+    const current = ub.currentProgress ?? 0;
+    const required = badge.requiredCount || 1;
     return {
-      current: userBadge.currentProgress || 0,
-      required: badge.requiredCount || 1,
-      percentage: Math.min(
-        100,
-        ((userBadge.currentProgress || 0) / (badge.requiredCount || 1)) * 100
-      )
+      current,
+      required,
+      percentage: Math.min(100, (current / required) * 100),
     };
   };
 
@@ -116,7 +154,7 @@ function BadgeGuide() {
         <div className="filter-section">
           <h3>카테고리별 필터</h3>
           <div className="category-filters">
-            {categories.map(category => (
+            {categories.map((category) => (
               <button
                 key={category.value}
                 onClick={() => setSelectedCategory(category.value)}
@@ -129,7 +167,7 @@ function BadgeGuide() {
         </div>
 
         <div className="badges-grid">
-          {filteredBadges.map(badge => {
+          {filteredBadges.map((badge) => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
 
@@ -137,7 +175,11 @@ function BadgeGuide() {
               <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'}`}>
                 <div className="badge-image">
                   <div className="badge-icon-container">
-                    <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
+                    <img
+                      src={getBadgeImagePath((badge.name || '').trim())}
+                      alt={badge.name}
+                      className="badge-image-actual"
+                    />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
@@ -148,7 +190,15 @@ function BadgeGuide() {
 
                   <div className="badge-category">
                     <span className={`category-tag category-${String(badge.category || '').toLowerCase()}`}>
-                      {categories.find(c => c.value === badge.category)?.label || badge.category}
+                      {(
+                        [
+                          ['ALL', '전체'],
+                          ['ACTIVITY', '활동'],
+                          ['ACHIEVEMENT', '업적'],
+                          ['SPECIAL', '특별'],
+                          ['EVENT', '이벤트'],
+                        ].find((c) => c[0] === (badge.category || '').toUpperCase()) || [null, badge.category]
+                      )[1]}
                     </span>
                   </div>
 
@@ -157,38 +207,35 @@ function BadgeGuide() {
                       {progress ? (
                         <>
                           <div className="progress-bar">
-                            <div
-                              className="progress-fill"
-                              style={{ width: `${progress.percentage}%` }}
-                            />
+                            <div className="progress-fill" style={{ width: `${progress.percentage}%` }} />
                           </div>
                           <div className="progress-text">
                             {progress.current} / {progress.required}
                           </div>
                         </>
                       ) : (
-                        <div className="progress-text">
-                          0 / {badge.requiredCount}
-                        </div>
+                        <div className="progress-text">0 / {badge.requiredCount}</div>
                       )}
                     </div>
                   )}
 
-                  <div className="badge-requirements">
-                    <h5>획득 조건:</h5>
-                    <ul>
-                      {badge.requirements && badge.requirements.map((req, index) => (
-                        <li key={index}>{req}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  {(badge.requirements?.length ?? 0) > 0 && (
+                    <div className="badge-requirements">
+                      <h5>획득 조건:</h5>
+                      <ul>
+                        {badge.requirements.map((req, i) => (
+                          <li key={i}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                  {badge.rewards && (
+                  {(badge.rewards?.length ?? 0) > 0 && (
                     <div className="badge-rewards">
                       <h5>보상:</h5>
                       <ul>
-                        {badge.rewards.map((reward, index) => (
-                          <li key={index}>{reward}</li>
+                        {badge.rewards.map((rw, i) => (
+                          <li key={i}>{rw}</li>
                         ))}
                       </ul>
                     </div>
