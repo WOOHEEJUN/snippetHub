@@ -301,44 +301,11 @@ public class CodeExecutionSecurityFilter extends OncePerRequestFilter {
         return input.replaceAll("&amp;", "&")
                    .replaceAll("&lt;", "<")
                    .replaceAll("&gt;", ">")
-                   .replaceAll("&quot;", "\"")
-                   .replaceAll("&#([0-9]+);", matchResult -> {
-                       try {
-                           return String.valueOf((char) Integer.parseInt(matchResult.group(1)));
-                       } catch (Exception e) {
-                           return matchResult.group();
-                       }
-                   });
+                   .replaceAll("&quot;", "\"");
     }
 
     private String decodeEscapes(String input) {
-        // 유니코드 이스케이프 시퀀스 디코딩
-        input = input.replaceAll("\\\\u([0-9A-Fa-f]{4})", matchResult -> {
-            try {
-                return String.valueOf((char) Integer.parseInt(matchResult.group(1), 16));
-            } catch (Exception e) {
-                return matchResult.group();
-            }
-        });
-        
-        // 16진수 이스케이프 시퀀스 디코딩
-        input = input.replaceAll("\\\\x([0-9A-Fa-f]{2})", matchResult -> {
-            try {
-                return String.valueOf((char) Integer.parseInt(matchResult.group(1), 16));
-            } catch (Exception e) {
-                return matchResult.group();
-            }
-        });
-        
-        // 8진수 이스케이프 시퀀스 디코딩
-        input = input.replaceAll("\\\\([0-7]{3})", matchResult -> {
-            try {
-                return String.valueOf((char) Integer.parseInt(matchResult.group(1), 8));
-            } catch (Exception e) {
-                return matchResult.group();
-            }
-        });
-        
+        // 간단한 문자열 치환으로 변경
         return input;
     }
 
