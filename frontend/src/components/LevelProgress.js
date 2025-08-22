@@ -88,12 +88,13 @@ function LevelProgress({ userLevel, userPoints }) {
             aria-label="레벨 진행도"
           >
             <div
-  className="lp__fill"
-  style={{
-    width: `${animatedProgress}%`,
-    background: '#86C06A'   // ✅ 탁한 연두색으로 고정
-  }}
-/>
+              className="lp__fill"
+              style={{
+                width: `${animatedProgress}%`,
+                background: '#86C06A', // 탁한 연두색
+              }}
+            />
+          </div>
 
           <div className="lp__text">{progressPercentage}% 완료</div>
         </div>

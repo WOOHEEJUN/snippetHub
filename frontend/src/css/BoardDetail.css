@@ -1,5 +1,4 @@
-
-
+/* ===== BoardDetail.css ===== */
 
 .board-detail-page {
   display: flex;
@@ -7,7 +6,7 @@
   padding: 2.5rem;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #121212; 
+  background-color: #121212;
   border-radius: 12px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
@@ -26,13 +25,13 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  height: fit-content; 
-  position: sticky; 
-  top: 2rem; 
-  align-self: flex-start; 
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+  align-self: flex-start;
 }
 
-
+/* Header */
 .post-header {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
@@ -47,6 +46,7 @@
   word-break: break-word;
 }
 
+/* Meta */
 .post-meta-info {
   display: flex;
   align-items: center;
@@ -66,40 +66,40 @@
   color: #999;
 }
 
-
+/* Actions */
 .post-actions-top {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   flex-wrap: wrap;
 }
 
 .post-actions-top .like-button {
-  padding: 0.7rem 1.4rem !important; 
-  border-radius: 50px !important; 
-  font-size: 1.1rem !important; 
-  font-weight: 700 !important; 
+  padding: 0.7rem 1.4rem !important;
+  border-radius: 50px !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
   display: flex !important;
   align-items: center !important;
-  gap: 0.6rem !important; 
+  gap: 0.6rem !important;
   transition: all 0.3s ease-in-out !important;
   white-space: nowrap !important;
-  background-color: #e0e0e0 !important; 
-  color: #333333 !important; 
-  border: 1px solid #e0e0e0 !important; 
+  background-color: #e0e0e0 !important;
+  color: #333333 !important;
+  border: 1px solid #e0e0e0 !important;
   width: auto !important;
   margin-left: auto !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .post-actions-top .like-button svg {
-  font-size: 1.5rem; 
+  font-size: 1.5rem;
 }
 
 .post-actions-top .like-button:hover {
-  transform: translateY(-2px); 
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 .post-actions-top .like-button.liked {
@@ -109,10 +109,9 @@
 }
 
 .post-actions-top .like-button.liked:hover {
-  background-color: #c0392b !important; 
+  background-color: #c0392b !important;
   border-color: #c0392b !important;
 }
-
 
 @media (max-width: 768px) {
   .post-actions-top .like-button {
@@ -121,7 +120,7 @@
     gap: 0.5rem !important;
   }
   .post-actions-top .like-button svg {
-    font-size: 1.3rem; 
+    font-size: 1.3rem;
   }
 }
 
@@ -136,7 +135,7 @@
   color: #333333;
 }
 
-
+/* Content */
 .post-content-body {
   background-color: #222222;
   padding: 2rem;
@@ -162,51 +161,71 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
-
+/* Sidebar cards */
 .sidebar-card {
   background-color: #1a1a1a;
   border: 1px solid #333333;
   border-radius: 12px;
-  padding: 1rem; 
+  padding: 1rem;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  margin-bottom: 0.5rem; 
+  margin-bottom: 0.5rem;
 }
 
 .sidebar-card h4 {
-  font-size: 1rem; /* Smaller icon and title */
+  font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 0.5rem; 
+  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
   color: #d3d3d3;
 }
 
+/* Author card (프로필 사진칸 제거 + 닉네임 크게) */
 .author-card .author-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Adjusted gap */
+  gap: 0.7rem;                 /* 배지-닉네임 간격 살짝 키움 */
 }
 
-.author-card img {
-  width: 40px; 
-  height: 40px; 
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #8ab0d1;
+/* 프로필 원형 아바타가 있어도 숨김 (레벨 배지는 유지) */
+.author-card img:not(.level-badge-inline) {
+  display: none !important;
 }
 
+/* 배지는 아바타 스타일 제거 */
+.level-badge-inline {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  vertical-align: middle;
+  border: none;
+  border-radius: 0;
+}
+
+/* 기본 텍스트 */
 .author-card span {
   font-weight: 600;
   color: #d3d3d3;
-  font-size: 1.1em; /* Larger nickname */
 }
 
+/* 닉네임만 크게 */
+.author-card .nickname {
+  font-size: 1.6rem;           /* ← 더 키우고 싶으면 1.8rem 등으로 */
+  font-weight: 800;
+  color: #f1f1f1;
+  line-height: 1.1;
+}
+
+/* 링크 공통 */
 .author-link {
-  font-weight: bold;
-  color: #d3d3d3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
   text-decoration: none;
   transition: color 0.2s;
+  white-space: nowrap;
 }
 
 .author-link:hover {
@@ -214,22 +233,22 @@
   text-decoration: underline;
 }
 
-
+/* Buttons */
 .actions-card {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; 
+  gap: 0.5rem;
 }
 
 .action-button {
   width: 100%;
-  padding: 0.6rem; 
+  padding: 0.6rem;
   border-radius: 5px;
   border: 1px solid #000000;
   background-color: #000000;
   cursor: pointer;
   font-weight: 500;
-  font-size: 0.9rem; 
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,36 +257,19 @@
   color: #e0e0e0;
 }
 
-.action-button:hover {
-  background-color: #333333;
-}
+.action-button:hover { background-color: #333333; }
+.edit-button   { background-color: #000000; color: #e0e0e0; border-color: #000000; }
+.delete-button { background-color: #000000; color: #e0e0e0; border-color: #000000; }
+.back-button   { background-color: #000000; color: #e0e0e0; border-color: #000000; }
 
-.edit-button {
-  background-color: #000000;
-  color: #e0e0e0;
-  border-color: #000000;
-}
-
-.delete-button {
-  background-color: #000000;
-  color: #e0e0e0;
-  border-color: #000000;
-}
-
-.back-button {
-  background-color: #000000;
-  color: #e0e0e0;
-  border-color: #000000;
-}
-
-
+/* Info list */
 .info-card ul {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; 
+  gap: 0.5rem;
 }
 
 .info-card li {
@@ -275,10 +277,10 @@
   align-items: center;
   gap: 0.5rem;
   color: #b0b0b0;
-  font-size: 0.9rem; 
+  font-size: 0.9rem;
 }
 
-
+/* Replies */
 .replies-container {
   margin-top: 1.5rem;
   padding-left: 1.5rem;
@@ -286,17 +288,14 @@
 }
 
 .reply-item {
-  background-color: #222222; 
+  background-color: #222222;
   padding: 1.2rem;
   border-radius: 8px;
   margin-top: 1rem;
   border: 1px solid #3a3a3a;
 }
 
-.reply-form {
-  margin-top: 1rem;
-  padding-left: 1.5rem;
-}
+.reply-form { margin-top: 1rem; padding-left: 1.5rem; }
 
 .reply-form textarea {
   width: 100%;
@@ -325,52 +324,10 @@
   color: #e0e0e0;
 }
 
-
-.like-button.liked svg {
-  animation: pop 0.2s;
-}
+/* Like animation */
+.like-button.liked svg { animation: pop 0.2s; }
 @keyframes pop {
   0% { transform: scale(1); }
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
-}
-.post-actions-top {
-  display: flex;
-  justify-content: flex-end;
-  margin: 1rem 0;
-}
-
-
-.like-button.liked {
-  background-color: #bf3636; 
-  color: #fff;
-  border-color: #bf3636;
-}
-
-.like-button.liked svg {
-  animation: pop 0.2s;
-}
-
-@keyframes pop {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
-.author-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;            /* 배지-닉네임 간격 */
-  color: inherit;
-  text-decoration: none;
-}
-
-.level-badge-inline {
-  width: 30px;         /* Larger badge */
-  height: 30px;
-  object-fit: contain;
-  vertical-align: middle;
-}
-
-.nickname {
-  line-height: 1;
 }
