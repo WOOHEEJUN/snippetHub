@@ -34,6 +34,7 @@ public enum ErrorCode {
     PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "PR001", "문제를 찾을 수 없습니다."),
     DAILY_PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "PR002", "일일 문제를 찾을 수 없습니다."),
     SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "PR003", "제출을 찾을 수 없습니다."),
+    DUPLICATE_SUBMISSION(HttpStatus.CONFLICT, "PR004", "5초 내에 중복 제출할 수 없습니다."),
 
     // Comment
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "C004", "댓글을 찾을 수 없습니다."),
