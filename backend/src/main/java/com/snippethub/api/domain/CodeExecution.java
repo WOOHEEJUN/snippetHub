@@ -31,20 +31,16 @@ public class CodeExecution {
     @Column(nullable = false, length = 20)
     private String language;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String code;
 
-    @Lob
-    @Column(name = "input_data")
+    @Column(name = "input_data", columnDefinition = "TEXT")
     private String input;
 
-    @Lob
-    @Column(name = "output_data")
+    @Column(name = "output_data", columnDefinition = "TEXT")
     private String output;
 
-    @Lob
-    @Column(name = "error_data")
+    @Column(name = "error_data", columnDefinition = "TEXT")
     private String error;
 
     @Column(name = "execution_time")

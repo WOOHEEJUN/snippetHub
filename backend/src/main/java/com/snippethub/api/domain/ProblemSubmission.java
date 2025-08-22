@@ -28,8 +28,7 @@ public class ProblemSubmission {
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
-    @Lob
-    @Column(name = "submitted_code", nullable = false)
+    @Column(name = "submitted_code", nullable = false, columnDefinition = "TEXT")
     private String submittedCode;
 
     @Column(name = "language", nullable = false)
@@ -51,12 +50,10 @@ public class ProblemSubmission {
     @Column(name = "total_test_cases")
     private Integer totalTestCases = 0;
 
-    @Lob
-    @Column(name = "error_message")
+    @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
-    @Lob
-    @Column(name = "output")
+    @Column(name = "output", columnDefinition = "TEXT")
     private String output;
 
     @CreationTimestamp
