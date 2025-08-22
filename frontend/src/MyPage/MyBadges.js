@@ -10,9 +10,13 @@ function MyBadges() {
 
   const [level, setLevel] = useState(null);
   const [points, setPoints] = useState(null);
+
   const [badges, setBadges] = useState([]);
   const [featuredBadges, setFeaturedBadges] = useState([]);
-  const [badgeStats, setBadgeStats] = useState(null); // 필요 시 API 연결
+
+  // 선택 사항(통계가 API에 있으면 노출)
+  const [badgeStats, setBadgeStats] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,24 +39,24 @@ function MyBadges() {
 
         const profileData = await profileRes.json().catch(() => ({}));
         const badgesData = await badgesRes.json().catch(() => ({}));
-        const featuredBadgesData = await featuredRes.json().catch(() => ({}));
+        const featuredData = await featuredRes.json().catch(() => ({}));
 
         if (profileData?.data) {
           setLevel({
             levelName: profileData.data.level,
             level: profileData.data.level,
           });
-          setPoints({
-            point: profileData.data.points,
-          });
+          setPoints({ point: profileData.data.points });
         } else {
           setLevel(null);
           setPoints(null);
         }
 
         setBadges(badgesData?.data || []);
-        setFeaturedBadges(featuredBadgesData?.data || []);
-        // setBadgeStats(…); // 필요하면 여기서 통계 API 연결
+        setFeaturedBadges(featuredData?.data || []);
+
+        // 통계 API가 있으면 여기에 setBadgeStats로 넣어 쓰세요
+        // setBadgeStats(statsData?.data)
       } catch (err) {
         console.error('데이터 불러오기 실패:', err);
         setError('데이터를 불러오는 중 오류가 발생했습니다.');
@@ -83,7 +87,7 @@ function MyBadges() {
 
         if (newFeaturedStatus) {
           const newlyFeaturedBadge = badges.find((b) => b.badgeId === badgeId);
-          updateRepresentativeBadge(newlyFeaturedBadge);
+          updateRepresentativeBadge(newlyFeaturedBadge || null);
         } else {
           updateRepresentativeBadge(null);
         }
@@ -110,53 +114,32 @@ function MyBadges() {
     <div className="my-badges-page">
       <h2>마이페이지</h2>
 
-      {/* 등급 / 포인트 타일 */}
+      {/* --- 가로(한 줄) 정보 타일 --- */}
       <div className="info-section">
         <Link to="/grade-guide" className="info-card-link">
           <div className="info-card">
-            <div className="label">
-              <FaCrown />
-              등급
-            </div>
+            <div className="label"><FaCrown /> 등급</div>
             <div className="value">{level ? level.levelName : '정보 없음'}</div>
           </div>
         </Link>
 
         <div className="info-card">
-          <div className="label">
-            <FaCoins />
-            포인트
-          </div>
-          <div className="value">
-            {points ? (
-              <>
-                {points.point}
-                <small>&nbsp;P</small>
-              </>
-            ) : (
-              '정보 없음'
-            )}
-          </div>
+          <div className="label"><FaCoins /> 포인트</div>
+          <div className="value">{points ? <><strong>{points.point}</strong><small>&nbsp;P</small></> : '정보 없음'}</div>
         </div>
       </div>
 
-      {/* 통계(선택) */}
+      {/* (선택) 통계 카드 */}
       {badgeStats && (
         <div className="badge-section">
           <h3>뱃지 통계</h3>
           <div className="info-section">
             <div className="info-card">
-              <div className="label">
-                <FaAward />
-                획득 뱃지 수
-              </div>
+              <div className="label"><FaAward /> 획득 뱃지 수</div>
               <div className="value">{badgeStats.totalBadgesOwned}개</div>
             </div>
             <div className="info-card">
-              <div className="label">
-                <FaChartBar />
-                총 뱃지 수
-              </div>
+              <div className="label"><FaChartBar /> 총 뱃지 수</div>
               <div className="value">{badgeStats.totalBadgesAvailable}개</div>
             </div>
           </div>
@@ -173,11 +156,7 @@ function MyBadges() {
             {featuredBadges.map((badge) => (
               <div key={badge.badgeId} className="badge-item featured">
                 <div className="badge-icon-container">
-                  <img
-                    src={getBadgeImagePath(badge.name)}
-                    alt={badge.name}
-                    className="badge-image-actual"
-                  />
+                  <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
                 </div>
                 <div className="badge-name">{badge.name}</div>
                 <button className="equip-button" onClick={() => handleToggleFeatured(badge.badgeId)}>
@@ -189,7 +168,7 @@ function MyBadges() {
         )}
       </div>
 
-      {/* 전체 보유 뱃지 */}
+      {/* 내 모든 뱃지 */}
       <div className="badge-section">
         <h3>내 모든 뱃지</h3>
         {badges.length === 0 ? (
@@ -201,16 +180,10 @@ function MyBadges() {
               return (
                 <div
                   key={badge.badgeId}
-                  className={`badge-item ${isFeatured ? 'featured' : ''} ${
-                    badge.owned ? '' : 'not-owned'
-                  }`}
+                  className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
                 >
                   <div className="badge-icon-container">
-                    <img
-                      src={getBadgeImagePath(badge.name)}
-                      alt={badge.name}
-                      className="badge-image-actual"
-                    />
+                    <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
                   </div>
                   <div className="badge-name">{badge.name}</div>
                   {badge.owned && (
