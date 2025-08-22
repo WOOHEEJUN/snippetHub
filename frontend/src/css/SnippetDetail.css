@@ -20,7 +20,7 @@
 .author-card .nickname{
   font-weight: 800;
   color: #e6e6e6;
-  font-size: 1.15rem;       /* ↓ 살짝 줄임 */
+  font-size: 0.85rem;       /* ↓ 살짝 줄임 */
   letter-spacing: 0.2px;
   line-height: 1.15;
   white-space: nowrap;
