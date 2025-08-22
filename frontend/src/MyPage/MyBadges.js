@@ -151,12 +151,17 @@ function MyBadges() {
                 <div 
                   key={badge.badgeId} 
                   className="badge-item featured"
-                  onClick={() => handleToggleFeatured(badge.badgeId)}
                 >
                   <div className="badge-icon-container">
                     <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
                   </div>
                   <div className="badge-name">{badge.name}</div>
+                  <button 
+                    className="equip-button"
+                    onClick={() => handleToggleFeatured(badge.badgeId)}
+                  >
+                    대표 뱃지 해제
+                  </button>
                 </div>
               ))}
             </div>
@@ -176,12 +181,19 @@ function MyBadges() {
                   <div 
                     key={badge.badgeId} 
                     className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
-                    onClick={() => badge.owned && handleToggleFeatured(badge.badgeId)}
                   >
                     <div className="badge-icon-container">
                       <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
                     </div>
                     <div className="badge-name">{badge.name}</div>
+                    {badge.owned && (
+                      <button 
+                        className="equip-button"
+                        onClick={() => handleToggleFeatured(badge.badgeId)}
+                      >
+                        {isFeatured ? '대표 뱃지 해제' : '대표 뱃지 설정'}
+                      </button>
+                    )}
                   </div>
                 );
               })}

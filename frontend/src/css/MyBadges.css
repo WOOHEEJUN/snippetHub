@@ -2,150 +2,174 @@
 /* frontend/src/css/MyBadges.css */
 
 .my-badges-page {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
+  max-width: 960px;
+  margin: 3rem auto;
+  padding: 2.5rem;
   background-color: #1a1a1a;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  color: #d3d3d3;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  color: #e0e0e0;
 }
 
 .my-badges-page h2 {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.info-card {
+  background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+  border: 1px solid #333333;
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.info-card .label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #b0b0b0;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.info-card .label svg {
+  color: #8ab0d1;
+  font-size: 1.4rem;
+}
+
+.info-card .value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #8ab0d1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.badge-section {
+  margin-bottom: 3rem;
+}
+
+.badge-section h3 {
+  font-size: 2rem;
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 2rem;
   text-align: center;
-}
-
-.info-section {
-  display: flex;
-  justify-content: space-around;
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-  flex-wrap: wrap;
-}
-
-.info-card {
-  background-color: #222222;
-  border: 1px solid #333333;
-  border-radius: 10px;
-  padding: 1.5rem;
-  flex: 1;
-  min-width: 180px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.info-card .label {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #b0b0b0;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.info-card .value {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.badge-section {
-  margin-bottom: 2.5rem;
-}
-
-.badge-section h3 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .badge-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1.5rem;
-  justify-content: center;
+  justify-items: center;
 }
 
 .badge-item {
-  background-color: #222222;
+  background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
   border: 1px solid #333333;
-  border-radius: 10px;
-  padding: 1rem;
+  border-radius: 15px;
+  padding: 1.5rem;
   text-align: center;
-  width: 120px; /* 고정 너비 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  cursor: pointer; /* 대표 뱃지 토글 기능 고려 */
+  width: 160px; /* Adjusted width */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  cursor: pointer;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .badge-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-7px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border-color: #8ab0d1;
 }
 
 .badge-icon-container {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 0.5rem auto;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #333333;
+  border-radius: 50%;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .badge-item .badge-name {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #b0b0b0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
   margin-bottom: 0.5rem;
+  word-break: break-word;
 }
 
 .badge-item.representative {
-  border-color: #8ab0d1; /* 대표 뱃지 강조 색상 */
-  box-shadow: 0 0 15px rgba(138, 176, 209, 0.5); /* 대표 뱃지 그림자 */
+  border-color: #ffd700; /* Gold color for representative badge */
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); /* Gold glow */
 }
 
 .badge-item.not-owned {
-  opacity: 0.5;
+  opacity: 0.6;
+  filter: grayscale(100%);
   cursor: not-allowed;
 }
 
 .badge-item.not-owned .badge-icon-container {
-  opacity: 0.3;
+  opacity: 0.5;
+  background-color: #444444;
 }
 
 .equip-button {
   background-color: #4CAF50;
   color: white;
   border: none;
-  padding: 5px 10px;
+  padding: 8px 15px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 12px;
-  margin: 4px 2px;
+  font-size: 0.9rem;
+  margin-top: 1rem;
   cursor: pointer;
-  border-radius: 4px;
-  width: 80%;
+  border-radius: 8px;
+  width: 90%;
+  transition: background-color 0.3s ease;
+}
+
+.equip-button:hover {
+  background-color: #45a049;
 }
 
 .badge-item.representative .equip-button {
   background-color: #f44336;
 }
 
-.loading-message, .error-message, .no-badges {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #b0b0b0;
-  padding: 2rem;
+.badge-item.representative .equip-button:hover {
+  background-color: #d32f2f;
 }
 
 /* 반응형 */
@@ -156,37 +180,35 @@
   }
 
   .my-badges-page h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .info-section {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .info-card {
-    width: 100%;
-    max-width: 300px;
+    grid-template-columns: 1fr;
   }
 
   .badge-grid {
-    justify-content: center;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
 
   .badge-item {
-    width: 100px;
+    width: 140px;
+    padding: 1rem;
   }
 
-  .badge-item img {
-  width: 50px;
-  height: 50px;
-}
+  .badge-icon-container {
+    width: 70px;
+    height: 70px;
+  }
 
-.badge-image-actual {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+  .badge-item .badge-name {
+    font-size: 0.9rem;
+  }
+
+  .equip-button {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
 }
 
 .info-card-link {
