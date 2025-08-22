@@ -10,7 +10,6 @@ function Ranking() {
   const [rankingData, setRankingData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [levelFilter, setLevelFilter] = useState(''); 
   const [page, setPage] = useState(0);
   const [size] = useState(10); 
   const [totalPages, setTotalPages] = useState(0);
@@ -23,9 +22,6 @@ function Ranking() {
         page: page,
         size: size,
       });
-      if (levelFilter) {
-        params.append('level', levelFilter);
-      }
 
       const response = await fetch(`/api/users/ranking?${params.toString()}`, {
         headers: getAuthHeaders(),
@@ -46,16 +42,11 @@ function Ranking() {
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders, levelFilter, page, size]);
+  }, [getAuthHeaders, page, size]);
 
   useEffect(() => {
     fetchRanking();
   }, [fetchRanking]);
-
-  const handleLevelFilterChange = (e) => {
-    setLevelFilter(e.target.value);
-    setPage(0); 
-  };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -67,19 +58,6 @@ function Ranking() {
   return (
     <div className="ranking-page">
       <h2>사용자 랭킹</h2>
-
-      <div className="filter-controls">
-        <label htmlFor="levelFilter">등급 필터:</label>
-        <select id="levelFilter" value={levelFilter} onChange={handleLevelFilterChange}>
-          <option value="">전체</option>
-          
-          <option value="Bronze">Bronze</option>
-          <option value="Silver">Silver</option>
-          <option value="Gold">Gold</option>
-          <option value="Platinum">Platinum</option>
-          <option value="Diamond">Diamond</option>
-        </select>
-      </div>
 
       {rankingData.length === 0 ? (
         <div className="no-data-message">랭킹 정보가 없습니다.</div>
