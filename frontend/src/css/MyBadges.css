@@ -1,226 +1,148 @@
-
-/* frontend/src/css/MyBadges.css */
-
-.my-badges-page {
-  max-width: 960px;
-  margin: 3rem auto;
-  padding: 2.5rem;
-  background-color: #1a1a1a;
-  border-radius: 15px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-  color: #e0e0e0;
+/* 페이지 래퍼 */
+.my-badges-page{
+  max-width:960px; margin:3rem auto; padding:2.5rem;
+  background:#1a1a1a; border-radius:15px;
+  box-shadow:0 8px 30px rgba(0,0,0,.5); color:#e0e0e0;
+}
+.my-badges-page h2{
+  font-size:2.5rem; font-weight:700; color:#fff;
+  margin-bottom:2.5rem; text-align:center;
+  text-shadow:0 2px 5px rgba(0,0,0,.2);
 }
 
-.my-badges-page h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 2.5rem;
-  text-align: center;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+/* ================================
+   ✨ 등급/포인트 타일 (신규 디자인)
+   ================================ */
+.info-section{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+  gap:18px; margin-bottom:3rem;
+}
+.info-card-link{ display:block; text-decoration:none; color:inherit; }
+
+.info-card{
+  --panel:#1a1a1a; --border:#2a2a2a;
+  position:relative; overflow:hidden;
+  border-radius:16px; padding:18px 20px;
+  background:linear-gradient(180deg, var(--panel), #141414);
+  border:1px solid var(--border);
+  display:grid; grid-template-columns:52px 1fr;
+  align-items:center; gap:14px;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.info-card::before{
+  content:""; position:absolute; inset:-1px; border-radius:16px; padding:1px;
+  background: conic-gradient(from 180deg, #70b7ff, #86f7a5, #70b7ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity:.55; pointer-events:none;
+}
+.info-card::after{
+  content:""; position:absolute; inset:-40% -25% auto auto;
+  width:70%; height:140%;
+  background: radial-gradient(50% 50% at 50% 50%, #ffffff12 0%, transparent 60%);
+  transform: rotate(8deg); pointer-events:none;
+}
+.info-card:hover{
+  transform:translateY(-2px);
+  border-color:#3a89ff55; box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
-.info-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+.info-card .label{
+  display:flex; align-items:center; gap:10px;
+  font-size:.95rem; font-weight:600; color:#b7c3cf; letter-spacing:.02em;
+}
+.info-card .label svg{
+  font-size:22px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.35));
+}
+.info-card .value{
+  justify-self:end; font-size:2.2rem; font-weight:900; color:#f2f6ff;
+  letter-spacing:.02em; text-shadow:0 2px 14px rgba(28,142,255,.15);
+}
+.info-card .value small{ font-size:1rem; font-weight:700; opacity:.7; margin-left:4px; }
+
+/* 1번째(등급) = 블루 톤 */
+.info-section > *:nth-child(1) .info-card::before{
+  background: conic-gradient(#65b4ff, #1ec9ff, #65b4ff);
+}
+.info-section > *:nth-child(1) .info-card .label svg{ color:#6db8ff; }
+.info-section > *:nth-child(1) .info-card .value{ text-shadow:0 2px 14px rgba(101,180,255,.25); }
+
+/* 2번째(포인트) = 그린 톤 */
+.info-section > *:nth-child(2) .info-card::before{
+  background: conic-gradient(#8ee88b, #3bd08a, #8ee88b);
+}
+.info-section > *:nth-child(2) .info-card .label svg{ color:#8ee88b; }
+.info-section > *:nth-child(2) .info-card .value{ text-shadow:0 2px 14px rgba(59,208,138,.25); }
+
+@media (max-width:640px){
+  .info-card{ grid-template-columns:44px 1fr; padding:16px; }
+  .info-card .value{ font-size:1.8rem; }
 }
 
-.info-card {
-  background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
-  border: 1px solid #333333;
-  border-radius: 15px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease;
+/* -------- 배지 섹션 -------- */
+.badge-section{ margin-bottom:3rem; }
+.badge-section h3{
+  font-size:2rem; font-weight:700; color:#fff;
+  margin-bottom:2rem; text-align:center;
+  text-shadow:0 1px 3px rgba(0,0,0,.2);
 }
+.badge-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+  gap:1.5rem; justify-items:center;
+}
+.badge-item{
+  background:linear-gradient(145deg, #2a2a2a, #1e1e1e);
+  border:1px solid #333; border-radius:15px;
+  padding:1.5rem; text-align:center; width:160px;
+  box-shadow:0 4px 15px rgba(0,0,0,.4);
+  transition:all .3s ease; cursor:pointer; position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+}
+.badge-item:hover{
+  transform:translateY(-7px);
+  box-shadow:0 8px 25px rgba(0,0,0,.5);
+  border-color:#8ab0d1;
+}
+.badge-icon-container{
+  width:80px; height:80px; margin:0 auto 1rem;
+  display:flex; align-items:center; justify-content:center;
+  background:#333; border-radius:50%;
+  box-shadow: inset 0 0 10px rgba(0,0,0,.3);
+}
+.badge-image-actual{ width:64px; height:64px; object-fit:contain; }
 
-.info-card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+.badge-item .badge-name{
+  font-size:1rem; font-weight:600; color:#fff;
+  margin-bottom:.5rem; word-break:break-word;
 }
+.badge-item.not-owned{ opacity:.6; filter:grayscale(100%); cursor:not-allowed; }
+.badge-item.not-owned .badge-icon-container{ opacity:.5; background:#444; }
 
-.info-card .label {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #b0b0b0 !important;
-  margin-bottom: 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
+.equip-button{
+  background:#4CAF50; color:#fff; border:none;
+  padding:8px 15px; font-size:.9rem; margin-top:1rem;
+  cursor:pointer; border-radius:8px; width:90%;
+  transition: background-color .3s ease;
 }
-
-.info-card .label svg {
-  color: #8ab0d1 !important;
-  font-size: 1.4rem !important;
-}
-
-.info-card .value {
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  color: #8ab0d1 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-}
-
-.badge-section {
-  margin-bottom: 3rem;
-}
-
-.badge-section h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 2rem;
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.badge-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1.5rem;
-  justify-items: center;
-}
-
-.badge-item {
-  background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
-  border: 1px solid #333333;
-  border-radius: 15px;
-  padding: 1.5rem;
-  text-align: center;
-  width: 160px; /* Adjusted width */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.badge-item:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  border-color: #8ab0d1;
-}
-
-.badge-icon-container {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1rem auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #333333;
-  border-radius: 50%;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.badge-item .badge-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-  word-break: break-word;
-}
-
-.badge-item.representative {
-  border-color: #ffd700; /* Gold color for representative badge */
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); /* Gold glow */
-}
-
-.badge-item.not-owned {
-  opacity: 0.6;
-  filter: grayscale(100%);
-  cursor: not-allowed;
-}
-
-.badge-item.not-owned .badge-icon-container {
-  opacity: 0.5;
-  background-color: #444444;
-}
-
-.equip-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  cursor: pointer;
-  border-radius: 8px;
-  width: 90%;
-  transition: background-color 0.3s ease;
-}
-
-.equip-button:hover {
-  background-color: #45a049;
-}
-
-.badge-item.representative .equip-button {
-  background-color: #f44336;
-}
-
-.badge-item.representative .equip-button:hover {
-  background-color: #d32f2f;
-}
+.equip-button:hover{ background:#45a049; }
 
 /* 반응형 */
-@media (max-width: 768px) {
-  .my-badges-page {
-    padding: 1.5rem;
-    margin: 1rem auto;
-  }
-
-  .my-badges-page h2 {
-    font-size: 2rem;
-  }
-
-  .info-section {
-    grid-template-columns: 1fr;
-  }
-
-  .badge-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-
-  .badge-item {
-    width: 140px;
-    padding: 1rem;
-  }
-
-  .badge-icon-container {
-    width: 70px;
-    height: 70px;
-  }
-
-  .badge-item .badge-name {
-    font-size: 0.9rem;
-  }
-
-  .equip-button {
-    font-size: 0.8rem;
-    padding: 6px 10px;
-  }
+@media (max-width:768px){
+  .my-badges-page{ padding:1.5rem; margin:1rem auto; }
+  .my-badges-page h2{ font-size:2rem; }
+  .badge-grid{ grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); }
+  .badge-item{ width:140px; padding:1rem; }
+  .badge-icon-container{ width:70px; height:70px; }
+  .badge-item .badge-name{ font-size:.9rem; }
+  .equip-button{ font-size:.8rem; padding:6px 10px; }
 }
 
-.info-card-link {
-  text-decoration: none;
-  color: inherit;
+/* 링크 hover 효과 */
+.info-card-link .info-card{
+  transition: transform .18s ease, box-shadow .18s ease;
 }
-
-.info-card-link .info-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.info-card-link:hover .info-card {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+.info-card-link:hover .info-card{
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
