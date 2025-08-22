@@ -44,7 +44,11 @@ const OAuth2Callback = () => {
         }
         
         console.log('login 함수 호출 시작');
-        login({ accessToken, refreshToken });
+        const user = userStr ? JSON.parse(decodeURIComponent(userStr)) : null;
+        login({ 
+          token: { accessToken, refreshToken },
+          user: user
+        });
         console.log('login 함수 호출 완료');
         
         console.log('홈페이지로 리다이렉트 시작');

@@ -10,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "problem_submissions")
+@Table(name = "problem_submissions", schema = "snippethub_db")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProblemSubmission {
@@ -28,8 +28,7 @@ public class ProblemSubmission {
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
-    @Lob
-    @Column(name = "submitted_code", nullable = false)
+    @Column(name = "submitted_code", nullable = false, columnDefinition = "LONGTEXT")
     private String submittedCode;
 
     @Column(name = "language", nullable = false)
@@ -51,12 +50,10 @@ public class ProblemSubmission {
     @Column(name = "total_test_cases")
     private Integer totalTestCases = 0;
 
-    @Lob
-    @Column(name = "error_message")
+    @Column(name = "error_message", columnDefinition = "LONGTEXT")
     private String errorMessage;
 
-    @Lob
-    @Column(name = "output")
+    @Column(name = "output", columnDefinition = "LONGTEXT")
     private String output;
 
     @CreationTimestamp

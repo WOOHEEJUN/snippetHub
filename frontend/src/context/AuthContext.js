@@ -116,16 +116,27 @@ export const AuthProvider = ({ children }) => {
   const login = async (tokens) => {
     console.log('AuthContext login 함수 호출됨:', tokens);
     
+    // 데이터 구조 검증
+    if (!tokens || !tokens.token || !tokens.token.accessToken) {
+      console.error('Invalid tokens structure:', tokens);
+      throw new Error('Invalid tokens structure');
+    }
+    
     console.log('localStorage에 토큰 저장 시작');
     localStorage.setItem('accessToken', tokens.token.accessToken);
     localStorage.setItem('refreshToken', tokens.token.refreshToken);
-    localStorage.setItem('user', JSON.stringify(tokens.user));
-    localStorage.setItem('userId', tokens.user.userId);
+    
+    if (tokens.user) {
+      localStorage.setItem('user', JSON.stringify(tokens.user));
+      if (tokens.user.userId) {
+        localStorage.setItem('userId', tokens.user.userId);
+      }
+    }
+    
     console.log('localStorage에 토큰 저장 완료');
-    console.log(localStorage.getItem('accessToken'));
-    console.log(localStorage.getItem('refreshToken'));
-    console.log(localStorage.getItem('user'));
-    console.log(localStorage.getItem('userId'));
+    console.log('AccessToken:', localStorage.getItem('accessToken'));
+    console.log('RefreshToken:', localStorage.getItem('refreshToken'));
+    console.log('User:', localStorage.getItem('user'));
 
     setAccessToken(tokens.token.accessToken);
     setRefreshToken(tokens.token.refreshToken);

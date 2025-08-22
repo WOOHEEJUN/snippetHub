@@ -6,7 +6,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Builder
 public class ExecutionResponse {
     private Long executionId;
@@ -19,6 +18,18 @@ public class ExecutionResponse {
     private Integer memoryUsed;
     private String status;
     private LocalDateTime executedAt;
+
+    // Getter 메서드들
+    public Long getExecutionId() { return executionId; }
+    public String getLanguage() { return language; }
+    public String getCode() { return code; }
+    public String getInput() { return input; }
+    public String getOutput() { return output != null ? output : ""; }
+    public String getError() { return error != null ? error : ""; }
+    public Integer getExecutionTime() { return executionTime; }
+    public Integer getMemoryUsed() { return memoryUsed; }
+    public String getStatus() { return status; }
+    public LocalDateTime getExecutedAt() { return executedAt; }
 
     public static ExecutionResponse from(CodeExecution codeExecution) {
         return ExecutionResponse.builder()

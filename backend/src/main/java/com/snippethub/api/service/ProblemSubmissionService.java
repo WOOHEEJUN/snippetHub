@@ -45,6 +45,9 @@ public class ProblemSubmissionService {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROBLEM_NOT_FOUND));
 
+        // 중복 제출 방지 (5초 내 동일 문제 제출 차단)
+        checkDuplicateSubmission(userId, problemId);
+
         // 코드 실행 및 결과 확인
         SubmissionResult result = executeAndValidateCode(requestDto.getCode(), requestDto.getLanguage(), problem);
         
@@ -87,6 +90,24 @@ public class ProblemSubmissionService {
                 user.getNickname(), problem.getTitle(), result.getStatus());
 
         return new ProblemSubmissionResponseDto(savedSubmission);
+    }
+
+    /**
+     * 중복 제출 방지 체크
+     */
+    private void checkDuplicateSubmission(Long userId, Long problemId) {
+        // 최근 5초 내 동일 문제 제출 확인
+        Optional<ProblemSubmission> recentSubmission = submissionRepository
+                .findFirstByUserIdAndProblemIdOrderBySubmittedAtDesc(userId, problemId);
+        
+        if (recentSubmission.isPresent()) {
+            ProblemSubmission submission = recentSubmission.get();
+            long timeDiff = System.currentTimeMillis() - submission.getSubmittedAt().toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+            
+            if (timeDiff < 5000) { // 5초 내 중복 제출
+                throw new BusinessException(ErrorCode.DUPLICATE_SUBMISSION);
+            }
+        }
     }
 
     /**
@@ -186,7 +207,7 @@ public class ProblemSubmissionService {
     private boolean validateAgainstProblem(String output, Problem problem) {
         // 실제로는 더 복잡한 검증 로직이 필요
         // 예: 테스트 케이스와 비교, 정확한 출력 형식 확인 등
-        if (problem.getSampleOutput() != null) {
+        if (problem.getSampleOutput() != null && output != null) {
             return output.trim().equals(problem.getSampleOutput().trim());
         }
         return true; // 기본적으로 통과

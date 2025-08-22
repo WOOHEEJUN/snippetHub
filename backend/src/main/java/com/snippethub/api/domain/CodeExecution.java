@@ -10,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "code_executions")
+@Table(name = "code_executions", schema = "snippethub_db")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CodeExecution {
@@ -31,20 +31,16 @@ public class CodeExecution {
     @Column(nullable = false, length = 20)
     private String language;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String code;
 
-    @Lob
-    @Column(name = "input_data")
+    @Column(name = "input_data", columnDefinition = "LONGTEXT")
     private String input;
 
-    @Lob
-    @Column(name = "output_data")
+    @Column(name = "output_data", columnDefinition = "LONGTEXT")
     private String output;
 
-    @Lob
-    @Column(name = "error_data")
+    @Column(name = "error_data", columnDefinition = "LONGTEXT")
     private String error;
 
     @Column(name = "execution_time")
