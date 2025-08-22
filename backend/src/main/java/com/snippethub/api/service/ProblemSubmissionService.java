@@ -207,7 +207,7 @@ public class ProblemSubmissionService {
     private boolean validateAgainstProblem(String output, Problem problem) {
         // 실제로는 더 복잡한 검증 로직이 필요
         // 예: 테스트 케이스와 비교, 정확한 출력 형식 확인 등
-        if (problem.getSampleOutput() != null) {
+        if (problem.getSampleOutput() != null && output != null) {
             return output.trim().equals(problem.getSampleOutput().trim());
         }
         return true; // 기본적으로 통과

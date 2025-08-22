@@ -428,7 +428,8 @@ public class ExecutionService {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
-            return output.toString();
+            String result = output.toString();
+            return result.isEmpty() ? "" : result; // 빈 문자열이면 빈 문자열 반환
         }
     }
 
