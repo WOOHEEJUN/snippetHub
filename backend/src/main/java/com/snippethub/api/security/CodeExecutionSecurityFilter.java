@@ -35,20 +35,19 @@ public class CodeExecutionSecurityFilter extends OncePerRequestFilter {
     private Set<String> allowedLanguageSet;
     private Set<String> blockedKeywordSet;
 
-    // 강화된 위험 패턴들 (정규식 기반)
+    // 단순화된 위험 패턴들 (정규식 기반)
     private static final List<Pattern> DANGEROUS_PATTERNS = Arrays.asList(
         // 시스템 명령어 실행
-        Pattern.compile("(?i)\\b(rm|sudo|su|chmod|chown|kill|killall|pkill)\\b.*\\b(-rf?|--recursive|--force|-r)\\b"),
+        Pattern.compile("(?i)\\b(rm|sudo|su|chmod|chown|kill|killall|pkill)\\b"),
         Pattern.compile("(?i)\\b(wget|curl|nc|netcat|ssh|scp|rsync|dd|format|mkfs|fdisk|mount|umount)\\b"),
         Pattern.compile("(?i)\\b(shutdown|reboot|halt|poweroff|init|crontab|at|batch|systemctl|service)\\b"),
         Pattern.compile("(?i)\\b(iptables|ufw|firewall|passwd|useradd|userdel|groupadd|groupdel)\\b"),
         Pattern.compile("(?i)\\b(tar|zip|unzip|gzip|bzip2|7z|cat|less|more|head|tail|grep|sed|awk)\\b"),
         
         // Windows 명령어
-        Pattern.compile("(?i)\\b(del|rd|rmdir)\\b.*\\b(/s|/q)\\b"),
-        Pattern.compile("(?i)\\b(format|chkdsk|sfc|dism|bcdedit|net)\\b.*\\b(user|group|localgroup)\\b"),
+        Pattern.compile("(?i)\\b(del|rd|rmdir|format|chkdsk|sfc|dism|bcdedit|net)\\b"),
         Pattern.compile("(?i)\\b(taskkill|tasklist|schtasks|netsh|ipconfig|route|arp)\\b"),
-        Pattern.compile("(?i)\\b(reg|sc)\\b.*\\b(add|delete|query|create|start|stop)\\b"),
+        Pattern.compile("(?i)\\b(reg|sc)\\b"),
         
         // 함수 실행
         Pattern.compile("(?i)\\b(eval|exec|system|os\\.system|os\\.popen|subprocess)\\s*\\("),
@@ -64,7 +63,7 @@ public class CodeExecutionSecurityFilter extends OncePerRequestFilter {
         // 파일 시스템 접근
         Pattern.compile("(?i)(/etc/|/var/|/tmp/|/home/|/root/|/usr/|/bin/|/sbin/)"),
         Pattern.compile("(?i)(/proc/|/sys/|/dev/|/boot/|/mnt/|/media/)"),
-        Pattern.compile("(?i)(C:\\\\|D:\\\\|E:\\\\|F:\\\\|G:\\\\|H:\\\\|I:\\\\|J:\\\\|K:\\\\|L:\\\\|M:\\\\|N:\\\\|O:\\\\|P:\\\\|Q:\\\\|R:\\\\|S:\\\\|T:\\\\|U:\\\\|V:\\\\|W:\\\\|X:\\\\|Y:\\\\|Z:\\\\\\)"),
+        Pattern.compile("(?i)(C:|D:|E:|F:|G:|H:|I:|J:|K:|L:|M:|N:|O:|P:|Q:|R:|S:|T:|U:|V:|W:|X:|Y:|Z:)"),
         Pattern.compile("(?i)(\\.\\./|\\.\\.\\\\|%2e%2e%2f|%2e%2e%5c)"),
         Pattern.compile("(?i)(Windows|System32|Program Files|ProgramData)"),
         Pattern.compile("(?i)(/etc/passwd|/etc/shadow|/etc/hosts|/etc/fstab)"),
@@ -74,8 +73,6 @@ public class CodeExecutionSecurityFilter extends OncePerRequestFilter {
         Pattern.compile("(?i)(localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0|::1)"),
         Pattern.compile("(?i)\\b(socket|connect|bind|listen|accept|URL|HttpURLConnection|HttpClient)\\b"),
         Pattern.compile("(?i)\\b(requests|urllib|httplib|fetch|XMLHttpRequest|axios)\\b"),
-        Pattern.compile("(?i)\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b"), // IP 주소
-        Pattern.compile("(?i)\\b([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}\\b"), // 도메인
         
         // 무한 루프
         Pattern.compile("(?i)\\bwhile\\s*\\(\\s*(true|1|!0)\\s*\\)"),
@@ -91,13 +88,6 @@ public class CodeExecutionSecurityFilter extends OncePerRequestFilter {
         // 변수 할당 후 실행
         Pattern.compile("(?i)\\b(var|let|const|String|int|cmd|command)\\s+\\w+\\s*=\\s*['\"`][^'\"]*(rm|sudo|kill|exec|system)"),
         Pattern.compile("(?i)\\b(exec|eval|system)\\s*\\(\\s*\\w+\\s*\\)"), // exec(variable)
-        
-        // 인코딩 우회 패턴
-        Pattern.compile("(?i)(%[0-9A-Fa-f]{2})+"), // URL 인코딩
-        Pattern.compile("(?i)(&#[0-9]+;)+"), // HTML 엔티티
-        Pattern.compile("(?i)(\\\\u[0-9A-Fa-f]{4})+"), // 유니코드 이스케이프
-        Pattern.compile("(?i)(\\\\x[0-9A-Fa-f]{2})+"), // 16진수 이스케이프
-        Pattern.compile("(?i)(\\\\[0-7]{3})+"), // 8진수 이스케이프
         
         // 추가 위험 패턴들
         Pattern.compile("(?i)\\b(Class\\.forName|ClassLoader|getClass|getDeclaredMethod|getMethod)\\b"),
