@@ -19,11 +19,17 @@ const normalizeComments = (payload) => {
   return [];
 };
 
-// 닉네임 앞에 붙일 배지 이미지 (level 형식이 숫자/영문/한글 모두 OK)
+// 레벨 배지 컴포넌트(숫자/영문/한글 level 모두 허용)
 const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
   const src = getLevelBadgeImage(level);
   if (!src) return null;
-  return <img src={src} alt={typeof level === 'string' ? level : 'level-badge'} className={className} />;
+  return (
+    <img
+      src={src}
+      alt={typeof level === 'string' ? level : 'level-badge'}
+      className={className}
+    />
+  );
 };
 
 function BoardDetail() {
@@ -31,7 +37,21 @@ function BoardDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [authorLevels, setAuthorLevels] = useState({}); // New state to store author levels from ranking
+  // ✅ 누락됐던 상태 훅들 전부 선언
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [error, setError] = useState('');
+
+  const [newComment, setNewComment] = useState('');
+
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentContent, setEditingCommentContent] = useState('');
+
+  const [replyContent, setReplyContent] = useState('');
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+
+  // 랭킹에서 받은 userId -> level 매핑
+  const [authorLevels, setAuthorLevels] = useState({});
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
@@ -40,18 +60,21 @@ function BoardDetail() {
 
   const fetchRankingData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/users/ranking?size=1000`, { headers: getAuthHeaders(), credentials: 'include' }); // Fetch a large enough size
+      const res = await fetch(`/api/users/ranking?size=1000`, {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
       const data = await res.json();
       const levelMap = {};
-      data.data.content.forEach(user => {
-        levelMap[user.userId] = user.currentLevel;
+      (data?.data?.content || []).forEach((u) => {
+        levelMap[u.userId] = u.currentLevel;
       });
       setAuthorLevels(levelMap);
     } catch (err) {
-      console.error("Failed to fetch ranking data:", err);
+      console.error('Failed to fetch ranking data:', err);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   const fetchPostData = useCallback(async () => {
     try {
@@ -74,11 +97,11 @@ function BoardDetail() {
     } catch (err) {
       setError('데이터를 불러오는 중 오류가 발생했습니다.');
     }
-  }, [postId, getAuthHeaders]);
+  }, [postId]);
 
   useEffect(() => {
     fetchPostData();
-    fetchRankingData(); // Fetch ranking data on component mount
+    fetchRankingData();
   }, [fetchPostData, fetchRankingData, postId]);
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
