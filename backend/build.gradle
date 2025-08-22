@@ -40,6 +40,14 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    // Rate Limiting
+    implementation 'com.bucket4j:bucket4j-core:8.7.0'
+    implementation 'com.bucket4j:bucket4j-redis:8.7.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
+    // Security Headers
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('compileJava') {

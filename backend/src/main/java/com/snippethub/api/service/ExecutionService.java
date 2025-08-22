@@ -10,7 +10,11 @@ import com.snippethub.api.exception.ErrorCode;
 import com.snippethub.api.repository.CodeExecutionRepository;
 import com.snippethub.api.repository.SnippetRepository;
 import com.snippethub.api.repository.UserRepository;
+import com.snippethub.api.security.CodeExecutionSecurityFilter;
+import com.snippethub.api.security.CodeExecutionSandbox;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,14 +36,33 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ExecutionService {
+
+    @Value("${code.execution.max-execution-time:10000}")
+    private long maxExecutionTime;
+
+    @Value("${code.execution.max-memory:512}")
+    private int maxMemory;
 
     private final CodeExecutionRepository codeExecutionRepository;
     private final UserRepository userRepository;
     private final SnippetRepository snippetRepository;
     private final PointService pointService;
+    private final CodeExecutionSecurityFilter codeExecutionSecurityFilter;
+    private final CodeExecutionSandbox codeExecutionSandbox;
 
     public ExecutionResponse execute(ExecutionRequest request, String email) {
+        // 보안 검증
+        if (!codeExecutionSecurityFilter.validateCodeContent(request.getCode(), request.getLanguage())) {
+            log.warn("Code execution blocked due to security validation - Language: {}, Code length: {}", 
+                    request.getLanguage(), request.getCode().length());
+            return ExecutionResponse.builder()
+                    .status(CodeExecution.Status.ERROR.name())
+                    .error("Code execution blocked due to security policy violation")
+                    .build();
+        }
+
         User user = null;
         if (email != null) {
             user = userRepository.findByEmail(email)
@@ -54,27 +77,51 @@ public class ExecutionService {
 
         ExecutionResponse response;
         String language = request.getLanguage().toLowerCase();
-        switch (language) {
-            case "java":
-                response = executeJava(request.getCode(), request.getInput());
-                break;
-            case "python":
-                response = executePython(request.getCode(), request.getInput());
-                break;
-            case "c":
-                response = executeC(request.getCode(), request.getInput());
-                break;
-            case "html":
-                response = executeHtml(request.getCode());
-                break;
-            case "css":
-                response = executeCss(request.getCode());
-                break;
-            default:
-                response = ExecutionResponse.builder()
-                        .status(CodeExecution.Status.ERROR.name())
-                        .error("Unsupported language: " + language)
-                        .build();
+        
+        // 샌드박스 환경 생성
+        CodeExecutionSandbox.SandboxEnvironment sandbox = null;
+        try {
+            sandbox = codeExecutionSandbox.createSandbox(language);
+        } catch (IOException e) {
+            log.error("Failed to create sandbox environment", e);
+            return ExecutionResponse.builder()
+                    .status(CodeExecution.Status.ERROR.name())
+                    .error("Failed to create execution environment: " + e.getMessage())
+                    .build();
+        }
+        
+        try {
+            
+            switch (language) {
+                case "java":
+                    response = executeJavaInSandbox(request.getCode(), request.getInput(), sandbox);
+                    break;
+                case "python":
+                    response = executePythonInSandbox(request.getCode(), request.getInput(), sandbox);
+                    break;
+                case "c":
+                    response = executeCInSandbox(request.getCode(), request.getInput(), sandbox);
+                    break;
+                case "javascript":
+                    response = executeJavaScriptInSandbox(request.getCode(), request.getInput(), sandbox);
+                    break;
+                case "html":
+                    response = executeHtml(request.getCode());
+                    break;
+                case "css":
+                    response = executeCss(request.getCode());
+                    break;
+                default:
+                    response = ExecutionResponse.builder()
+                            .status(CodeExecution.Status.ERROR.name())
+                            .error("Unsupported language: " + language)
+                            .build();
+            }
+        } finally {
+            // 샌드박스 정리 (항상 실행)
+            if (sandbox != null) {
+                codeExecutionSandbox.cleanupSandbox(sandbox);
+            }
         }
 
         // 코드 실행 기록 저장
@@ -383,5 +430,275 @@ public class ExecutionService {
             }
             return output.toString();
         }
+    }
+
+    // 샌드박스 환경에서 Java 실행
+    private ExecutionResponse executeJavaInSandbox(String code, String input, CodeExecutionSandbox.SandboxEnvironment sandbox) {
+        long startTime = System.currentTimeMillis();
+        String stdout = "";
+        String stderr = "";
+        CodeExecution.Status status = CodeExecution.Status.ERROR;
+
+        try {
+            // Java 파일 생성
+            Path javaFile = Paths.get(sandbox.getExecutablePath());
+            Files.write(javaFile, code.getBytes());
+
+            // 컴파일
+            ProcessBuilder compileBuilder = codeExecutionSandbox.createSecureProcessBuilder(
+                "javac", new String[]{"Main.java"}, sandbox.getSandboxDir());
+            Process compileProcess = compileBuilder.start();
+
+            if (!compileProcess.waitFor(10, TimeUnit.SECONDS)) {
+                compileProcess.destroyForcibly();
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.TIMEOUT.name())
+                        .error("Compilation timed out.")
+                        .build();
+            }
+
+            if (compileProcess.exitValue() != 0) {
+                stderr = readStream(compileProcess.getErrorStream());
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.ERROR.name())
+                        .error("Compilation failed: " + stderr)
+                        .build();
+            }
+
+            // 실행
+            ProcessBuilder executeBuilder = codeExecutionSandbox.createSecureProcessBuilder(
+                "java", new String[]{"Main"}, sandbox.getSandboxDir());
+            Process executeProcess = executeBuilder.start();
+
+            if (input != null && !input.isEmpty()) {
+                try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(executeProcess.getOutputStream()))) {
+                    writer.write(input);
+                    writer.flush();
+                }
+            }
+
+            if (!executeProcess.waitFor(maxExecutionTime, TimeUnit.MILLISECONDS)) {
+                executeProcess.destroyForcibly();
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.TIMEOUT.name())
+                        .error("Execution timed out.")
+                        .build();
+            }
+
+            stdout = readStream(executeProcess.getInputStream());
+            stderr = readStream(executeProcess.getErrorStream());
+
+            if (executeProcess.exitValue() == 0) {
+                status = CodeExecution.Status.SUCCESS;
+            } else {
+                status = CodeExecution.Status.ERROR;
+            }
+
+        } catch (Exception e) {
+            stderr = "An unexpected error occurred: " + e.getMessage();
+        }
+
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        return ExecutionResponse.builder()
+                .output(stdout)
+                .error(stderr)
+                .executionTime((int) executionTime)
+                .memoryUsed(maxMemory)
+                .status(status.name())
+                .build();
+    }
+
+    // 샌드박스 환경에서 Python 실행
+    private ExecutionResponse executePythonInSandbox(String code, String input, CodeExecutionSandbox.SandboxEnvironment sandbox) {
+        long startTime = System.currentTimeMillis();
+        String stdout = "";
+        String stderr = "";
+        CodeExecution.Status status = CodeExecution.Status.ERROR;
+
+        try {
+            // Python 파일 생성
+            Path pythonFile = Paths.get(sandbox.getExecutablePath());
+            Files.write(pythonFile, code.getBytes());
+
+            // 실행
+            ProcessBuilder executeBuilder = codeExecutionSandbox.createSecureProcessBuilder(
+                "python3", new String[]{pythonFile.getFileName().toString()}, sandbox.getSandboxDir());
+            Process executeProcess = executeBuilder.start();
+
+            if (input != null && !input.isEmpty()) {
+                try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(executeProcess.getOutputStream()))) {
+                    writer.write(input);
+                    writer.flush();
+                }
+            }
+
+            if (!executeProcess.waitFor(maxExecutionTime, TimeUnit.MILLISECONDS)) {
+                executeProcess.destroyForcibly();
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.TIMEOUT.name())
+                        .error("Execution timed out.")
+                        .build();
+            }
+
+            stdout = readStream(executeProcess.getInputStream());
+            stderr = readStream(executeProcess.getErrorStream());
+
+            if (executeProcess.exitValue() == 0) {
+                status = CodeExecution.Status.SUCCESS;
+            } else {
+                status = CodeExecution.Status.ERROR;
+            }
+
+        } catch (Exception e) {
+            stderr = "An unexpected error occurred: " + e.getMessage();
+        }
+
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        return ExecutionResponse.builder()
+                .output(stdout)
+                .error(stderr)
+                .executionTime((int) executionTime)
+                .memoryUsed(maxMemory)
+                .status(status.name())
+                .build();
+    }
+
+    // 샌드박스 환경에서 C 실행
+    private ExecutionResponse executeCInSandbox(String code, String input, CodeExecutionSandbox.SandboxEnvironment sandbox) {
+        long startTime = System.currentTimeMillis();
+        String stdout = "";
+        String stderr = "";
+        CodeExecution.Status status = CodeExecution.Status.ERROR;
+
+        try {
+            // C 파일 생성
+            Path cFile = Paths.get(sandbox.getExecutablePath());
+            Files.write(cFile, code.getBytes());
+
+            // 컴파일
+            ProcessBuilder compileBuilder = codeExecutionSandbox.createSecureProcessBuilder(
+                "gcc", new String[]{"-o", "main", "main.c"}, sandbox.getSandboxDir());
+            Process compileProcess = compileBuilder.start();
+
+            if (!compileProcess.waitFor(10, TimeUnit.SECONDS)) {
+                compileProcess.destroyForcibly();
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.TIMEOUT.name())
+                        .error("Compilation timed out.")
+                        .build();
+            }
+
+            if (compileProcess.exitValue() != 0) {
+                stderr = readStream(compileProcess.getErrorStream());
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.ERROR.name())
+                        .error("Compilation failed: " + stderr)
+                        .build();
+            }
+
+            // 실행
+            ProcessBuilder executeBuilder = codeExecutionSandbox.createSecureProcessBuilder(
+                "./main", null, sandbox.getSandboxDir());
+            Process executeProcess = executeBuilder.start();
+
+            if (input != null && !input.isEmpty()) {
+                try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(executeProcess.getOutputStream()))) {
+                    writer.write(input);
+                    writer.flush();
+                }
+            }
+
+            if (!executeProcess.waitFor(maxExecutionTime, TimeUnit.MILLISECONDS)) {
+                executeProcess.destroyForcibly();
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.TIMEOUT.name())
+                        .error("Execution timed out.")
+                        .build();
+            }
+
+            stdout = readStream(executeProcess.getInputStream());
+            stderr = readStream(executeProcess.getErrorStream());
+
+            if (executeProcess.exitValue() == 0) {
+                status = CodeExecution.Status.SUCCESS;
+            } else {
+                status = CodeExecution.Status.ERROR;
+            }
+
+        } catch (Exception e) {
+            stderr = "An unexpected error occurred: " + e.getMessage();
+        }
+
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        return ExecutionResponse.builder()
+                .output(stdout)
+                .error(stderr)
+                .executionTime((int) executionTime)
+                .memoryUsed(maxMemory)
+                .status(status.name())
+                .build();
+    }
+
+    // 샌드박스 환경에서 JavaScript 실행
+    private ExecutionResponse executeJavaScriptInSandbox(String code, String input, CodeExecutionSandbox.SandboxEnvironment sandbox) {
+        long startTime = System.currentTimeMillis();
+        String stdout = "";
+        String stderr = "";
+        CodeExecution.Status status = CodeExecution.Status.ERROR;
+
+        try {
+            // JavaScript 파일 생성
+            Path jsFile = Paths.get(sandbox.getExecutablePath());
+            Files.write(jsFile, code.getBytes());
+
+            // 실행
+            ProcessBuilder executeBuilder = codeExecutionSandbox.createSecureProcessBuilder(
+                "node", new String[]{jsFile.getFileName().toString()}, sandbox.getSandboxDir());
+            Process executeProcess = executeBuilder.start();
+
+            if (input != null && !input.isEmpty()) {
+                try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(executeProcess.getOutputStream()))) {
+                    writer.write(input);
+                    writer.flush();
+                }
+            }
+
+            if (!executeProcess.waitFor(maxExecutionTime, TimeUnit.MILLISECONDS)) {
+                executeProcess.destroyForcibly();
+                return ExecutionResponse.builder()
+                        .status(CodeExecution.Status.TIMEOUT.name())
+                        .error("Execution timed out.")
+                        .build();
+            }
+
+            stdout = readStream(executeProcess.getInputStream());
+            stderr = readStream(executeProcess.getErrorStream());
+
+            if (executeProcess.exitValue() == 0) {
+                status = CodeExecution.Status.SUCCESS;
+            } else {
+                status = CodeExecution.Status.ERROR;
+            }
+
+        } catch (Exception e) {
+            stderr = "An unexpected error occurred: " + e.getMessage();
+        }
+
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        return ExecutionResponse.builder()
+                .output(stdout)
+                .error(stderr)
+                .executionTime((int) executionTime)
+                .memoryUsed(maxMemory)
+                .status(status.name())
+                .build();
     }
 }

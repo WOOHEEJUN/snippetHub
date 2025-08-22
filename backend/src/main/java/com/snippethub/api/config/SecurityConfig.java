@@ -1,6 +1,11 @@
 package com.snippethub.api.config;
 
 import com.snippethub.api.security.JwtRequestFilter;
+import com.snippethub.api.security.RateLimitFilter;
+import com.snippethub.api.security.CodeExecutionSecurityFilter;
+import com.snippethub.api.security.SecurityHeadersFilter;
+import com.snippethub.api.security.AuditLogFilter;
+import com.snippethub.api.security.InputValidationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,10 +31,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
-    // CustomOAuth2UserService 주입 코드 완전히 제거
+    private final RateLimitFilter rateLimitFilter;
+    private final CodeExecutionSecurityFilter codeExecutionSecurityFilter;
+    private final SecurityHeadersFilter securityHeadersFilter;
+    private final AuditLogFilter auditLogFilter;
+    private final InputValidationFilter inputValidationFilter;
 
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter, 
+                         RateLimitFilter rateLimitFilter,
+                         CodeExecutionSecurityFilter codeExecutionSecurityFilter,
+                         SecurityHeadersFilter securityHeadersFilter,
+                         AuditLogFilter auditLogFilter,
+                         InputValidationFilter inputValidationFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
+        this.rateLimitFilter = rateLimitFilter;
+        this.codeExecutionSecurityFilter = codeExecutionSecurityFilter;
+        this.securityHeadersFilter = securityHeadersFilter;
+        this.auditLogFilter = auditLogFilter;
+        this.inputValidationFilter = inputValidationFilter;
     }
 
     @Bean
@@ -75,6 +94,11 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+            .addFilterBefore(auditLogFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(inputValidationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(codeExecutionSecurityFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
