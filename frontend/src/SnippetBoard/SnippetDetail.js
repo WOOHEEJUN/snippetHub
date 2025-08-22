@@ -24,8 +24,8 @@ const apiFetch = async (path, init = {}) => {
   const res = await fetch(path, { ...init, credentials: 'include' });
   if (!res.ok) {
     let bodyText = '';
-    try { bodyText = await res.clone().text(); } catch {}
-    console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}`, bodyText);
+    try { bodyText = await res.clone().text(); } catch { /* noop */ }
+    console.error(`[API ERROR] ${init.method || 'GET'} ${path} -> ${res.status}, ${bodyText}`);
   }
   return res;
 };
@@ -34,76 +34,64 @@ const parseJsonSafe = async (res) => {
   try {
     const ct = res.headers.get('content-type') || '';
     if (ct.includes('application/json')) return await res.json();
-  } catch (_) {}
+  } catch { /* noop */ }
   return null;
 };
 
-// 닉네임 앞에 붙일 배지 이미지
-const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
-  const src = getLevelBadgeImage(level);
-  if (!src) return null;
-  return <img src={src} alt={typeof level === 'string' ? level : 'level-badge'} className={className} />;
-};
+// 유틸
+const removeCommentFromTree = (list, targetId) =>
+  list
+    .filter((c) => c.commentId !== targetId)
+    .map((c) => ({
+      ...c,
+      replies: c.replies ? removeCommentFromTree(c.replies, targetId) : [],
+    }));
 
-const removeCommentFromTree = (comments, commentId) => {
-  return comments.filter(comment => {
-    if (comment.commentId === commentId) {
-      return false;
-    }
-    if (comment.replies && comment.replies.length > 0) {
-      comment.replies = removeCommentFromTree(comment.replies, commentId);
-    }
-    return true;
-  });
-};
+async function deleteCommentById(commentId, headers) {
+  try {
+    const res = await apiFetch(ENDPOINTS.comment(commentId), {
+      method: 'DELETE',
+      headers,
+    });
+    if (res.status === 204) return { ok: true, msg: '삭제됨' };
+    const body = await parseJsonSafe(res);
+    return { ok: res.ok, msg: body?.message || res.statusText };
+  } catch (e) {
+    return { ok: false, msg: e?.message || '삭제 실패' };
+  }
+}
 
 function SnippetDetail() {
   const { snippetId } = useParams();
   const navigate = useNavigate();
   const { user, getAuthHeaders } = useAuth();
 
+  // 상태
   const [snippet, setSnippet] = useState(null);
   const [comments, setComments] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
+  const [replyContent, setReplyContent] = useState('');
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
   const [editCommentId, setEditCommentId] = useState(null);
   const [editContent, setEditContent] = useState('');
-  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isAIExpanded, setIsAIExpanded] = useState(false);
-  const [authorLevels, setAuthorLevels] = useState({}); // New state to store author levels from ranking
-
-  const deleteCommentById = async (commentId) => {
-    try {
-      const res = await apiFetch(ENDPOINTS.comment(commentId), {
-        method: 'DELETE',
-        headers: { ...getAuthHeaders() },
-      });
-      const body = await parseJsonSafe(res);
-      const msg = body?.message || res.statusText || '';
-      if (res.ok) {
-        return { ok: true, msg: msg || '삭제되었습니다.' };
-      }
-      return { ok: false, msg };
-    } catch (err) {
-      return { ok: false, msg: '댓글 삭제 중 오류가 발생했습니다.' };
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [authorLevels, setAuthorLevels] = useState({}); // 랭킹에서 가져온 레벨 맵
 
   const fetchRankingData = useCallback(async () => {
     try {
-      const res = await apiFetch(`/api/users/ranking?size=1000`, { headers: getAuthHeaders() }); // Fetch a large enough size
+      const res = await apiFetch(`/api/users/ranking?size=1000`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
       const data = await parseJsonSafe(res);
       const levelMap = {};
-      data.data.content.forEach(user => {
-        levelMap[user.userId] = user.currentLevel;
+      (data?.data?.content || []).forEach((u) => {
+        levelMap[u.userId] = u.currentLevel;
       });
       setAuthorLevels(levelMap);
     } catch (err) {
-      console.error("Failed to fetch ranking data:", err);
+      console.error('Failed to fetch ranking data:', err);
     }
   }, [getAuthHeaders]);
 
@@ -135,14 +123,13 @@ function SnippetDetail() {
   useEffect(() => {
     fetchSnippet();
     fetchComments();
-    fetchRankingData(); // Fetch ranking data on component mount
+    fetchRankingData();
   }, [fetchSnippet, fetchComments, fetchRankingData, snippetId]);
 
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
   const handleDelete = async () => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-
     try {
       const res = await apiFetch(ENDPOINTS.snippet(snippetId), {
         method: 'DELETE',
@@ -195,10 +182,10 @@ function SnippetDetail() {
       const body = await parseJsonSafe(res);
       if (!res.ok || body?.success === false) throw new Error(body?.message || '좋아요 처리에 실패했습니다.');
 
-      setSnippet(prev => ({
+      setSnippet((prev) => ({
         ...prev,
         isLiked: body?.data?.isLiked ?? !prev.isLiked,
-        likeCount: body?.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1)
+        likeCount: body?.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1),
       }));
     } catch (err) {
       alert(err.message);
@@ -249,15 +236,13 @@ function SnippetDetail() {
 
   const handleCommentDelete = async (commentId) => {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
-
-    const result = await deleteCommentById(commentId);
+    const result = await deleteCommentById(commentId, getAuthHeaders());
     if (!result.ok) {
       alert(result.msg);
       if (result.msg.includes('로그인')) navigate('/login');
       return;
     }
-
-    setComments(prev => removeCommentFromTree(prev, commentId));
+    setComments((prev) => removeCommentFromTree(prev, commentId));
     await fetchComments();
   };
 
@@ -281,11 +266,6 @@ function SnippetDetail() {
       console.error(err);
       alert(err.message || '답글 작성 중 오류가 발생했습니다.');
     }
-  };
-
-  const handleCancelReply = () => {
-    setReplyingToCommentId(null);
-    setReplyContent('');
   };
 
   const copyToClipboard = () => {
@@ -388,7 +368,7 @@ function SnippetDetail() {
                 <div className="comment-author">
                   {(() => {
                     const authorId = comment.author?.userId ?? comment.authorId;
-                    const displayLevel = authorLevels[authorId] || comment.author?.level; // Fallback to comment.author.level
+                    const displayLevel = authorLevels[authorId] || comment.author?.level;
                     return authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
                         {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
@@ -452,7 +432,7 @@ function SnippetDetail() {
                             <div className="comment-author">
                               {(() => {
                                 const rAuthorId = reply.author?.userId ?? reply.authorId;
-                                const displayLevel = authorLevels[rAuthorId] || reply.author?.level; // Fallback to reply.author.level
+                                const displayLevel = authorLevels[rAuthorId] || reply.author?.level;
                                 return reply.author?.userId ? (
                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
                                     {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
@@ -488,24 +468,42 @@ function SnippetDetail() {
         </div>
       </div>
 
+      {/* ===== 사이드바 ===== */}
       <div className="snippet-sidebar">
+        {/* 작성자 카드: 레이블 고정폭 + 값 가변폭 */}
         <div className="sidebar-card author-card">
-          <h4><FaUser /> 작성자</h4>
-          <div className="author-info">
-            {(() => {
-              const displayLevel = authorLevels[snippet.author?.userId] || snippet.author?.level; // Fallback to snippet.author.level
-              return snippet.author?.userId ? (
-                <Link to={`/users/${snippet.author.userId}`}>
-                  {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
-                  <span>{snippet.author?.nickname}</span>
-                </Link>
-              ) : (
-                <> 
-                  {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
-                  <span>{snippet.author?.nickname}</span>
-                </>
-              );
-            })()}
+          <div className="meta-row">
+            <span className="meta-label">
+              <FaUser style={{ marginRight: 6 }} />
+              작성자
+            </span>
+
+            <div className="meta-value">
+              {(() => {
+                const displayLevel = authorLevels[snippet.author?.userId] || snippet.author?.level;
+                const Nick = (
+                  <>
+                    {displayLevel && (
+                      <img
+                        src={getLevelBadgeImage(displayLevel)}
+                        alt={displayLevel}
+                        className="level-badge-inline"
+                      />
+                    )}
+                    <span className="nickname" title={snippet.author?.nickname}>
+                      {snippet.author?.nickname}
+                    </span>
+                  </>
+                );
+                return snippet.author?.userId ? (
+                  <Link to={`/users/${snippet.author.userId}`} className="author-link">
+                    {Nick}
+                  </Link>
+                ) : (
+                  <span className="author-link">{Nick}</span>
+                );
+              })()}
+            </div>
           </div>
         </div>
 

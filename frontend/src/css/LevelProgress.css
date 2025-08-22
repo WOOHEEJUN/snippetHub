@@ -1,137 +1,102 @@
-
-.level-progress {
+/* ====== 고정 배치(왼쪽 세로) ====== */
+.lp {
   position: fixed;
   top: 50%;
-  left: 30px;
+  left: 24px;
   transform: translateY(-50%);
-  background-color: #222222;
+  width: 84px;
+  height: 420px;
+  background: #222;
+  border: 1px solid #2a2a2a;
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
-  width: 80px; /* Adjust width for vertical layout */
-  height: 400px; /* Adjust height for vertical layout */
+  padding: 14px 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-}
-.level-progress:hover { 
-  transform: translateY(-50%) scale(1.05); 
+  gap: 12px;
+  z-index: 1000;
 }
 
-.level-header { text-align: center; margin-bottom: 10px; }
-.level-header h3 {
-  color: #e0e0e0; font-size: 1.2rem; font-weight: 600; margin: 0;
+.lp:hover { transform: translateY(-50%) scale(1.04); }
+
+/* 제목은 세로쓰기(장식) */
+.lp__header h3{
+  margin: 0;
+  color: #e0e0e0;
+  font-size: .95rem;
+  font-weight: 700;
   writing-mode: vertical-rl;
   text-orientation: mixed;
+  letter-spacing: .06em;
 }
 
-.current-level-info {
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  gap: 10px; 
-  margin-bottom: 15px;
-}
-.level-icon { font-size: 2.5rem; color: #ffd700; }
-.level-details { 
+/* 현재 레벨 */
+.lp__current{
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 8px;
 }
-.level-name { font-size: 1rem; font-weight: 700; color: #e0e0e0; }
-.level-number { font-size: 0.8rem; color: #b0b0b0; margin-bottom: 3px; }
-.current-points { font-size: 0.9rem; font-weight: 600; color: #8ab0d1; }
+.lp__icon{ font-size: 2.2rem; }
+.lp__details{ display: flex; flex-direction: column; align-items: center; }
+.lp__name{ font-size: .95rem; font-weight: 700; color:#e0e0e0; }
+.lp__num{ font-size: .8rem; color:#b0b0b0; }
+.lp__pts{ font-size: .9rem; font-weight: 700; color:#8ab0d1; }
 
-.next-level-info { 
-  margin-top: 10px;
+/* 진행도 */
+.lp__progress{
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 8px;
   width: 100%;
-  flex-grow: 1;
+  flex: 1;
 }
-
-.progress-section {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.progress-header {
+.lp__progressHead{
   width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 2px;
   align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.8rem;
+  font-size: .78rem;
   color: #b0b0b0;
   text-align: center;
 }
 
-.progress-bar {
-  width: 12px; /* Thickness of the vertical bar */
+/* ✅ 세로 막대 (아래에서 위로 차오름) */
+.lp__bar{
+  position: relative;
+  width: 12px;
   height: 100%;
-  background-color: #444444;
+  background: #444;
   border-radius: 6px;
   overflow: hidden;
-  position: relative;
   display: flex;
-  align-items: flex-end; /* Fill from bottom */
+  align-items: flex-end;
 }
-
-.progress-fill {
-  width: 100%;
-  border-radius: 6px;
-  transition: height 0.5s ease-in-out;
-  background: #8BC34A;
-}
-
-.progress-text {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #b0b0b0;
-}
-
-.max-level-info {
-  text-align: center;
-  padding: 10px;
-  background-color: #333333;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-.max-level-badge {
-  display: flex; 
-  flex-direction: column;
-  align-items: center; 
-  justify-content: center; 
-  gap: 5px;
-  font-size: 1rem; font-weight: 600; color: #ffd700;
-}
-
-/* Adjustments for vertical progress fill */
-.progress-bar .progress-fill {
+.lp__fill{
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
+  height: 0;                 /* JS에서 높이%로 제어 */
+  background: #8BC34A;
+  border-radius: 6px;
+  transition: height .5s ease-in-out;
 }
 
-/* Since the component is now fixed, media queries might need adjustment 
-   if it overlaps with other elements on small screens. For now, we assume
-   it's acceptable on all screen sizes. */
-@media (max-width: 768px) {
-  .level-progress {
-    left: 10px;
-    width: 70px;
-    height: 350px;
-  }
-  .level-header h3 { font-size: 1rem; }
-  .level-icon { font-size: 2rem; }
-  .level-name { font-size: 0.9rem; }
+.lp__text{ font-size: .85rem; color:#b0b0b0; }
+
+/* 최고 레벨 */
+.lp__max{
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: #ffd700; font-weight: 700; font-size: .9rem;
 }
 
+/* 반응형 */
+@media (max-width: 768px){
+  .lp{ left: 10px; width: 72px; height: 360px; }
+  .lp__icon{ font-size: 1.9rem; }
+  .lp__name{ font-size: .9rem; }
+}

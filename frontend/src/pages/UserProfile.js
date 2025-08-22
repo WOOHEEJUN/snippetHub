@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FaUser, FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
+import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
 import { getLevelBadgeImage } from '../utils/badgeUtils'; 
 import '../css/UserProfile.css';
 
@@ -13,15 +13,6 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-  };
-
-  
   const fetchUserProfile = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/profile`);
@@ -31,12 +22,11 @@ const UserProfile = () => {
       } else {
         setError('사용자를 찾을 수 없습니다.');
       }
-    } catch (error) {
+    } catch {
       setError('프로필을 불러오는데 실패했습니다.');
     }
   };
 
-  
   const fetchUserPosts = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/posts?page=0&size=10`);
@@ -44,11 +34,9 @@ const UserProfile = () => {
         const data = await response.json();
         setPosts(data.data.content || []);
       }
-    } catch (error) {
-    }
+    } catch {}
   };
 
-  
   const fetchUserSnippets = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/snippets?page=0&size=10`);
@@ -56,18 +44,13 @@ const UserProfile = () => {
         const data = await response.json();
         setSnippets(data.data.content || []);
       }
-    } catch (error) {
-    }
+    } catch {}
   };
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchUserProfile(),
-        fetchUserPosts(),
-        fetchUserSnippets()
-      ]);
+      await Promise.all([fetchUserProfile(), fetchUserPosts(), fetchUserSnippets()]);
       setLoading(false);
     };
     loadData();
@@ -77,50 +60,28 @@ const UserProfile = () => {
     return new Date(dateString).toLocaleDateString('ko-KR');
   };
 
-  if (loading) {
-    return (
-      <div className="user-profile-container">
-        <div className="loading">로딩 중...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="user-profile-container">
-        <div className="error">{error}</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="user-profile-container">
-        <div className="error">사용자를 찾을 수 없습니다.</div>
-      </div>
-    );
-  }
+  if (loading) return <div className="user-profile-container"><div className="loading">로딩 중...</div></div>;
+  if (error) return <div className="user-profile-container"><div className="error">{error}</div></div>;
+  if (!user) return <div className="user-profile-container"><div className="error">사용자를 찾을 수 없습니다.</div></div>;
 
   return (
     <div className="user-profile-container">
       <div className="profile-header">
-        <div className="profile-level-display"> {/* New div for level badge */}
+        <div className="profile-level-display">
           {user.level && (
             <img
               src={getLevelBadgeImage(user.level)}
               alt={user.level}
-              className="profile-level-badge-large" /* New class for styling */
+              className="profile-level-badge-large"
             />
           )}
         </div>
         <div className="profile-info">
-          <h1 className="profile-nickname">
-            {/* Removed level badge from here */}
-            {user.nickname}
-          </h1>
+          <h1 className="profile-nickname">{user.nickname}</h1>
           {user.levelName && user.level && <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>}
           {user.points !== undefined && <p className="profile-points">포인트: {user.points} P</p>}
           {user.bio && <p className="profile-bio">{user.bio}</p>}
+
           <div className="profile-stats">
             <div className="stat-item">
               <FaFileAlt className="stat-icon" />
@@ -177,7 +138,7 @@ const UserProfile = () => {
                   <div key={post.postId} className="content-item">
                     <Link to={`/board/${post.postId}`} className="content-link">
                       <h3 className="content-title">{post.title}</h3>
-                      <p className="content-excerpt">{post.content.substring(0, 100)}...</p>
+                      <p className="content-excerpt">{(post.content || '').substring(0, 100)}...</p>
                       <div className="content-meta">
                         <span className="content-date">{formatDate(post.createdAt)}</span>
                         <span className="content-views">조회 {post.viewCount}</span>

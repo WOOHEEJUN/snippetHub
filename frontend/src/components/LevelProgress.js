@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
-import '../css/LevelProgress.css';
+import '../css/LevelProgress.vertical.css'; // ✅ 파일명도 새로
 
 function LevelProgress({ userLevel, userPoints }) {
   const levels = [
@@ -30,8 +30,7 @@ function LevelProgress({ userLevel, userPoints }) {
     if (!next || !isFinite(next.minPoints - cur.minPoints)) return 100;
     const have = userPoints - cur.minPoints;
     const need = next.minPoints - cur.minPoints;
-    const pct = (have / need) * 100;
-    return clamp(Math.round(pct), 0, 100);
+    return clamp(Math.round((have / need) * 100), 0, 100);
   };
 
   const getLevelIcon = (levelName) => {
@@ -48,78 +47,63 @@ function LevelProgress({ userLevel, userPoints }) {
     }
   };
 
-  const [animatedProgress, setAnimatedProgress] = useState(0); // New state for animation
-
-  const progressPercentage = getProgressPercentage(); // Keep this for calculation
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const progressPercentage = getProgressPercentage();
 
   useEffect(() => {
-    // When progressPercentage changes, update animatedProgress after a short delay
-    const timer = setTimeout(() => {
-      setAnimatedProgress(progressPercentage);
-    }, 100); // 100ms delay
-
-    return () => clearTimeout(timer); // Cleanup timer
-  }, [progressPercentage]); // Re-run effect when progressPercentage changes
+    const t = setTimeout(() => setAnimatedProgress(progressPercentage), 100);
+    return () => clearTimeout(t);
+  }, [progressPercentage]);
 
   const currentLevel = getCurrentLevelInfo();
   const nextLevel = getNextLevelInfo();
   const pointsToNextLevel = nextLevel ? Math.max(0, nextLevel.minPoints - userPoints) : 0;
 
   return (
-    <div className="level-progress">
-      <div className="level-header">
-        <h3>🏆 레벨 정보</h3>
+    <aside className="lp"> {/* lp = level progress (namespace) */}
+      <div className="lp__header" aria-hidden="true">
+        <h3>레벨</h3>
       </div>
 
-      <div className="current-level-info">
-        <div className="level-icon">{getLevelIcon(currentLevel.name)}</div>
-        <div className="level-details">
-          <div className="level-name">{currentLevel.name}</div>
-          <div className="level-number">Level {currentLevel.level}</div>
-          <div className="current-points">{userPoints} P</div>
+      <div className="lp__current">
+        <div className="lp__icon">{getLevelIcon(currentLevel.name)}</div>
+        <div className="lp__details">
+          <div className="lp__name">{currentLevel.name}</div>
+          <div className="lp__num">Level {currentLevel.level}</div>
+          <div className="lp__pts">{userPoints} P</div>
         </div>
       </div>
 
       {nextLevel ? (
-        <div className="next-level-info">
-          <div className="progress-section">
-            <div className="progress-header">
-              <span>다음 레벨: {nextLevel.name}</span>
-              <span>{pointsToNextLevel} P 더 필요</span>
-            </div>
-
-            {/* 왼쪽 기준 정렬 막대 */}
-            <div
-              className="progress-bar"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={progressPercentage}
-              aria-label="경험치 진행도"
-            >
-              <div
-                className="progress-fill"
-                style={{
-                  height: `${animatedProgress}%`,
-                  background: '#8BC34A',
-                }}
-              />
-            </div>
-
-            <div className="progress-text">
-              {progressPercentage}% 완료
-            </div>
+        <div className="lp__progress">
+          <div className="lp__progressHead">
+            <span>다음: {nextLevel.name}</span>
+            <span>{pointsToNextLevel} P 더 필요</span>
           </div>
+
+          <div
+            className="lp__bar"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPercentage}
+            aria-label="레벨 진행도"
+          >
+            <div
+              className="lp__fill"
+              style={{ height: `${animatedProgress}%` }}  /* ✅ 세로 진행 */
+            />
+          </div>
+
+          <div className="lp__text">{progressPercentage}% 완료</div>
         </div>
       ) : (
-        <div className="max-level-info">
-          <div className="max-level-badge">
-            <FaCrown style={{ color: '#ffd700', fontSize: '2rem' }} />
-            <span>최고 레벨 달성!</span>
-          </div>
+        <div className="lp__max">
+          <FaCrown style={{ color: '#ffd700', fontSize: '1.6rem' }} />
+          <span>최고 레벨 달성!</span>
         </div>
       )}
-    </div>
+    </aside>
   );
 }
 
