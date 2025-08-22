@@ -1,29 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
-import { Medal } from 'iconoir-react';
-
-const getBadgeIcon = (badgeName) => {
-  if (!badgeName) {
-    return <Medal color="lightgray" width="100%" height="100%" />;
-  }
-  const lowerCaseBadgeName = badgeName.toLowerCase();
-  let color = 'lightgray';
-
-  if (lowerCaseBadgeName.includes('bronze')) {
-    color = '#cd7f32';
-  } else if (lowerCaseBadgeName.includes('silver')) {
-    color = '#c0c0c0';
-  } else if (lowerCaseBadgeName.includes('gold')) {
-    color = '#ffd700';
-  } else if (lowerCaseBadgeName.includes('platinum')) {
-    color = '#e5e4e2';
-  } else if (lowerCaseBadgeName.includes('diamond')) {
-    color = '#b9f2ff';
-  }
-
-  return <Medal color={color} width="100%" height="100%" />;
-};
+import { getBadgeImagePath } from '../utils/badgeUtils';
 
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
@@ -159,7 +137,7 @@ function BadgeGuide() {
               <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'}`}>
                 <div className="badge-image">
                   <div className="badge-icon-container">
-                    {getBadgeIcon(badge.name)}
+                    <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>

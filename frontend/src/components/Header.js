@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
-
-import { getBadgeIcon } from '../utils/badgeIcon';
-import { getLevelBadgeImage } from '../utils/badgeUtils';
+import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils';
 
 import '../css/Header.css';
 
@@ -93,15 +91,11 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  {user?.representativeBadge ? (
-                    <div className="representative-badge-header">
-                      {getBadgeIcon(user.representativeBadge.name)}
-                    </div>
-                  ) : user?.level && (
+                  {user?.representativeBadge && (
                     <img
-                      src={getLevelBadgeImage(user.level)}
-                      alt={user.level}
-                      className="level-badge-header"
+                      src={getBadgeImagePath(user.representativeBadge.name)}
+                      alt={user.representativeBadge.name}
+                      className="representative-badge-header"
                       width={24}
                       height={24}
                     />

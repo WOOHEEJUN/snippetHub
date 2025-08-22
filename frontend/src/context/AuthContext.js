@@ -169,6 +169,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateRepresentativeBadge = (badge) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, representativeBadge: badge };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
+
   return (
     <AuthContext.Provider value={{
       accessToken,
@@ -179,7 +187,8 @@ export const AuthProvider = ({ children }) => {
       logout,
       getAuthHeaders,
       loading,
-      refetchUser
+      refetchUser,
+      updateRepresentativeBadge
     }}>
       {children}
     </AuthContext.Provider>
