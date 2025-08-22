@@ -171,7 +171,7 @@ const Board = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted">
+                  <td colSpan="5" className="text-center py-5 text-muted empty-board-message">
                     <h5>게시글이 없습니다.</h5>
                     <p>첫 번째 게시글을 작성해보세요!</p>
                   </td>

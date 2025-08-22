@@ -26,7 +26,7 @@ const Header = () => {
         {/* LEFT */}
         <div className="header-left">
           <Link to="/" className="logo">
-            <span>SNI</span>
+            <img src="/Logo.png" alt="SNI Logo" className="header-logo-img" />
           </Link>
 
           <nav className="main-nav">

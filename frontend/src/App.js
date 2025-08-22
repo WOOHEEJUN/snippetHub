@@ -40,6 +40,7 @@ import './css/App.css';
 import MyBadges from './MyPage/MyBadges';
 import Ranking from './MyPage/Ranking';
 import PointsGuide from './MyPage/PointsGuide';
+import MyPageLayout from './MyPage/MyPageLayout';
 
 function App() {
   return (
@@ -57,14 +58,20 @@ function App() {
             <Route path="/board/write" element={<BoardWrite />} />
             <Route path="/board/:postId" element={<BoardDetail />} />
             <Route path="/board/edit/:postId" element={<BoardEdit />} />
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/mypage/posts" element={<MyPosts />} />
-            <Route path="/mypage/snippets" element={<MySnippets />} />
-            <Route path="/mypage/edit" element={<ProfileEdit />} />
-            <Route path="/mypage/badges" element={<MyBadges />} />
-            <Route path="/mypage/ranking" element={<Ranking />} />
-            <Route path="/mypage/points-guide" element={<PointsGuide />} />
-            <Route path="/mypage/saved-problems" element={<SavedProblems />} />
+            
+            <Route path="/mypage" element={<MyPageLayout />}>
+              <Route index element={<MyPage />} />
+              <Route path="posts" element={<MyPosts />} />
+              <Route path="snippets" element={<MySnippets />} />
+              <Route path="edit" element={<ProfileEdit />} />
+              <Route path="badges" element={<MyBadges />} />
+              <Route path="ranking" element={<Ranking />} />
+              <Route path="points-guide" element={<PointsGuide />} />
+              <Route path="saved-problems" element={<SavedProblems />} />
+              <Route path="submission-history" element={<SubmissionHistory />} />
+              <Route path="point-history" element={<PointHistory />} />
+            </Route>
+
             <Route path="/badge-guide" element={<BadgeGuide />} />
             <Route path="/grade-guide" element={<GradeGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
@@ -75,10 +82,8 @@ function App() {
             <Route path="/ai-problem-generation" element={<AIProblemGeneration />} />
             <Route path="/ai-code-evaluation" element={<AICodeEvaluation />} />
             <Route path="/daily-problems" element={<DailyProblem />} />
-            <Route path="/submission-history" element={<SubmissionHistory />} />
             <Route path="/problems" element={<ProblemList />} />
             <Route path="/problems/:problemId" element={<ProblemDetail />} />
-            <Route path="/point-history" element={<PointHistory />} />
             <Route path="/oauth2/callback" element={<OAuth2Callback />} />
             <Route path="/oauth2/redirect" element={<OAuth2Callback />} />
             <Route path="/notifications" element={<Notifications />} />

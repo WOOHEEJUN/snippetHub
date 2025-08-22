@@ -1,21 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  FaComment, 
-  FaEye, 
-  FaUser, 
-  FaCalendarAlt, 
-  FaEdit, 
-  FaTrash, 
-  FaThumbsUp, 
-  FaTag,
-  FaHeart,         
-  FaRegHeart       
+import {
+  FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag,
+  FaHeart, FaRegHeart
 } from 'react-icons/fa';
-import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
-
 import '../css/BoardDetail.css';
 
 const MOCK_ENABLED = false;
@@ -29,25 +19,62 @@ const normalizeComments = (payload) => {
   return [];
 };
 
+// 레벨 배지 컴포넌트(숫자/영문/한글 level 모두 허용)
+const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
+  const src = getLevelBadgeImage(level);
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt={typeof level === 'string' ? level : 'level-badge'}
+      className={className}
+    />
+  );
+};
+
 function BoardDetail() {
   const { postId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // ✅ 누락됐던 상태 훅들 전부 선언
   const [post, setPost] = useState(null);
-  const [error, setError] = useState('');
   const [comments, setComments] = useState([]);
+  const [error, setError] = useState('');
+
   const [newComment, setNewComment] = useState('');
+
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentContent, setEditingCommentContent] = useState('');
-  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
 
-  
+  const [replyContent, setReplyContent] = useState('');
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+
+  // 랭킹에서 받은 userId -> level 매핑
+  const [authorLevels, setAuthorLevels] = useState({});
+
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
+
+  const fetchRankingData = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/users/ranking?size=1000`, {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
+      const data = await res.json();
+      const levelMap = {};
+      (data?.data?.content || []).forEach((u) => {
+        levelMap[u.userId] = u.currentLevel;
+      });
+      setAuthorLevels(levelMap);
+    } catch (err) {
+      console.error('Failed to fetch ranking data:', err);
+    }
+  }, []);
 
   const fetchPostData = useCallback(async () => {
     try {
@@ -74,7 +101,8 @@ function BoardDetail() {
 
   useEffect(() => {
     fetchPostData();
-  }, [fetchPostData, postId]);
+    fetchRankingData();
+  }, [fetchPostData, fetchRankingData, postId]);
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 
@@ -120,14 +148,12 @@ function BoardDetail() {
         throw new Error(errorData.message || '좋아요 처리에 실패했습니다.');
       }
 
-      
       const body = await res.json().catch(() => null);
 
       setPost(prev => ({
         ...prev,
         isLiked: body?.data?.isLiked ?? !prev.isLiked,
-        likeCount:
-          body?.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1),
+        likeCount: body?.data?.likeCount ?? (prev.isLiked ? prev.likeCount - 1 : prev.likeCount + 1),
       }));
     } catch (err) {
       alert(err.message);
@@ -160,7 +186,6 @@ function BoardDetail() {
       if (created) {
         setComments(prev => [...prev, created]);
       } else {
-        
         fetchPostData();
       }
       setNewComment('');
@@ -199,11 +224,15 @@ function BoardDetail() {
       const body = await res.json().catch(() => null);
       const updated = body?.data ?? body ?? null;
 
-      setComments(prev =>
-        prev.map(c =>
-          c.commentId === commentId ? (updated || { ...c, content: editingCommentContent }) : c
-        )
-      );
+      if (updated) {
+        setComments(prev =>
+          prev.map(c =>
+            c.commentId === commentId ? (updated || { ...c, content: editingCommentContent }) : c
+          )
+        );
+      } else {
+        fetchPostData();
+      }
       setEditingCommentId(null);
       setEditingCommentContent('');
     } catch (err) {
@@ -255,7 +284,6 @@ function BoardDetail() {
       });
       if (!res.ok) throw new Error('답글 작성 실패');
 
-      
       await fetchPostData();
       setReplyContent('');
       setReplyingToCommentId(null);
@@ -282,23 +310,28 @@ function BoardDetail() {
 
   const isAuthor = user?.userId === post.author?.userId;
 
-  return (
-    <div className="board-detail-page">
-      <div className="post-main-content">
-        <div className="post-header">
-          <h1>{post.title}</h1>
-          <div className="post-meta-info">
-            <span className="category-info-inline">
-              <FaTag /> {post.category}
-            </span>
-            <span className="author-info-inline">
-              <FaUser />
-              {post.author?.userId ? (
-                <Link to={`/users/${post.author.userId}`}>
-                  {post.author?.level && (
+return (
+  <div className="board-detail-page">
+    {/* 본문 영역 */}
+    <div className="post-main-content">
+      <div className="post-header">
+        <h1>{post.title}</h1>
+        <div className="post-meta-info">
+          <span className="category-info-inline">
+            <FaTag /> {post.category}
+          </span>
+
+          <span className="author-info-inline">
+            <FaUser />
+            {(() => {
+              const displayLevel =
+                authorLevels[post.author?.userId] || post.author?.level;
+              return post.author?.userId ? (
+                <Link to={`/users/${post.author.userId}`} className="author-link">
+                  {displayLevel && (
                     <img
-                      src={getLevelBadgeImage(post.author.level)}
-                      alt={post.author.level}
+                      src={getLevelBadgeImage(displayLevel)}
+                      alt={displayLevel}
                       className="level-badge-inline"
                     />
                   )}
@@ -306,99 +339,97 @@ function BoardDetail() {
                 </Link>
               ) : (
                 <>
-                  {post.author?.level && (
+                  {displayLevel && (
                     <img
-                      src={getLevelBadgeImage(post.author.level)}
-                      alt={post.author.level}
+                      src={getLevelBadgeImage(displayLevel)}
+                      alt={displayLevel}
                       className="level-badge-inline"
                     />
                   )}
                   {post.author?.nickname}
                 </>
-              )}
-            </span>
-            <span className="date-info-inline">
-              <FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}
-            </span>
-            <span className="view-info-inline">
-              <FaEye /> {post.viewCount}
-            </span>
+              );
+            })()}
+          </span>
+
+          <span className="date-info-inline">
+            <FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}
+          </span>
+          <span className="view-info-inline">
+            <FaEye /> {post.viewCount}
+          </span>
+        </div>
+      </div>
+
+      <div className="post-content-body">
+        {post.content}
+        {post.imageUrl && (
+          <div className="post-image-container">
+            <img src={post.imageUrl} alt="게시글 이미지" />
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="post-content-body">
-          {post.content}
-          {post.imageUrl && (
-            <div className="post-image-container">
-              <img src={post.imageUrl} alt="게시글 이미지" />
-            </div>
+      <div className="post-actions-top">
+        <button
+          onClick={handleLike}
+          style={{
+            background: 'none',
+            border: 'none',
+            outline: 'none',
+            cursor: 'pointer',
+            fontSize: 24,
+            display: 'flex',
+            alignItems: 'center',
+            color: post.isLiked ? '#e74c3c' : '#aaa',
+            transition: 'color 0.2s',
+          }}
+          aria-label={post.isLiked ? '좋아요 취소' : '좋아요'}
+        >
+          {post.isLiked ? (
+            <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
+          ) : (
+            <FaRegHeart />
           )}
-        </div>
+          <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>
+            {post.likeCount}
+          </span>
+        </button>
+      </div>
 
-        <div className="post-actions-top">
-  <button
-    onClick={handleLike}
-    style={{
-      background: 'none',     
-      border: 'none',         
-      outline: 'none',
-      cursor: 'pointer',
-      fontSize: 24,
-      display: 'flex',
-      alignItems: 'center',
-      color: post.isLiked ? '#e74c3c' : '#aaa',
-      transition: 'color 0.2s'
-    }}
-    aria-label={post.isLiked ? '좋아요 취소' : '좋아요'}
-  >
-    {post.isLiked ? (
-      <FaHeart style={{ transition: 'transform 0.2s', transform: 'scale(1.2)' }} />
-    ) : (
-      <FaRegHeart />
-    )}
-    <span style={{ marginLeft: 8, fontWeight: 'bold', fontSize: 18 }}>
-      {post.likeCount}
-    </span>
-  </button>
-</div>
+      <div className="comment-section">
+        <h3>
+          <FaComment /> 댓글 ({comments.length})
+        </h3>
 
-        <div className="comment-section">
-          <h3>
-            <FaComment /> 댓글 ({comments.length})
-          </h3>
+        <form onSubmit={handleCommentSubmit} className="comment-form">
+          <textarea
+            id="comment-input"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="댓글을 남겨주세요."
+          />
+          <button type="submit">등록</button>
+        </form>
 
-          <form onSubmit={handleCommentSubmit} className="comment-form">
-            <textarea
-              id="comment-input"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 남겨주세요."
-            />
-            <button type="submit">등록</button>
-          </form>
+        <div className="comment-list">
+          {comments.map((comment) => {
+            const authorId = comment.author?.userId ?? comment.authorId;
+            const authorName =
+              comment.author?.nickname ?? comment.authorNickname ?? '알 수 없는 사용자';
 
-          <div className="comment-list">
-            {comments.map((comment) => {
-              const authorId = comment.author?.userId ?? comment.authorId;
-              const authorName = comment.author?.nickname ?? comment.authorNickname ?? '알 수 없는 사용자';
-
-              return (
-                <div key={comment.commentId} className="comment-item">
-                  
-                  <div className="comment-author">
-                  {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
-                    {authorId ? (
+            return (
+              <div key={comment.commentId} className="comment-item">
+                <div className="comment-author">
+                  {(() => {
+                    const displayLevel =
+                      authorLevels[authorId] || comment.author?.level;
+                    return authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
-                        {comment.author?.level && (
+                        {displayLevel && (
                           <img
-                            src={getLevelBadgeImage(comment.author.level)}
-                            alt={comment.author.level}
+                            src={getLevelBadgeImage(displayLevel)}
+                            alt={displayLevel}
                             className="level-badge-inline"
                           />
                         )}
@@ -406,96 +437,93 @@ function BoardDetail() {
                       </Link>
                     ) : (
                       <span className="author-link">
-                        {comment.author?.level && (
+                        {displayLevel && (
                           <img
-                            src={getLevelBadgeImage(comment.author.level)}
-                            alt={comment.author.level}
+                            src={getLevelBadgeImage(displayLevel)}
+                            alt={displayLevel}
                             className="level-badge-inline"
                           />
                         )}
                         {authorName}
                       </span>
-                    )}
+                    );
+                  })()}
+                </div>
+
+                {editingCommentId === comment.commentId ? (
+                  <div className="comment-edit-form">
+                    <textarea
+                      value={editingCommentContent}
+                      onChange={(e) => setEditingCommentContent(e.target.value)}
+                    />
+                    <button onClick={() => handleSaveComment(comment.commentId)}>저장</button>
+                    <button onClick={handleCancelEdit}>취소</button>
                   </div>
-
-                  {editingCommentId === comment.commentId ? (
-                    <div className="comment-edit-form">
-                      <textarea
-                        value={editingCommentContent}
-                        onChange={(e) => setEditingCommentContent(e.target.value)}
-                      />
-                      <button onClick={() => handleSaveComment(comment.commentId)}>저장</button>
-                      <button onClick={handleCancelEdit}>취소</button>
-                    </div>
-                  ) : (
-                    <>
-                      <p className="comment-content">{comment.content}</p>
-                      <div className="comment-meta">
-                        <span>{new Date(comment.createdAt).toLocaleString()}</span>
-                        <div className="comment-actions">
-                          <button onClick={() => setReplyingToCommentId(comment.commentId)}>
-                            답글
-                          </button>
-                          {(user?.userId === authorId) && (
-                            <>
-                              <button onClick={() => handleEditComment(comment)}>
-                                <FaEdit /> 수정
-                              </button>
-                              <button onClick={() => handleDeleteComment(comment.commentId)}>
-                                <FaTrash /> 삭제
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {replyingToCommentId === comment.commentId && (
-                        <div className="reply-form">
-                          <form onSubmit={(e) => handleReplySubmit(e, comment.commentId)}>
-                            <textarea
-                              value={replyContent}
-                              onChange={(e) => setReplyContent(e.target.value)}
-                              placeholder="답글을 입력하세요..."
-                            />
-                            <button type="submit">답글 작성</button>
-                            <button type="button" onClick={handleCancelReply}>
-                              취소
+                ) : (
+                  <>
+                    <p className="comment-content">{comment.content}</p>
+                    <div className="comment-meta">
+                      <span>{new Date(comment.createdAt).toLocaleString()}</span>
+                      <div className="comment-actions">
+                        <button onClick={() => setReplyingToCommentId(comment.commentId)}>
+                          답글
+                        </button>
+                        {user?.userId === authorId && (
+                          <>
+                            <button onClick={() => handleEditComment(comment)}>
+                              <FaEdit /> 수정
                             </button>
-                          </form>
-                        </div>
-                      )}
+                            <button onClick={() => handleDeleteComment(comment.commentId)}>
+                              <FaTrash /> 삭제
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
 
-                      {comment.replies && comment.replies.length > 0 && (
-                        <div className="replies-container">
-                          {comment.replies.map((reply) => {
-                            const rAuthorId = reply.author?.userId ?? reply.authorId;
-                            const rAuthorName =
-                              reply.author?.nickname ?? reply.authorNickname ?? '알 수 없는 사용자';
+                    {replyingToCommentId === comment.commentId && (
+                      <div className="reply-form">
+                        <form onSubmit={(e) => handleReplySubmit(e, comment.commentId)}>
+                          <textarea
+                            value={replyContent}
+                            onChange={(e) => setReplyContent(e.target.value)}
+                            placeholder="답글을 입력하세요..."
+                          />
+                          <button type="submit">답글 작성</button>
+                          <button type="button" onClick={handleCancelReply}>
+                            취소
+                          </button>
+                        </form>
+                      </div>
+                    )}
 
-                            return (
-                              <div
-                                key={reply.commentId}
-                                className="reply-item"
-                                style={{
-                                  marginLeft: '20px',
-                                  borderLeft: '2px solid #e0e0e0',
-                                  paddingLeft: '10px',
-                                }}
-                              >
-                                <div className="comment-author">
-                                {user?.level && (
-                  <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
-                                  {rAuthorId ? (
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="replies-container">
+                        {comment.replies.map((reply) => {
+                          const rAuthorId = reply.author?.userId ?? reply.authorId;
+                          const rAuthorName =
+                            reply.author?.nickname ?? reply.authorNickname ?? '알 수 없는 사용자';
+
+                          return (
+                            <div
+                              key={reply.commentId}
+                              className="reply-item"
+                              style={{
+                                marginLeft: '20px',
+                                borderLeft: '2px solid #e0e0e0',
+                                paddingLeft: '10px',
+                              }}
+                            >
+                              <div className="comment-author">
+                                {(() => {
+                                  const displayLevel =
+                                    authorLevels[rAuthorId] || reply.author?.level;
+                                  return rAuthorId ? (
                                     <Link to={`/users/${rAuthorId}`} className="author-link">
-                                      {reply.author?.level && (
+                                      {displayLevel && (
                                         <img
-                                          src={getLevelBadgeImage(reply.author.level)}
-                                          alt={reply.author.level}
+                                          src={getLevelBadgeImage(displayLevel)}
+                                          alt={displayLevel}
                                           className="level-badge-inline"
                                         />
                                       )}
@@ -503,111 +531,104 @@ function BoardDetail() {
                                     </Link>
                                   ) : (
                                     <span className="author-link">
-                                      {reply.author?.level && (
+                                      {displayLevel && (
                                         <img
-                                          src={getLevelBadgeImage(reply.author.level)}
-                                          alt={reply.author.level}
+                                          src={getLevelBadgeImage(displayLevel)}
+                                          alt={displayLevel}
                                           className="level-badge-inline"
                                         />
                                       )}
                                       {rAuthorName}
                                     </span>
-                                  )}
-                                </div>
-
-                                <p className="comment-content">{reply.content}</p>
-                                <div className="comment-meta">
-                                  <span>{new Date(reply.createdAt).toLocaleString()}</span>
-                                  {(user?.userId === rAuthorId) && (
-                                    <div className="comment-actions">
-                                      <button onClick={() => handleDeleteComment(reply.commentId)}>
-                                        <FaTrash /> 삭제
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
+                                  );
+                                })()}
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+
+                              <p className="comment-content">{reply.content}</p>
+                              <div className="comment-meta">
+                                <span>{new Date(reply.createdAt).toLocaleString()}</span>
+                                {user?.userId === rAuthorId && (
+                                  <div className="comment-actions">
+                                    <button onClick={() => handleDeleteComment(reply.commentId)}>
+                                      <FaTrash /> 삭제
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="post-sidebar">
-        <div className="sidebar-card author-card">
-          <h4>
-            <FaUser /> 작성자
-          </h4>
-          <div className="author-info">
-          {user?.level && (
+    </div> {/* post-main-content 종료 */}
+
+    {/* 🔒 사이드바는 반드시 post-sidebar 안에 */}
+    <aside className="post-sidebar">
+      <div className="sidebar-card author-card">
+        <h4><FaUser /> 작성자</h4>
+        <div className="author-info">
+          {(() => {
+            const displayLevel =
+              authorLevels[post.author?.userId] || post.author?.level;
+            return post.author?.userId ? (
+              <Link to={`/users/${post.author.userId}`} className="author-link">
+                {displayLevel && (
                   <img
-                    src={getLevelBadgeImage(user.level)}
-                    alt={user.level}
-                    className="level-badge-header"
-                  />
-                )}
-            {post.author?.userId ? (
-              <Link to={`/users/${post.author.userId}`}>
-                {post.author?.level && (
-                  <img
-                    src={getLevelBadgeImage(post.author.level)}
-                    alt={post.author.level}
+                    src={getLevelBadgeImage(displayLevel)}
+                    alt={displayLevel}
                     className="level-badge-inline"
                   />
                 )}
-                <span>{post.author?.nickname}</span>
+                <span className="nickname">{post.author?.nickname}</span>
               </Link>
             ) : (
               <>
-                {post.author?.level && (
+                {displayLevel && (
                   <img
-                    src={getLevelBadgeImage(post.author.level)}
-                    alt={post.author.level}
+                    src={getLevelBadgeImage(displayLevel)}
+                    alt={displayLevel}
                     className="level-badge-inline"
                   />
                 )}
-                <span>{post.author?.nickname}</span>
+                <span className="nickname">{post.author?.nickname}</span>
               </>
-            )}
-          </div>
-        </div>
-
-        <div className="sidebar-card info-card">
-          <h4>
-            <FaThumbsUp /> 게시글 정보
-          </h4>
-          <ul>
-            <li>
-              <FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}
-            </li>
-          </ul>
-        </div>
-
-        <div className="sidebar-card actions-card">
-          {isAuthor && (
-            <>
-              <button onClick={handleEdit} className="action-button edit-button">
-                <FaEdit /> 수정하기
-              </button>
-              <button onClick={handleDelete} className="action-button delete-button">
-                <FaTrash /> 삭제하기
-              </button>
-            </>
-          )}
-          <button onClick={() => navigate('/board')} className="action-button back-button">
-            목록으로
-          </button>
+            );
+          })()}
         </div>
       </div>
-    </div>
-  );
-}
 
+      <div className="sidebar-card info-card">
+        <h4><FaThumbsUp /> 게시글 정보</h4>
+        <ul>
+          <li><FaCalendarAlt /> {new Date(post.createdAt).toLocaleDateString()}</li>
+        </ul>
+      </div>
+
+      <div className="sidebar-card actions-card">
+        {isAuthor && (
+          <>
+            <button onClick={handleEdit} className="action-button edit-button">
+              <FaEdit /> 수정하기
+            </button>
+            <button onClick={handleDelete} className="action-button delete-button">
+              <FaTrash /> 삭제하기
+            </button>
+          </>
+        )}
+        <button onClick={() => navigate('/board')} className="action-button back-button">
+          목록으로
+        </button>
+      </div>
+    </aside>
+  </div>
+);
+}
 export default BoardDetail;

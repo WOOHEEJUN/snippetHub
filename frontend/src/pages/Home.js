@@ -14,6 +14,18 @@ const Home = () => {
   const [recentPosts, setRecentPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLanguage, setSearchLanguage] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     fetch('/api/snippets?page=0&size=5&sort=POPULAR')
@@ -94,7 +106,7 @@ const Home = () => {
                       <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="키워드, 언어, 작성자 등..." 
+                        placeholder={isMobile ? "검색" : "키워드, 언어, 작성자 등..."} 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
@@ -104,7 +116,7 @@ const Home = () => {
                         value={searchLanguage}
                         onChange={(e) => setSearchLanguage(e.target.value)}
                       >
-                        <option value="">모든 언어</option>
+                        <option value="">{isMobile ? "언어" : "모든 언어"}</option>
                         <option value="HTML">HTML</option>
                         <option value="CSS">CSS</option>
                         <option value="JAVASCRIPT">JavaScript</option>

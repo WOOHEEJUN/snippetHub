@@ -1,7 +1,76 @@
-export const getLevelBadgeImage = (levelName) => {
-  if (!levelName) {
-    return null;
+// src/utils/badgeUtils.js
+
+// 영문 → 한글 매핑
+const EN_TO_KO = {
+  BRONZE: '브론즈',
+  SILVER: '실버',
+  GOLD: '골드',
+  PLATINUM: '플래티넘',
+  DIAMOND: '다이아몬드',
+  MASTER: '마스터',
+  GRANDMASTER: '그랜드마스터',
+  LEGEND: '레전드',
+};
+
+// 숫자 → 영문 매핑 (1~8)
+const NUM_TO_EN = {
+  1: 'BRONZE',
+  2: 'SILVER',
+  3: 'GOLD',
+  4: 'PLATINUM',
+  5: 'DIAMOND',
+  6: 'MASTER',
+  7: 'GRANDMASTER',
+  8: 'LEGEND',
+};
+
+/**
+ * 입력을 한글 등급명으로 변환
+ * - number: 1~8 → 매핑
+ * - string: 영문/한글 모두 허용 (대소문자 무시)
+ * - object: { name } 또는 { level } 지원
+ */
+export const getLevelName = (level) => {
+  if (level == null) return '';
+
+  // 숫자
+  if (typeof level === 'number') {
+    const en = NUM_TO_EN[level];
+    return en ? EN_TO_KO[en] : '';
   }
+
+  // 문자열
+  if (typeof level === 'string') {
+    const raw = level.trim();
+    const upper = raw.toUpperCase();
+
+    // 영문 이름인 경우
+    if (EN_TO_KO[upper]) return EN_TO_KO[upper];
+
+    // 한글 이름이 이미 들어온 경우
+    const koList = Object.values(EN_TO_KO);
+    if (koList.includes(raw)) return raw;
+
+    return '';
+  }
+
+  // 객체
+  if (typeof level === 'object') {
+    if (typeof level.name === 'string') return getLevelName(level.name);
+    if (typeof level.level === 'number') return getLevelName(level.level);
+  }
+
+  return '';
+};
+
+/**
+ * 등급별 배지 이미지 반환
+ * - /public/badges/ 디렉토리에 이미지 파일 배치 필요
+ */
+export const getLevelBadgeImage = (level) => {
+  if (level === undefined || level === null) return null;
+
+  const levelName = getLevelName(level); // 등급 이름(한글)으로 통일
   const normalizedLevelName = levelName.toLowerCase();
 
   switch (normalizedLevelName) {
@@ -15,8 +84,13 @@ export const getLevelBadgeImage = (levelName) => {
       return '/badges/platinum.png';
     case '다이아몬드':
       return '/badges/diamond.png';
-    
+    case '마스터':
+      return '/badges/master.png';
+    case '그랜드마스터':
+      return '/badges/grandmaster.png';
+    case '레전드':
+      return '/badges/legend.png';
     default:
-      return null; 
+      return null;
   }
 };

@@ -273,7 +273,6 @@ function ProblemList() {
           <div className="problems-grid">
             {problems.length === 0 ? (
               <div className="no-problems">
-                <FaCode className="no-problems-icon" />
                 <p>조건에 맞는 문제가 없습니다.</p>
               </div>
             ) : (
@@ -334,13 +333,12 @@ function ProblemList() {
         {activeTab === 'recommended' && (
           <div className="recommended-problems">
             <div className="section-header">
-              <h2>🎯 당신에게 추천하는 문제</h2>
+              <h2> 당신에게 추천하는 문제</h2>
               <p>현재 수준과 학습 패턴을 분석하여 맞춤형 문제를 추천해드립니다.</p>
             </div>
             
             {recommendedProblems.length === 0 ? (
               <div className="no-problems">
-                <FaCode className="no-problems-icon" />
                 <p>추천할 문제가 없습니다. 더 많은 문제를 풀어보세요!</p>
               </div>
             ) : (
@@ -401,7 +399,7 @@ function ProblemList() {
         {activeTab === 'progress' && (
           <div className="learning-progress">
             <div className="section-header">
-              <h2>📊 학습 진도</h2>
+              <h2> 학습 진도</h2>
               <p>지금까지의 학습 현황과 다음 목표를 확인해보세요.</p>
             </div>
             

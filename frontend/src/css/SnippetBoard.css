@@ -1,12 +1,222 @@
-/* ====================== 기본 변수 ====================== */
-:root{
-  --ctl-h: 44px;                 
-  --ctl-gap: 10px;               
-  --ctl-radius: 8px;             
-  --ctl-font: 14px;              
+/* =========================================================
+   Board Toolbar – Left(검색폼) / Right(글쓰기), No wrap, No scroll
+   ========================================================= */
+
+/* 래퍼: 이미 .d-flex.justify-content-between.align-items-center.mb-4 사용 중 */
+.board-container .d-flex.justify-content-between.align-items-center.mb-4{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* 왼쪽(폼) / 오른쪽(글쓰기) */
+  gap: 16px;
+  /* 절대 가로 스크롤 금지 */
+  overflow: hidden;                 
 }
 
-/* ====================== 페이지 공통 ====================== */
+/* 왼쪽: 검색 폼 */
+.board-container .search-form{
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;                /* 한 줄 고정 */
+  min-width: 0;                     /* 내부 아이템이 수축 가능 */
+  gap: 12px;
+  margin: 0;
+  overflow: hidden;                 /* 혹시 모를 넘침 방지 */
+}
+
+/* 오른쪽: 글쓰기 버튼(오른쪽 끝 고정) */
+.board-container .d-flex.justify-content-between.align-items-center.mb-4 > .btn-primary{
+  margin-left: auto;                /* 오른쪽으로 밀기 */
+  flex: 0 0 auto;
+}
+
+/* ---------------- 공통 규격(기본) ---------------- */
+:root{
+  --ctl-h: 34px;
+  --ctl-radius: 8px;
+  --ctl-font: 13px;
+  --gap: 12px;
+  --input-min: 180px;               /* 입력 최소폭 */
+  --input-ideal: 280px;             /* 입력 권장폭 */
+  --sel-w: 110px;                   /* 셀렉트 폭 */
+  --btn-w: 80px;                    /* 검색 버튼 폭 */
+  --write-w: 92px;                  /* 글쓰기 폭 */
+}
+
+/* 모든 컨트롤 공통 */
+.board-container .search-form .form-control,
+.board-container .search-form .form-select,
+.board-container .search-form .btn,
+.board-container .btn-primary{
+  height: var(--ctl-h);
+  border-radius: var(--ctl-radius);
+  font-size: var(--ctl-font);
+  line-height: 1.2;
+  padding: 0 10px;
+}
+
+/* 입력창: 주변 여백을 줄이며 유연하게 축소 */
+.board-container .search-form .form-control{
+  flex: 1 1 clamp(var(--input-min), var(--input-ideal), 32vw);
+  min-width: var(--input-min);
+  background:#1a1a1a; color:#d3d3d3; border:1px solid #444;
+}
+.board-container .search-form .form-control::placeholder{ color:#808080; }
+
+/* 셀렉트 2개: 동일 폭, 고정 */
+.board-container .search-form .form-select{
+  flex: 0 0 var(--sel-w);
+  width: var(--sel-w);
+  background:#1a1a1a; color:#d3d3d3; border:1px solid #444;
+  appearance:none; -webkit-appearance:none; -moz-appearance:none;
+}
+
+/* 검색 버튼: 검은색 */
+.board-container .search-form .btn{
+  flex: 0 0 var(--btn-w);
+  width: var(--btn-w);
+  background:#000; color:#fff; border:1px solid #000;
+}
+.board-container .search-form .btn:hover{ background:#222; border-color:#222; }
+
+/* 글쓰기 버튼(오른쪽) */
+.board-container .btn-primary{
+  flex: 0 0 var(--write-w);
+  width: var(--write-w);
+  background:#000; color:#fff; border:1px solid #fff;
+}
+.board-container .btn-primary:hover{ background:#333; border-color:#fff; }
+
+/* 폼 내부 간격 */
+.board-container .search-form{ gap: var(--gap); }
+
+/* =========================================================
+   반응형 – 스크롤 없이 ‘작게 작게’ 줄어들도록 변수만 단계적으로 축소
+   ========================================================= */
+
+/* 중간 화면 */
+@media (max-width: 900px){
+  :root{
+    --ctl-h: 32px;
+    --ctl-font: 12.5px;
+    --gap: 10px;
+    --input-min: 150px;
+    --input-ideal: 240px;
+    --sel-w: 100px;
+    --btn-w: 74px;
+    --write-w: 84px;
+  }
+}
+
+/* 작은 화면 */
+@media (max-width: 700px){
+  :root{
+    --ctl-h: 30px;
+    --ctl-font: 12px;
+    --gap: 8px;
+    --input-min: 130px;
+    --input-ideal: 200px;
+    --sel-w: 92px;
+    --btn-w: 70px;
+    --write-w: 78px;
+  }
+  /* 입력이 너무 길면 더 수축 */
+  .board-container .search-form .form-control{
+    flex-basis: clamp(var(--input-min), var(--input-ideal), 38vw);
+  }
+}
+
+/* 극소 화면(아이폰 SE 등) */
+@media (max-width: 380px){
+  :root{
+    --ctl-h: 28px;
+    --ctl-font: 11.5px;
+    --gap: 6px;
+    --input-min: 110px;
+    --input-ideal: 170px;
+    --sel-w: 84px;
+    --btn-w: 66px;
+    --write-w: 72px;
+  }
+  .board-container .search-form .form-control{
+    flex-basis: clamp(var(--input-min), var(--input-ideal), 40vw);
+  }
+}
+
+/* =========================================================
+   안전장치 – 절대 가로 스크롤/줄바꿈 방지
+   ========================================================= */
+.board-container .search-form,
+.board-container .d-flex.justify-content-between.align-items-center.mb-4{
+  white-space: nowrap;
+  overflow: hidden;            /* 스크롤 금지 */
+}
+/* === 1) 폼은 overflow 숨기지 않도록 (버튼 잘림 방지) === */
+.board-container .search-form{
+  overflow: visible !important;     /* <- 여기가 핵심 */
+  gap: 12px !important;
+  min-width: 0 !important;          /* flex 수축 허용 */
+}
+
+/* === 2) 검색 인풋은 가장 많이 줄어드는 요소로 === */
+.board-container .search-form .form-control{
+  flex: 1 1 0 !important;           /* 폭을 최우선으로 줄임 */
+  min-width: 90px !important;       /* 최저 폭만 보장 */
+}
+
+/* === 3) 셀렉트/버튼은 고정폭 + 수축 금지 === */
+.board-container .search-form .form-select{
+  flex: 0 0 var(--sel-w) !important;
+  width: var(--sel-w) !important;
+}
+.board-container .search-form .btn{
+  flex: 0 0 var(--btn-w) !important;
+  width: var(--btn-w) !important;
+}
+
+/* === 4) 글쓰기 버튼은 오른쪽 고정 === */
+.board-container .d-flex.justify-content-between.align-items-center.mb-4{
+  justify-content: space-between !important;
+}
+.board-container .d-flex.justify-content-between.align-items-center.mb-4 > .btn-primary{
+  margin-left: 12px !important;
+  flex: 0 0 var(--write-w) !important;
+  width: var(--write-w) !important;
+}
+
+/* === 5) 작은 화면일수록 변수로 더 '작게 작게' === */
+@media (max-width: 900px){
+  :root{
+    --sel-w: 100px;
+    --btn-w: 74px;
+    --write-w: 84px;
+  }
+}
+
+@media (max-width: 700px){
+  :root{
+    --sel-w: 92px;
+    --btn-w: 68px;
+    --write-w: 78px;
+  }
+  .board-container .search-form{ gap: 10px !important; }
+  .board-container .search-form .form-control{ min-width: 80px !important; }
+}
+
+@media (max-width: 380px){
+  :root{
+    --sel-w: 84px;
+    --btn-w: 62px;
+    --write-w: 72px;
+  }
+  .board-container .search-form{ gap: 8px !important; }
+  .board-container .search-form .form-control{ min-width: 70px !important; }
+}
+
+
+/* =========================================================
+   SnippetBoard Specific Styles
+   ========================================================= */
+
 .snippet-board-container {
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -20,7 +230,7 @@
   margin-bottom: 2rem;
 }
 .board-header h2 { font-weight: 700; color: #d3d3d3; }
-.board-header p  { color: #b0b0b0; }
+.board-header p  { color: #fff !important; }
 
 /* 테이블 */
 .table { background:#1a1a1a; color:#d3d3d3; }
@@ -41,90 +251,91 @@
 .badge-python{background:#4169e1;} .badge-c{background:#87cefa;color:#333;}
 .badge-default{background:#a9a9a9;}
 
-/* ====================== 검색/필터/버튼 툴바 ====================== */
-.search-toolbar{
-  display:flex; align-items:center; gap:var(--ctl-gap);
-  white-space:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch;
-  padding-bottom:6px;
+
+/* ====================== 스니펫 카드 ====================== */
+.snippet-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
-.search-fields{
-  display:flex; align-items:center; gap:var(--ctl-gap);
-  flex:1 1 auto; min-width:0;
+.snippet-card {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.search-actions{
-  display:flex; align-items:center; gap:var(--ctl-gap);
-  flex:0 0 auto; margin-left:auto;
+.snippet-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-color: #444;
 }
 
-/* 공통 크기 규격 */
-.search-toolbar .form-control,
-.search-toolbar .form-select,
-.search-toolbar .btn{
-  height: var(--ctl-h);
-  padding: 0 12px;
-  font-size: var(--ctl-font);
-  border-radius: var(--ctl-radius);
-  flex: 0 0 auto;
+.card-body {
+  padding: 1.25rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 검색 인풋 */
-.search-toolbar .form-control{
-  flex: 0 1 220px;    
-  min-width: 140px;       
-  background:#1a1a1a; color:#d3d3d3; border:1px solid #444;
-}
-.search-toolbar .form-control::placeholder{ color:#808080; }
-
-/* ===== 버튼/셀렉트 줄이기 ===== */
-.search-toolbar .form-select,
-.search-toolbar .btn,
-.search-actions .write-btn{
-  height: 34px;
-  font-size: 13px;
-  padding: 0 8px;
-  min-width: 70px;          /* 🔥 버튼 가로 길이 줄임 */
+.card-title {
+  color: #e0e0e0;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
-/* 셀렉트 */
-.search-toolbar .form-select{
-  width: 100px;             /* 🔥 폭 줄임 */
-  background:#1a1a1a; color:#d3d3d3; border:1px solid #444;
-  appearance:none; -webkit-appearance:none; -moz-appearance:none;
+.card-text {
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  flex-grow: 1;
+  margin-bottom: 1rem;
 }
 
-/* 검색 버튼 */
-.search-toolbar .btn{ min-width: 70px; }
-
-/* 스니펫 작성 버튼 */
-.search-actions .write-btn{ min-width: 80px; }
-
-/* 버튼 스킨 */
-.btn-outline-secondary{ background:#e0e0e0; color:#333; border-color:#e0e0e0; }
-.btn-outline-secondary:hover{ background:#d3d3d3; color:#333; }
-.btn-primary{ background:#000; color:#e0e0e0; border:1px solid #000; }
-.btn-primary:hover{ background:#333; color:#e0e0e0; border-color:#333; }
-
-/* ====================== 반응형 ====================== */
-@media (max-width: 640px){
-  :root{ --ctl-h: 38px; --ctl-gap: 8px; --ctl-font: 13px; }
-  .search-toolbar .form-control{ flex:0 1 160px; min-width:120px; }
-  .search-toolbar .form-select,
-  .search-toolbar .btn,
-  .search-actions .write-btn{
-    height: 30px; font-size: 12.5px; padding: 0 6px; min-width: 60px; /* 더 줄임 */
-  }
-  .search-toolbar .form-select{ width: 90px; }
-  .search-toolbar .btn{ min-width: 60px; }
-  .search-actions .write-btn{ min-width: 70px; }
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid #2a2a2a;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* 극소 화면 */
-@media (max-width: 380px){
-  :root{ --ctl-h: 34px; --ctl-gap: 6px; --ctl-font: 12px; }
-  .search-toolbar .form-control{ flex:0 1 130px; min-width:100px; }
-  .search-toolbar .form-select{ width: 80px; }
-  .search-toolbar .btn{ min-width: 56px; }
-  .search-actions .write-btn{ min-width: 64px; }
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.author-info .level-badge-inline {
+  width: 18px;
+  height: 18px;
+}
+
+.author-info a {
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.author-info a:hover {
+  color: #fff;
+}
+
+.stats-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #a0a0a0;
+}
+
+.stats-info .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }

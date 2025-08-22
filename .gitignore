@@ -1,1 +1,48 @@
 .gradle/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+application-local.properties
+application-dev.properties
+application-prod.properties
+application.properties
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build directories
+build/
+dist/
+node_modules/
+
+# AWS credentials
+.aws/
+aws-credentials.txt
+
+# SSH keys
+*.pem
+*.key
+
+# Database
+*.db
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp

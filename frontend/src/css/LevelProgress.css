@@ -1,113 +1,65 @@
-.level-progress {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
+/* 레벨 카드 통째로 크게 */
+.lp {
+  position: static;
+  width: 100%;
+  max-width: 680px;          /* ↑ 크게 */
+  margin: 24px auto 0;       /* 가운데 */
+  background: #222;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;       /* 살짝 더 둥글게 */
+  padding: 22px 24px;        /* ↑ 내부 여백 확대 */
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.level-progress:hover {
-  transform: translateY(-5px);
-}
-
-.level-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.level-header h3 {
-  color: #e0e0e0;
-  font-size: 1.5rem;
-  font-weight: 600;
+.lp__header h3{
   margin: 0;
-}
-
-.current-level-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.level-icon {
-  font-size: 3.5rem;
-  color: #ffd700;
-}
-
-.level-details {
-  flex-grow: 1;
-}
-
-.level-name {
-  font-size: 1.8rem;
-  font-weight: 700;
   color: #e0e0e0;
+  font-size: 1.05rem;        /* ↑ */
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: .02em;
 }
 
-.level-number {
-  font-size: 1rem;
-  color: #b0b0b0;
-  margin-bottom: 5px;
+/* 현재 레벨 덩치 키우기 */
+.lp__current{
+  display: grid;
+  grid-template-columns: 56px 1fr;  /* ↑ 아이콘 칸 확대 */
+  align-items: center;
+  column-gap: 14px;
 }
+.lp__icon{ font-size: 2.6rem; }      /* ↑ */
+.lp__name{ font-size: 1.05rem; font-weight: 800; color:#e0e0e0; }
+.lp__num{  font-size: .9rem;  color:#b0b0b0; }
+.lp__pts{  font-size: 1rem;   font-weight: 800; color:#8ab0d1; }
 
-.current-points {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #8ab0d1;
+/* 진행도(가로) – 더 두껍고 큼직하게 */
+.lp__progress{ display: flex; flex-direction: column; gap: 10px; }
+.lp__progressHead{
+  display: flex; justify-content: space-between;
+  font-size: .9rem; color: #b0b0b0;
 }
-
-.next-level-info {
-  margin-top: 20px;
-}
-
-.progress-section {
+.lp__bar{
+  position: relative;
   width: 100%;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: #b0b0b0;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 12px;
-  background-color: #444444;
-  border-radius: 6px;
+  height: 18px;               /* ↑ 막대 두께 업 */
+  background: #3f3f3f;
+  border-radius: 999px;
   overflow: hidden;
 }
-
-.progress-fill {
+.lp__fill{
+  position: absolute; left: 0; top: 0;
   height: 100%;
-  border-radius: 6px;
-  transition: width 0.5s ease-in-out;
+  width: 0;
+  border-radius: 999px;
+  transition: width .5s ease-in-out;
+  /* 색상은 JSX에서 덮어씀 */
 }
+.lp__text{ font-size: .95rem; color:#b0b0b0; text-align: right; }
 
-.progress-text {
-  text-align: right;
-  margin-top: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #b0b0b0;
-}
-
-.max-level-info {
-  text-align: center;
-  padding: 20px;
-  background-color: #333333;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-.max-level-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #ffd700;
+@media (max-width: 768px){
+  .lp{ max-width: 100%; padding: 18px 16px; }
+  .lp__icon{ font-size: 2.2rem; }
 }

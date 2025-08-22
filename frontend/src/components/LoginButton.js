@@ -18,8 +18,6 @@ function KakaoLoginButton() {
     <button 
       onClick={handleLogin} 
       style={{ 
-        background: '#fee500', 
-        color: '#000', 
         border: 'none', 
         padding: '12px 20px', 
         borderRadius: '8px',
@@ -47,8 +45,6 @@ function GoogleLoginButton() {
       href={GOOGLE_AUTH_URL}
       style={{
         display: "inline-block",
-        background: "#fff",
-        color: "#444",
         border: "1px solid #ddd",
         padding: "10px 20px",
         borderRadius: "4px",
