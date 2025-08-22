@@ -45,7 +45,7 @@
 .info-card .label {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #b0b0b0;
+  color: #b0b0b0 !important;
   margin-bottom: 0.8rem;
   display: flex;
   align-items: center;
@@ -54,15 +54,15 @@
 }
 
 .info-card .label svg {
-  color: #8ab0d1;
-  font-size: 1.4rem;
+  color: #8ab0d1 !important;
+  font-size: 1.4rem !important;
 }
 
 .info-card .value {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #8ab0d1;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+  color: #8ab0d1 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
 .badge-section {

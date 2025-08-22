@@ -142,7 +142,7 @@ function MyBadges() {
       )}
 
       <div className="badge-section">
-        <h3>🏅 대표 뱃지</h3>
+        <h3>대표 뱃지</h3>
         {featuredBadges.length === 0
           ? <div className="no-badges">대표 뱃지가 없습니다.</div>
           : (
@@ -170,7 +170,7 @@ function MyBadges() {
       </div>
 
       <div className="badge-section">
-        <h3>🎖️ 내 모든 뱃지</h3>
+        <h3>내 모든 뱃지</h3>
         {badges.length === 0
           ? <div className="no-badges">획득한 뱃지가 없습니다.</div>
           : (
