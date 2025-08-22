@@ -21,11 +21,16 @@ public class InputValidationFilter extends OncePerRequestFilter {
     @Value("${security.input.validation.enabled:true}")
     private boolean inputValidationEnabled;
 
-    // SQL Injection 패턴
+    // SQL Injection 패턴 (더 구체적으로 수정)
     private static final List<Pattern> SQL_INJECTION_PATTERNS = Arrays.asList(
-        Pattern.compile("(?i)(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|OR|AND)"),
+        // SQL 키워드 (문맥을 고려하여 더 구체적으로)
+        Pattern.compile("(?i)\\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC)\\b"),
+        Pattern.compile("(?i)\\b(UNION\\s+ALL|UNION\\s+SELECT)\\b"),
         Pattern.compile("(?i)(--|;|'|\"|/\\*|\\*/)"),
-        Pattern.compile("(?i)(xp_cmdshell|sp_executesql|EXECUTE)")
+        Pattern.compile("(?i)\\b(xp_cmdshell|sp_executesql|EXECUTE)\\b"),
+        // OR/AND는 SQL 문맥에서만 차단
+        Pattern.compile("(?i)\\b(OR|AND)\\s*=\\s*['\"]?\\d+['\"]?"),
+        Pattern.compile("(?i)\\b(OR|AND)\\s+\\d+\\s*=\\s*\\d+")
     );
 
     // XSS 패턴
@@ -50,15 +55,23 @@ public class InputValidationFilter extends OncePerRequestFilter {
             return;
         }
 
+        String requestPath = request.getRequestURI();
+        
+        // 특정 경로에서는 검증 완화 (정상적인 API 요청)
+        if (isWhitelistedPath(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // URL 경로 검증
-        if (containsMaliciousPattern(request.getRequestURI(), PATH_TRAVERSAL_PATTERNS)) {
-            log.warn("Path traversal attempt detected in URL: {}", request.getRequestURI());
+        if (containsMaliciousPattern(requestPath, PATH_TRAVERSAL_PATTERNS)) {
+            log.warn("Path traversal attempt detected in URL: {}", requestPath);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\":\"Invalid request path\"}");
             return;
         }
 
-        // Query 파라미터 검증
+        // Query 파라미터 검증 (더 정확한 검증)
         String queryString = request.getQueryString();
         if (queryString != null) {
             if (containsMaliciousPattern(queryString, SQL_INJECTION_PATTERNS) ||
@@ -79,6 +92,27 @@ public class InputValidationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isWhitelistedPath(String path) {
+        // 정상적인 API 경로들은 검증에서 제외
+        return path.startsWith("/api/posts") ||
+               path.startsWith("/api/snippets") ||
+               path.startsWith("/api/problems") ||
+               path.startsWith("/api/users") ||
+               path.startsWith("/api/comments") ||
+               path.startsWith("/api/likes") ||
+               path.startsWith("/api/notifications") ||
+               path.startsWith("/api/badges") ||
+               path.startsWith("/api/points") ||
+               path.startsWith("/api/languages") ||
+               path.startsWith("/api/daily-problems") ||
+               path.startsWith("/api/submissions") ||
+               path.startsWith("/api/executions") ||
+               path.startsWith("/api/files") ||
+               path.startsWith("/api/security") ||
+               path.startsWith("/actuator") ||
+               path.startsWith("/ws");
     }
 
     private boolean containsMaliciousPattern(String input, List<Pattern> patterns) {
