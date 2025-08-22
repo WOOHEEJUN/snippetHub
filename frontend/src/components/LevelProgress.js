@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaCrown, FaStar, FaTrophy } from 'react-icons/fa';
-import '../css/LevelProgress.vertical.css'; // ✅ 파일명도 새로
+import '../css/LevelProgress.css'; // ✅ 가로형 CSS
 
 function LevelProgress({ userLevel, userPoints }) {
   const levels = [
@@ -15,15 +15,12 @@ function LevelProgress({ userLevel, userPoints }) {
   ];
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
   const getCurrentLevelInfo = () =>
     levels.find(l => userPoints >= l.minPoints && userPoints < l.maxPoints) || levels[levels.length - 1];
-
   const getNextLevelInfo = () => {
     const cur = getCurrentLevelInfo();
     return levels.find(l => l.level === cur.level + 1);
   };
-
   const getProgressPercentage = () => {
     const cur = getCurrentLevelInfo();
     const next = getNextLevelInfo();
@@ -60,9 +57,9 @@ function LevelProgress({ userLevel, userPoints }) {
   const pointsToNextLevel = nextLevel ? Math.max(0, nextLevel.minPoints - userPoints) : 0;
 
   return (
-    <aside className="lp"> {/* lp = level progress (namespace) */}
+    <aside className="lp">
       <div className="lp__header" aria-hidden="true">
-        <h3>레벨</h3>
+        <h3>레벨 정보</h3>
       </div>
 
       <div className="lp__current">
@@ -77,10 +74,11 @@ function LevelProgress({ userLevel, userPoints }) {
       {nextLevel ? (
         <div className="lp__progress">
           <div className="lp__progressHead">
-            <span>다음: {nextLevel.name}</span>
-            <span>{pointsToNextLevel} P 더 필요</span>
+            <span>다음 레벨: {nextLevel.name}</span>
+            <span>{pointsToNextLevel} P 남음</span>
           </div>
 
+          {/* ✅ 가로 막대: 왼쪽 → 오른쪽으로 차오름 */}
           <div
             className="lp__bar"
             role="progressbar"
@@ -91,7 +89,7 @@ function LevelProgress({ userLevel, userPoints }) {
           >
             <div
               className="lp__fill"
-              style={{ height: `${animatedProgress}%` }}  /* ✅ 세로 진행 */
+              style={{ width: `${animatedProgress}%`, background: nextLevel.color }}
             />
           </div>
 
