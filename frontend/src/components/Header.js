@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
+
+import { getBadgeIcon } from '../utils/badgeIcon';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
+
 import '../css/Header.css';
 
 const Header = () => {
@@ -35,6 +38,7 @@ const Header = () => {
                 <span className="nav-link-main">게시판</span>
                 <ul className="submenu">
                   <li><Link to="/board">자유게시판</Link></li>
+                  <li><Link to="/snippets">스니펫게시판</Link></li>
                 </ul>
               </li>
 
@@ -51,7 +55,6 @@ const Header = () => {
               <li className="nav-item">
                 <span className="nav-link-main">스니펫</span>
                 <ul className="submenu">
-                  <li><Link to="/snippets">스니펫게시판</Link></li>
                   <li><Link to="/snippets?language=C&sort=LATEST&page=0">C</Link></li>
                   <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0">JavaScript</Link></li>
                   <li><Link to="/snippets?language=Python&sort=LATEST&page=0">Python</Link></li>
@@ -90,7 +93,11 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  {user?.level && (
+                  {user?.representativeBadge ? (
+                    <div className="representative-badge-header">
+                      {getBadgeIcon(user.representativeBadge.name)}
+                    </div>
+                  ) : user?.level && (
                     <img
                       src={getLevelBadgeImage(user.level)}
                       alt={user.level}
@@ -122,7 +129,10 @@ const Header = () => {
               <div className="hamburger-dropdown">
                 <div className="hamburger-menu-section">
                   <h4>게시판</h4>
-                  <ul><li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li></ul>
+                  <ul>
+                    <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
+                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
+                  </ul>
                 </div>
 
                 <div className="hamburger-menu-section">
@@ -138,7 +148,6 @@ const Header = () => {
                 <div className="hamburger-menu-section">
                   <h4>스니펫</h4>
                   <ul>
-                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
                     <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
                     <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
                     <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>

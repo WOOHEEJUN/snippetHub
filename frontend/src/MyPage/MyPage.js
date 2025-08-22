@@ -82,6 +82,13 @@ function MyPage() {
           </div>
         </div>
       </div>
+
+      {/* 뱃지 가이드 카드 */}
+      <div className="mypage-card badge-guide-card">
+        <h3 className="card-title">뱃지 가이드</h3>
+        <p>획득할 수 있는 뱃지 종류와 조건을 확인해보세요.</p>
+        <a href="/badge-guide" className="btn btn-primary">뱃지 가이드로 이동</a>
+      </div>
     </div>
   );
 }

@@ -140,3 +140,16 @@
   font-weight: 700;
   color: #8ab0d1; /* A distinct color for values */
 }
+
+.badge-guide-card {
+  text-align: center;
+}
+
+.badge-guide-card p {
+  color: #b0b0b0;
+  margin-bottom: 1rem;
+}
+
+.badge-guide-card .btn {
+  margin-top: 1rem;
+}

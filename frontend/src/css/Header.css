@@ -51,6 +51,7 @@
 .nav-link-main{
   color:#e0e0e0; font-size:.95rem; font-weight:500; cursor:pointer;
   padding:.4rem .8rem; border-radius:.5rem; transition:all .3s ease;
+  white-space: nowrap;
 }
 .nav-link-main:hover{ background-color:#333; color:#fff; }
 
@@ -146,6 +147,19 @@
   object-fit:contain !important;
   vertical-align:middle;
   margin-right:6px;
+}
+
+.representative-badge-header {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.representative-badge-header > svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* 전역 .img-fluid / img{max-width:100%} 영향 제거 */

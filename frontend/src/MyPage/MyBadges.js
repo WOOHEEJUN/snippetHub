@@ -1,39 +1,18 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/MyBadges.css';
-import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa'; 
-import { Medal } from 'iconoir-react';
-
-const getBadgeIcon = (badgeName) => {
-  if (!badgeName) {
-    return <Medal color="lightgray" width="100%" height="100%" />;
-  }
-  const lowerCaseBadgeName = badgeName.toLowerCase();
-  let color = 'lightgray';
-
-  if (lowerCaseBadgeName.includes('bronze')) {
-    color = '#cd7f32';
-  } else if (lowerCaseBadgeName.includes('silver')) {
-    color = '#c0c0c0';
-  } else if (lowerCaseBadgeName.includes('gold')) {
-    color = '#ffd700';
-  } else if (lowerCaseBadgeName.includes('platinum')) {
-    color = '#e5e4e2';
-  } else if (lowerCaseBadgeName.includes('diamond')) {
-    color = '#b9f2ff';
-  }
-
-  return <Medal color={color} width="100%" height="100%" />;
-};
+import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa';
+import { getBadgeIcon } from '../utils/badgeIcon';
 
 function MyBadges() {
   const { user, getAuthHeaders } = useAuth();
   const [level, setLevel] = useState(null);
   const [points, setPoints] = useState(null);
   const [badges, setBadges] = useState([]);
-  const [featuredBadges, setFeaturedBadges] = useState([]);
-  const [badgeStats, setBadgeStats] = useState(null); 
+  const [representativeBadge, setRepresentativeBadge] = useState(null);
+  const [badgeStats, setBadgeStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -48,21 +27,20 @@ function MyBadges() {
       setLoading(true);
       setError(null);
       try {
-        const [profileRes, badgesRes, featuredRes] = await Promise.all([
+        const [profileRes, badgesRes, representativeRes] = await Promise.all([
           fetch('/api/users/profile', { headers: getAuthHeaders(), credentials: 'include' }),
           fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include' }),
-          fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include' }),
-          
+          fetch('/api/users/me/representative-badge', { headers: getAuthHeaders(), credentials: 'include' }),
         ]);
 
         const profileData = await profileRes.json();
         const badgesData = await badgesRes.json();
-        const featuredBadgesData = await featuredRes.json();
+        const representativeData = await representativeRes.json();
 
         if (profileData.data) {
           setLevel({
             levelName: profileData.data.level,
-            level: profileData.data.level 
+            level: profileData.data.level
           });
           setPoints({
             point: profileData.data.points
@@ -72,8 +50,7 @@ function MyBadges() {
           setPoints(null);
         }
         setBadges(badgesData.data || []);
-        setFeaturedBadges(featuredBadgesData.data || []);
-        
+        setRepresentativeBadge(representativeData.data || null);
 
       } catch (err) {
         console.error('데이터 불러오기 실패:', err);
@@ -86,39 +63,44 @@ function MyBadges() {
     fetchData();
   }, [user, getAuthHeaders]);
 
-  const handleToggleFeatured = useCallback(async (badgeId) => {
+  const handleSetRepresentativeBadge = useCallback(async (badgeId) => {
     try {
-      const isCurrentlyFeatured = featuredBadges.some(b => b.badgeId === badgeId);
-      const newFeaturedStatus = !isCurrentlyFeatured; 
+      // If the clicked badge is already representative, unequip it.
+      if (representativeBadge && representativeBadge.badgeId === badgeId) {
+        const response = await fetch(`/api/users/me/representative-badge`, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+          credentials: 'include',
+        });
 
-      const response = await fetch(`/api/badges/${badgeId}/feature?featured=${newFeaturedStatus}`, {
-        method: 'PUT', 
-        headers: getAuthHeaders(),
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '대표 뱃지 설정/해제 실패');
-      }
-
-      
-      setFeaturedBadges(prev => {
-        if (newFeaturedStatus) {
-          
-          const badgeToFeature = badges.find(b => b.badgeId === badgeId);
-          return badgeToFeature ? [...prev, badgeToFeature] : prev;
-        } else {
-          
-          return prev.filter(b => b.badgeId !== badgeId);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || '대표 뱃지 해제 실패');
         }
-      });
+        setRepresentativeBadge(null);
+      } else { // Equip the new badge
+        const response = await fetch(`/api/users/me/representative-badge`, {
+          method: 'PUT',
+          headers: {
+            ...getAuthHeaders(),
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ badgeId }),
+        });
 
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || '대표 뱃지 설정 실패');
+        }
+        const newRepresentativeBadge = badges.find(b => b.badgeId === badgeId);
+        setRepresentativeBadge(newRepresentativeBadge);
+      }
     } catch (err) {
       alert(err.message);
-      console.error('대표 뱃지 토글 실패:', err);
+      console.error('대표 뱃지 설정 실패:', err);
     }
-  }, [getAuthHeaders, badges, featuredBadges]); 
+  }, [getAuthHeaders, badges, representativeBadge]);
 
   if (loading) return <div className="loading-message">데이터를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
@@ -140,11 +122,10 @@ function MyBadges() {
         </div>
       </div>
 
-      
       {badgeStats && (
         <div className="badge-section">
           <h3>뱃지 통계</h3>
-          <div className="info-section"> 
+          <div className="info-section">
             <div className="info-card">
               <div className="label"><FaAward /> 획득 뱃지 수</div>
               <div className="value">{badgeStats.totalBadgesOwned}개</div>
@@ -158,46 +139,49 @@ function MyBadges() {
       )}
 
       <div className="badge-section">
-        <h3>🏅 대표 뱃지</h3>
-        {featuredBadges.length === 0
+        <h3>대표 뱃지</h3>
+        {!representativeBadge
           ? <div className="no-badges">대표 뱃지가 없습니다.</div>
           : (
             <div className="badge-grid">
-              {featuredBadges.map(badge => (
-                <div 
-                  key={badge.badgeId} 
-                  className="badge-item featured"
-                  onClick={() => handleToggleFeatured(badge.badgeId)}
-                >
-                  <div className="badge-icon-container">
-                    {getBadgeIcon(badge.name)}
-                  </div>
-                  <div className="badge-name">{badge.name}</div>
+              <div
+                className="badge-item representative"
+                onClick={() => handleSetRepresentativeBadge(representativeBadge.badgeId)}
+              >
+                <div className="badge-icon-container">
+                  {getBadgeIcon(representativeBadge.name)}
                 </div>
-              ))}
+                <div className="badge-name">{representativeBadge.name}</div>
+                <button className="equip-button">해제</button>
+              </div>
             </div>
           )
         }
       </div>
 
       <div className="badge-section">
-        <h3>🎖️ 내 모든 뱃지</h3>
+        <h3>내 모든 뱃지</h3>
         {badges.length === 0
           ? <div className="no-badges">획득한 뱃지가 없습니다.</div>
           : (
             <div className="badge-grid">
               {badges.map(badge => {
-                const isFeatured = featuredBadges.some(fb => fb.badgeId === badge.badgeId);
+                const isRepresentative = representativeBadge && representativeBadge.badgeId === badge.badgeId;
                 return (
-                  <div 
-                    key={badge.badgeId} 
-                    className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
-                    onClick={() => badge.owned && handleToggleFeatured(badge.badgeId)}
+                  <div
+                    key={badge.badgeId}
+                    className={`badge-item ${isRepresentative ? 'representative' : ''} ${badge.owned ? '' : 'not-owned'}`}
+                    onClick={() => badge.owned && handleSetRepresentativeBadge(badge.badgeId)}
                   >
                     <div className="badge-icon-container">
                       {getBadgeIcon(badge.name)}
                     </div>
                     <div className="badge-name">{badge.name}</div>
+                    {badge.owned && (
+                      <button className="equip-button">
+                        {isRepresentative ? '해제' : '장착'}
+                      </button>
+                    )}
                   </div>
                 );
               })}

@@ -1,3 +1,4 @@
+
 /* frontend/src/css/MyBadges.css */
 
 .my-badges-page {
@@ -83,6 +84,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   cursor: pointer; /* 대표 뱃지 토글 기능 고려 */
+  position: relative;
 }
 
 .badge-item:hover {
@@ -103,18 +105,43 @@
   font-size: 0.9rem;
   font-weight: 500;
   color: #b0b0b0;
+  margin-bottom: 0.5rem;
 }
 
-.badge-item.featured {
+.badge-item.representative {
   border-color: #8ab0d1; /* 대표 뱃지 강조 색상 */
   box-shadow: 0 0 15px rgba(138, 176, 209, 0.5); /* 대표 뱃지 그림자 */
 }
 
-.badge-item.not-owned img {
-  opacity: 0.3; /* 획득하지 않은 뱃지 흐리게 */
+.badge-item.not-owned {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.loading-message, .error-message {
+.badge-item.not-owned .badge-icon-container {
+  opacity: 0.3;
+}
+
+.equip-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 80%;
+}
+
+.badge-item.representative .equip-button {
+  background-color: #f44336;
+}
+
+.loading-message, .error-message, .no-badges {
   text-align: center;
   font-size: 1.2rem;
   color: #b0b0b0;

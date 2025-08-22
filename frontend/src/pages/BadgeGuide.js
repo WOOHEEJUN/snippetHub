@@ -114,7 +114,7 @@ function BadgeGuide() {
     <div className="badge-guide-page">
       <div className="container">
         <div className="page-header">
-          <h1>🏅 뱃지 가이드</h1>
+          <h1>뱃지 가이드</h1>
           <p>다양한 활동을 통해 뱃지를 획득하고 성장해보세요!</p>
         </div>
 
