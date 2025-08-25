@@ -1,24 +1,8 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
-import {
-  // CREATION
-  FaCode, FaKeyboard, FaLaptopCode, FaFileCode, FaPenNib, FaPaintBrush,
-  // ENGAGEMENT
-  FaHeart, FaHandsHelping, FaComment, FaComments, FaThumbsUp,
-  // ACHIEVEMENT
-  FaTrophy, FaMedal, FaCrown, FaAward, FaGem,
-  // MILESTONE
-  FaFlagCheckered, FaRoute, FaMapSigns,
-  // COMMUNITY
-  FaUsers, FaUserFriends,
-  // ACTIVITY
-  FaRunning, FaBicycle, FaDumbbell, FaFlask,
-  // SPECIAL
-  FaMagic, FaMeteor, FaStar,
-  // EVENT
-  FaCalendarAlt, FaGift, FaTicketAlt,
-} from 'react-icons/fa';
+
+/** ============ 유틸 ============ */
 
 /** 안전 JSON 파서 */
 const parseJsonSafe = async (res) => {
@@ -29,7 +13,7 @@ const parseJsonSafe = async (res) => {
   return null;
 };
 
-/** 여러 응답 스키마에서 배열을 뽑아내기 */
+/** 여러 응답 스키마에서 배열 뽑기 */
 const extractArray = (data) => {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.data)) return data.data;
@@ -42,7 +26,7 @@ const extractArray = (data) => {
 const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c.trim()) ? c.trim() : null;
 
-/** 카테고리 폴백 색 */
+/** 카테고리 기본 색 (DB color 폴백) */
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
@@ -55,22 +39,35 @@ const CATEGORY_DEFAULT = {
   OTHER:      '#8ab0d1',
 };
 
-/** 카테고리별 아이콘 풀(여러 모양에서 선택) */
-const ICON_POOLS = {
-  CREATION:   [FaCode, FaKeyboard, FaLaptopCode, FaFileCode, FaPenNib, FaPaintBrush],
-  ENGAGEMENT: [FaHeart, FaHandsHelping, FaComment, FaComments, FaThumbsUp],
-  ACHIEVEMENT:[FaTrophy, FaMedal, FaCrown, FaAward, FaGem],
-  MILESTONE:  [FaFlagCheckered, FaRoute, FaMapSigns, FaMedal],
-  COMMUNITY:  [FaUsers, FaUserFriends, FaHandsHelping, FaComments],
-  ACTIVITY:   [FaRunning, FaBicycle, FaDumbbell, FaFlask],
-  SPECIAL:    [FaMagic, FaMeteor, FaGem, FaStar],
-  EVENT:      [FaCalendarAlt, FaGift, FaTicketAlt, FaGem],
-  OTHER:      [FaStar],
+/** 카테고리 기본 이모지 (외부 아이콘 실패 시 폴백) */
+const CATEGORY_EMOJI = {
+  CREATION:   '💻',
+  ENGAGEMENT: '❤️',
+  ACHIEVEMENT:'🏆',
+  MILESTONE:  '🚩',
+  COMMUNITY:  '👥',
+  ACTIVITY:   '⚗️',
+  SPECIAL:    '✨',
+  EVENT:      '🎟️',
+  OTHER:      '⭐',
 };
 
-/** 간단 해시(아이콘 안정적 선택용) */
+/** Lucide 아이콘 풀 (Iconify prefix는 'lucide') */
+const ICONIFY_POOLS = {
+  CREATION:   ['lucide:code', 'lucide:terminal', 'lucide:file-code-2', 'lucide:pen-tool', 'lucide:palette'],
+  ENGAGEMENT: ['lucide:heart', 'lucide:message-circle', 'lucide:messages-square', 'lucide:thumbs-up', 'lucide:user-plus'],
+  ACHIEVEMENT:['lucide:trophy', 'lucide:medal', 'lucide:award', 'lucide:gem', 'lucide:crown'],
+  MILESTONE:  ['lucide:flag', 'lucide:route', 'lucide:map', 'lucide:flag-triangle-right', 'lucide:milestone'],
+  COMMUNITY:  ['lucide:users', 'lucide:user-plus', 'lucide:messages-square', 'lucide:megaphone'],
+  ACTIVITY:   ['lucide:activity', 'lucide:flask-conical', 'lucide:beaker', 'lucide:lab-flask'],
+  SPECIAL:    ['lucide:sparkles', 'lucide:wand-2', 'lucide:stars', 'lucide:gem'],
+  EVENT:      ['lucide:calendar', 'lucide:calendar-clock', 'lucide:ticket', 'lucide:gift'],
+  OTHER:      ['lucide:star'],
+};
+
+/** 간단 해시(안정적 랜덤 선택) */
 const hashStr = (s) => {
-  let h = 2166136261 >>> 0; // FNV-1a seed
+  let h = 2166136261 >>> 0; // FNV-1a
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
     h = Math.imul(h, 16777619);
@@ -78,28 +75,38 @@ const hashStr = (s) => {
   return h >>> 0;
 };
 
-/** 아이콘 선택 */
-const pickIcon = (category, seed) => {
-  const pool = ICON_POOLS[category] || ICON_POOLS.OTHER;
+/** 카테고리/시드 기반 외부 아이콘 이름 선택 */
+const pickIconifyName = (category, seed) => {
+  const pool = ICONIFY_POOLS[category] || ICONIFY_POOLS.OTHER;
   const idx = pool.length ? hashStr(seed) % pool.length : 0;
-  return pool[idx] || FaStar;
+  return pool[idx] || 'lucide:star';
 };
 
-/** 희귀도 계산 */
+/** Iconify SVG URL 생성 (height + color 적용) */
+const iconifyUrl = (iconName, color, size = 56) => {
+  const safeColor = color ? encodeURIComponent(color) : '';
+  const qs = new URLSearchParams();
+  qs.set('height', String(size));
+  if (safeColor) qs.set('color', safeColor.replace(/%23/gi, '%23')); // # -> %23
+  return `https://api.iconify.design/${iconName}.svg?${qs.toString()}`; // /{prefix}/{name}.svg?height=&color=
+};
+
+/** 희귀도 계산: common / uncommon / rare / epic / legendary */
 const computeRarity = (b) => {
   const name = (b.name ?? '').toUpperCase();
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
   const pts = Number(b.points_reward ?? b.pointsReward ?? 0) || 0;
-  const explicitRare = b.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
+  const explicitRare =
+    b.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
 
   if (explicitRare || rc >= 1000 || pts >= 1000) return 'legendary';
-  if (rc >= 500 || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
-  if (rc >= 100 || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
-  if (rc >= 25  || /GOLD|25\b/.test(name) || pts >= 50)   return 'uncommon';
+  if (rc >= 500   || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
+  if (rc >= 100   || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
+  if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
   return 'common';
 };
 
-/** 뱃지 정규화 (DB color/icon/rarity 포함) */
+/** ============ 정규화 ============ */
 const normalizeBadge = (b, idx = 0) => {
   const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER').toString().toUpperCase();
   const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
@@ -117,21 +124,18 @@ const normalizeBadge = (b, idx = 0) => {
     rewards: b.rewards ?? b.rewardList ?? [],
     currentProgress: b.currentProgress ?? b.progress ?? 0,
     owned: b.owned ?? b.isOwned ?? false,
-    iconText: b.icon ?? '', // DB 이모지(📝 등) 사용 시 표시 용도
     pointsReward: b.points_reward ?? b.pointsReward ?? 0,
+    emoji: (b.icon ?? CATEGORY_EMOJI[category] ?? '✨'), // 폴백 이모지
     color,
   };
 
-  normalized.rarity = computeRarity({ ...b, ...normalized }); // common~legendary
+  normalized.rarity = computeRarity({ ...b, ...normalized });
+  normalized.iconifyName = pickIconifyName(normalized.category, normalized.name || normalized.badgeId);
+  normalized.iconifyUrl = iconifyUrl(normalized.iconifyName, normalized.color, 56);
   return normalized;
 };
 
-/** 아이콘 컴포넌트 */
-const BadgeIcon = ({ badge }) => {
-  const Icon = pickIcon(badge.category, badge.name || badge.badgeId);
-  return <Icon size={40} color={badge.color} />;
-};
-
+/** ============ 본 컴포넌트 ============ */
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 
@@ -141,19 +145,24 @@ function BadgeGuide() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
+  // 외부 아이콘 실패 시 폴백 이모지 표시용
+  const [iconFail, setIconFail] = useState({}); // { [badgeId]: true }
+  const markIconFail = useCallback((id) => setIconFail((p) => ({ ...p, [id]: true })), []);
+
+  // 로딩 애니메이션 제어(선택)
   const [loaded, setLoaded] = useState({});
   const markLoaded = useCallback((id) => setLoaded((p) => ({ ...p, [id]: true })), []);
 
   const categories = [
-    { value: 'ALL', label: '전체' },
-    { value: 'CREATION', label: '창작' },
+    { value: 'ALL',        label: '전체' },
+    { value: 'CREATION',   label: '창작' },
     { value: 'ENGAGEMENT', label: '참여' },
-    { value: 'ACHIEVEMENT', label: '업적' },
-    { value: 'MILESTONE', label: '이정표' },
-    { value: 'COMMUNITY', label: '커뮤니티' },
-    { value: 'SPECIAL', label: '특별' },
-    { value: 'EVENT', label: '이벤트' },
-    { value: 'ACTIVITY', label: '활동' },
+    { value: 'ACHIEVEMENT',label: '업적' },
+    { value: 'MILESTONE',  label: '이정표' },
+    { value: 'COMMUNITY',  label: '커뮤니티' },
+    { value: 'SPECIAL',    label: '특별' },
+    { value: 'EVENT',      label: '이벤트' },
+    { value: 'ACTIVITY',   label: '활동' }, // 과거 호환
   ];
 
   useEffect(() => {
@@ -162,17 +171,18 @@ function BadgeGuide() {
         setLoading(true);
         setError(null);
 
+        // 1) 전체 뱃지
         const resAll = await fetch('/api/badges', {
           headers: getAuthHeaders(),
           credentials: 'include',
         });
         if (!resAll.ok) throw new Error('뱃지 목록 조회 실패');
-
         const jsonAll = await parseJsonSafe(resAll);
         const rawBadges = extractArray(jsonAll);
         const normalized = rawBadges.map((b, i) => normalizeBadge(b, i));
         setBadges(normalized);
 
+        // 2) 내 뱃지
         const resMine = await fetch('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
@@ -197,14 +207,17 @@ function BadgeGuide() {
     fetchBadgesAndUser();
   }, [getAuthHeaders]);
 
+  /** 필터 */
   const filteredBadges = useMemo(() => {
     if (selectedCategory === 'ALL') return badges;
     const target = selectedCategory.toUpperCase();
     return badges.filter((b) => (b.category || '').toUpperCase() === target);
   }, [badges, selectedCategory]);
 
+  /** 보유 여부 */
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
 
+  /** 진행도 */
   const getProgressInfo = (badge) => {
     const ub = userBadges.find((x) => x.badgeId === badge.badgeId);
     if (!ub) return null;
@@ -219,6 +232,19 @@ function BadgeGuide() {
 
   if (loading) return <div className="loading-message">뱃지 정보를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
+
+  /** 카테고리 한글 표기 */
+  const categoryKorean = (cat) => ({
+    ALL: '전체',
+    CREATION: '창작',
+    ENGAGEMENT: '참여',
+    ACHIEVEMENT: '업적',
+    MILESTONE: '이정표',
+    COMMUNITY: '커뮤니티',
+    SPECIAL: '특별',
+    EVENT: '이벤트',
+    ACTIVITY: '활동',
+  }[String(cat || '').toUpperCase()] || cat);
 
   return (
     <div className="badge-guide-page">
@@ -270,25 +296,43 @@ function BadgeGuide() {
                 key={badge.badgeId}
                 className={`badge-card ${owned ? 'owned' : 'not-owned'}`}
                 style={{ '--accent': badge.color }}
-                data-rarity={badge.rarity} // ★ 희귀도 클래스 후킹
+                data-rarity={badge.rarity}
               >
                 <div className="badge-image">
                   <div
                     className={`badge-icon-container rarity-${badge.rarity} ${loaded[badge.badgeId] ? 'ready' : 'loading'}`}
-                    title={badge.iconText || ''}
                     onAnimationEnd={() => markLoaded(badge.badgeId)}
                   >
-                    <BadgeIcon badge={badge} />
+                    {/* 살짝 빛나는 원판 */}
+                    <div className="emoji-plate" aria-hidden="true" />
+                    {/* 외부 SVG 아이콘 (Iconify) */}
+                    {!iconFail[badge.badgeId] ? (
+                      <img
+                        src={badge.iconifyUrl}
+                        alt=""
+                        width={56}
+                        height={56}
+                        loading="lazy"
+                        className="iconify-img"
+                        style={{ display: 'block', margin: '0 auto', position: 'relative', zIndex: 2 }}
+                        onError={() => markIconFail(badge.badgeId)}
+                      />
+                    ) : (
+                      // 네트워크 실패 시 폴백: 중앙 이모지
+                      <span className="badge-emoji" aria-hidden="true">{badge.emoji}</span>
+                    )}
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
 
                 <div className="badge-info">
-                  <h4 className={`badge-name rarity-title-${badge.rarity}`}>{badge.name}</h4>
+                  <h4 className={`badge-name ${badge.rarity === 'epic' ? 'rarity-title-epic' : ''} ${badge.rarity === 'legendary' ? 'rarity-title-legendary' : ''}`}>
+                    {badge.name}
+                  </h4>
                   <p className="badge-description">{badge.description}</p>
 
                   <div className="badge-category">
-                    <span className="category-tag use-accent">{badge.category}</span>
+                    <span className="category-tag use-accent">{categoryKorean(badge.category)}</span>
                   </div>
 
                   {badge.requiredCount > 1 && (
