@@ -278,7 +278,7 @@
 
 .error-message {
   color: #dc3545;
-  background-color: #3a2a2a;
+  background-color: #3a2a3a;
   border: 1px solid #5a3a3a;
 }
 
@@ -322,10 +322,22 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important; /* Ensure the SVG icon color is transparent */
+  /* New enhancements */
+  position: relative; /* Needed for pseudo-element or more complex effects */
+  z-index: 1; /* Ensure it's above any background effects */
+  /* More intense glow for rare badges */
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.7), 0 0 40px rgba(0, 255, 255, 0.5); /* Example vibrant glow */
+  animation: rainbow-text-animation 5s linear infinite; /* Subtle animation for the gradient */
 }
 
 /* Optional: Add a rainbow border to the card itself */
 .rainbow-badge {
-  border: 2px solid;
+  border: 4px solid; /* Thicker border */
   border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1;
+  box-shadow: 0 0 25px rgba(255, 0, 255, 0.4), 0 0 50px rgba(0, 255, 255, 0.3); /* Subtle glow for the card */
+}
+
+@keyframes rainbow-text-animation {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
