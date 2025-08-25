@@ -375,3 +375,122 @@
     0 0 20px color-mix(in oklab, var(--accent, #8ab0d1) 60%, transparent),
     0 0 40px color-mix(in oklab, var(--accent, #8ab0d1) 35%, transparent);
 }
+.badge-icon-container {
+  position: relative;
+  isolation: isolate;
+}
+
+/* 링(회전) 만들기: before를 링으로, mask로 속이 비게 함 */
+.badge-icon-container::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--accent, #8ab0d1), transparent 50%, var(--accent, #8ab0d1));
+  z-index: -1;
+  -webkit-mask: radial-gradient(circle at center, transparent 58%, #000 60%);
+          mask: radial-gradient(circle at center, transparent 58%, #000 60%);
+  opacity: .0; /* 기본은 숨김, 희귀도별에서 켠다 */
+}
+
+/* 희귀도별 강도/애니메이션 */
+@keyframes spin360 { to { transform: rotate(360deg); } }
+@keyframes sparkle {
+  0%,100% { opacity: .3; transform: translate(-50%, -50%) scale(1); }
+  50%     { opacity: .8; transform: translate(-50%, -50%) scale(1.12); }
+}
+
+/* COMMON: 기본 */
+.rarity-common { box-shadow: 0 0 10px rgba(255,255,255,.12); }
+
+/* UNCOMMON: 살짝 더 밝고 약한 회전 링 */
+.rarity-uncommon { box-shadow: 0 0 14px color-mix(in oklab, var(--accent, #8ab0d1) 40%, black); }
+.rarity-uncommon::before {
+  opacity: .35;
+  animation: spin360 9s linear infinite;
+}
+
+/* RARE: 강한 링 + 은은한 스파클 */
+.rarity-rare { box-shadow: 0 0 18px color-mix(in oklab, var(--accent, #8ab0d1) 60%, black); }
+.rarity-rare::before {
+  opacity: .55;
+  animation: spin360 6s linear infinite;
+}
+.rarity-rare::after {
+  content:"";
+  position:absolute;
+  left:50%; top:50%;
+  width:140%;
+  height:140%;
+  translate:-50% -50%;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), transparent 35%),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,.18), transparent 40%);
+  pointer-events:none;
+  animation: sparkle 2.4s ease-in-out infinite;
+  z-index:-1;
+}
+
+/* EPIC: 다색 그라디언트 링 + 더 강한 글로우 */
+.rarity-epic {
+  box-shadow:
+    0 0 22px color-mix(in oklab, var(--accent, #8ab0d1) 70%, black),
+    0 0 40px rgba(255,255,255,.12) inset;
+}
+.rarity-epic::before {
+  background: conic-gradient(
+    from 0deg,
+    #8a2be2, #1e90ff, #00e5ff, #64ffda, #ffd54f, #ff6ec7, #8a2be2
+  );
+  opacity: .7;
+  animation: spin360 4.5s linear infinite;
+}
+
+/* LEGENDARY: 무지개 링 + 두꺼운 오라 + 타이틀 그라디언트 */
+.rarity-legendary {
+  box-shadow:
+    0 0 28px rgba(255,255,255,.35),
+    0 0 60px color-mix(in oklab, var(--accent, #8ab0d1) 70%, transparent);
+}
+.rarity-legendary::before {
+  background: conic-gradient(
+    from 0deg,
+    #ff0040, #ff7a00, #ffd400, #3be000, #00e5ff, #0066ff, #b400ff, #ff0040
+  );
+  opacity: .9;
+  animation: spin360 3.2s linear infinite;
+}
+[data-rarity="legendary"] .owned-badge {
+  transform: translateX(50%) scale(1.05);
+  box-shadow: 0 0 14px rgba(255,255,255,.8), 0 0 24px rgba(255,255,255,.5);
+}
+
+/* 희귀도별 타이틀 텍스트 연출 */
+.rarity-title-epic {
+  background: linear-gradient(90deg, #a78bfa, #67e8f9, #86efac);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.rarity-title-legendary {
+  background: linear-gradient(90deg, #ff7a00, #ffd400, #64ffda, #8a2be2);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(255,255,255,.35);
+}
+
+/* 진행도 바도 희귀도에 살짝 보정 */
+[data-rarity="epic"] .progress-fill {
+  filter: brightness(1.05) saturate(1.15);
+}
+[data-rarity="legendary"] .progress-fill {
+  filter: brightness(1.12) saturate(1.25);
+}
+
+/* color-mix 미지원 브라우저를 위해 안전장치 */
+@supports not (color-mix(in oklab, black 50%, white 50%)) {
+  .rarity-uncommon,
+  .rarity-rare,
+  .rarity-epic,
+  .rarity-legendary { box-shadow: 0 0 18px rgba(255,255,255,.22); }
+}
