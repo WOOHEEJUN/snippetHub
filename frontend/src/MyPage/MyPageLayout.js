@@ -36,7 +36,7 @@ const MyPageLayout = () => {
     { to: "/mypage/submission-history", text: "제출 내역" },
     { to: "/mypage/point-history", text: "포인트 내역" },
     { to: "/mypage/ranking", text: "전체 랭킹" },
-    { to: "/pages/BadgeGuide", text: "뱃지 가이드" },
+    { to: "/pages/badge-guide", text: "뱃지 가이드" },
   ];
 
   return (
