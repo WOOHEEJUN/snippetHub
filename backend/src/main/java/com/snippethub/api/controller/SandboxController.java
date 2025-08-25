@@ -23,7 +23,7 @@ public class SandboxController {
     public ResponseEntity<ApiResponse<SandboxMonitor.SandboxStatus>> getSandboxStatus() {
         try {
             SandboxMonitor.SandboxStatus status = sandboxMonitor.getSandboxStatus();
-            return ResponseEntity.ok(ApiResponse.success(status, "Sandbox status retrieved successfully"));
+            return ResponseEntity.ok(ApiResponse.success("Sandbox status retrieved successfully", status));
         } catch (Exception e) {
             log.error("Error retrieving sandbox status", e);
             return ResponseEntity.internalServerError()
@@ -36,7 +36,7 @@ public class SandboxController {
     public ResponseEntity<ApiResponse<String>> checkForOrphanedSandboxes() {
         try {
             sandboxMonitor.checkForOrphanedSandboxes();
-            return ResponseEntity.ok(ApiResponse.success("Orphaned sandbox check completed", "Orphaned sandbox check completed successfully"));
+            return ResponseEntity.ok(ApiResponse.success("Orphaned sandbox check completed successfully", "Orphaned sandbox check completed"));
         } catch (Exception e) {
             log.error("Error checking for orphaned sandboxes", e);
             return ResponseEntity.internalServerError()
@@ -49,7 +49,7 @@ public class SandboxController {
     public ResponseEntity<ApiResponse<String>> logSandboxStatistics() {
         try {
             sandboxMonitor.logSandboxStatistics();
-            return ResponseEntity.ok(ApiResponse.success("Statistics logged", "Sandbox statistics logged successfully"));
+            return ResponseEntity.ok(ApiResponse.success("Sandbox statistics logged successfully", "Statistics logged"));
         } catch (Exception e) {
             log.error("Error logging sandbox statistics", e);
             return ResponseEntity.internalServerError()
@@ -73,7 +73,7 @@ public class SandboxController {
                 "status", status.getActiveSandboxes() == 0 ? "HEALTHY" : "WARNING"
             );
             
-            return ResponseEntity.ok(ApiResponse.success(health, "Sandbox health check completed"));
+            return ResponseEntity.ok(ApiResponse.success("Sandbox health check completed", health));
         } catch (Exception e) {
             log.error("Error checking sandbox health", e);
             return ResponseEntity.internalServerError()
