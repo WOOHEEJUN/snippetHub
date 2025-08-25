@@ -1,7 +1,26 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
-import { getBadgeImagePath } from '../utils/badgeUtils';
+import { FaTrophy, FaCode, FaHeart, FaMedal, FaUserPlus, FaStar } from 'react-icons/fa';
+
+/** BadgeIcon Component */
+const BadgeIcon = ({ badge }) => {
+  const iconProps = { size: 40, color: "#8ab0d1" };
+  switch ((badge.category || '').toUpperCase()) {
+    case 'CREATION':
+      return <FaCode {...iconProps} />;
+    case 'ENGAGEMENT':
+      return <FaHeart {...iconProps} />;
+    case 'ACHIEVEMENT':
+      return <FaTrophy {...iconProps} />;
+    case 'MILESTONE':
+      return <FaMedal {...iconProps} />;
+    case 'COMMUNITY':
+      return <FaUserPlus {...iconProps} />;
+    default:
+      return <FaStar {...iconProps} />;
+  }
+};
 
 /** 안전 JSON 파서 */
 const parseJsonSafe = async (res) => {
@@ -175,11 +194,7 @@ function BadgeGuide() {
               <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'}`}>
                 <div className="badge-image">
                   <div className="badge-icon-container">
-                    <img
-                      src={getBadgeImagePath((badge.name || '').trim())}
-                      alt={badge.name}
-                      className="badge-image-actual"
-                    />
+                    <BadgeIcon badge={badge} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>

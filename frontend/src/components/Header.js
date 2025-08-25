@@ -91,6 +91,7 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
+                  안녕하세요,{' '}
                   {user?.representativeBadge && (
                     <img
                       src={getBadgeImagePath(user.representativeBadge.name)}
@@ -98,9 +99,10 @@ const Header = () => {
                       className="representative-badge-header"
                       width={24}
                       height={24}
+                      style={{ marginRight: '8px', verticalAlign: 'middle' }}
                     />
                   )}
-                  안녕하세요, {user?.nickname || user?.email}님!
+                  {user?.nickname || user?.email}님!
                 </span>
                 <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
                 <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>

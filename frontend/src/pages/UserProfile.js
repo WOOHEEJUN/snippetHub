@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
-import { getLevelBadgeImage } from '../utils/badgeUtils'; 
+import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils'; 
 import '../css/UserProfile.css';
 
 const UserProfile = () => {
@@ -68,12 +68,20 @@ const UserProfile = () => {
     <div className="user-profile-container">
       <div className="profile-header">
         <div className="profile-level-display">
-          {user.level && (
+          {user.representativeBadge ? (
             <img
-              src={getLevelBadgeImage(user.level)}
-              alt={user.level}
+              src={getBadgeImagePath(user.representativeBadge.name)}
+              alt={user.representativeBadge.name}
               className="profile-level-badge-large"
             />
+          ) : (
+            user.level && (
+              <img
+                src={getLevelBadgeImage(user.level)}
+                alt={user.level}
+                className="profile-level-badge-large"
+              />
+            )
           )}
         </div>
         <div className="profile-info">

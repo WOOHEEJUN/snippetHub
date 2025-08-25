@@ -84,7 +84,13 @@
   width: var(--write-w);
   background:#000; color:#fff; border:1px solid #fff;
 }
-.board-container .btn-primary:hover{ background:#333; border-color:#fff; }
+.board-container .btn-primary:hover{
+  background:#333; /* Gray background on hover */
+  color:#fff;      /* Keep text white on hover */
+  border-color:#fff;
+  transform: none; /* Remove any lifting effect */
+  box-shadow: none; /* Remove any shadow effect */
+}
 
 /* 폼 내부 간격 */
 .board-container .search-form{ gap: var(--gap); }

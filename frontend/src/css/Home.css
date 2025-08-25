@@ -68,6 +68,19 @@
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
+.snippet-card .card-title {
+  color: #f0f0f0; /* Brighter color for the title */
+}
+
+.snippet-card .card-text {
+  color: #d0d0d0; /* Brighter color for the description text */
+}
+
+.snippet-card .text-muted,
+.snippet-card .text-muted a {
+  color: #b0b0b0 !important; /* A readable light gray for other muted text and links */
+}
+
 .snippet-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
@@ -95,6 +108,20 @@
   color: #e0e0e0;
   padding: 4rem 1rem;
   text-align: center;
+}
+
+/* Readability fix for Popular Snippets section */
+.home-page .bg-light h2,
+.home-page .bg-light h4 {
+  color: #212529; /* A standard dark color for text */
+}
+
+.home-page .bg-light p {
+  color: #495057; /* A slightly lighter dark color for paragraph text */
+}
+
+.home-page .bg-light .text-muted {
+  color: #6c757d !important; /* Override Bootstrap's default with a more readable muted color */
 }
 
 /* Media Queries */
@@ -149,3 +176,4 @@
     100% { transform: translateY(0); }
   }
 }
+
