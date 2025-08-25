@@ -26,7 +26,7 @@
   gap: 1.5rem;
 }
 
-.content-item {
+.my-content-container .content-item {
   background-color: #222222;
   border-radius: 12px;
   padding: 2rem; /* Increased padding */
@@ -44,20 +44,20 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
 }
 
-.item-title {
+.my-content-container .item-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #e0e0e0;
   margin-bottom: 1.5rem; /* Increased spacing */
 }
 
-.item-details {
+.my-content-container .item-details {
   font-size: 0.9rem;
   color: #b0b0b0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1.5rem; /* Increased spacing */ /* 제목과의 간격 */
+  margin-top: 1.5rem; /* Increased spacing */
 }
 
 .item-details .language {
