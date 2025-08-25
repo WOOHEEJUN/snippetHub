@@ -1,25 +1,53 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
-import { FaTrophy, FaCode, FaHeart, FaMedal, FaUserPlus, FaStar } from 'react-icons/fa';
+import { FaTrophy, FaCode, FaHeart, FaMedal, FaUserPlus, FaStar, FaDragon, FaMagic, FaGem, FaShieldAlt, FaBook, FaFlask } from 'react-icons/fa';
 
 /** BadgeIcon Component */
 const BadgeIcon = ({ badge }) => {
-  const iconProps = { size: 40, color: "#8ab0d1" };
+  let iconComponent;
+  let iconColor;
+
   switch ((badge.category || '').toUpperCase()) {
     case 'CREATION':
-      return <FaCode {...iconProps} />;
+      iconComponent = FaCode;
+      iconColor = "#FFD700"; // Gold
+      break;
     case 'ENGAGEMENT':
-      return <FaHeart {...iconProps} />;
+      iconComponent = FaHeart;
+      iconColor = "#FF6347"; // Tomato
+      break;
     case 'ACHIEVEMENT':
-      return <FaTrophy {...iconProps} />;
+      iconComponent = FaTrophy;
+      iconColor = "#00CED1"; // DarkTurquoise
+      break;
     case 'MILESTONE':
-      return <FaMedal {...iconProps} />;
+      iconComponent = FaMedal;
+      iconColor = "#DA70D6"; // Orchid
+      break;
     case 'COMMUNITY':
-      return <FaUserPlus {...iconProps} />;
+      iconComponent = FaUserPlus;
+      iconColor = "#32CD32"; // LimeGreen
+      break;
+    case 'ACTIVITY': // Assuming ACTIVITY is a category
+      iconComponent = FaFlask; // Example: a flask for activity
+      iconColor = "#8A2BE2"; // BlueViolet
+      break;
+    case 'SPECIAL': // Assuming SPECIAL is a category
+      iconComponent = FaMagic; // Example: a magic wand for special
+      iconColor = "#FF4500"; // OrangeRed
+      break;
+    case 'EVENT': // Assuming EVENT is a category
+      iconComponent = FaGem; // Example: a gem for events
+      iconColor = "#1E90FF"; // DodgerBlue
+      break;
     default:
-      return <FaStar {...iconProps} />;
+      iconComponent = FaStar;
+      iconColor = "#8ab0d1"; // Default color
   }
+
+  const iconProps = { size: 40, color: iconColor };
+  return React.createElement(iconComponent, iconProps);
 };
 
 /** 안전 JSON 파서 */
@@ -46,9 +74,12 @@ const normalizeBadge = (b, idx = 0) => {
     .toString()
     .toUpperCase();
 
+  const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
+  const isRare = (name.includes('Legendary') || name.includes('Grandmaster') || name.includes('Master')) ? true : (b.isRare ?? false); // Added rarity logic
+
   return {
     badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
-    name: b.name ?? b.title ?? b.badgeName ?? '이름 없음',
+    name,
     description: b.description ?? b.desc ?? '',
     category,
     requiredCount: b.requiredCount ?? b.requirementCount ?? b.goal ?? 1,
@@ -56,6 +87,7 @@ const normalizeBadge = (b, idx = 0) => {
     rewards: b.rewards ?? b.rewardList ?? [],
     currentProgress: b.currentProgress ?? b.progress ?? 0,
     owned: b.owned ?? b.isOwned ?? false,
+    isRare, // Add isRare property
   };
 };
 
@@ -191,9 +223,9 @@ function BadgeGuide() {
             const progress = getProgressInfo(badge);
 
             return (
-              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'}`}>
+              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'rainbow-badge' : ''}`}>
                 <div className="badge-image">
-                  <div className="badge-icon-container">
+                  <div className={`badge-icon-container ${badge.isRare ? 'rainbow-badge-icon' : ''}`}>
                     <BadgeIcon badge={badge} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}

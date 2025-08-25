@@ -316,3 +316,16 @@
     box-shadow: 0 0 15px rgba(138, 176, 209, 0.6), 0 0 30px rgba(138, 176, 209, 0.3);
   }
 }
+
+.rainbow-badge-icon {
+  background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important; /* Ensure the SVG icon color is transparent */
+}
+
+/* Optional: Add a rainbow border to the card itself */
+.rainbow-badge {
+  border: 2px solid;
+  border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1;
+}
