@@ -31,30 +31,48 @@ public class CodeExecutionSandbox {
     private static final String SANDBOX_BASE_DIR = "/tmp/snippethub_sandbox/";
     private static final String SECURE_TEMP_DIR = "/tmp/snippethub_secure/";
 
+    private final SandboxMonitor sandboxMonitor;
+
+    public CodeExecutionSandbox(SandboxMonitor sandboxMonitor) {
+        this.sandboxMonitor = sandboxMonitor;
+    }
+
     public SandboxEnvironment createSandbox(String language) throws IOException {
         if (!sandboxEnabled) {
+            log.info("Sandbox disabled, returning null environment");
             return new SandboxEnvironment(null, null, null);
         }
 
         String sandboxId = UUID.randomUUID().toString();
         Path sandboxDir = Paths.get(SANDBOX_BASE_DIR, sandboxId);
         
+        log.info("Creating sandbox environment - ID: {}, Language: {}, Directory: {}", 
+                sandboxId, language, sandboxDir);
+        
         // 샌드박스 디렉토리 생성
         Files.createDirectories(sandboxDir);
+        log.debug("Created sandbox directory: {}", sandboxDir);
         
         // 보안 디렉토리 생성
         Path secureDir = Paths.get(SECURE_TEMP_DIR, sandboxId);
         Files.createDirectories(secureDir);
+        log.debug("Created secure directory: {}", secureDir);
         
         String executablePath = getExecutablePath(language, sandboxDir);
         
         // 샌드박스 권한 설정
         setSecureSandboxPermissions(sandboxDir, secureDir);
+        log.debug("Set secure permissions for sandbox directories");
         
         // 심볼릭 링크 방지
         preventSymbolicLinks(sandboxDir);
+        log.debug("Applied symbolic link prevention");
         
-        log.info("Created secure sandbox environment: {} for language: {}", sandboxDir, language);
+        log.info("Successfully created secure sandbox environment: {} for language: {}", sandboxDir, language);
+        
+        // Record sandbox creation in monitor
+        sandboxMonitor.recordSandboxCreation(sandboxId, language, sandboxDir, secureDir);
+        
         return new SandboxEnvironment(sandboxDir, executablePath, sandboxId, secureDir);
     }
 
@@ -103,24 +121,37 @@ public class CodeExecutionSandbox {
 
     public void cleanupSandbox(SandboxEnvironment sandbox) {
         if (sandbox == null) {
+            log.debug("Cleanup requested for null sandbox, skipping");
             return;
         }
+        
+        log.info("Starting cleanup for sandbox: {}", sandbox.getSandboxId());
         
         try {
             // 보안 디렉토리 먼저 정리
             if (sandbox.getSecureDir() != null) {
+                log.debug("Cleaning up secure directory: {}", sandbox.getSecureDir());
                 deleteDirectoryRecursively(sandbox.getSecureDir().toFile());
+                log.debug("Successfully cleaned up secure directory");
             }
             
             // 샌드박스 디렉토리 정리
             if (sandbox.getSandboxDir() != null) {
+                log.debug("Cleaning up sandbox directory: {}", sandbox.getSandboxDir());
                 deleteDirectoryRecursively(sandbox.getSandboxDir().toFile());
+                log.debug("Successfully cleaned up sandbox directory");
             }
             
-            log.info("Cleaned up secure sandbox: {}", sandbox.getSandboxId());
+            log.info("Successfully cleaned up secure sandbox: {}", sandbox.getSandboxId());
+            
+            // Record successful cleanup
+            sandboxMonitor.recordSandboxCleanup(sandbox.getSandboxId(), true);
             
         } catch (Exception e) {
-            log.error("Error cleaning up sandbox: {}", sandbox.getSandboxId(), e);
+            log.error("Error cleaning up sandbox: {} - Error: {}", sandbox.getSandboxId(), e.getMessage(), e);
+            
+            // Record cleanup failure
+            sandboxMonitor.recordCleanupError(sandbox.getSandboxId(), e);
         }
     }
 

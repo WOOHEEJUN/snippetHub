@@ -92,30 +92,30 @@ public class ExecutionService {
         
         try {
             
-            switch (language) {
-                case "java":
+        switch (language) {
+            case "java":
                     response = executeJavaInSandbox(request.getCode(), request.getInput(), sandbox);
-                    break;
-                case "python":
+                break;
+            case "python":
                     response = executePythonInSandbox(request.getCode(), request.getInput(), sandbox);
-                    break;
-                case "c":
+                break;
+            case "c":
                     response = executeCInSandbox(request.getCode(), request.getInput(), sandbox);
                     break;
                 case "javascript":
                     response = executeJavaScriptInSandbox(request.getCode(), request.getInput(), sandbox);
-                    break;
-                case "html":
-                    response = executeHtml(request.getCode());
-                    break;
-                case "css":
-                    response = executeCss(request.getCode());
-                    break;
-                default:
-                    response = ExecutionResponse.builder()
-                            .status(CodeExecution.Status.ERROR.name())
-                            .error("Unsupported language: " + language)
-                            .build();
+                break;
+            case "html":
+                response = executeHtml(request.getCode());
+                break;
+            case "css":
+                response = executeCss(request.getCode());
+                break;
+            default:
+                response = ExecutionResponse.builder()
+                        .status(CodeExecution.Status.ERROR.name())
+                        .error("Unsupported language: " + language)
+                        .build();
             }
         } finally {
             // 샌드박스 정리 (항상 실행)

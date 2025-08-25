@@ -45,9 +45,11 @@ public class Comment {
     private Comment parentComment;
 
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Comment> replies = new ArrayList<>();
 
     @Column(name = "depth", nullable = false)
+    @Builder.Default
     private Integer depth = 0; // 0: 원댓글, 1: 대댓글, 2: 대대댓글
 
     @CreationTimestamp
