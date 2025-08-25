@@ -68,7 +68,7 @@ const Header = () => {
                   <li><Link to="/mypage/badges">등급보기</Link></li>
                   <li><Link to="/mypage/edit">개인정보수정</Link></li>
                   <li><Link to="/mypage/ranking">랭킹보기</Link></li>
-                                    <li><Link to="/mypage/badge-guide">뱃지 가이드</Link></li>
+                  <li><Link to="/mypage/badge-guide">뱃지 가이드</Link></li>
                   <li><Link to="/mypage/submission-history">제출 내역</Link></li>
                   <li><Link to="/mypage/posts">게시물 목록 보기</Link></li>
                   <li><Link to="/mypage/snippets">스니펫 목록 보기</Link></li>
