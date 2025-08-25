@@ -75,7 +75,11 @@ const normalizeBadge = (b, idx = 0) => {
     .toUpperCase();
 
   const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
-  const isRare = (name === 'LEGEND_ACHIEVER') ? true : (b.isRare ?? false);
+  const isRare = (
+    name === 'LEGEND_ACHIEVER' ||
+    name === 'POINT_COLLECTOR_10000' ||
+    name === 'LOGIN_STREAK_365'
+  ) ? true : (b.isRare ?? false);
 
   return {
     badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
