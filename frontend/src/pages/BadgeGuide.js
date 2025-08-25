@@ -245,10 +245,10 @@ function BadgeGuide() {
             const progress = getProgressInfo(badge);
 
             return (
-              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'red-rare-badge' : ''}`}>
+              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'rainbow-badge' : ''}`}>
                 <div className="badge-image">
-                  <div className={`badge-icon-container ${badge.isRare ? 'red-rare-badge-icon' : ''}`}>
-                    <BadgeIcon badge={badge} badgeColor={badge.color} />
+                  <div className={`badge-icon-container ${badge.isRare ? 'rainbow-badge-icon' : ''}`}>
+                    <BadgeIcon badge={badge} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
