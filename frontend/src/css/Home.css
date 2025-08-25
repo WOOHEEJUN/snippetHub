@@ -28,7 +28,7 @@
 }
 
 .hero-visual {
-  display: none; /* Hide the code logo on smaller screens */
+  display: none; 
 }
 
 /* Search Card */
@@ -69,7 +69,7 @@
 }
 
 .snippet-card .card-title {
-  color: #f0f0f0; /* Brighter color for the title */
+  color: #f0f0f0;
 }
 
 .snippet-card .card-text {

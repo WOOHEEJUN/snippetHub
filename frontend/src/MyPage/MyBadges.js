@@ -5,6 +5,43 @@ import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa';
 import { getBadgeImagePath } from '../utils/badgeUtils';
 import '../css/MyBadges.css';
 
+/** 안전 JSON 파서 */
+const parseJsonSafe = async (res) => {
+  try {
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return await res.json();
+  } catch (_) {}
+  return null;
+};
+
+/** 여러 응답 스키마에서 배열을 뽑아내기 */
+const extractArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  return [];
+};
+
+/** 뱃지 객체 정규화 */
+const normalizeBadge = (b, idx = 0) => {
+  const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER')
+    .toString()
+    .toUpperCase();
+
+  return {
+    badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
+    name: b.name ?? b.title ?? b.badgeName ?? '이름 없음',
+    description: b.description ?? b.desc ?? '',
+    category,
+    requiredCount: b.requiredCount ?? b.requirementCount ?? b.goal ?? 1,
+    requirements: b.requirements ?? b.requirementList ?? [],
+    rewards: b.rewards ?? b.rewardList ?? [],
+    currentProgress: b.currentProgress ?? b.progress ?? 0,
+    owned: b.owned ?? b.isOwned ?? false,
+  };
+};
+
 function MyBadges() {
   const { user, getAuthHeaders, updateRepresentativeBadge } = useAuth();
 
@@ -38,8 +75,8 @@ function MyBadges() {
         ]);
 
         const profileData = await profileRes.json().catch(() => ({}));
-        const badgesData = await badgesRes.json().catch(() => ({}));
-        const featuredData = await featuredRes.json().catch(() => ({}));
+        const badgesData = await parseJsonSafe(badgesRes);
+        const featuredData = await parseJsonSafe(featuredRes);
 
         if (profileData?.data) {
           setLevel({
@@ -52,8 +89,8 @@ function MyBadges() {
           setPoints(null);
         }
 
-        setBadges(badgesData?.data || []);
-        setFeaturedBadges(featuredData?.data || []);
+        const rawBadges = extractArray(badgesData); const normalizedBadges = rawBadges.map((b, i) => normalizeBadge(b, i)); setBadges(normalizedBadges);
+        const rawFeatured = extractArray(featuredData); const normalizedFeatured = rawFeatured.map((b, i) => normalizeBadge(b, i)); setFeaturedBadges(normalizedFeatured);
 
         // 통계 API가 있으면 여기에 setBadgeStats로 넣어 쓰세요
         // setBadgeStats(statsData?.data)
