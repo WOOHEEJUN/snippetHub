@@ -496,3 +496,33 @@
 }
 /* 외부 아이콘 이미지가 확실히 보이도록 */
 .iconify-img { display:block; margin:0 auto; position:relative; z-index:2; filter: drop-shadow(0 1px 2px rgba(0,0,0,.55)); }
+/* 아이콘/이모지 레이어를 반드시 중앙에 겹치게 */
+.badge-icon-container {
+  position: relative;
+}
+.icon-layer {         /* 내부 래퍼 */
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.iconify-img,
+.badge-emoji {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  z-index: 2;
+  transition: opacity .25s ease;
+}
+.iconify-img {
+  width: 56px;
+  height: 56px;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.55));
+}
+
+/* 혹시 이전 CSS에서 텍스트 색을 투명으로 만드는 클래스가 있다면 무력화 */
+.badge-emoji { color: #fff; }
+.badge-icon-container .badge-emoji { color: #fff !important; }
+
+/* 중앙이 빈 것처럼 보이는 문제를 확실히 방지: 외부 아이콘에 상관없이 이모지는 기본적으로 보임 */

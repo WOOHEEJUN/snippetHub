@@ -18,7 +18,7 @@ const extractArray = (data) => {
   return [];
 };
 const sanitizeHex = (c) =>
-  typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c.trim()) ? c.trim() : null;
+  typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
 
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
@@ -43,7 +43,7 @@ const CATEGORY_EMOJI = {
   OTHER:      '⭐',
 };
 
-/** 아이콘 세트: lucide → tabler → solar 순으로 폴백 */
+/** 아이콘 세트: lucide → tabler → solar 순으로 후보 생성 */
 const ICON_POOLS = {
   CREATION:   ['lucide:code','lucide:terminal','tabler:code','tabler:terminal-2','solar:code-square-linear'],
   ENGAGEMENT: ['lucide:heart','lucide:message-circle','tabler:heart','tabler:message-2','solar:chat-round-like-linear'],
@@ -57,22 +57,23 @@ const ICON_POOLS = {
 };
 
 const hashStr = (s) => {
+  const str = String(s ?? '');
   let h = 2166136261 >>> 0;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
   return h >>> 0;
 };
 const pickNames = (category, seed) => {
   const pool = ICON_POOLS[category] || ICON_POOLS.OTHER;
   const start = pool.length ? hashStr(seed) % pool.length : 0;
-  // 순환하며 3개 후보 뽑기 (다 실패하면 이모지)
-  return [0,1,2].map(i => pool[(start + i) % pool.length]);
+  return [0,1,2].map(i => pool[(start + i) % pool.length]); // 후보 3개
 };
 const iconUrl = (iconName, color, size = 56) => {
   const qs = new URLSearchParams();
   qs.set('height', String(size));
-  if (color) qs.set('color', color.replace('#', '%23'));
+  if (color) qs.set('color', color.replace('#','%23'));
   return `https://api.iconify.design/${iconName}.svg?${qs.toString()}`;
 };
+
 const computeRarity = (b) => {
   const name = (b.name ?? '').toUpperCase();
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -88,8 +89,7 @@ const computeRarity = (b) => {
 const normalizeBadge = (b, idx = 0) => {
   const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER').toString().toUpperCase();
   const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
-  const rawColor = b.color ?? b.hexColor ?? null;
-  const color = sanitizeHex(rawColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
+  const color = sanitizeHex(b.color ?? b.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
 
   const n = {
     badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
@@ -106,38 +106,52 @@ const normalizeBadge = (b, idx = 0) => {
     color,
   };
   n.rarity = computeRarity({ ...b, ...n });
-  n.candidates = pickNames(n.category, n.name || n.badgeId); // 아이콘 후보들
+  n.iconCandidates = pickNames(n.category, n.name || n.badgeId);
   return n;
 };
 
-/** 외부 아이콘 + 다중 폴백 컴포넌트 */
-const IconifyWithFallback = ({ badge, size = 56 }) => {
-  const [idx, setIdx] = useState(0);           // 현재 시도 중인 후보 인덱스
-  const names = badge.candidates || [];
+/** 외부 아이콘 로더: 항상 이모지를 렌더 → 아이콘이 로드되면 아이콘이 이모지를 부드럽게 덮음 */
+const IconifyWithSureFallback = ({ badge, size = 56 }) => {
+  const [idx, setIdx] = useState(0);      // 현재 후보 인덱스
+  const [imgOk, setImgOk] = useState(false);
+
+  const names = badge.iconCandidates || [];
   const hasMore = idx < names.length;
   const src = hasMore ? iconUrl(names[idx], badge.color, size) : null;
 
-  if (!hasMore) {
-    // 최종 폴백: 이모지 (항상 보이게)
-    return <span className="badge-emoji final-fallback" aria-hidden="true">{badge.emoji}</span>;
-  }
-
   return (
-    <img
-      src={src}
-      alt=""
-      width={size}
-      height={size}
-      loading="lazy"
-      className="iconify-img"
-      onError={() => setIdx((i) => i + 1)}     // 실패 시 다음 후보 자동 시도
-    />
+    <div className="icon-layer">
+      {/* 1) 폴백 이모지: 항상 보임 → 아이콘이 로드되면 사라짐 */}
+      <span
+        className="badge-emoji"
+        style={{ opacity: imgOk ? 0 : 1 }}
+        aria-hidden="true"
+      >
+        {badge.emoji}
+      </span>
+
+      {/* 2) 외부 아이콘 이미지 (로드 성공 시만 보임) */}
+      {hasMore && (
+        <img
+          src={src}
+          alt=""
+          width={size}
+          height={size}
+          loading="lazy"
+          className="iconify-img"
+          style={{ opacity: imgOk ? 1 : 0 }}
+          onLoad={() => setImgOk(true)}
+          onError={() => setIdx(i => i + 1)}  // 실패 시 다음 후보 시도
+        />
+      )}
+    </div>
   );
 };
 
 /** ============ 본 컴포넌트 ============ */
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
+
   const [badges, setBadges] = useState([]);
   const [userBadges, setUserBadges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -192,6 +206,7 @@ function BadgeGuide() {
         setLoading(false);
       }
     };
+
     fetchBadgesAndUser();
   }, [getAuthHeaders]);
 
@@ -219,8 +234,15 @@ function BadgeGuide() {
   if (error) return <div className="error-message">오류: {error}</div>;
 
   const categoryKorean = (cat) => ({
-    ALL: '전체', CREATION: '창작', ENGAGEMENT: '참여', ACHIEVEMENT: '업적',
-    MILESTONE: '이정표', COMMUNITY: '커뮤니티', SPECIAL: '특별', EVENT: '이벤트', ACTIVITY: '활동',
+    ALL: '전체',
+    CREATION: '창작',
+    ENGAGEMENT: '참여',
+    ACHIEVEMENT: '업적',
+    MILESTONE: '이정표',
+    COMMUNITY: '커뮤니티',
+    SPECIAL: '특별',
+    EVENT: '이벤트',
+    ACTIVITY: '활동',
   }[String(cat || '').toUpperCase()] || cat);
 
   return (
@@ -278,8 +300,8 @@ function BadgeGuide() {
                 <div className="badge-image">
                   <div className={`badge-icon-container rarity-${badge.rarity}`}>
                     <div className="emoji-plate" aria-hidden="true" />
-                    {/* 외부 아이콘 → 다른 세트 → 이모지 최종 폴백 */}
-                    <IconifyWithFallback badge={badge} size={56} />
+                    {/* ★ 항상 이모지를 렌더하고, 외부 아이콘이 로드되면 자동 교체 */}
+                    <IconifyWithSureFallback badge={badge} size={56} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
