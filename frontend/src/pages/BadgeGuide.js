@@ -4,46 +4,64 @@ import '../css/BadgeGuide.css';
 import { FaTrophy, FaCode, FaHeart, FaMedal, FaUserPlus, FaStar, FaDragon, FaMagic, FaGem, FaShieldAlt, FaBook, FaFlask } from 'react-icons/fa';
 
 /** BadgeIcon Component */
-const BadgeIcon = ({ badge }) => {
+const BadgeIcon = ({ badge, badgeColor }) => {
   let iconComponent;
-  let iconColor;
+  let iconColor = badgeColor; // Use badgeColor if provided
 
-  switch ((badge.category || '').toUpperCase()) {
-    case 'CREATION':
-      iconComponent = FaCode;
-      iconColor = "#FFD700"; // Gold
-      break;
-    case 'ENGAGEMENT':
-      iconComponent = FaHeart;
-      iconColor = "#FF6347"; // Tomato
-      break;
-    case 'ACHIEVEMENT':
-      iconComponent = FaTrophy;
-      iconColor = "#00CED1"; // DarkTurquoise
-      break;
-    case 'MILESTONE':
-      iconComponent = FaMedal;
-      iconColor = "#DA70D6"; // Orchid
-      break;
-    case 'COMMUNITY':
-      iconComponent = FaUserPlus;
-      iconColor = "#32CD32"; // LimeGreen
-      break;
-    case 'ACTIVITY': // Assuming ACTIVITY is a category
-      iconComponent = FaFlask; // Example: a flask for activity
-      iconColor = "#8A2BE2"; // BlueViolet
-      break;
-    case 'SPECIAL': // Assuming SPECIAL is a category
-      iconComponent = FaMagic; // Example: a magic wand for special
-      iconColor = "#FF4500"; // OrangeRed
-      break;
-    case 'EVENT': // Assuming EVENT is a category
-      iconComponent = FaGem; // Example: a gem for events
-      iconColor = "#1E90FF"; // DodgerBlue
-      break;
-    default:
-      iconComponent = FaStar;
-      iconColor = "#8ab0d1"; // Default color
+  if (!badgeColor) { // Fallback to category-based color if no specific badgeColor
+    switch ((badge.category || '').toUpperCase()) {
+      case 'CREATION':
+        iconComponent = FaCode;
+        iconColor = "#FFD700"; // Gold
+        break;
+      case 'ENGAGEMENT':
+        iconComponent = FaHeart;
+        iconColor = "#FF6347"; // Tomato
+        break;
+      case 'ACHIEVEMENT':
+        iconComponent = FaTrophy;
+        iconColor = "#00CED1"; // DarkTurquoise
+        break;
+      case 'MILESTONE':
+        iconComponent = FaMedal;
+        iconColor = "#DA70D6"; // Orchid
+        break;
+      case 'COMMUNITY':
+        iconComponent = FaUserPlus;
+        iconColor = "#32CD32"; // LimeGreen
+        break;
+      case 'ACTIVITY': // Assuming ACTIVITY is a category
+        iconComponent = FaFlask; // Example: a flask for activity
+        iconColor = "#8A2BE2"; // BlueViolet
+        break;
+      case 'SPECIAL': // Assuming SPECIAL is a category
+        iconComponent = FaMagic; // Example: a magic wand for special
+        iconColor = "#FF4500"; // OrangeRed
+        break;
+      case 'EVENT': // Assuming EVENT is a category
+        iconComponent = FaGem; // Example: a gem for events
+        iconColor = "#1E90FF"; // DodgerBlue
+        break;
+      default:
+        iconComponent = FaStar;
+        iconColor = "#8ab0d1"; // Default color
+    }
+  }
+
+  // If iconComponent is not set by switch (meaning badgeColor was provided and no specific icon was needed)
+  // or if it's the default case, ensure a default icon is set.
+  if (!iconComponent) {
+    switch ((badge.category || '').toUpperCase()) {
+      case 'CREATION': iconComponent = FaCode; break;
+      case 'ENGAGEMENT': iconComponent = FaHeart; break;
+      case 'ACHIEVEMENT': iconComponent = FaTrophy; break;
+      case 'MILESTONE': iconComponent = FaMedal; break;
+      case 'COMMUNITY': iconComponent = FaUserPlus; break;
+      case 'ACTIVITY': iconComponent = FaFlask; break;
+      case 'SPECIAL': iconComponent = FaMagic; break;
+      case 'EVENT': iconComponent = FaGem; break;
+      default: iconComponent = FaStar; break;
+    }
   }
 
   const iconProps = { size: 40, color: iconColor };
@@ -227,10 +245,10 @@ function BadgeGuide() {
             const progress = getProgressInfo(badge);
 
             return (
-              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'rainbow-badge' : ''}`}>
+              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'red-rare-badge' : ''}`}>
                 <div className="badge-image">
-                  <div className={`badge-icon-container ${badge.isRare ? 'rainbow-badge-icon' : ''}`}>
-                    <BadgeIcon badge={badge} />
+                  <div className={`badge-icon-container ${badge.isRare ? 'red-rare-badge-icon' : ''}`}>
+                    <BadgeIcon badge={badge} badgeColor={badge.color} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
