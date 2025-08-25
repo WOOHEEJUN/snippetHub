@@ -8,7 +8,6 @@ import {
 /** 아이콘 컴포넌트 */
 const BadgeIcon = ({ badge, badgeColor }) => {
   let iconComponent;
-  let iconColor = badgeColor;
 
   switch ((badge.category || '').toUpperCase()) {
     case 'CREATION':   iconComponent = FaCode;     break;
@@ -19,9 +18,11 @@ const BadgeIcon = ({ badge, badgeColor }) => {
     case 'ACTIVITY':   iconComponent = FaFlask;    break;
     case 'SPECIAL':    iconComponent = FaMagic;    break;
     case 'EVENT':      iconComponent = FaGem;      break;
-    default:           iconComponent = FaStar;     break;
+    default:           iconComponent = FaStar;     break; // True fallback
   }
-  return React.createElement(iconComponent, { size: 40, color: iconColor || '#8ab0d1' });
+
+  const iconProps = { size: 40, color: badgeColor || '#8ab0d1' }; // Use badgeColor, fallback to default
+  return React.createElement(iconComponent, iconProps);
 };
 
 /** 안전 JSON 파서 */
@@ -129,6 +130,7 @@ function BadgeGuide() {
         const rawBadges = extractArray(jsonAll);
         const normalized = rawBadges.map((b, i) => normalizeBadge(b, i));
         setBadges(normalized);
+        console.log('Normalized Badges:', normalized);
 
         const resMine = await fetch('/api/badges/my', {
           headers: getAuthHeaders(),

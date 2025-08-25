@@ -160,10 +160,12 @@ function MyBadges() {
           </div>
         </Link>
 
-        <div className="info-card">
-          <div className="label"><FaCoins /> 포인트</div>
-          <div className="value">{points ? <><strong>{points.point}</strong><small>&nbsp;P</small></> : '정보 없음'}</div>
-        </div>
+        <Link to="/mypage/point-history" className="info-card-link">
+          <div className="info-card">
+            <div className="label"><FaCoins /> 포인트</div>
+            <div className="value">{points ? <><strong>{points.point}</strong><small>&nbsp;P</small></> : '정보 없음'}</div>
+          </div>
+        </Link>
       </div>
 
       {/* (선택) 통계 카드 */}
