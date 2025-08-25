@@ -46,3 +46,12 @@ aws-credentials.txt
 # Temporary files
 *.tmp
 *.temp
+
+
+# .gitignore 맨 아래 추가
+!backend/src/main/resources/application.properties
+
+git add .gitignore backend/src/main/resources/application.properties
+git commit -m "chore: application.properties 임시 커밋 허용"
+git pull --rebase
+git push
