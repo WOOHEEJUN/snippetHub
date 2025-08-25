@@ -1,343 +1,36 @@
-.badge-guide-page {
-  padding: 40px 0;
-  background-color: #1a1a1a;
-  min-height: 100vh;
-}
+/* === DB 색상 연동용 덮어쓰기 === */
+/* 카드 외곽선/획득 배지/아이콘 링/프로그레스/태그 모두 --accent 사용 */
+.badge-card { border: 2px solid transparent; }
+.badge-card.owned { border-color: var(--accent, #4CAF50); }
+.badge-icon-container { border: 2px solid var(--accent, #8ab0d1); }
+.owned-badge { background: var(--accent, #4CAF50); color: #0d0d0d; }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
-  color: #e0e0e0;
-}
-
-.page-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-
-.page-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.stats-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.stats-card {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
-}
-
-.stats-card:hover {
-  transform: translateY(-5px);
-}
-
-.stats-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #8ab0d1;
-  margin-bottom: 8px;
-}
-
-.stats-label {
-  color: #b0b0b0;
-  font-weight: 500;
-}
-
-.filter-section {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.filter-section h3 {
-  color: #e0e0e0;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-.category-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.category-filter {
+/* 카테고리 태그를 DB 색상으로 */
+.category-tag.use-accent {
+  color: var(--accent, #8ab0d1);
+  border: 1px solid var(--accent, #8ab0d1);
   background-color: #333333;
-  border: 2px solid #444444;
-  color: #e0e0e0;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.category-filter:hover {
-  background-color: #444444;
-  border-color: #666666;
-}
-
-.category-filter.active {
-  background-color: #8ab0d1;
-  border-color: #8ab0d1;
-  color: #333333;
-}
-
-.badges-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 25px;
-}
-
-.badge-card {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.badge-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-}
-
-.badge-card.owned {
-  border: 2px solid #4CAF50;
-}
-
-.badge-card.not-owned {
-  opacity: 0.5;
-}
-
-.badge-image {
-  position: relative;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.badge-icon-container {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  /* background-color: #333; Removed to allow badge color to show */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* More subtle, generic glow */
-  transition: all 0.3s ease;
-  animation: pulse-glow 2s infinite alternate; /* Apply the animation */
-}
-
-.badge-image-actual {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.owned-badge {
-  position: absolute;
-  top: -5px;
-  right: 50%;
-  transform: translateX(50%);
-  background: #4CAF50;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 12px;
-}
-
-.badge-info {
-  text-align: center;
-}
-
-.badge-name {
-  color: #e0e0e0;
-  margin-bottom: 10px;
-  font-weight: 600;
-  font-size: 1.2rem;
-}
-
-.badge-description {
-  color: #b0b0b0;
-  margin-bottom: 15px;
-  line-height: 1.5;
-}
-
-.badge-category {
-  margin-bottom: 15px;
-}
-
-.category-tag {
-  display: inline-block;
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.category-activity { background-color: #333333; color: #8ab0d1; }
-.category-achievement { background-color: #333333; color: #FF9800; }
-.category-special { background-color: #333333; color: #9C27B0; }
-.category-event { background-color: #333333; color: #4CAF50; }
-
-.progress-section { margin-bottom: 15px; }
-
-.progress-bar {
-  width: 100%;
-  height: 24px;
-  background-color: #444444;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
+/* 프로그레스 바도 액센트로 채우기 */
 .progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #444444 0%, #666666 100%);
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, var(--accent, #8ab0d1) 0%, #ffffff 100%);
 }
 
-.progress-text {
-  font-size: 0.9rem;
-  color: #b0b0b0;
-  font-weight: 500;
+/* 아이콘 컨테이너 배경에 살짝 색 느낌 */
+.badge-icon-container {
+  background: radial-gradient(120px 120px at 30% 30%, color-mix(in oklab, var(--accent, #8ab0d1) 18%, transparent), transparent 60%);
 }
 
-.badge-requirements,
-.badge-rewards {
-  text-align: left;
-  margin-bottom: 15px;
-}
-
-.badge-requirements h5,
-.badge-rewards h5 {
-  color: #e0e0e0;
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.badge-requirements ul,
-.badge-rewards ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.badge-requirements li,
-.badge-rewards li {
-  color: #b0b0b0;
-  font-size: 0.85rem;
-  margin-bottom: 5px;
-  padding-left: 15px;
-  position: relative;
-}
-
-.badge-requirements li:before,
-.badge-rewards li:before {
-  content: "•";
-  color: #8ab0d1;
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-}
-
-.no-badges,
-.loading-message,
-.error-message {
-  text-align: center;
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 40px;
-  color: #b0b0b0;
-  margin: 20px 0;
-}
-
-.error-message {
-  color: #dc3545;
-  background-color: #3a2a3a;
-  border: 1px solid #5a3a3a;
-}
-
-@media (max-width: 768px) {
-  .badge-guide-page { padding: 20px 0; }
-  .page-header h1 { font-size: 2rem; }
-  .stats-section { grid-template-columns: 1fr; }
-  .badges-grid { grid-template-columns: 1fr; }
-  .category-filters { justify-content: center; }
-  .badge-card { padding: 20px; }
-}
-
+/* 컬러 강조 호버 */
 .badge-icon-container:hover {
-  box-shadow: 0 0 20px rgba(138, 176, 209, 0.8), 0 0 40px rgba(138, 176, 209, 0.5);
-  transform: scale(1.05); /* Slight zoom on hover */
-}
-
-.badge-icon-container svg {
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7)); /* White glow for the icon itself */
-  transition: filter 0.3s ease;
-}
-
-.badge-icon-container:hover svg {
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) brightness(1.1);
-}
-
-@keyframes pulse-glow {
-  0% {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.25);
-  }
-  100% {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.15);
-  }
-}
-
-.rainbow-badge-icon {
-  background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important; /* Ensure the SVG icon color is transparent */
-  /* New enhancements */
-  position: relative; /* Needed for pseudo-element or more complex effects */
-  z-index: 1; /* Ensure it's above any background effects */
-  /* More intense glow for rare badges */
-  box-shadow: 0 0 20px rgba(255, 0, 255, 0.7), 0 0 40px rgba(0, 255, 255, 0.5); /* Example vibrant glow */
-  animation: rainbow-text-animation 5s linear infinite; /* Subtle animation for the gradient */
-}
-
-/* Optional: Add a rainbow border to the card itself */
-.rainbow-badge {
-  border: 4px solid; /* Thicker border */
-  border-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) 1;
-  box-shadow: 0 0 25px rgba(255, 0, 255, 0.4), 0 0 50px rgba(0, 255, 255, 0.3); /* Subtle glow for the card */
-}
-
-@keyframes rainbow-text-animation {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  box-shadow:
+    0 0 20px color-mix(in oklab, var(--accent, #8ab0d1) 60%, transparent),
+    0 0 40px color-mix(in oklab, var(--accent, #8ab0d1) 35%, transparent);
 }

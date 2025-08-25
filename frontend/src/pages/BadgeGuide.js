@@ -1,71 +1,27 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
-import { FaTrophy, FaCode, FaHeart, FaMedal, FaUserPlus, FaStar, FaDragon, FaMagic, FaGem, FaShieldAlt, FaBook, FaFlask } from 'react-icons/fa';
+import {
+  FaTrophy, FaCode, FaHeart, FaMedal, FaUserPlus, FaStar, FaMagic, FaGem, FaFlask
+} from 'react-icons/fa';
 
-/** BadgeIcon Component */
+/** 아이콘 컴포넌트 */
 const BadgeIcon = ({ badge, badgeColor }) => {
   let iconComponent;
-  let iconColor = badgeColor; // Use badgeColor if provided
+  let iconColor = badgeColor;
 
-  if (!badgeColor) { // Fallback to category-based color if no specific badgeColor
-    switch ((badge.category || '').toUpperCase()) {
-      case 'CREATION':
-        iconComponent = FaCode;
-        iconColor = "#FFD700"; // Gold
-        break;
-      case 'ENGAGEMENT':
-        iconComponent = FaHeart;
-        iconColor = "#FF6347"; // Tomato
-        break;
-      case 'ACHIEVEMENT':
-        iconComponent = FaTrophy;
-        iconColor = "#00CED1"; // DarkTurquoise
-        break;
-      case 'MILESTONE':
-        iconComponent = FaMedal;
-        iconColor = "#DA70D6"; // Orchid
-        break;
-      case 'COMMUNITY':
-        iconComponent = FaUserPlus;
-        iconColor = "#32CD32"; // LimeGreen
-        break;
-      case 'ACTIVITY': // Assuming ACTIVITY is a category
-        iconComponent = FaFlask; // Example: a flask for activity
-        iconColor = "#8A2BE2"; // BlueViolet
-        break;
-      case 'SPECIAL': // Assuming SPECIAL is a category
-        iconComponent = FaMagic; // Example: a magic wand for special
-        iconColor = "#FF4500"; // OrangeRed
-        break;
-      case 'EVENT': // Assuming EVENT is a category
-        iconComponent = FaGem; // Example: a gem for events
-        iconColor = "#1E90FF"; // DodgerBlue
-        break;
-      default:
-        iconComponent = FaStar;
-        iconColor = "#8ab0d1"; // Default color
-    }
+  switch ((badge.category || '').toUpperCase()) {
+    case 'CREATION':   iconComponent = FaCode;     break;
+    case 'ENGAGEMENT': iconComponent = FaHeart;    break;
+    case 'ACHIEVEMENT':iconComponent = FaTrophy;   break;
+    case 'MILESTONE':  iconComponent = FaMedal;    break;
+    case 'COMMUNITY':  iconComponent = FaUserPlus; break;
+    case 'ACTIVITY':   iconComponent = FaFlask;    break;
+    case 'SPECIAL':    iconComponent = FaMagic;    break;
+    case 'EVENT':      iconComponent = FaGem;      break;
+    default:           iconComponent = FaStar;     break;
   }
-
-  // If iconComponent is not set by switch (meaning badgeColor was provided and no specific icon was needed)
-  // or if it's the default case, ensure a default icon is set.
-  if (!iconComponent) {
-    switch ((badge.category || '').toUpperCase()) {
-      case 'CREATION': iconComponent = FaCode; break;
-      case 'ENGAGEMENT': iconComponent = FaHeart; break;
-      case 'ACHIEVEMENT': iconComponent = FaTrophy; break;
-      case 'MILESTONE': iconComponent = FaMedal; break;
-      case 'COMMUNITY': iconComponent = FaUserPlus; break;
-      case 'ACTIVITY': iconComponent = FaFlask; break;
-      case 'SPECIAL': iconComponent = FaMagic; break;
-      case 'EVENT': iconComponent = FaGem; break;
-      default: iconComponent = FaStar; break;
-    }
-  }
-
-  const iconProps = { size: 40, color: iconColor };
-  return React.createElement(iconComponent, iconProps);
+  return React.createElement(iconComponent, { size: 40, color: iconColor || '#8ab0d1' });
 };
 
 /** 안전 JSON 파서 */
@@ -86,18 +42,34 @@ const extractArray = (data) => {
   return [];
 };
 
-/** 뱃지 객체 정규화 */
-const normalizeBadge = (b, idx = 0) => {
-  const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER')
-    .toString()
-    .toUpperCase();
+/** hex 색상 유효성 검사 */
+const sanitizeHex = (c) => (typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c.trim()) ? c.trim() : null);
 
+/** 카테고리 폴백 색 */
+const CATEGORY_DEFAULT = {
+  CREATION:   '#4CAF50',
+  ENGAGEMENT: '#E91E63',
+  ACHIEVEMENT:'#FFD54F',
+  MILESTONE:  '#FFD700',
+  COMMUNITY:  '#32CD32',
+  SPECIAL:    '#9C27B0',
+  EVENT:      '#1E90FF',
+  ACTIVITY:   '#8A2BE2',
+  OTHER:      '#8ab0d1',
+};
+
+/** 뱃지 정규화 (DB color/icon 포함) */
+const normalizeBadge = (b, idx = 0) => {
+  const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER').toString().toUpperCase();
   const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
-  const isRare = (
+  const isRare =
     name === 'LEGEND_ACHIEVER' ||
     name === 'POINT_COLLECTOR_10000' ||
-    name === 'LOGIN_STREAK_365'
-  ) ? true : (b.isRare ?? false);
+    name === 'LOGIN_STREAK_365' ||
+    b.isRare === true;
+
+  const rawColor = b.color ?? b.hexColor ?? null;
+  const color = sanitizeHex(rawColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
 
   return {
     badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
@@ -109,7 +81,9 @@ const normalizeBadge = (b, idx = 0) => {
     rewards: b.rewards ?? b.rewardList ?? [],
     currentProgress: b.currentProgress ?? b.progress ?? 0,
     owned: b.owned ?? b.isOwned ?? false,
-    isRare, // Add isRare property
+    iconText: b.icon ?? '', // DB의 이모지(📝 등) 있으면 보관 (옵션)
+    isRare,
+    color, // ★ 여기!
   };
 };
 
@@ -122,12 +96,21 @@ function BadgeGuide() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
+  /** 이미지/아이콘 로딩 상태 (스켈레톤 줄 때 쓰려면) */
+  const [loaded, setLoaded] = useState({});
+  const markLoaded = useCallback((id) => setLoaded((p) => ({ ...p, [id]: true })), []);
+
   const categories = [
     { value: 'ALL', label: '전체' },
-    { value: 'ACTIVITY', label: '활동' },
+    { value: 'CREATION', label: '창작' },
+    { value: 'ENGAGEMENT', label: '참여' },
     { value: 'ACHIEVEMENT', label: '업적' },
+    { value: 'MILESTONE', label: '이정표' },
+    { value: 'COMMUNITY', label: '커뮤니티' },
     { value: 'SPECIAL', label: '특별' },
     { value: 'EVENT', label: '이벤트' },
+    // 과거 명칭 대비 (있으면 필터용)
+    { value: 'ACTIVITY', label: '활동' },
   ];
 
   useEffect(() => {
@@ -136,7 +119,6 @@ function BadgeGuide() {
         setLoading(true);
         setError(null);
 
-        // 1) 전체 뱃지
         const resAll = await fetch('/api/badges', {
           headers: getAuthHeaders(),
           credentials: 'include',
@@ -148,7 +130,6 @@ function BadgeGuide() {
         const normalized = rawBadges.map((b, i) => normalizeBadge(b, i));
         setBadges(normalized);
 
-        // 2) 내가 가진 뱃지
         const resMine = await fetch('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
@@ -173,17 +154,14 @@ function BadgeGuide() {
     fetchBadgesAndUser();
   }, [getAuthHeaders]);
 
-  /** 필터링 (대소문자 불일치 내성) */
   const filteredBadges = useMemo(() => {
     if (selectedCategory === 'ALL') return badges;
     const target = selectedCategory.toUpperCase();
     return badges.filter((b) => (b.category || '').toUpperCase() === target);
   }, [badges, selectedCategory]);
 
-  /** 보유 여부 */
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
 
-  /** 진행도 계산 */
   const getProgressInfo = (badge) => {
     const ub = userBadges.find((x) => x.badgeId === badge.badgeId);
     if (!ub) return null;
@@ -227,13 +205,13 @@ function BadgeGuide() {
         <div className="filter-section">
           <h3>카테고리별 필터</h3>
           <div className="category-filters">
-            {categories.map((category) => (
+            {categories.map((c) => (
               <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`category-filter ${selectedCategory === category.value ? 'active' : ''}`}
+                key={c.value}
+                onClick={() => setSelectedCategory(c.value)}
+                className={`category-filter ${selectedCategory === c.value ? 'active' : ''}`}
               >
-                {category.label}
+                {c.label}
               </button>
             ))}
           </div>
@@ -243,12 +221,18 @@ function BadgeGuide() {
           {filteredBadges.map((badge) => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
+            const accent = badge.color; // ★ DB 색상 사용
 
             return (
-              <div key={badge.badgeId} className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'rainbow-badge' : ''}`}>
+              <div
+                key={badge.badgeId}
+                className={`badge-card ${owned ? 'owned' : 'not-owned'} ${badge.isRare ? 'rainbow-badge' : ''}`}
+                style={{ '--accent': accent }}
+              >
                 <div className="badge-image">
-                  <div className={`badge-icon-container ${badge.isRare ? 'rainbow-badge-icon' : ''}`}>
-                    <BadgeIcon badge={badge} />
+                  <div className={`badge-icon-container ${badge.isRare ? 'rainbow-badge-icon' : ''}`} title={badge.iconText || ''}>
+                    {/* react-icons */}
+                    <BadgeIcon badge={badge} badgeColor={accent} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
@@ -258,17 +242,8 @@ function BadgeGuide() {
                   <p className="badge-description">{badge.description}</p>
 
                   <div className="badge-category">
-                    <span className={`category-tag category-${String(badge.category || '').toLowerCase()}`}>
-                      {(
-                        [
-                          ['ALL', '전체'],
-                          ['ACTIVITY', '활동'],
-                          ['ACHIEVEMENT', '업적'],
-                          ['SPECIAL', '특별'],
-                          ['EVENT', '이벤트'],
-                        ].find((c) => c[0] === (badge.category || '').toUpperCase()) || [null, badge.category]
-                      )[1]}
-                    </span>
+                    {/* 카테고리 텍스트 + 색상은 --accent로 */}
+                    <span className="category-tag use-accent">{badge.category}</span>
                   </div>
 
                   {badge.requiredCount > 1 && (
