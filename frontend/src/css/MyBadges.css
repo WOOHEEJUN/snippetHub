@@ -1,171 +1,155 @@
-/* frontend/src/css/MyBadges.css */
-
-.my-badges-page {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
+/* ========== Page ========== */
+.my-badges-page{
+  max-width: 960px;
+  margin: 3rem auto;
+  padding: 2.5rem;
   background-color: #1a1a1a;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  color: #d3d3d3;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.5);
+  color: #e0e0e0;
 }
-
-.my-badges-page h2 {
+.my-badges-page h2{
   font-size: 2.2rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color:#fff;
   margin-bottom: 2rem;
   text-align: center;
 }
 
-.info-section {
-  display: flex;
-  justify-content: space-around;
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-  flex-wrap: wrap;
+/* ========== 가로형 정보 타일 ========== */
+.info-section{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+  gap:18px;
+  margin-bottom:3rem;
+}
+.info-card-link{ color:inherit; text-decoration:none; }
+
+.info-card{
+  --panel:#1a1a1a; --border:#2a2a2a;
+  position:relative; overflow:hidden;
+  border-radius:16px;
+  padding:14px 16px;
+  background:linear-gradient(180deg, var(--panel), #141414);
+  border:1px solid var(--border);
+
+  /* ✅ 가로(한 줄) */
+  display:flex; align-items:center; gap:12px;
+  white-space:nowrap;
+
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.info-card::before{
+  content:""; position:absolute; inset:-1px; border-radius:16px; padding:1px;
+  background: conic-gradient(from 180deg, #70b7ff, #86f7a5, #70b7ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity:.55; pointer-events:none;
+}
+.info-card::after{
+  content:""; position:absolute; inset:-40% -25% auto auto;
+  width:70%; height:140%;
+  background: radial-gradient(50% 50% at 50% 50%, #ffffff12 0%, transparent 60%);
+  transform: rotate(8deg); pointer-events:none;
+}
+.info-card:hover{
+  transform:translateY(-2px);
+  border-color:#3a89ff55; box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
-.info-card {
-  background-color: #222222;
-  border: 1px solid #333333;
-  border-radius: 10px;
-  padding: 1.5rem;
-  flex: 1;
-  min-width: 180px;
+/* 라벨(아이콘 + 텍스트) */
+.info-card .label{
+  display:flex; align-items:center; gap:10px;
+  font-size:.95rem; font-weight:700; color:#b7c3cf; letter-spacing:.02em;
+  margin:0;
+}
+.info-card .label svg{ font-size:20px; }
+
+/* 값(라벨 옆) */
+.info-card .value{
+  font-size:1.6rem;
+  font-weight:900; color:#f2f6ff;
+  letter-spacing:.02em;
+}
+.info-card .value small{ font-size:.95rem; font-weight:700; opacity:.75; }
+
+/* 1번째(등급) 색감 */
+.info-section > *:nth-child(1) .info-card::before{
+  background: conic-gradient(#65b4ff, #1ec9ff, #65b4ff);
+}
+.info-section > *:nth-child(1) .info-card .label svg{ color:#6db8ff; }
+
+/* 2번째(포인트) 색감 */
+.info-section > *:nth-child(2) .info-card::before{
+  background: conic-gradient(#8ee88b, #3bd08a, #8ee88b);
+}
+.info-section > *:nth-child(2) .info-card .label svg{ color:#8ee88b; }
+
+/* 모바일은 길면 줄바꿈 허용 */
+@media (max-width:640px){
+  .info-card{
+    padding:12px 14px;
+    white-space:normal;
+    flex-wrap:wrap;
+  }
+  .info-card .value{ font-size:1.4rem; }
+}
+
+/* ========== 섹션/그리드 ========== */
+.badge-section{ margin-bottom: 3rem; }
+.badge-section h3{
+  font-size: 1.6rem; font-weight: 800; color:#fff; text-align:center;
+  margin-bottom: 1.2rem;
+}
+
+.badge-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap:1.2rem;
+  justify-items:center;
+}
+
+/* ========== 뱃지 카드 ========== */
+.badge-item{
+  background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+  border: 1px solid #333;
+  border-radius: 15px;
+  padding: 1.2rem;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  width: 160px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.4);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  display:flex; flex-direction:column; align-items:center; gap:.6rem;
 }
+.badge-item:hover{ transform:translateY(-4px); box-shadow:0 8px 25px rgba(0,0,0,.45); border-color:#8ab0d1; }
 
-.info-card .label {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #b0b0b0;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+.badge-icon-container{
+  width:80px; height:80px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#333; box-shadow: inset 0 0 10px rgba(0,0,0,.3);
 }
-
-.info-card .value {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #ffffff;
+.badge-item .badge-name{
+  font-size:.95rem; font-weight:700; color:#fff; word-break:keep-all;
 }
+.badge-item.not-owned{ opacity:.6; filter:grayscale(100%); }
+.badge-item.not-owned .badge-icon-container{ background:#444; }
 
-.badge-section {
-  margin-bottom: 2.5rem;
+.equip-button{
+  background:#4CAF50; color:#fff; border:none; border-radius:8px;
+  padding:8px 12px; font-size:.9rem; width:90%;
+  cursor:pointer; transition: background-color .2s ease;
 }
+.equip-button:hover{ background:#45a049; }
 
-.badge-section h3 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.badge-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  justify-content: center;
-}
-
-.badge-item {
-  background-color: #222222;
-  border: 1px solid #333333;
-  border-radius: 10px;
-  padding: 1rem;
-  text-align: center;
-  width: 120px; /* 고정 너비 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  cursor: pointer; /* 대표 뱃지 토글 기능 고려 */
-}
-
-.badge-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.badge-icon-container {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 0.5rem auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.badge-item .badge-name {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #b0b0b0;
-}
-
-.badge-item.featured {
-  border-color: #8ab0d1; /* 대표 뱃지 강조 색상 */
-  box-shadow: 0 0 15px rgba(138, 176, 209, 0.5); /* 대표 뱃지 그림자 */
-}
-
-.badge-item.not-owned img {
-  opacity: 0.3; /* 획득하지 않은 뱃지 흐리게 */
-}
-
-.loading-message, .error-message {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #b0b0b0;
-  padding: 2rem;
+/* ========== 유틸 메시지 ========== */
+.loading-message, .error-message, .no-badges{
+  text-align:center; color:#cfd6dd; padding:1.2rem 0;
 }
 
 /* 반응형 */
-@media (max-width: 768px) {
-  .my-badges-page {
-    padding: 1.5rem;
-    margin: 1rem auto;
-  }
-
-  .my-badges-page h2 {
-    font-size: 1.8rem;
-  }
-
-  .info-section {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .info-card {
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .badge-grid {
-    justify-content: center;
-  }
-
-  .badge-item {
-    width: 100px;
-  }
-
-  .badge-item img {
-    width: 50px;
-    height: 50px;
-  }
-}
-
-.info-card-link {
-  text-decoration: none;
-  color: inherit;
-}
-
-.info-card-link .info-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.info-card-link:hover .info-card {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+@media (max-width:768px){
+  .my-badges-page{ padding:1.6rem; margin:1rem auto; }
+  .badge-grid{ grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .badge-item{ width:140px; padding:1rem; }
+  .badge-icon-container{ width:70px; height:70px; }
 }

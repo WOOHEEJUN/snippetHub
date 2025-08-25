@@ -94,3 +94,9 @@ export const getLevelBadgeImage = (level) => {
       return null;
   }
 };
+
+export const getBadgeImagePath = (badgeName) => {
+  if (!badgeName) return null;
+  const normalizedBadgeName = badgeName.toLowerCase();
+  return `/badges/${normalizedBadgeName}.png`;
+};

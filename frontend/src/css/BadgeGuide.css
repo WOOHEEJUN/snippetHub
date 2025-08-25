@@ -137,9 +137,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%; /* 아이콘도 원형으로 */
-  background-color: #333; /* 아이콘 배경색 */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2); /* 아이콘 그림자 */
+  border-radius: 50%;
+  background-color: #333;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.badge-image-actual {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .owned-badge {
@@ -190,29 +196,12 @@
   letter-spacing: 0.5px;
 }
 
-.category-activity {
-  background-color: #333333;
-  color: #8ab0d1;
-}
+.category-activity { background-color: #333333; color: #8ab0d1; }
+.category-achievement { background-color: #333333; color: #FF9800; }
+.category-special { background-color: #333333; color: #9C27B0; }
+.category-event { background-color: #333333; color: #4CAF50; }
 
-.category-achievement {
-  background-color: #333333;
-  color: #FF9800;
-}
-
-.category-special {
-  background-color: #333333;
-  color: #9C27B0;
-}
-
-.category-event {
-  background-color: #333333;
-  color: #4CAF50;
-}
-
-.progress-section {
-  margin-bottom: 15px;
-}
+.progress-section { margin-bottom: 15px; }
 
 .progress-bar {
   width: 100%;
@@ -274,22 +263,15 @@
   left: 0;
 }
 
-.no-badges {
-  text-align: center;
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 40px;
-  color: #b0b0b0;
-}
-
+.no-badges,
 .loading-message,
 .error-message {
   text-align: center;
   background-color: #222222;
   border-radius: 12px;
   padding: 40px;
-  margin: 20px 0;
   color: #b0b0b0;
+  margin: 20px 0;
 }
 
 .error-message {
@@ -299,27 +281,10 @@
 }
 
 @media (max-width: 768px) {
-  .badge-guide-page {
-    padding: 20px 0;
-  }
-  
-  .page-header h1 {
-    font-size: 2rem;
-  }
-  
-  .stats-section {
-    grid-template-columns: 1fr;
-  }
-  
-  .badges-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .category-filters {
-    justify-content: center;
-  }
-  
-  .badge-card {
-    padding: 20px;
-  }
-} 
+  .badge-guide-page { padding: 20px 0; }
+  .page-header h1 { font-size: 2rem; }
+  .stats-section { grid-template-columns: 1fr; }
+  .badges-grid { grid-template-columns: 1fr; }
+  .category-filters { justify-content: center; }
+  .badge-card { padding: 20px; }
+}

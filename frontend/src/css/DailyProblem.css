@@ -1,7 +1,7 @@
 .daily-problem {
   padding: 2rem 0;
   min-height: 100vh;
-  background-color: #1a1a1a;
+  background-color: #121212; /* 더 어두운 배경 */
 }
 
 .daily-problem .container {
@@ -11,28 +11,28 @@
 }
 
 .daily-problem h1 {
-  color: white;
+  color: #e0e0e0; /* 밝은 텍스트 색상 */
   text-align: center;
   margin-bottom: 1rem;
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 2.8rem; /* 크기 조정 */
+  font-weight: 700; /* 굵기 조정 */
 }
 
 .daily-problem .description {
-  color: rgba(255, 255, 255, 0.9);
+  color: #b0b0b0; /* 밝은 회색 */
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
+  margin-bottom: 2.5rem; /* 간격 조정 */
+  font-size: 1.2rem;
 }
 
 .tab-navigation {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
-  background: white;
+  margin-bottom: 2.5rem;
+  background: #2a2a2a; /* 탭 배경색 변경 */
   border-radius: 15px;
   padding: 0.5rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .tab-btn {
@@ -43,343 +43,110 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #666;
+  color: #a0a0a0; /* 비활성 탭 색상 */
 }
 
 .tab-btn.active {
-  background-color: #333333;
-  color: #e0e0e0;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  background-color: #8ab0d1; /* 활성 탭 배경색 */
+  color: #121212; /* 활성 탭 텍스트 색상 */
+  box-shadow: 0 3px 10px rgba(138, 176, 209, 0.3);
 }
 
 .tab-btn:hover:not(.active) {
-  background: #f8f9fa;
-  color: #333;
+  background: #3a3a3a;
+  color: #e0e0e0;
 }
 
 .tab-content {
-  background: white;
+  background: #1e1e1e; /* 콘텐츠 배경색 변경 */
   border-radius: 15px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  color: #c5c5c5; /* 기본 텍스트 색상 */
 }
 
 .problem-card {
-  border: 2px solid #e1e5e9;
+  border: 1px solid #333;
   border-radius: 15px;
   padding: 2rem;
   margin-bottom: 2rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.problem-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-}
-
-.problem-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  background-color: #242424; /* 카드 배경색 */
 }
 
 .problem-header h2 {
   margin: 0;
-  color: #333;
-  font-size: 1.5rem;
-  font-weight: bold;
+  color: #e0e0e0; /* 제목 색상 */
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
 .date {
-  color: #666;
+  color: #a0a0a0; /* 날짜 색상 */
   font-size: 0.9rem;
-}
-
-.problem-info {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.difficulty-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  color: white;
-  font-weight: 600;
-  font-size: 0.8rem;
-}
-
-.category-badge {
-  padding: 0.5rem 1rem;
-  background: #e9ecef;
-  border-radius: 20px;
-  color: #495057;
-  font-weight: 600;
-  font-size: 0.8rem;
 }
 
 .problem-title {
-  color: #333;
+  color: #d0d0d0; /* 문제 제목 색상 */
   margin-bottom: 1rem;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
 .problem-description {
-  color: #666;
-  line-height: 1.6;
+  color: #b0b0b0; /* 문제 설명 색상 */
+  line-height: 1.7;
   margin-bottom: 1.5rem;
 }
 
-.problem-actions {
-  display: flex;
-  gap: 1rem;
+.welcome-message h3 {
+  color: #8ab0d1; /* 환영 메시지 제목 색상 */
+  font-size: 2rem;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background-color: #e0e0e0;
-  color: #333333;
-}
-
-.btn-primary:hover {
-  background-color: #d3d3d3;
-  color: #333333;
-}
-
-.btn-lg {
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.btn-lg:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  transform: translateY(-3px);
-}
-
-.btn-outline-primary {
-  background: #e0e0e0;
-  color: #333333;
-  border: 2px solid #e0e0e0;
-}
-
-.btn-outline-primary:hover {
-  background: #d3d3d3;
-  color: #333333;
-  transform: translateY(-2px);
-}
-
-.btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
+.welcome-message p {
+  color: #b0b0b0; /* 환영 메시지 본문 색상 */
 }
 
 .no-problem {
   text-align: center;
   padding: 3rem;
-  color: #666;
-}
-
-.welcome-message {
-  margin-bottom: 2rem;
-}
-
-.welcome-message h3 {
-  color: #e0e0e0;
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: unset;
-  background-clip: unset;
-}
-
-.welcome-message p {
-  color: #666;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-  line-height: 1.6;
-}
-
-.no-problem p {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-.problems-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  color: #a0a0a0;
 }
 
 .problem-card-small {
-  border: 1px solid #e1e5e9;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.problem-card-small:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.problem-header-small {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.day-label {
-  font-weight: 600;
-  color: #667eea;
-  font-size: 0.9rem;
-}
-
-.difficulty-badge-small {
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  color: white;
-  font-weight: 600;
-  font-size: 0.7rem;
+  border: 1px solid #333;
+  background-color: #242424;
 }
 
 .problem-title-small {
-  color: #333;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: bold;
+  color: #d0d0d0;
 }
 
 .problem-description-small {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  color: #b0b0b0;
 }
 
-.statistics h2 {
-  color: #333;
-  margin-bottom: 2rem;
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.stat-card {
-  background-color: #222222;
-  color: #e0e0e0;
-  padding: 2rem;
-  border-radius: 15px;
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-}
-
-.stat-card h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  opacity: 0.9;
-}
-
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin: 0;
+.day-label {
   color: #8ab0d1;
 }
 
+.statistics h2 {
+  color: #e0e0e0;
+}
+
+.stat-card {
+  background-color: #2a2a2a;
+}
+
+.stat-card h3 {
+  color: #c5c5c5;
+}
+
 .loading {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.alert {
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.alert-danger {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
+  color: #a0a0a0;
 }
 
 .week-problems h2,
 .month-problems h2 {
-  color: #333;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-@media (max-width: 768px) {
-  .daily-problem h1 {
-    font-size: 2rem;
-  }
-  
-  .tab-navigation {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  
-  .tab-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-  
-  .tab-content {
-    padding: 1.5rem;
-  }
-  
-  .problem-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .problem-actions {
-    flex-direction: column;
-  }
-  
-  .problems-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .stat-value {
-    font-size: 2rem;
-  }
+  color: #e0e0e0;
 }

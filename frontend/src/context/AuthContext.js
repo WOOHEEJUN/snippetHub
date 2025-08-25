@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
     fetchUserPromise.current = (async () => {
       try {
-        const res = await fetch('/api/users/profile', {
+        const userDataRes = await fetch('/api/users/profile', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
@@ -42,18 +42,35 @@ export const AuthProvider = ({ children }) => {
           credentials: 'include',
         });
 
-        if (res.status === 401) {
+        if (userDataRes.status === 401) {
           const newAccessToken = await reissueToken();
           await fetchUser(newAccessToken);
           return;
         }
 
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        if (!userDataRes.ok) throw new Error(`HTTP error! status: ${userDataRes.status}`);
 
-        const userData = await res.json();
-        console.log("userData.data:", userData.data);
-        setUser(userData.data);
-        localStorage.setItem('user', JSON.stringify(userData.data));
+        const userData = await userDataRes.json();
+
+        const representativeBadgeRes = await fetch('/api/users/me/representative-badge', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        let representativeBadge = null;
+        if (representativeBadgeRes.ok) {
+          const representativeBadgeData = await representativeBadgeRes.json();
+          representativeBadge = representativeBadgeData.data;
+        }
+
+        const combinedUserData = { ...userData.data, representativeBadge };
+
+        console.log("combinedUserData:", combinedUserData);
+        setUser(combinedUserData);
+        localStorage.setItem('user', JSON.stringify(combinedUserData));
         localStorage.setItem('userEmail', userData.data.email);
         localStorage.setItem('userId', userData.data.userId);
       } catch (err) {
@@ -152,6 +169,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateRepresentativeBadge = (badge) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, representativeBadge: badge };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
+
   return (
     <AuthContext.Provider value={{
       accessToken,
@@ -162,7 +187,8 @@ export const AuthProvider = ({ children }) => {
       logout,
       getAuthHeaders,
       loading,
-      refetchUser
+      refetchUser,
+      updateRepresentativeBadge
     }}>
       {children}
     </AuthContext.Provider>

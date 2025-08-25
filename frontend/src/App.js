@@ -70,9 +70,8 @@ function App() {
               <Route path="saved-problems" element={<SavedProblems />} />
               <Route path="submission-history" element={<SubmissionHistory />} />
               <Route path="point-history" element={<PointHistory />} />
+              <Route path="badge-guide" element={<BadgeGuide />} />
             </Route>
-
-            <Route path="/badge-guide" element={<BadgeGuide />} />
             <Route path="/grade-guide" element={<GradeGuide />} />
             <Route path="/snippets" element={<SnippetBoard />} />
             <Route path="/snippets/write" element={<SnippetWrite />} />
