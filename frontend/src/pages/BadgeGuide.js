@@ -75,7 +75,7 @@ const normalizeBadge = (b, idx = 0) => {
     .toUpperCase();
 
   const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
-  const isRare = (name.includes('Legendary') || name.includes('Grandmaster') || name.includes('Master')) ? true : (b.isRare ?? false); // Added rarity logic
+  const isRare = (name === 'LEGEND_ACHIEVER') ? true : (b.isRare ?? false);
 
   return {
     badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
