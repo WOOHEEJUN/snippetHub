@@ -522,7 +522,13 @@
 }
 
 /* 혹시 이전 CSS에서 텍스트 색을 투명으로 만드는 클래스가 있다면 무력화 */
-.badge-emoji { color: #fff; }
+.badge-emoji {
+  font-size: 2rem;   /* 크게 보이게 */
+  line-height: 1;
+  z-index: 2;
+  color: #fff;       /* 기본 흰색 */
+  text-shadow: 0 0 6px rgba(0,0,0,.6); /* 대비감 */
+}
 .badge-icon-container .badge-emoji { color: #fff !important; }
 
 /* 중앙이 빈 것처럼 보이는 문제를 확실히 방지: 외부 아이콘에 상관없이 이모지는 기본적으로 보임 */
