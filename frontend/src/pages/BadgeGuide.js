@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
@@ -31,19 +31,21 @@ const CATEGORY_DEFAULT = {
   ACTIVITY:   '#8A2BE2',
   OTHER:      '#8ab0d1',
 };
+
+/** 카테고리별 이모지 (심플/비-AI) */
 const CATEGORY_EMOJI = {
   CREATION:   '💻',
-  ENGAGEMENT: '❤️',
+  ENGAGEMENT: '💬',
   ACHIEVEMENT:'🏆',
   MILESTONE:  '🚩',
   COMMUNITY:  '👥',
-  ACTIVITY:   '⚗️',
+  ACTIVITY:   '⚡',
   SPECIAL:    '✨',
-  EVENT:      '🎟️',
+  EVENT:      '🎉',
   OTHER:      '⭐',
 };
 
-/** 아이콘 세트: lucide → tabler → solar 순으로 후보 생성 */
+/** 아이콘 후보 (옵션용) */
 const ICON_POOLS = {
   CREATION:   ['lucide:code','lucide:terminal','tabler:code','tabler:terminal-2','solar:code-square-linear'],
   ENGAGEMENT: ['lucide:heart','lucide:message-circle','tabler:heart','tabler:message-2','solar:chat-round-like-linear'],
@@ -65,7 +67,7 @@ const hashStr = (s) => {
 const pickNames = (category, seed) => {
   const pool = ICON_POOLS[category] || ICON_POOLS.OTHER;
   const start = pool.length ? hashStr(seed) % pool.length : 0;
-  return [0,1,2].map(i => pool[(start + i) % pool.length]); // 후보 3개
+  return [0,1,2].map(i => pool[(start + i) % pool.length]);
 };
 const iconUrl = (iconName, color, size = 56) => {
   const qs = new URLSearchParams();
@@ -110,9 +112,9 @@ const normalizeBadge = (b, idx = 0) => {
   return n;
 };
 
-/** 외부 아이콘 로더: 항상 이모지를 렌더 → 아이콘이 로드되면 아이콘이 이모지를 부드럽게 덮음 */
-const IconifyWithSureFallback = ({ badge, size = 56 }) => {
-  const [idx, setIdx] = useState(0);      // 현재 후보 인덱스
+/** 이모지 항상 보임, 아이콘은 옵션(useIconify)으로만 덮어쓰기 */
+const IconifyWithSureFallback = ({ badge, size = 56, useIconify = false }) => {
+  const [idx, setIdx] = useState(0);
   const [imgOk, setImgOk] = useState(false);
 
   const names = badge.iconCandidates || [];
@@ -121,17 +123,13 @@ const IconifyWithSureFallback = ({ badge, size = 56 }) => {
 
   return (
     <div className="icon-layer">
-      {/* 1) 폴백 이모지: 항상 보임 → 아이콘이 로드되면 사라짐 */}
-      <span
-        className="badge-emoji"
-        style={{ opacity: imgOk ? 0 : 1 }}
-        aria-hidden="true"
-      >
+      {/* 이모지: 기본 고정 노출 */}
+      <span className="badge-emoji" aria-hidden="true">
         {badge.emoji}
       </span>
 
-      {/* 2) 외부 아이콘 이미지 (로드 성공 시만 보임) */}
-      {hasMore && (
+      {/* 필요 시에만 외부 아이콘으로 덮어씀 */}
+      {useIconify && hasMore && (
         <img
           src={src}
           alt=""
@@ -141,7 +139,7 @@ const IconifyWithSureFallback = ({ badge, size = 56 }) => {
           className="iconify-img"
           style={{ opacity: imgOk ? 1 : 0 }}
           onLoad={() => setImgOk(true)}
-          onError={() => setIdx(i => i + 1)}  // 실패 시 다음 후보 시도
+          onError={() => setIdx(i => i + 1)}
         />
       )}
     </div>
@@ -299,8 +297,9 @@ function BadgeGuide() {
               >
                 <div className="badge-image">
                   <div className={`badge-icon-container rarity-${badge.rarity}`}>
+                    {/* 회전링 뒤 레이어 */}
                     <div className="emoji-plate" aria-hidden="true" />
-                    {/* ★ 항상 이모지를 렌더하고, 외부 아이콘이 로드되면 자동 교체 */}
+                    {/* 이모지 항상 표시, 아이콘 덮어쓰기는 기본 OFF */}
                     <IconifyWithSureFallback badge={badge} size={56} />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
