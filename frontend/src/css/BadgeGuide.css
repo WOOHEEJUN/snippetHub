@@ -102,3 +102,115 @@
 @supports not (color-mix(in oklab, black 50%, white 50%)){
   .rarity-uncommon,.rarity-rare,.rarity-epic,.rarity-legendary{box-shadow:0 0 18px rgba(255,255,255,.22);}
 }
+/* =========================
+   Modern (Less-AI, Sleek) Overrides
+   ========================= */
+
+/* 카드: 글래스 + 은은한 경계 */
+.modern-badges .badge-card{
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)) #181818;
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modern-badges .badge-card:hover{
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 14px 28px rgba(0,0,0,.45);
+}
+
+/* 아이콘 코인: 네온/스파클 제거, 얇은 링 + 미세한 입체감 */
+.modern-badges .badge-icon-container{
+  width: 76px; height: 76px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent,#8ab0d1) 35%, #000);
+  background:
+    radial-gradient(120px 120px at 35% 30%, color-mix(in oklab, var(--accent,#8ab0d1) 10%, transparent), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.08));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.35),
+    0 4px 14px rgba(0,0,0,.35);
+  animation: none;           /* 네온 호흡 제거 */
+  transform: none;
+}
+
+/* 회전/무지개/스파클 완전 비활성화 */
+.modern-badges .badge-icon-container::before,
+.modern-badges .rarity-rare::after{
+  display: none !important;
+  content: none !important;
+}
+
+/* rarity는 과장 ↓, 색만 살짝 다른 테두리로 */
+.modern-badges .rarity-common{ box-shadow:none; }
+.modern-badges .rarity-uncommon{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 12%, transparent) inset; }
+.modern-badges .rarity-rare{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 18%, transparent) inset; }
+.modern-badges .rarity-epic{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 24%, transparent) inset; }
+.modern-badges .rarity-legendary{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 30%, transparent) inset; }
+
+/* 이모지: 선명하지만 과장 X */
+.modern-badges .badge-emoji{
+  font-size: 28px;          /* 살짝 축소 */
+  text-shadow: none;        /* 네온 제거 */
+  opacity: .96;
+}
+
+/* 외부 아이콘(켜는 경우): 살짝 소프트 */
+.modern-badges .iconify-img{
+  filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+  opacity: .92;
+}
+
+/* 태그: 칩 느낌의 톤다운 */
+.modern-badges .category-tag.use-accent{
+  background: color-mix(in oklab, var(--accent,#8ab0d1) 8%, #2a2a2a);
+  border: 1px solid rgba(255,255,255,.1);
+  color: #d7dbe0;
+}
+
+/* 진행바: 얇고 섬세하게 */
+.modern-badges .progress-bar{ height: 10px; border-radius: 999px; background: #2d2d2d; }
+.modern-badges .progress-fill{
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    color-mix(in oklab, var(--accent,#8ab0d1) 55%, #fff) 0%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 25%, #fff) 100%);
+  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset;
+}
+
+/* 미보유: 과장된 투명도 대신 절제된 디세추레이션 */
+.modern-badges .badge-card.not-owned{
+  opacity: 1;
+  filter: saturate(.6) contrast(.98) brightness(.96);
+}
+.modern-badges .badge-card.not-owned .badge-emoji{ opacity: .8; }
+.modern-badges .badge-card.owned .badge-emoji{ opacity: 1; }
+
+/* 획득 체크: 플로팅 뱃지 대신 작고 단단하게 */
+.modern-badges .owned-badge{
+  top: -6px;
+  width: 22px; height: 22px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, #9be58c, #3cb371);
+  color: #091207;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+/* 타이틀 그라디언트/글로우 제거, 명도 대비만 */
+.modern-badges .rarity-title-epic,
+.modern-badges .rarity-title-legendary{
+  background: none;
+  color: #e6e8ea;
+  text-shadow: none;
+  letter-spacing: .2px;
+}
+
+/* 호버시 “살짝”만 */
+.modern-badges .badge-icon-container:hover{
+  transform: translateY(-1px) scale(1.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.35),
+    0 8px 18px rgba(0,0,0,.35);
+}

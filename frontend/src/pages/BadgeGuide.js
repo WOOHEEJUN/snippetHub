@@ -244,7 +244,7 @@ function BadgeGuide() {
   }[String(cat || '').toUpperCase()] || cat);
 
   return (
-    <div className="badge-guide-page">
+    <div className="badge-guide-page modern-badges">
       <div className="container">
         <div className="page-header">
           <h1>뱃지 가이드</h1>
