@@ -1,8 +1,9 @@
+// src/pages/BadgeGuide.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
-/** ============ 유틸 ============ */
+/* ===== 유틸 ===== */
 const parseJsonSafe = async (res) => {
   try {
     const ct = res.headers.get('content-type') || '';
@@ -20,6 +21,10 @@ const extractArray = (data) => {
 const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
 
+/* 문자열 정규화(공백/대소문자 안전) */
+const norm = (s) => String(s ?? '').trim().toUpperCase();
+
+/* 기본 색상 */
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
@@ -32,7 +37,7 @@ const CATEGORY_DEFAULT = {
   OTHER:      '#8ab0d1',
 };
 
-/** 카테고리 이모지 (아이콘 실패 시 폴백용) */
+/* 폴백 이모지 */
 const CATEGORY_EMOJI = {
   CREATION:   '💻',
   ENGAGEMENT: '💬',
@@ -45,7 +50,7 @@ const CATEGORY_EMOJI = {
   OTHER:      '⭐',
 };
 
-/** ✅ 채움형/두툼한 계열 우선 (어두운 배경에서 선명) */
+/* 아이콘 후보(채움/두툼 계열) */
 const ICON_POOLS = {
   CREATION:   ['solar:code-square-bold-duotone','ph:code-bold','material-symbols:laptop','mdi:laptop'],
   ENGAGEMENT: ['solar:chat-round-like-bold-duotone','ph:chat-circle-dots-bold','mdi:message-badge'],
@@ -70,18 +75,16 @@ const pickNames = (category, seed) => {
   return [0,1,2].map(i => pool[(start + i) % pool.length]);
 };
 
-/** Iconify SVG URL (액센트 색 입히기) */
 const iconUrl = (iconName, color, size = 64) => {
   const qs = new URLSearchParams();
   qs.set('height', String(size));
   if (color) qs.set('color', color.replace('#','%23'));
-  // 얇은 라인 대비 보정 (지원되는 아이콘에만 영향)
   qs.set('stroke', '1.6');
   return `https://api.iconify.design/${iconName}.svg?${qs.toString()}`;
 };
 
 const computeRarity = (b) => {
-  const name = (b.name ?? '').toUpperCase();
+  const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
   const pts = Number(b.points_reward ?? b.pointsReward ?? 0) || 0;
   const explicit = b.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
@@ -93,22 +96,22 @@ const computeRarity = (b) => {
 };
 
 const normalizeBadge = (b, idx = 0) => {
-  const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER').toString().toUpperCase();
-  const name = b.name ?? b.title ?? b.badgeName ?? '이름 없음';
-  const color = sanitizeHex(b.color ?? b.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
+  const category = norm(b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER');
+  const name = b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음';
+  const color = sanitizeHex(b?.color ?? b?.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
 
   const n = {
-    badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
+    badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
     name,
-    description: b.description ?? b.desc ?? '',
+    description: b?.description ?? b?.desc ?? '',
     category,
-    requiredCount: b.requiredCount ?? b.requirementCount ?? b.goal ?? 1,
-    requirements: b.requirements ?? b.requirementList ?? [],
-    rewards: b.rewards ?? b.rewardList ?? [],
-    currentProgress: b.currentProgress ?? b.progress ?? 0,
-    owned: b.owned ?? b.isOwned ?? false,
-    pointsReward: b.points_reward ?? b.pointsReward ?? 0,
-    emoji: (b.icon ?? CATEGORY_EMOJI[category] ?? '✨'),
+    requiredCount: b?.requiredCount ?? b?.requirementCount ?? b?.goal ?? 1,
+    requirements: b?.requirements ?? b?.requirementList ?? [],
+    rewards: b?.rewards ?? b?.rewardList ?? [],
+    currentProgress: b?.currentProgress ?? b?.progress ?? 0,
+    owned: b?.owned ?? b?.isOwned ?? false,
+    pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
+    emoji: (b?.icon ?? CATEGORY_EMOJI[category] ?? '✨'),
     color,
   };
   n.rarity = computeRarity({ ...b, ...n });
@@ -116,22 +119,19 @@ const normalizeBadge = (b, idx = 0) => {
   return n;
 };
 
-/** 외부 아이콘 메인, 실패 시 이모지 폴백 */
+/* 외부 아이콘(실패 시 이모지 폴백) */
 const IconifyWithSureFallback = ({ badge, size = 64, useIconify = true }) => {
   const [idx, setIdx] = useState(0);
   const [imgOk, setImgOk] = useState(false);
-
   const names = badge.iconCandidates || [];
   const hasMore = idx < names.length;
   const src = hasMore ? iconUrl(names[idx], badge.color, size) : null;
 
   return (
     <div className="icon-layer">
-      {/* 폴백 이모지: 아이콘 로딩/실패 시만 노출 */}
       <span className="badge-emoji" style={{ opacity: imgOk ? 0 : 1 }} aria-hidden="true">
         {badge.emoji}
       </span>
-
       {useIconify && hasMore && (
         <img
           src={src}
@@ -149,7 +149,7 @@ const IconifyWithSureFallback = ({ badge, size = 64, useIconify = true }) => {
   );
 };
 
-/** ============ 본 컴포넌트 ============ */
+/* ===== 메인 컴포넌트 ===== */
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 
@@ -193,7 +193,7 @@ function BadgeGuide() {
         });
         if (resMine.ok) {
           const jsonMine = await parseJsonSafe(resMine);
-          const mine = extractArray(jsonMine).map((b, i) => normalizeBadge(b, i));
+          const mine = extractArray(jsonMine).map((b, i) => normalizeBadge(b, i, true));
           setUserBadges(mine);
         } else {
           setUserBadges([]);
@@ -212,9 +212,9 @@ function BadgeGuide() {
   }, [getAuthHeaders]);
 
   const filteredBadges = useMemo(() => {
-    if (selectedCategory === 'ALL') return badges;
-    const target = selectedCategory.toUpperCase();
-    return badges.filter((b) => (b.category || '').toUpperCase() === target);
+    if (norm(selectedCategory) === 'ALL') return badges;
+    const target = norm(selectedCategory);
+    return badges.filter((b) => norm(b.category) === target);
   }, [badges, selectedCategory]);
 
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
@@ -224,11 +224,7 @@ function BadgeGuide() {
     if (!ub) return null;
     const current = ub.currentProgress ?? 0;
     const required = badge.requiredCount || 1;
-    return {
-      current,
-      required,
-      percentage: Math.min(100, (current / required) * 100),
-    };
+    return { current, required, percentage: Math.min(100, (current / required) * 100) };
   };
 
   if (loading) return <div className="loading-message">뱃지 정보를 불러오는 중...</div>;
@@ -244,7 +240,7 @@ function BadgeGuide() {
     SPECIAL: '특별',
     EVENT: '이벤트',
     ACTIVITY: '활동',
-  }[String(cat || '').toUpperCase()] || cat);
+  }[norm(cat)] || cat);
 
   return (
     <div className="badge-guide-page modern-badges">
@@ -277,8 +273,10 @@ function BadgeGuide() {
             {categories.map((c) => (
               <button
                 key={c.value}
-                onClick={() => setSelectedCategory(c.value)}
-                className={`category-filter ${selectedCategory === c.value ? 'active' : ''}`}
+                type="button" /* ✅ 폼 submit 방지 */
+                onClick={(e) => { e.preventDefault(); setSelectedCategory(c.value); }}
+                className={`category-filter ${norm(selectedCategory) === norm(c.value) ? 'active' : ''}`}
+                aria-pressed={norm(selectedCategory) === norm(c.value)}
               >
                 {c.label}
               </button>
