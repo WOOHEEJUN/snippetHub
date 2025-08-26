@@ -306,14 +306,6 @@
     filter .18s ease;
 }
 
-/* 아이콘(유니코드) 살짝만: 과하지 않게 */
-.expand-ai-btn::before{
-  content:"⚡";
-  font-size:1rem;
-  line-height:1;
-  translate:0 .5px;
-  opacity:.9;
-}
 
 /* 외곽 링(은은한 그라디언트) */
 .expand-ai-btn::after{
