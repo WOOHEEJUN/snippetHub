@@ -32,7 +32,7 @@ const CATEGORY_DEFAULT = {
   OTHER:      '#8ab0d1',
 };
 
-/** 카테고리별 이모지 (심플/비-AI) */
+/** 카테고리 이모지 (아이콘 실패 시 폴백용) */
 const CATEGORY_EMOJI = {
   CREATION:   '💻',
   ENGAGEMENT: '💬',
@@ -45,17 +45,17 @@ const CATEGORY_EMOJI = {
   OTHER:      '⭐',
 };
 
-/** 아이콘 후보 (옵션용) */
+/** ✅ 채움형/두툼한 계열 우선 (어두운 배경에서 선명) */
 const ICON_POOLS = {
-  CREATION:   ['lucide:code','lucide:terminal','tabler:code','tabler:terminal-2','solar:code-square-linear'],
-  ENGAGEMENT: ['lucide:heart','lucide:message-circle','tabler:heart','tabler:message-2','solar:chat-round-like-linear'],
-  ACHIEVEMENT:['lucide:trophy','lucide:award','tabler:trophy','tabler:award','solar:crown-star-linear'],
-  MILESTONE:  ['lucide:flag','lucide:route','tabler:flag','tabler:route','solar:flag-linear'],
-  COMMUNITY:  ['lucide:users','lucide:user-plus','tabler:users','tabler:user-plus','solar:users-group-two-rounded-linear'],
-  ACTIVITY:   ['lucide:activity','lucide:flask-conical','tabler:activity','tabler:flask','solar:flask-linear'],
-  SPECIAL:    ['lucide:sparkles','lucide:wand-2','tabler:sparkles','tabler:wand','solar:magic-stick-3-linear'],
-  EVENT:      ['lucide:calendar','lucide:ticket','tabler:calendar','tabler:ticket','solar:ticket-linear'],
-  OTHER:      ['lucide:star','tabler:star','solar:star-linear'],
+  CREATION:   ['solar:code-square-bold-duotone','ph:code-bold','material-symbols:laptop','mdi:laptop'],
+  ENGAGEMENT: ['solar:chat-round-like-bold-duotone','ph:chat-circle-dots-bold','mdi:message-badge'],
+  ACHIEVEMENT:['solar:trophy-bold-duotone','ph:trophy-bold','mdi:trophy'],
+  MILESTONE:  ['solar:flag-bold-duotone','ph:flag-banner-bold','mdi:flag'],
+  COMMUNITY:  ['solar:users-group-rounded-bold-duotone','ph:users-three-bold','mdi:account-group'],
+  ACTIVITY:   ['solar:activity-bold-duotone','ph:lightning-bold','mdi:lightning-bolt'],
+  SPECIAL:    ['solar:sparkles-bold-duotone','ph:sparkle-bold','mdi:sparkles'],
+  EVENT:      ['solar:calendar-bold-duotone','ph:ticket-bold','mdi:ticket-confirmation'],
+  OTHER:      ['solar:star-bold-duotone','ph:star-four-bold','mdi:star'],
 };
 
 const hashStr = (s) => {
@@ -69,10 +69,14 @@ const pickNames = (category, seed) => {
   const start = pool.length ? hashStr(seed) % pool.length : 0;
   return [0,1,2].map(i => pool[(start + i) % pool.length]);
 };
-const iconUrl = (iconName, color, size = 56) => {
+
+/** Iconify SVG URL (액센트 색 입히기) */
+const iconUrl = (iconName, color, size = 64) => {
   const qs = new URLSearchParams();
   qs.set('height', String(size));
   if (color) qs.set('color', color.replace('#','%23'));
+  // 얇은 라인 대비 보정 (지원되는 아이콘에만 영향)
+  qs.set('stroke', '1.6');
   return `https://api.iconify.design/${iconName}.svg?${qs.toString()}`;
 };
 
@@ -112,8 +116,8 @@ const normalizeBadge = (b, idx = 0) => {
   return n;
 };
 
-/** 이모지 항상 보임, 아이콘은 옵션(useIconify)으로만 덮어쓰기 */
-const IconifyWithSureFallback = ({ badge, size = 56, useIconify = false }) => {
+/** 외부 아이콘 메인, 실패 시 이모지 폴백 */
+const IconifyWithSureFallback = ({ badge, size = 64, useIconify = true }) => {
   const [idx, setIdx] = useState(0);
   const [imgOk, setImgOk] = useState(false);
 
@@ -123,12 +127,11 @@ const IconifyWithSureFallback = ({ badge, size = 56, useIconify = false }) => {
 
   return (
     <div className="icon-layer">
-      {/* 이모지: 기본 고정 노출 */}
-      <span className="badge-emoji" aria-hidden="true">
+      {/* 폴백 이모지: 아이콘 로딩/실패 시만 노출 */}
+      <span className="badge-emoji" style={{ opacity: imgOk ? 0 : 1 }} aria-hidden="true">
         {badge.emoji}
       </span>
 
-      {/* 필요 시에만 외부 아이콘으로 덮어씀 */}
       {useIconify && hasMore && (
         <img
           src={src}
@@ -297,18 +300,13 @@ function BadgeGuide() {
               >
                 <div className="badge-image">
                   <div className={`badge-icon-container rarity-${badge.rarity}`}>
-                    {/* 회전링 뒤 레이어 */}
-                    <div className="emoji-plate" aria-hidden="true" />
-                    {/* 이모지 항상 표시, 아이콘 덮어쓰기는 기본 OFF */}
-                    <IconifyWithSureFallback badge={badge} size={56} />
+                    <IconifyWithSureFallback badge={badge} size={64} useIconify />
                   </div>
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
 
                 <div className="badge-info">
-                  <h4 className={`badge-name ${badge.rarity === 'epic' ? 'rarity-title-epic' : ''} ${badge.rarity === 'legendary' ? 'rarity-title-legendary' : ''}`}>
-                    {badge.name}
-                  </h4>
+                  <h4 className="badge-name">{badge.name}</h4>
                   <p className="badge-description">{badge.description}</p>
 
                   <div className="badge-category">

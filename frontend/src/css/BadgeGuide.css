@@ -1,15 +1,23 @@
-/* 레이아웃 */
+/* =====================
+   Layout
+   ===================== */
 .badge-guide-page{padding:40px 0;background:#1a1a1a;min-height:100vh;}
 .page-header{text-align:center;margin-bottom:40px;color:#e0e0e0;}
 .page-header h1{font-size:2.5rem;margin-bottom:10px;font-weight:700;}
 .page-header p{font-size:1.1rem;opacity:.9;}
 
+/* =====================
+   Stats
+   ===================== */
 .stats-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:40px;}
 .stats-card{background:#222;border-radius:12px;padding:25px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:.3s;}
 .stats-card:hover{transform:translateY(-5px);}
 .stats-number{font-size:2.5rem;font-weight:700;color:#8ab0d1;margin-bottom:8px;}
 .stats-label{color:#b0b0b0;font-weight:500;}
 
+/* =====================
+   Category filter
+   ===================== */
 .filter-section{background:#222;border-radius:12px;padding:25px;margin-bottom:30px;box-shadow:0 4px 20px rgba(0,0,0,.3);}
 .filter-section h3{color:#e0e0e0;margin-bottom:20px;font-weight:600;}
 .category-filters{display:flex;flex-wrap:wrap;gap:12px;}
@@ -17,53 +25,65 @@
 .category-filter:hover{background:#444;border-color:#666;}
 .category-filter.active{background:#8ab0d1;border-color:#8ab0d1;color:#333;}
 
+/* =====================
+   Grid / Card
+   ===================== */
 .badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:25px;}
 .badge-card{background:#222;border-radius:12px;padding:25px;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:.3s;position:relative;overflow:hidden;border:2px solid transparent;}
 .badge-card:hover{transform:translateY(-5px);box-shadow:0 8px 30px rgba(0,0,0,.4);}
 .badge-card.owned{border-color:var(--accent,#4CAF50);}
 .badge-card.not-owned{opacity:.5;}
 
+/* =====================
+   Badge coin
+   ===================== */
 .badge-image{position:relative;text-align:center;margin-bottom:20px;}
-.badge-icon-container{width:80px;height:80px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;
-  box-shadow:0 0 10px rgba(0,0,0,.2);transition:.3s;animation:pulse-glow 2s infinite alternate;background:
-  radial-gradient(120px 120px at 30% 30%, color-mix(in oklab, var(--accent,#8ab0d1) 18%, transparent), transparent 60%);
-  position:relative;isolation:isolate;border:2px solid var(--accent,#8ab0d1);}
-.badge-icon-container:hover{box-shadow:0 0 20px color-mix(in oklab, var(--accent,#8ab0d1) 60%, transparent),0 0 40px color-mix(in oklab, var(--accent,#8ab0d1) 35%, transparent);transform:scale(1.05);}
 
-/* 회전 링: 뒤 레이어 */
-.badge-icon-container::before{
-  content:"";position:absolute;inset:-4px;border-radius:50%;
-  background:conic-gradient(from 0deg, var(--accent,#8ab0d1), transparent 50%, var(--accent,#8ab0d1));
-  -webkit-mask:radial-gradient(circle at center, transparent 58%, #000 60%);mask:radial-gradient(circle at center, transparent 58%, #000 60%);
-  z-index:-1;opacity:.0;
+.badge-icon-container{
+  width:78px;height:78px;margin:0 auto;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  position:relative;isolation:isolate;
+  border:2px solid transparent; /* 링은 gradient로 */
+  background:
+    /* 표면 */ linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.08)) padding-box,
+    /* 소프트 라이트 */ radial-gradient(120px 120px at 35% 30%, color-mix(in oklab, var(--accent,#8ab0d1) 10%, transparent), transparent 60%) padding-box,
+    /* 희귀도 링 */ var(--ring-gradient, linear-gradient(transparent,transparent)) border-box;
+  background-clip: padding-box, padding-box, border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.28),
+    0 6px 18px rgba(0,0,0,.35);
+  transition:.25s;
+}
+.badge-icon-container:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 8px 18px rgba(0,0,0,.35);}
+
+/* 중앙 레이어 */
+.icon-layer{position:relative;width:100%;height:100%;}
+.iconify-img{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:block;width:64px;height:64px;z-index:2;opacity:.98;
+}
+.badge-emoji{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:28px;line-height:1;color:#fff;z-index:1;transition:opacity .2s;
 }
 
-/* 희귀도 효과 */
-@keyframes spin360{to{transform:rotate(360deg);}}
-@keyframes sparkle{0%,100%{opacity:.3;transform:translate(-50%,-50%) scale(1);}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.12);}}
-.rarity-common{box-shadow:0 0 10px rgba(255,255,255,.12);}
-.rarity-uncommon{box-shadow:0 0 14px color-mix(in oklab, var(--accent,#8ab0d1) 40%, black);}
-.rarity-uncommon::before{opacity:.35;animation:spin360 9s linear infinite;}
-.rarity-rare{box-shadow:0 0 18px color-mix(in oklab, var(--accent,#8ab0d1) 60%, black);}
-.rarity-rare::before{opacity:.55;animation:spin360 6s linear infinite;}
-.rarity-rare::after{
-  content:"";position:absolute;left:50%;top:50%;width:140%;height:140%;translate:-50% -50%;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), transparent 35%),radial-gradient(circle at 70% 60%, rgba(255,255,255,.18), transparent 40%);
-  pointer-events:none;animation:sparkle 2.4s ease-in-out infinite;z-index:-1;
+/* =====================
+   Owned check
+   ===================== */
+.owned-badge{
+  position:absolute;top:-6px;right:50%;transform:translateX(50%);
+  background:linear-gradient(180deg,#9be58c,#3cb371);
+  color:#091207;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
 }
-.rarity-epic{box-shadow:0 0 22px color-mix(in oklab, var(--accent,#8ab0d1) 70%, black), inset 0 0 40px rgba(255,255,255,.12);}
-.rarity-epic::before{
-  background:conic-gradient(from 0deg,#8a2be2,#1e90ff,#00e5ff,#64ffda,#ffd54f,#ff6ec7,#8a2be2);
-  opacity:.7;animation:spin360 4.5s linear infinite;
-}
-.rarity-legendary{box-shadow:0 0 28px rgba(255,255,255,.35),0 0 60px color-mix(in oklab, var(--accent,#8ab0d1) 70%, transparent);}
-.rarity-legendary::before{
-  background:conic-gradient(from 0deg,#ff0040,#ff7a00,#ffd400,#3be000,#00e5ff,#0066ff,#b400ff,#ff0040);
-  opacity:.9;animation:spin360 3.2s linear infinite;
-}
-[data-rarity="legendary"] .owned-badge{transform:translateX(50%) scale(1.05);box-shadow:0 0 14px rgba(255,255,255,.8),0 0 24px rgba(255,255,255,.5);}
 
-.owned-badge{position:absolute;top:-5px;right:50%;transform:translateX(50%);background:var(--accent,#4CAF50);color:#0d0d0d;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+/* =====================
+   Info / Text
+   ===================== */
 .badge-info{text-align:center;}
 .badge-name{color:#e0e0e0;margin-bottom:10px;font-weight:600;font-size:1.2rem;}
 .badge-description{color:#b0b0b0;margin-bottom:15px;line-height:1.5;}
@@ -71,14 +91,27 @@
 .category-tag{display:inline-block;padding:5px 12px;border-radius:15px;font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
 .category-tag.use-accent{color:var(--accent,#8ab0d1);border:1px solid var(--accent,#8ab0d1);background:#333;}
 
+/* =====================
+   Progress
+   ===================== */
 .progress-section{margin-bottom:15px;}
-.progress-bar{width:100%;height:24px;background:#444;border-radius:12px;overflow:hidden;margin-bottom:8px;}
-.progress-fill{height:100%;background:linear-gradient(90deg, var(--accent,#8ab0d1) 0%, #ffffff 100%);transition:width .3s ease;}
+.progress-bar{width:100%;height:10px;background:#2d2d2d;border-radius:999px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{
+  height:100%;border-radius:999px;
+  background:linear-gradient(90deg,color-mix(in oklab,var(--accent,#8ab0d1) 55%,#fff) 0%,color-mix(in oklab,var(--accent,#8ab0d1) 25%,#fff) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
 .progress-text{font-size:.9rem;color:#b0b0b0;font-weight:500;}
 
+/* =====================
+   Empty / states
+   ===================== */
 .no-badges,.loading-message,.error-message{text-align:center;background:#222;border-radius:12px;padding:40px;color:#b0b0b0;margin:20px 0;}
 .error-message{color:#dc3545;background:#3a2a3a;border:1px solid #5a3a3a;}
 
+/* =====================
+   Responsive
+   ===================== */
 @media (max-width:768px){
   .badge-guide-page{padding:20px 0;}
   .page-header h1{font-size:2rem;}
@@ -88,129 +121,79 @@
   .badge-card{padding:20px;}
 }
 
-/* 중앙 이모지/아이콘 레이어 확정 */
-.icon-layer{position:relative;width:100%;height:100%;}
-.badge-emoji{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  font-size:32px;line-height:1;color:#fff !important;z-index:2;pointer-events:none;text-shadow:0 0 6px rgba(0,0,0,.55);
-}
-.iconify-img{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;display:block;width:56px;height:56px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));
-}
-
-/* 안전장치 */
-@supports not (color-mix(in oklab, black 50%, white 50%)){
-  .rarity-uncommon,.rarity-rare,.rarity-epic,.rarity-legendary{box-shadow:0 0 18px rgba(255,255,255,.22);}
-}
-/* =========================
-   Modern (Less-AI, Sleek) Overrides
-   ========================= */
-
-/* 카드: 글래스 + 은은한 경계 */
+/* =====================
+   Modern overrides scope
+   ===================== */
 .modern-badges .badge-card{
   background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)) #181818;
   border: 1px solid rgba(255,255,255,.06);
   box-shadow: 0 10px 24px rgba(0,0,0,.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
 .modern-badges .badge-card:hover{
   transform: translateY(-4px) scale(1.01);
   box-shadow: 0 14px 28px rgba(0,0,0,.45);
 }
-
-/* 아이콘 코인: 네온/스파클 제거, 얇은 링 + 미세한 입체감 */
-.modern-badges .badge-icon-container{
-  width: 76px; height: 76px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--accent,#8ab0d1) 35%, #000);
-  background:
-    radial-gradient(120px 120px at 35% 30%, color-mix(in oklab, var(--accent,#8ab0d1) 10%, transparent), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.08));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    inset 0 -1px 0 rgba(0,0,0,.35),
-    0 4px 14px rgba(0,0,0,.35);
-  animation: none;           /* 네온 호흡 제거 */
-  transform: none;
-}
-
-/* 회전/무지개/스파클 완전 비활성화 */
-.modern-badges .badge-icon-container::before,
-.modern-badges .rarity-rare::after{
-  display: none !important;
-  content: none !important;
-}
-
-/* rarity는 과장 ↓, 색만 살짝 다른 테두리로 */
-.modern-badges .rarity-common{ box-shadow:none; }
-.modern-badges .rarity-uncommon{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 12%, transparent) inset; }
-.modern-badges .rarity-rare{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 18%, transparent) inset; }
-.modern-badges .rarity-epic{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 24%, transparent) inset; }
-.modern-badges .rarity-legendary{ box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent,#8ab0d1) 30%, transparent) inset; }
-
-/* 이모지: 선명하지만 과장 X */
-.modern-badges .badge-emoji{
-  font-size: 28px;          /* 살짝 축소 */
-  text-shadow: none;        /* 네온 제거 */
-  opacity: .96;
-}
-
-/* 외부 아이콘(켜는 경우): 살짝 소프트 */
-.modern-badges .iconify-img{
-  filter: drop-shadow(0 0 0 rgba(0,0,0,0));
-  opacity: .92;
-}
-
-/* 태그: 칩 느낌의 톤다운 */
 .modern-badges .category-tag.use-accent{
   background: color-mix(in oklab, var(--accent,#8ab0d1) 8%, #2a2a2a);
   border: 1px solid rgba(255,255,255,.1);
   color: #d7dbe0;
 }
-
-/* 진행바: 얇고 섬세하게 */
-.modern-badges .progress-bar{ height: 10px; border-radius: 999px; background: #2d2d2d; }
-.modern-badges .progress-fill{
-  border-radius: 999px;
-  background: linear-gradient(90deg,
-    color-mix(in oklab, var(--accent,#8ab0d1) 55%, #fff) 0%,
-    color-mix(in oklab, var(--accent,#8ab0d1) 25%, #fff) 100%);
-  box-shadow: 0 1px 0 rgba(255,255,255,.18) inset;
-}
-
-/* 미보유: 과장된 투명도 대신 절제된 디세추레이션 */
 .modern-badges .badge-card.not-owned{
   opacity: 1;
-  filter: saturate(.6) contrast(.98) brightness(.96);
-}
-.modern-badges .badge-card.not-owned .badge-emoji{ opacity: .8; }
-.modern-badges .badge-card.owned .badge-emoji{ opacity: 1; }
-
-/* 획득 체크: 플로팅 뱃지 대신 작고 단단하게 */
-.modern-badges .owned-badge{
-  top: -6px;
-  width: 22px; height: 22px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: linear-gradient(180deg, #9be58c, #3cb371);
-  color: #091207;
-  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  filter: saturate(.65) contrast(.98) brightness(.96);
 }
 
-/* 타이틀 그라디언트/글로우 제거, 명도 대비만 */
-.modern-badges .rarity-title-epic,
-.modern-badges .rarity-title-legendary{
-  background: none;
-  color: #e6e8ea;
-  text-shadow: none;
-  letter-spacing: .2px;
+/* =====================
+   Rarity ring (subtle)
+   ===================== */
+[data-rarity="common"] .badge-icon-container{
+  --ring-gradient: linear-gradient(
+    color-mix(in oklab, var(--accent,#8ab0d1) 18%, #0f0f0f),
+    color-mix(in oklab, var(--accent,#8ab0d1) 18%, #0f0f0f)
+  );
+}
+[data-rarity="uncommon"] .badge-icon-container{
+  --ring-gradient: conic-gradient(
+    from 180deg,
+    color-mix(in oklab, var(--accent,#8ab0d1) 26%, #0f0f0f),
+    color-mix(in oklab, var(--accent,#8ab0d1) 14%, #0f0f0f) 55%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 26%, #0f0f0f)
+  );
+}
+[data-rarity="rare"] .badge-icon-container{
+  --ring-gradient: conic-gradient(
+    from 180deg,
+    color-mix(in oklab, var(--accent,#8ab0d1) 36%, #0f0f0f),
+    color-mix(in oklab, var(--accent,#8ab0d1) 18%, #0f0f0f) 50%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 36%, #0f0f0f)
+  );
+}
+[data-rarity="epic"] .badge-icon-container{
+  --ring-gradient: conic-gradient(
+    from 180deg,
+    color-mix(in oklab, #9b87f5 30%, #0f0f0f),
+    color-mix(in oklab, #67e8f9 26%, #0f0f0f) 33%,
+    color-mix(in oklab, #86efac 26%, #0f0f0f) 66%,
+    color-mix(in oklab, #9b87f5 30%, #0f0f0f)
+  );
+}
+[data-rarity="legendary"] .badge-icon-container{
+  --ring-gradient: conic-gradient(
+    from 180deg,
+    color-mix(in oklab, #ff7a00 28%, #0f0f0f),
+    color-mix(in oklab, #ffd400 28%, #0f0f0f) 20%,
+    color-mix(in oklab, #64ffda 26%, #0f0f0f) 40%,
+    color-mix(in oklab, #8a2be2 28%, #0f0f0f) 60%,
+    color-mix(in oklab, #00e5ff 26%, #0f0f0f) 80%,
+    color-mix(in oklab, #ff7a00 28%, #0f0f0f)
+  );
 }
 
-/* 호버시 “살짝”만 */
-.modern-badges .badge-icon-container:hover{
-  transform: translateY(-1px) scale(1.02);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    inset 0 -1px 0 rgba(0,0,0,.35),
-    0 8px 18px rgba(0,0,0,.35);
+/* =====================
+   Safety fallback
+   ===================== */
+@supports not (color-mix(in oklab, black 50%, white 50%)){
+  .badge-card,
+  .badge-icon-container{ box-shadow: 0 0 18px rgba(255,255,255,.22); }
 }
