@@ -15,10 +15,9 @@ class WebSocketService {
       return 'http://localhost:8080/ws';
     }
     
-    // AWS 서버의 경우 직접 백엔드 서버로 연결
+    // AWS 서버의 경우 HTTPS로 연결
     if (window.location.hostname === 'snippethub.co.kr') {
-      // CloudFront를 우회하고 직접 백엔드 서버로 연결
-      return 'wss://your-alb-domain.com/ws';
+      return 'https://snippethub.co.kr/ws';
     }
     
     // 기본 설정
