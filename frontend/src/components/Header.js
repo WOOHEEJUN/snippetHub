@@ -5,29 +5,6 @@ import NotificationBell from './NotificationBell';
 import { getBadgeImagePath } from '../utils/badgeUtils';
 import '../css/Header.css';
 
-/* 대표 뱃지 작은 코인(휘장 링 포함) */
-const RepBadgeCoin = ({ badge }) => {
-  const [failed, setFailed] = useState(false);
-
-  // tierLetter가 있으면 S/A/B/C/D/F 중앙 PNG 사용
-  const byTier = badge?.tierLetter ? `/badges/badge_${badge.tierLetter}.png` : null;
-  // 이름 기반 파일이 있으면 사용 (없으면 onError로 F 폴백)
-  const byName = badge?.name ? getBadgeImagePath(badge.name) : null;
-
-  const src = failed ? '/badges/badge_f.png' : (byTier || byName || '/badges/badge_f.png');
-
-  return (
-    <span className="rep-coin" title={badge?.name || '대표 뱃지'}>
-      <img
-        src={src}
-        alt={badge?.name || '대표 뱃지'}
-        onError={() => setFailed(true)}
-        draggable="false"
-      />
-    </span>
-  );
-};
-
 const Header = () => {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user, loading } = useAuth();
@@ -39,7 +16,7 @@ const Header = () => {
     navigate('/');
   };
 
-  const toggleHamburger = () => setIsHamburgerOpen((v) => !v);
+  const toggleHamburger = () => setIsHamburgerOpen(v => !v);
 
   if (loading) return <p>Loading...</p>;
 
@@ -113,11 +90,16 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  {/* ✅ 닉네임 앞에 대표 뱃지(휘장 코인) */}
+                  {/* 대표 뱃지: 배지 "객체"를 넘겨서 경로 해석(아이콘/URL/티어 PNG) */}
                   {user?.representativeBadge && (
-                    <RepBadgeCoin badge={user.representativeBadge} />
+                    <img
+                      src={getBadgeImagePath(user.representativeBadge)}
+                      alt={user?.representativeBadge?.name || '대표 뱃지'}
+                      className="representative-badge-header"
+                      loading="lazy"
+                    />
                   )}
-                  안녕하세요, {user?.nickname || user?.email}님!
+                  안녕하세요,&nbsp;{user?.nickname || user?.email}님!
                 </span>
                 <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
                 <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
@@ -180,7 +162,14 @@ const Header = () => {
                       <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
                       <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
                       <li><Link to="/mypage/saved-problems" onClick={toggleHamburger}>저장한 문제보기</Link></li>
-                      <li><button onClick={() => { handleLogout(); toggleHamburger(); }} className="btn btn-primary">로그아웃</button></li>
+                      <li>
+                        <button
+                          onClick={() => { handleLogout(); toggleHamburger(); }}
+                          className="btn btn-primary"
+                        >
+                          로그아웃
+                        </button>
+                      </li>
                     </ul>
                   </div>
                 ) : (

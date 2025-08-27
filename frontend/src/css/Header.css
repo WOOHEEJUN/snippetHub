@@ -9,6 +9,15 @@
   z-index: 100;
 }
 
+/* 혹시 이전 스타일에서 헤더에 배경 워터마크를 깔아뒀다면 완전히 제거 */
+.header::before,
+.header::after,
+.header .rep-badge-watermark{
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -20,7 +29,7 @@
 
 .header-left { display: flex; align-items: center; gap: 1rem; }
 
-/* 오른쪽 영역 */
+/* RIGHT */
 .header-right {
   display: flex;
   align-items: center;
@@ -38,9 +47,9 @@
   text-decoration: none;
 }
 .header-logo-img {
-  height: 40px; /* Adjust height as needed */
-  width: auto; /* Maintain aspect ratio */
-  vertical-align: middle; /* Align with text if any */
+  height: 40px;
+  width: auto;
+  vertical-align: middle;
 }
 
 .nav-menu-horizontal {
@@ -55,7 +64,7 @@
 }
 .nav-link-main:hover{ background-color:#333; color:#fff; }
 
-/* 일반 드롭다운 */
+/* 드롭다운 */
 .submenu{
   position:absolute; top:100%; left:0; margin-top:.5rem; min-width:180px;
   background:#1f1f1f; border:1px solid #333; border-radius:8px;
@@ -70,7 +79,7 @@
 }
 .submenu a:hover{ background:#333; color:#fff; }
 
-/* 로그인/회원가입 버튼 */
+/* 버튼들 */
 .auth-buttons{ display:flex; align-items:center; gap:.75rem; order:1; }
 
 .btn{
@@ -85,7 +94,7 @@
 .btn-primary{ background:#e0e0e0; color:#333; border-color:#e0e0e0; }
 .btn-primary:hover{ background:#d3d3d3; border-color:#d3d3d3; color:#333; box-shadow:0 0 0 .2rem rgba(0,0,0,.2); }
 
-/* 햄버거 버튼 */
+/* 햄버거 */
 .hamburger-container{ display:block; position:relative; z-index:1002; order:2; }
 .hamburger-btn{
   display:flex; flex-direction:column; justify-content:space-around;
@@ -96,7 +105,7 @@
 .hamburger-btn.active span:nth-child(2){ opacity:0; }
 .hamburger-btn.active span:nth-child(3){ transform:rotate(-45deg) translate(6px,-6px); }
 
-/* 햄버거 드롭다운 */
+/* 드롭다운 패널 */
 .hamburger-dropdown{
   position:absolute; top:calc(100% + 8px); right:0; background:#1f1f1f;
   border:1px solid #333; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.35);
@@ -133,140 +142,33 @@
   .auth-buttons{ gap:2rem; }
 }
 
-/* =================== ★ 등급 배지 이미지 고정(핵심) =================== */
-
-.level-badge-header{
+/* =================== 대표 뱃지 아이콘(닉네임 옆) =================== */
+.user-info{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.representative-badge-header{
   width:24px !important;
   height:24px !important;
   min-width:24px !important;
   min-height:24px !important;
   max-width:24px !important;
   max-height:24px !important;
-  flex:0 0 24px !important;
-  display:inline-block !important;
   object-fit:contain !important;
   vertical-align:middle;
   margin-right:6px;
+  flex:0 0 24px !important;
 }
-
-.representative-badge-header {
-  display: inline-block;
-  width: 24px;
-  height: 24px;
-  margin-right: 6px;
-  vertical-align: middle;
-}
-
-.representative-badge-header > svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* 전역 .img-fluid / img{max-width:100%} 영향 제거 */
-.user-info img.level-badge-header,
-.header img.level-badge-header{
+/* 전역 img{max-width:100%} 같은 규칙 무력화 */
+.header img.representative-badge-header{
   max-width:none !important;
-  height:24px !important;
 }
-
-/* 아주 작은 화면에서는 20px로만 살짝 축소 */
 @media (max-width: 480px){
-  .level-badge-header{
-    width:20px !important;
-    height:20px !important;
-    min-width:20px !important;
-    min-height:20px !important;
-    max-width:20px !important;
-    max-height:20px !important;
+  .representative-badge-header{
+    width:20px !important; height:20px !important;
+    min-width:20px !important; min-height:20px !important;
+    max-width:20px !important; max-height:20px !important;
     flex:0 0 20px !important;
-  }
-  /* 대표 뱃지(닉네임 옆 미니 코인) */
-.rep-coin{
-  --size: 24px;
-  --ring: 2.4px;              /* 링 두께 */
-  position: relative;
-  display: inline-flex;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  margin-right: 6px;
-  background:
-    radial-gradient(60% 60% at 35% 30%, rgba(255,255,255,.06), transparent 70%) padding-box,
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.1)) padding-box;
-  border: 1px solid #222;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    inset 0 -1px 0 rgba(0,0,0,.35),
-    0 2px 8px rgba(0,0,0,.35);
-  overflow: visible;
-  vertical-align: middle;
-}
-
-/* 무지개 링 (작게, 은은하게 회전) */
-.rep-coin::before{
-  content:"";
-  position:absolute; inset:-5px; border-radius:50%;
-  -webkit-mask:
-    radial-gradient(circle,
-      transparent calc(50% - var(--ring)),
-      #000 calc(50% - var(--ring) + 0.5px),
-      #000 calc(50% + var(--ring) - 0.5px),
-      transparent calc(50% + var(--ring)));
-          mask:
-    radial-gradient(circle,
-      transparent calc(50% - var(--ring)),
-      #000 calc(50% - var(--ring) + 0.5px),
-      #000 calc(50% + var(--ring) - 0.5px),
-      transparent calc(50% + var(--ring)));
-  background: conic-gradient(#9b87f5, #67e8f9, #86efac, #9b87f5);
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.45));
-  opacity:.8;
-  animation: repSpin 12s linear infinite;
-}
-
-.rep-coin img{
-  width: 70%;
-  height: 70%;
-  object-fit: contain;
-  display: block;
-  user-select: none;
-  pointer-events: none;
-}
-
-/* 모션 최소화 존중 */
-@media (prefers-reduced-motion: reduce){
-  .rep-coin::before{ animation: none; }
-}
-
-@keyframes repSpin { to { transform: rotate(360deg); } }
-
-}
-.rep-badge{
-  width:24px !important;
-  height:24px !important;
-  min-width:24px !important;
-  min-height:24px !important;
-  max-width:24px !important;
-  max-height:24px !important;
-  aspect-ratio: 1 / 1;
-  display:inline-block !important;
-  object-fit: contain !important;
-  vertical-align: middle;
-  margin-right: 6px;
-  border-radius: 4px;
-  /* 전역 img 규칙 무력화 */
-  max-inline-size: none !important;
-}
-
-@media (max-width: 480px){
-  .rep-badge{
-    width:20px !important;
-    height:20px !important;
-    min-width:20px !important;
-    min-height:20px !important;
-    max-width:20px !important;
-    max-height:20px !important;
   }
 }
