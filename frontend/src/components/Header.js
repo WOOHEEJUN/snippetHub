@@ -61,12 +61,12 @@ const Header = () => {
           <nav className="main-nav">
             <ul className="nav-menu-horizontal">
               <li className="nav-item">
-                <span className="nav-link-main">자유게시판</span>
+                <span className="nav-link-main">게시판</span>
                 <ul className="submenu">
-                  <li><Link to="/board">자유게시판</Link></li>
-                  <li><Link to="/board?category=GENERAL">자유</Link></li>
-                  <li><Link to="/board?category=QNA">Q&A</Link></li>
-                  <li><Link to="/board?category=INFO">정보</Link></li>
+                  <li><Link to="/board">게시판 모아보기</Link></li>
+                  <li><Link to="/board?category=GENERAL">자유 게시판</Link></li>
+                  <li><Link to="/board?category=QNA">Q&A 게시판</Link></li>
+                  <li><Link to="/board?category=INFO">정보 게시판</Link></li>
                 </ul>
               </li>
 
@@ -81,9 +81,9 @@ const Header = () => {
               </li>
 
               <li className="nav-item">
-                <span className="nav-link-main">스니펫 모아보기</span>
+                <span className="nav-link-main">스니펫</span>
                 <ul className="submenu">
-                  <li><Link to="/snippets">스니펫게시판</Link></li>
+                  <li><Link to="/snippets">스니펫 모아보기</Link></li>
                   <li><Link to="/snippets?language=C&sort=LATEST&page=0">C</Link></li>
                   <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0">JavaScript</Link></li>
                   <li><Link to="/snippets?language=Python&sort=LATEST&page=0">Python</Link></li>
@@ -153,12 +153,12 @@ const Header = () => {
             {isHamburgerOpen && (
               <div className="hamburger-dropdown">
                 <div className="hamburger-menu-section">
-                  <h4>자유게시판</h4>
+                  <h4>게시판</h4>
                   <ul>
-                    <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
-                    <li><Link to="/board?category=GENERAL" onClick={toggleHamburger}>자유</Link></li>
-                    <li><Link to="/board?category=QNA" onClick={toggleHamburger}>Q&A</Link></li>
-                    <li><Link to="/board?category=INFO" onClick={toggleHamburger}>정보</Link></li>
+                    <li><Link to="/board" onClick={toggleHamburger}>게시판 모아보기</Link></li>
+                    <li><Link to="/board?category=GENERAL" onClick={toggleHamburger}>자유 게시판</Link></li>
+                    <li><Link to="/board?category=QNA" onClick={toggleHamburger}>Q&A 게시판</Link></li>
+                    <li><Link to="/board?category=INFO" onClick={toggleHamburger}>정보 게시판</Link></li>
                   </ul>
                 </div>
 
@@ -173,9 +173,9 @@ const Header = () => {
                 </div>
 
                 <div className="hamburger-menu-section">
-                  <h4>스니펫 모아보기</h4>
+                  <h4>스니펫</h4>
                   <ul>
-                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
+                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫 모아보기</Link></li>
                     <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
                     <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
                     <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>
