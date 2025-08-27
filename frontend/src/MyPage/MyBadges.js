@@ -1,9 +1,8 @@
-// src/pages/MyBadges.jsx
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaCrown, FaCoins } from 'react-icons/fa';
-import { getRepresentativeBadgeImage } from '../utils/badgeUtils';
+import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/MyBadges.css';
 
 /* ---------- 유틸 ---------- */
@@ -58,19 +57,100 @@ const normalizeBadge = (b, idx = 0) => {
   return n;
 };
 
-/* 배지 코어 + 휘장(링/오라) — PNG 후보를 순차 시도 */
+/* ===== 등급 → 파일명 매핑(정적 폴더) ===== */
+const LEVEL_IMG_MAP = {
+  BRONZE: '/badges/bronze.png',
+  SILVER: '/badges/silver.png',
+  GOLD: '/badges/gold.png',
+  PLATINUM: '/badges/platinum.png',
+  DIAMOND: '/badges/diamond.png',
+  MASTER: '/badges/master.png',
+  GRANDMASTER: '/badges/grandmaster.png',
+  LEGEND: '/badges/legend.png'
+};
+
+/* ---------- 이미지 후보 빌더 ---------- */
+const buildBadgeImageCandidates = (badge) => {
+  const list = [];
+
+  // 1) 대표 배지 유틸(있다면 최우선)
+  try {
+    if (typeof getRepresentativeBadgeImage === 'function') {
+      const fromUtil = getRepresentativeBadgeImage(badge);
+      if (fromUtil) list.push(fromUtil);
+    }
+  } catch (_) {}
+
+  // 2) 서버/객체에서 온 직접 경로
+  if (badge?.imageUrl) list.push(badge.imageUrl);
+
+  // 3) 배지 객체에 등급 정보가 있으면 등급 이미지 후보들 추가
+  const levelName = norm(badge?.levelName ?? badge?.level ?? '');
+  if (levelName) {
+    try {
+      const fromLevelUtil = getLevelBadgeImage?.(levelName);
+      if (fromLevelUtil) list.push(fromLevelUtil);
+    } catch (_) {}
+    if (LEVEL_IMG_MAP[levelName]) list.push(LEVEL_IMG_MAP[levelName]);
+    list.push(`/badges/${levelName.toLowerCase()}.png`); // 관용형
+  }
+
+  // 4) 마지막 안전망(프로젝트 공통 더미가 있다면 남겨두세요)
+  list.push(
+    '/badges/badge_a.png',
+    '/badges/badge_b.png',
+    '/badges/badge_c.png'
+  );
+
+  // 중복 제거
+  return Array.from(new Set(list.filter(Boolean)));
+};
+
+/* ---------- 배지 비주얼 (무한 로드 방지 + 폴백) ---------- */
 const BadgeVisual = ({ badge }) => {
-  const src = getRepresentativeBadgeImage(badge);
+  const candidates = useMemo(() => buildBadgeImageCandidates(badge), [badge]);
+  const [idx, setIdx] = useState(0);
+
+  const outOfCandidates = idx >= candidates.length;
+  const src = outOfCandidates ? null : candidates[idx];
 
   return (
     <div className="badge-icon-container" data-rarity={badge.rarity}>
-      <img
-        src={src}
-        alt={badge.name}
-        className="badge-image-actual"
-      />
+      {!outOfCandidates && src ? (
+        <img
+          key={src}
+          src={src}
+          alt={badge.name}
+          className="badge-core-img"
+          loading="lazy"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+          onError={() => setIdx((i) => i + 1)}
+        />
+      ) : (
+        <span className="badge-fallback" aria-hidden="true">
+          {norm(badge?.name).slice(0, 1) || '🏅'}
+        </span>
+      )}
     </div>
   );
+};
+
+/* 등급 배지를 ‘가짜 배지’ 객체로 만들어서 BadgeVisual에 그대로 사용 */
+const makeLevelBadge = (levelNameRaw) => {
+  const levelName = norm(levelNameRaw || 'BRONZE');
+  const n = {
+    badgeId: `level-${levelName}`,
+    name: `${levelName} 등급`,
+    description: '대표 뱃지 미장착 시 노출되는 등급 배지',
+    category: 'LEVEL',
+    owned: true,
+    imageUrl: null,
+    levelName,      // 후보 이미지 빌더가 이 값을 사용
+    level: levelName
+  };
+  n.rarity = computeRarity({ name: levelName }); // 링 효과도 등급에 맞게
+  return n;
 };
 
 export default function MyBadges() {
@@ -127,6 +207,10 @@ export default function MyBadges() {
   /* 현재 단 하나의 대표(theFeatured) */
   const theFeatured = useMemo(() => featuredBadges[0] ?? null, [featuredBadges]);
   const hasFeatured = !!theFeatured;
+
+  /* 대표 없을 때 보여줄 등급 배지 */
+  const levelNameUpper = norm(level?.levelName ?? user?.level ?? user?.userLevel ?? 'BRONZE');
+  const levelFallbackBadge = useMemo(() => makeLevelBadge(levelNameUpper), [levelNameUpper]);
 
   /* 항상 1개만 대표로 유지 */
   const handleToggleFeatured = useCallback(
@@ -187,22 +271,27 @@ export default function MyBadges() {
         </Link>
       </div>
 
-      {/* 대표 뱃지: 가운데 1개 */}
+      {/* 대표 뱃지: 가운데 1개 (없으면 등급 배지) */}
       <div className="badge-section">
         <h3>대표 뱃지</h3>
-        {!hasFeatured ? (
-          <div className="no-badges">대표 뱃지가 없습니다.</div>
-        ) : (
-          <div className="featured-grid">
-            <div className="badge-item featured">
-              <BadgeVisual badge={theFeatured} />
-              <div className="badge-name" title={theFeatured.name}>{theFeatured.name}</div>
+
+        <div className="featured-grid">
+          <div
+            className="badge-item featured"
+            data-rarity={(hasFeatured ? theFeatured : levelFallbackBadge).rarity}
+          >
+            <BadgeVisual badge={hasFeatured ? theFeatured : levelFallbackBadge} />
+            <div className="badge-name" title={hasFeatured ? theFeatured.name : levelFallbackBadge.name}>
+              {hasFeatured ? theFeatured.name : levelFallbackBadge.name}
+            </div>
+
+            {hasFeatured ? (
               <button className="equip-button danger" onClick={() => handleToggleFeatured(theFeatured)}>
                 대표 뱃지 해제
               </button>
-            </div>
+            ) : null}
           </div>
-        )}
+        </div>
       </div>
 
       {/* 내 모든 뱃지 */}
@@ -215,7 +304,11 @@ export default function MyBadges() {
             {badges.map((badge) => {
               const isFeatured = theFeatured?.badgeId === badge.badgeId;
               return (
-                <div key={badge.badgeId} className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}>
+                <div
+                  key={badge.badgeId}
+                  className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
+                  data-rarity={badge.rarity}
+                >
                   <BadgeVisual badge={badge} />
                   <div className="badge-name" title={badge.name}>{badge.name}</div>
 

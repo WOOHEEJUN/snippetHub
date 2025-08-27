@@ -33,7 +33,7 @@ function Ranking() {
       const withBadges = await Promise.all(users.map(async (u) => {
         try {
           const r = await fetch(`/api/badges/users/${u.userId}/featured`, {
-            headers: getAuthHeaders(),
+            // headers: getAuthHeaders(), // 대표뱃지 없는 유저가 다른 유저 뱃지 조회 못하는 버그 수정
             credentials: 'include',
           });
           if (r.ok) {
