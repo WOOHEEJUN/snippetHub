@@ -3,29 +3,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
-/* ===== 설정: 서버 필터를 쓰고 싶으면 true 로 ===== */
+/* === 필요 시 켜서 원인 바로 찾기 === */
+const DEBUG = true;
+/* === 서버에 ?category=로 필터 시도하려면 true === */
 const SERVER_FILTER = false;
 
-/* ===== 공용 유틸 ===== */
-const parseJsonSafe = async (res) => {
-  try {
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) return await res.json();
-  } catch (_) {}
-  return null;
-};
-const extractArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  return [];
-};
+/* -------- 유틸 -------- */
+const norm = (s) => String(s ?? '').trim().toUpperCase();
 const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
-const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/* 카테고리 기본 색 */
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
@@ -37,8 +24,6 @@ const CATEGORY_DEFAULT = {
   ACTIVITY:   '#8A2BE2',
   OTHER:      '#8ab0d1',
 };
-
-/* 희귀도 계산 */
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -50,13 +35,17 @@ const computeRarity = (b) => {
   if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
   return 'common';
 };
-
-/* 응답 정규화 */
+const extractArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  return [];
+};
 const normalizeBadge = (b, idx = 0) => {
   const category = norm(b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER');
   const name = b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음';
   const color = sanitizeHex(b?.color ?? b?.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
-
   const n = {
     badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
     name,
@@ -73,14 +62,35 @@ const normalizeBadge = (b, idx = 0) => {
   n.rarity = computeRarity({ ...b, ...n });
   return n;
 };
-
-/* 희귀도 → 파일 접미사(S>A>B>C>D>F) + 정렬 우선순위 */
 const rarityToTier = { legendary: 's', epic: 'a', rare: 'b', uncommon: 'c', common: 'd' };
 const rarityRank = (r) => ({ legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 }[r] ?? 5);
 const sortByRarityDesc = (arr) =>
   [...arr].sort((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity) || a.name.localeCompare(b.name));
 
-/* 중앙 PNG 뱃지 */
+/* fetch + 상세디버그 */
+const fetchJsonReport = async (url, init) => {
+  try {
+    const res = await fetch(url, init);
+    const text = await res.clone().text().catch(() => '');
+    let data = null;
+    try { data = JSON.parse(text); } catch { /* not json */ }
+    if (DEBUG) {
+      // 개발자도구 콘솔에서 원인 바로 확인
+      console.info('[BadgeGuide] GET', url, {
+        status: res.status,
+        ok: res.ok,
+        headers: Object.fromEntries([...res.headers.entries()]),
+        preview: text.slice(0, 300),
+      });
+    }
+    return { ok: res.ok, status: res.status, data, text };
+  } catch (e) {
+    if (DEBUG) console.error('[BadgeGuide] fetch error', url, e);
+    return { ok: false, status: 0, data: null, text: String(e?.message || e) };
+  }
+};
+
+/* 중앙 PNG */
 const CenterBadge = ({ rarity, alt }) => {
   const tier = rarityToTier[rarity] || 'f';
   const src = `/badges/badge_${tier}.png`;
@@ -107,7 +117,6 @@ const CenterBadge = ({ rarity, alt }) => {
   );
 };
 
-/* 카테고리 한글 매핑 */
 const categoryLabel = (cat) => ({
   ALL: '전체',
   CREATION: '창작',
@@ -120,8 +129,6 @@ const categoryLabel = (cat) => ({
   ACTIVITY: '활동',
   OTHER: '기타',
 }[norm(cat)] || cat);
-
-/* 버튼 표시는 이 순서로 정렬 */
 const CATEGORY_ORDER = ['CREATION','ENGAGEMENT','ACHIEVEMENT','MILESTONE','COMMUNITY','SPECIAL','EVENT','ACTIVITY','OTHER'];
 
 function BadgeGuide() {
@@ -133,64 +140,67 @@ function BadgeGuide() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
-  /* ===== 데이터 로딩 ===== */
+  // 데이터 로딩 (카테고리 바뀌어도 서버로 다시 안 가고, 클라 필터가 기본)
   useEffect(() => {
-    const fetchAll = async () => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        setError(null);
+        // 1) 전체(또는 서버필터) 목록
+        const listUrl =
+          SERVER_FILTER && norm(selectedCategory) !== 'ALL'
+            ? `/api/badges?category=${encodeURIComponent(selectedCategory)}`
+            : '/api/badges';
 
-        // 전체 목록 (또는 선택 카테고리 서버 필터)
-        const listUrl = SERVER_FILTER && norm(selectedCategory) !== 'ALL'
-          ? `/api/badges?category=${encodeURIComponent(selectedCategory)}`
-          : '/api/badges';
-
-        const resAll = await fetch(listUrl, {
+        const all = await fetchJsonReport(listUrl, {
           headers: getAuthHeaders(),
           credentials: 'include',
           cache: 'no-store',
         });
-        if (!resAll.ok) throw new Error('뱃지 목록 조회 실패');
-        const jsonAll = await parseJsonSafe(resAll);
-        const normalized = extractArray(jsonAll).map((b, i) => normalizeBadge(b, i));
-        setBadges(sortByRarityDesc(normalized));
+        const rawList = extractArray(all.data);
+        const normalized = rawList.map((b, i) => normalizeBadge(b, i));
+        if (!cancelled) setBadges(sortByRarityDesc(normalized));
 
-        // 내 뱃지
-        const resMine = await fetch('/api/badges/my', {
+        // 2) 내 뱃지
+        const mine = await fetchJsonReport('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
           cache: 'no-store',
         });
-        if (resMine.ok) {
-          const jsonMine = await parseJsonSafe(resMine);
-          const mine = extractArray(jsonMine).map((b, i) => normalizeBadge(b, i));
-          setUserBadges(sortByRarityDesc(mine));
-        } else {
-          setUserBadges([]);
+        const rawMine = extractArray(mine.data);
+        const normalizedMine = rawMine.map((b, i) => normalizeBadge(b, i));
+        if (!cancelled) setUserBadges(sortByRarityDesc(normalizedMine));
+
+        // 디버그: 데이터가 비면 바로 힌트
+        if (DEBUG && !cancelled) {
+          if (normalized.length === 0) console.warn('[BadgeGuide] 서버에서 뱃지 0개 반환');
+          if (normalizedMine.length === 0) console.warn('[BadgeGuide] 내 뱃지 0개 반환');
         }
-      } catch (err) {
-        console.error(err);
-        setBadges([]);
-        setUserBadges([]);
-        setError('뱃지 정보를 불러오는 중 오류가 발생했습니다.');
+      } catch (e) {
+        if (!cancelled) {
+          setBadges([]);
+          setUserBadges([]);
+          setError('뱃지 정보를 불러오는 중 오류가 발생했습니다.');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-    fetchAll();
-    // 서버 필터를 켜면 카테고리 바뀔 때마다 API 재호출
-  }, [getAuthHeaders, selectedCategory]);
+    load();
+    return () => { cancelled = true; };
+    // ⚠️ 클라 필터 기본이라 selectedCategory 변경 시 재요청 필요 없음
+  }, [getAuthHeaders]); // (원한다면 SERVER_FILTER가 true일 때만 selectedCategory를 deps로 추가)
 
-  /* ===== 동적 카테고리: 데이터에 실제 있는 것만 버튼으로 ===== */
+  // 데이터에 실제 있는 카테고리만 버튼으로
   const categoriesFromData = useMemo(() => {
     const set = new Set();
     badges.forEach(b => set.add(norm(b.category || 'OTHER')));
-    // 순서 기준으로 소팅 + ALL 맨 앞
     const ordered = CATEGORY_ORDER.filter(c => set.has(c));
     return ['ALL', ...ordered, ...[...set].filter(c => !CATEGORY_ORDER.includes(c) && c !== 'ALL')];
   }, [badges]);
 
-  /* ===== 클라이언트 필터 (SERVER_FILTER=false일 때 동작) ===== */
+  // 클라이언트 필터
   const filteredBadges = useMemo(() => {
     if (SERVER_FILTER || norm(selectedCategory) === 'ALL') return badges;
     const target = norm(selectedCategory);
@@ -198,7 +208,6 @@ function BadgeGuide() {
   }, [badges, selectedCategory]);
 
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
-
   const getProgressInfo = (badge) => {
     const ub = userBadges.find((x) => x.badgeId === badge.badgeId);
     if (!ub) return null;
@@ -235,7 +244,6 @@ function BadgeGuide() {
           </div>
         </div>
 
-        {/* 동적 카테고리 버튼 */}
         <div className="filter-section">
           <h3>카테고리별 필터</h3>
           <div className="category-filters">
@@ -265,7 +273,6 @@ function BadgeGuide() {
                 data-rarity={badge.rarity}
               >
                 <div className="badge-image">
-                  {/* 중앙 PNG + 희귀도 오라 */}
                   <CenterBadge rarity={badge.rarity} alt={badge.name} />
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
@@ -298,18 +305,14 @@ function BadgeGuide() {
                   {(badge.requirements?.length ?? 0) > 0 && (
                     <div className="badge-requirements">
                       <h5>획득 조건:</h5>
-                      <ul>
-                        {badge.requirements.map((req, i) => <li key={i}>{req}</li>)}
-                      </ul>
+                      <ul>{badge.requirements.map((req, i) => <li key={i}>{req}</li>)}</ul>
                     </div>
                   )}
 
                   {(badge.rewards?.length ?? 0) > 0 && (
                     <div className="badge-rewards">
                       <h5>보상:</h5>
-                      <ul>
-                        {badge.rewards.map((rw, i) => <li key={i}>{rw}</li>)}
-                      </ul>
+                      <ul>{badge.rewards.map((rw, i) => <li key={i}>{rw}</li>)}</ul>
                     </div>
                   )}
                 </div>
@@ -321,6 +324,11 @@ function BadgeGuide() {
         {filteredBadges.length === 0 && (
           <div className="no-badges">
             <p>해당 카테고리의 뱃지가 없습니다.</p>
+            {DEBUG && (
+              <p style={{marginTop:8,opacity:.7,fontSize:'.9rem'}}>
+                디버그: 전체 {badges.length}개 / 선택 카테고리 {selectedCategory}
+              </p>
+            )}
           </div>
         )}
       </div>
