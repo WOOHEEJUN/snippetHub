@@ -2,9 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
-/* =======================
-   유틸
-   ======================= */
+/* ===== 공용 유틸 ===== */
 const parseJsonSafe = async (res) => {
   try {
     const ct = res.headers.get('content-type') || '';
@@ -20,93 +18,40 @@ const extractArray = (data) => {
   return [];
 };
 const sanitizeHex = (c) =>
-  typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '')
-    ? c.trim()
-    : null;
-
-/* 문자열 정규화(공백/대소문자 안전) */
+  typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
 const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/* 카테고리 기본 색 */
+/* 카테고리 기본 색(없을 때 액센트로 사용) */
 const CATEGORY_DEFAULT = {
-  CREATION: '#4CAF50',
+  CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
-  ACHIEVEMENT: '#FFD54F',
-  MILESTONE: '#FFD700',
-  COMMUNITY: '#32CD32',
-  SPECIAL: '#9C27B0',
-  EVENT: '#1E90FF',
-  ACTIVITY: '#8A2BE2',
-  OTHER: '#8ab0d1',
+  ACHIEVEMENT:'#FFD54F',
+  MILESTONE:  '#FFD700',
+  COMMUNITY:  '#32CD32',
+  SPECIAL:    '#9C27B0',
+  EVENT:      '#1E90FF',
+  ACTIVITY:   '#8A2BE2',
+  OTHER:      '#8ab0d1',
 };
 
-/* 폴백 이모지 (아이콘 실패 시) */
-const CATEGORY_EMOJI = {
-  CREATION: '💻',
-  ENGAGEMENT: '💬',
-  ACHIEVEMENT: '🏆',
-  MILESTONE: '🚩',
-  COMMUNITY: '👥',
-  ACTIVITY: '⚡',
-  SPECIAL: '✨',
-  EVENT: '🎉',
-  OTHER: '⭐',
-};
-
-/* 기존 계산식(문자 희귀도가 없을 때 링 단계 추정에 사용) */
-const computeRarityText = (b) => {
+/* 희귀도 계산(이전 로직 유지) */
+const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
   const pts = Number(b.points_reward ?? b.pointsReward ?? 0) || 0;
   const explicit = b.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
   if (explicit || rc >= 1000 || pts >= 1000) return 'legendary';
-  if (rc >= 500 || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
-  if (rc >= 100 || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
-  if (rc >= 25 || /GOLD|25\b/.test(name) || pts >= 50) return 'uncommon';
+  if (rc >= 500   || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
+  if (rc >= 100   || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
+  if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
   return 'common';
 };
 
-/* ===== 희귀도 매핑 =====
-   - letter: S/A/B/C/D/F  (중앙 이미지 선택 & 정렬용)
-   - ring:   legendary/epic/rare/uncommon/common  (테두리 이펙트용)
-*/
-const RARITY_ORDER = ['S', 'A', 'B', 'C', 'D', 'F'];
-
-const RARITY_TO_RING = {
-  S: 'legendary',
-  A: 'epic',
-  B: 'rare',
-  C: 'uncommon',
-  D: 'common',
-  F: 'common',
-};
-
-const RARITY_IMG = {
-  S: '/badges/badge_s.png',
-  A: '/badges/badge_a.png',
-  B: '/badges/badge_b.png',
-  C: '/badges/badge_c.png',
-  D: '/badges/badge_d.png', // 파일이 없다면 만들어 넣어주세요.
-  F: '/badges/badge_f.png',
-};
-
-/* 문자열/텍스트 희귀도 무엇이 오든 → Letter로 통일 */
-const inferRarityLetter = (raw, badgeForFallback) => {
-  const c = String(raw ?? '').toUpperCase();
-  if (RARITY_ORDER.includes(c)) return c;
-
-  // 'legendary/epic/...' 같은 텍스트를 받은 경우
-  const text = c || computeRarityText(badgeForFallback).toUpperCase();
-  const map = { LEGENDARY: 'S', EPIC: 'A', RARE: 'B', UNCOMMON: 'C', COMMON: 'D' };
-  return map[text] || 'F';
-};
-
-/* 뱃지 정규화 */
+/* 응답 정규화 */
 const normalizeBadge = (b, idx = 0) => {
   const category = norm(b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER');
   const name = b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음';
-  const color =
-    sanitizeHex(b?.color ?? b?.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
+  const color = sanitizeHex(b?.color ?? b?.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
 
   const n = {
     badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
@@ -114,30 +59,52 @@ const normalizeBadge = (b, idx = 0) => {
     description: b?.description ?? b?.desc ?? '',
     category,
     requiredCount: b?.requiredCount ?? b?.requirementCount ?? b?.goal ?? 1,
+    currentProgress: b?.currentProgress ?? b?.progress ?? 0,
     requirements: b?.requirements ?? b?.requirementList ?? [],
     rewards: b?.rewards ?? b?.rewardList ?? [],
-    currentProgress: b?.currentProgress ?? b?.progress ?? 0,
-    owned: b?.owned ?? b?.isOwned ?? false,
     pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
-    emoji: b?.icon ?? CATEGORY_EMOJI[category] ?? '✨',
+    owned: b?.owned ?? b?.isOwned ?? false,
     color,
   };
-
-  // 희귀도 통합
-  n.rarityLetter = inferRarityLetter(b?.rarityLetter ?? b?.tier ?? b?.rank ?? b?.grade ?? b?.rarity, {
-    name,
-    requiredCount: n.requiredCount,
-    pointsReward: n.pointsReward,
-  });
-  n.ring = RARITY_TO_RING[n.rarityLetter] || 'common';
-  n.imgSrc = RARITY_IMG[n.rarityLetter] || RARITY_IMG.F;
-
+  n.rarity = computeRarity({ ...b, ...n });
   return n;
 };
 
-/* =======================
-   메인 컴포넌트
-   ======================= */
+/* 희귀도 → 파일 접미사(S>A>B>C>D>F) + 정렬 우선순위 */
+const rarityToTier = { legendary: 's', epic: 'a', rare: 'b', uncommon: 'c', common: 'd' };
+const rarityRank = (r) => ({ legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 }[r] ?? 5);
+const sortByRarityDesc = (arr) =>
+  [...arr].sort((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity) || a.name.localeCompare(b.name));
+
+/* 중앙 PNG 뱃지 */
+const CenterBadge = ({ rarity, alt }) => {
+  const tier = rarityToTier[rarity] || 'f';
+  const src = `/badges/badge_${tier}.png`;
+  return (
+    <div className={`badge-icon-container rarity-${rarity}`}>
+      <img
+        src={src}
+        alt={alt}
+        className="badge-core-img"
+        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+        /* 자리 정확히 가운데 고정 + 컨테이너 안에 맞춤 */
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%,-50%)',
+          width: '66%',
+          height: '66%',
+          objectFit: 'contain',
+          pointerEvents: 'none',
+          userSelect: 'none'
+        }}
+      />
+    </div>
+  );
+};
+
+/* ===== 본문 ===== */
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 
@@ -148,15 +115,15 @@ function BadgeGuide() {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
   const categories = [
-    { value: 'ALL', label: '전체' },
-    { value: 'CREATION', label: '창작' },
+    { value: 'ALL',        label: '전체' },
+    { value: 'CREATION',   label: '창작' },
     { value: 'ENGAGEMENT', label: '참여' },
-    { value: 'ACHIEVEMENT', label: '업적' },
-    { value: 'MILESTONE', label: '이정표' },
-    { value: 'COMMUNITY', label: '커뮤니티' },
-    { value: 'SPECIAL', label: '특별' },
-    { value: 'EVENT', label: '이벤트' },
-    { value: 'ACTIVITY', label: '활동' },
+    { value: 'ACHIEVEMENT',label: '업적' },
+    { value: 'MILESTONE',  label: '이정표' },
+    { value: 'COMMUNITY',  label: '커뮤니티' },
+    { value: 'SPECIAL',    label: '특별' },
+    { value: 'EVENT',      label: '이벤트' },
+    { value: 'ACTIVITY',   label: '활동' },
   ];
 
   useEffect(() => {
@@ -168,18 +135,25 @@ function BadgeGuide() {
         const resAll = await fetch('/api/badges', {
           headers: getAuthHeaders(),
           credentials: 'include',
+          cache: 'no-store',
         });
         if (!resAll.ok) throw new Error('뱃지 목록 조회 실패');
         const jsonAll = await parseJsonSafe(resAll);
         const normalized = extractArray(jsonAll).map((b, i) => normalizeBadge(b, i));
-        setBadges(normalized);
+        setBadges(sortByRarityDesc(normalized));
 
         const resMine = await fetch('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
+          cache: 'no-store',
         });
-        const mine = resMine.ok ? extractArray(await parseJsonSafe(resMine)).map((b, i) => normalizeBadge(b, i, true)) : [];
-        setUserBadges(mine);
+        if (resMine.ok) {
+          const jsonMine = await parseJsonSafe(resMine);
+          const mine = extractArray(jsonMine).map((b, i) => normalizeBadge(b, i));
+          setUserBadges(sortByRarityDesc(mine));
+        } else {
+          setUserBadges([]);
+        }
       } catch (err) {
         console.error(err);
         setBadges([]);
@@ -189,22 +163,14 @@ function BadgeGuide() {
         setLoading(false);
       }
     };
-
     fetchBadgesAndUser();
   }, [getAuthHeaders]);
 
-  // 카테고리 필터
   const filteredBadges = useMemo(() => {
     if (norm(selectedCategory) === 'ALL') return badges;
     const target = norm(selectedCategory);
     return badges.filter((b) => norm(b.category) === target);
   }, [badges, selectedCategory]);
-
-  // 희귀도 정렬 (S → A → B → C → D → F)
-  const sortedBadges = useMemo(() => {
-    const rank = (r) => RARITY_ORDER.indexOf(String(r || 'F').toUpperCase());
-    return filteredBadges.slice().sort((a, b) => rank(a.rarityLetter) - rank(b.rarityLetter));
-  }, [filteredBadges]);
 
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
 
@@ -219,18 +185,17 @@ function BadgeGuide() {
   if (loading) return <div className="loading-message">뱃지 정보를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
 
-  const categoryKorean = (cat) =>
-    ({
-      ALL: '전체',
-      CREATION: '창작',
-      ENGAGEMENT: '참여',
-      ACHIEVEMENT: '업적',
-      MILESTONE: '이정표',
-      COMMUNITY: '커뮤니티',
-      SPECIAL: '특별',
-      EVENT: '이벤트',
-      ACTIVITY: '활동',
-    }[norm(cat)] || cat);
+  const categoryKorean = (cat) => ({
+    ALL: '전체',
+    CREATION: '창작',
+    ENGAGEMENT: '참여',
+    ACHIEVEMENT: '업적',
+    MILESTONE: '이정표',
+    COMMUNITY: '커뮤니티',
+    SPECIAL: '특별',
+    EVENT: '이벤트',
+    ACTIVITY: '활동',
+  }[norm(cat)] || cat);
 
   return (
     <div className="badge-guide-page modern-badges">
@@ -240,7 +205,6 @@ function BadgeGuide() {
           <p>다양한 활동을 통해 뱃지를 획득하고 성장해보세요!</p>
         </div>
 
-        {/* 통계 */}
         <div className="stats-section">
           <div className="stats-card">
             <div className="stats-number">{userBadges.length}</div>
@@ -258,7 +222,6 @@ function BadgeGuide() {
           </div>
         </div>
 
-        {/* 카테고리 필터 */}
         <div className="filter-section">
           <h3>카테고리별 필터</h3>
           <div className="category-filters">
@@ -266,10 +229,7 @@ function BadgeGuide() {
               <button
                 key={c.value}
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedCategory(c.value);
-                }}
+                onClick={() => setSelectedCategory(c.value)}
                 className={`category-filter ${norm(selectedCategory) === norm(c.value) ? 'active' : ''}`}
                 aria-pressed={norm(selectedCategory) === norm(c.value)}
               >
@@ -279,9 +239,8 @@ function BadgeGuide() {
           </div>
         </div>
 
-        {/* 뱃지 목록 (정렬 적용) */}
         <div className="badges-grid">
-          {sortedBadges.map((badge) => {
+          {filteredBadges.map((badge) => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
 
@@ -290,18 +249,11 @@ function BadgeGuide() {
                 key={badge.badgeId}
                 className={`badge-card ${owned ? 'owned' : 'not-owned'}`}
                 style={{ '--accent': badge.color }}
-                data-rarity={badge.ring} // ← 테두리 이펙트 유지
+                data-rarity={badge.rarity}
               >
                 <div className="badge-image">
-                  <div className="badge-icon-container">
-                    <img
-                      className="rarity-coin"
-                      src={badge.imgSrc}
-                      alt={badge.rarityLetter}
-                      width={64}
-                      height={64}
-                    />
-                  </div>
+                  {/* 중앙 PNG + 희귀도 오라(테두리는 CSS가 처리) */}
+                  <CenterBadge rarity={badge.rarity} alt={badge.name} />
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
 
@@ -310,9 +262,7 @@ function BadgeGuide() {
                   <p className="badge-description">{badge.description}</p>
 
                   <div className="badge-category">
-                    <span className="category-tag use-accent">
-                      {categoryKorean(badge.category)}
-                    </span>
+                    <span className="category-tag use-accent">{categoryKorean(badge.category)}</span>
                   </div>
 
                   {badge.requiredCount > 1 && (
@@ -359,7 +309,7 @@ function BadgeGuide() {
           })}
         </div>
 
-        {sortedBadges.length === 0 && (
+        {filteredBadges.length === 0 && (
           <div className="no-badges">
             <p>해당 카테고리의 뱃지가 없습니다.</p>
           </div>
