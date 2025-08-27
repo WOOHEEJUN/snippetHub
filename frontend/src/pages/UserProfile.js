@@ -1,10 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
- 
+
 import '../css/UserProfile.css';
-// import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
-import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
+import { getBadgeRarity, getLevelBadgeImage } from '../utils/badgeUtils';
+
+/* ===== 티어 계산: 가이드와 동일 규칙 간이판 ===== */
+const norm = (s) => String(s ?? '').trim().toUpperCase();
+const RARITY_TO_TIER = { LEGENDARY: 's', EPIC: 'a', RARE: 'b', UNCOMMON: 'c', COMMON: 'd' };
+const tierHintFromName = (name) => {
+  const s = norm(name);
+  if (/\bS(\b|_RANK|_TIER)/.test(s)) return 's';
+  if (/\bA(\b|_RANK|_TIER)/.test(s)) return 'a';
+  if (/\bB(\b|_RANK|_TIER)/.test(s)) return 'b';
+  if (/\bC(\b|_RANK|_TIER)/.test(s)) return 'c';
+  if (/\bD(\b|_RANK|_TIER)/.test(s)) return 'd';
+  if (/\bF(\b|_RANK|_TIER|_BADGE)?\b/.test(s)) return 'f';
+  return null;
+};
+const computeTierLetter = (badge) => {
+  if (!badge) return 'f';
+  const direct = (badge.tier || badge.grade || '').toString().toLowerCase();
+  if (['s','a','b','c','d','f'].includes(direct)) return direct;
+
+  const rarity = (getBadgeRarity?.(badge) || '').toString().toUpperCase();
+  if (RARITY_TO_TIER[rarity]) return RARITY_TO_TIER[rarity];
+
+  const byName = tierHintFromName(badge.name);
+  return byName || 'f';
+};
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -66,13 +90,44 @@ const UserProfile = () => {
   if (error) return <div className="user-profile-container"><div className="error">{error}</div></div>;
   if (!user) return <div className="user-profile-container"><div className="error">사용자를 찾을 수 없습니다.</div></div>;
 
+  /* ---------- 대표뱃지/등급 아이콘 계산 ---------- */
+  const repBadge = user?.representativeBadge ?? user?.data?.representativeBadge ?? null;
+  const repTier = repBadge ? computeTierLetter(repBadge) : null;             // 's' | 'a' | 'b' | 'c' | 'd' | 'f'
+  const repTierSrc = repBadge ? `/badges/badge_${repTier}.png` : null;       // 가이드 동일 PNG
+  const repRarity = repBadge ? (getBadgeRarity(repBadge) || 'rare').toLowerCase() : null;
+
+  const levelNameUpper = (
+    user?.levelName ?? user?.level ?? user?.userLevel ?? 'BRONZE'
+  ).toString().toUpperCase();
+  const levelImgSrc = getLevelBadgeImage(levelNameUpper) || `/badges/${levelNameUpper.toLowerCase()}.png`;
+
   return (
     <div className="user-profile-container">
       <div className="profile-header">
         <div className="profile-level-display">
-          {/* Replaced with UserBadgeAndNickname */}
-          <UserBadgeAndNickname user={user} showLink={false} className="profile-level-badge-large" />
+          {/* 대표뱃지 있으면 → 티어 PNG + 링 / 없으면 → 등급 PNG */}
+          {repBadge ? (
+            <span
+              className={`rep-badge-chip rarity-${repRarity}`}
+              style={{ '--rep-size': '80px' }}
+              title={repBadge?.name || '대표 뱃지'}
+            >
+              <img
+                src={repTierSrc}
+                alt={repBadge?.name || '대표 뱃지'}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+              />
+            </span>
+          ) : (
+            <img
+              className="profile-level-badge-large"
+              src={levelImgSrc}
+              alt={`${levelNameUpper} 등급`}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/bronze.png'; }}
+            />
+          )}
         </div>
+
         <div className="profile-info">
           <h1 className="profile-nickname">{user.nickname}</h1>
           {user.levelName && user.level && <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>}
@@ -111,13 +166,13 @@ const UserProfile = () => {
 
       <div className="profile-content">
         <div className="tab-navigation">
-          <button 
+          <button
             className={`tab-button ${activeTab === 'posts' ? 'active' : ''}`}
             onClick={() => setActiveTab('posts')}
           >
             게시글 ({posts.length})
           </button>
-          <button 
+          <button
             className={`tab-button ${activeTab === 'snippets' ? 'active' : ''}`}
             onClick={() => setActiveTab('snippets')}
           >
