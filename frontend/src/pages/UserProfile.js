@@ -1,9 +1,10 @@
+// src/pages/UserProfile.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
 
 import '../css/UserProfile.css';
-import { getBadgeRarity, getLevelBadgeImage } from '../utils/badgeUtils';
+import { getBadgeRarity, getLevelBadgeImage, getUserLevel } from '../utils/badgeUtils';
 
 /* ===== 티어 계산: 가이드와 동일 규칙 간이판 ===== */
 const norm = (s) => String(s ?? '').trim().toUpperCase();
@@ -21,7 +22,7 @@ const tierHintFromName = (name) => {
 const computeTierLetter = (badge) => {
   if (!badge) return 'f';
   const direct = (badge.tier || badge.grade || '').toString().toLowerCase();
-  if (['s','a','b','c','d','f'].includes(direct)) return direct;
+  if (['s', 'a', 'b', 'c', 'd', 'f'].includes(direct)) return direct;
 
   const rarity = (getBadgeRarity?.(badge) || '').toString().toUpperCase();
   if (RARITY_TO_TIER[rarity]) return RARITY_TO_TIER[rarity];
@@ -56,7 +57,7 @@ const UserProfile = () => {
   const fetchUserPosts = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/posts?page=0&size=10`);
-      if (response.ok) {
+    if (response.ok) {
         const data = await response.json();
         setPosts(data.data.content || []);
       }
@@ -82,30 +83,35 @@ const UserProfile = () => {
     loadData();
   }, [userId]);
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ko-KR');
-  };
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('ko-KR');
 
   if (loading) return <div className="user-profile-container"><div className="loading">로딩 중...</div></div>;
   if (error) return <div className="user-profile-container"><div className="error">{error}</div></div>;
   if (!user) return <div className="user-profile-container"><div className="error">사용자를 찾을 수 없습니다.</div></div>;
 
   /* ---------- 대표뱃지/등급 아이콘 계산 ---------- */
-  const repBadge = user?.representativeBadge ?? user?.data?.representativeBadge ?? null;
-  const repTier = repBadge ? computeTierLetter(repBadge) : null;             // 's' | 'a' | 'b' | 'c' | 'd' | 'f'
-  const repTierSrc = repBadge ? `/badges/badge_${repTier}.png` : null;       // 가이드 동일 PNG
+  // 1) 대표뱃지 (프로필 응답에 없으면 falsy)
+  const repBadge =
+    user?.representativeBadge ??
+    user?.data?.representativeBadge ??
+    null;
+
+  // 2) 대표뱃지 있으면 가이드와 동일한 티어 PNG
+  const repTier = repBadge ? computeTierLetter(repBadge) : null; // 's'...'f'
+  const repTierSrc = repBadge ? `/badges/badge_${repTier}.png` : null;
   const repRarity = repBadge ? (getBadgeRarity(repBadge) || 'rare').toLowerCase() : null;
 
-  const levelNameUpper = (
-    user?.levelName ?? user?.level ?? user?.userLevel ?? 'BRONZE'
-  ).toString().toUpperCase();
-  const levelImgSrc = getLevelBadgeImage(levelNameUpper) || `/badges/${levelNameUpper.toLowerCase()}.png`;
+  // 3) 대표뱃지가 없을 때는 표준화된 등급키로 이미지 선택 (한글 → 영문 매핑 포함)
+  const levelKey = getUserLevel(user); // e.g. 'GOLD', 'PLATINUM' ...
+  const levelImgSrc =
+    getLevelBadgeImage(levelKey) ||
+    `/badges/${String(levelKey || 'bronze').toLowerCase()}.png`;
 
   return (
     <div className="user-profile-container">
       <div className="profile-header">
         <div className="profile-level-display">
-          {/* 대표뱃지 있으면 → 티어 PNG + 링 / 없으면 → 등급 PNG */}
           {repBadge ? (
             <span
               className={`rep-badge-chip rarity-${repRarity}`}
@@ -115,23 +121,33 @@ const UserProfile = () => {
               <img
                 src={repTierSrc}
                 alt={repBadge?.name || '대표 뱃지'}
-                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = '/badges/badge_f.png';
+                }}
               />
             </span>
           ) : (
             <img
               className="profile-level-badge-large"
               src={levelImgSrc}
-              alt={`${levelNameUpper} 등급`}
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/bronze.png'; }}
+              alt={`${levelKey} 등급`}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/badges/bronze.png';
+              }}
             />
           )}
         </div>
 
         <div className="profile-info">
           <h1 className="profile-nickname">{user.nickname}</h1>
-          {user.levelName && user.level && <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>}
-          {user.points !== undefined && <p className="profile-points">포인트: {user.points} P</p>}
+          {user.levelName && user.level && (
+            <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>
+          )}
+          {user.points !== undefined && (
+            <p className="profile-points">포인트: {user.points} P</p>
+          )}
           {user.bio && <p className="profile-bio">{user.bio}</p>}
 
           <div className="profile-stats">
@@ -190,7 +206,9 @@ const UserProfile = () => {
                   <div key={post.postId} className="content-item">
                     <Link to={`/board/${post.postId}`} className="content-link">
                       <h3 className="content-title">{post.title}</h3>
-                      <p className="content-excerpt">{(post.content || '').substring(0, 100)}...</p>
+                      <p className="content-excerpt">
+                        {(post.content || '').substring(0, 100)}...
+                      </p>
                       <div className="content-meta">
                         <span className="content-date">{formatDate(post.createdAt)}</span>
                         <span className="content-views">조회 {post.viewCount}</span>
