@@ -18,24 +18,7 @@
   text-align: center;
 }
 
-.filter-controls {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.filter-controls label {
-  margin-right: 0.5rem;
-  font-weight: 500;
-}
-
-.filter-controls select {
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #444;
-  background-color: #2a2a2a;
-  color: #d3d3d3;
-}
-
+/* 테이블 */
 .ranking-table {
   width: 100%;
   border-collapse: collapse;
@@ -63,6 +46,28 @@
   color: #b0b0b0;
 }
 
+/* 닉네임 셀에서 아이콘과 텍스트 정렬 */
+.nickname-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* UserBadgeAndNickname 기본 크기 조정(랭킹 표용) */
+.nickname-cell .ubn-icon,
+.nickname-cell .level-badge-header {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  object-fit: contain !important;
+  flex: 0 0 20px !important;
+}
+
+/* 페이지네이션 */
 .pagination-controls {
   text-align: center;
   margin-top: 2rem;
@@ -127,5 +132,16 @@
 
   .pagination-controls span {
     font-size: 1rem;
+  }
+
+  .nickname-cell .ubn-icon,
+  .nickname-cell .level-badge-header {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    flex: 0 0 18px !important;
   }
 }

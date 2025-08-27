@@ -1,10 +1,8 @@
+// src/pages/Ranking.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// Removed getLevelBadgeImage as UserBadgeAndNickname will handle it
-// import { getLevelBadgeImage } from '../utils/badgeUtils';
-import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Import the new component
-
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname';
 import '../css/Ranking.css';
 
 function Ranking() {
@@ -21,62 +19,44 @@ function Ranking() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({
-        page: page,
-        size: size,
-      });
-
+      const params = new URLSearchParams({ page, size });
       const response = await fetch(`/api/users/ranking?${params.toString()}`, {
         headers: getAuthHeaders(),
         credentials: 'include',
       });
-
-      if (!response.ok) {
-        throw new Error('랭킹 정보를 불러오기 실패');
-      }
+      if (!response.ok) throw new Error('랭킹 정보를 불러오기 실패');
 
       const data = await response.json();
-      let users = data.data.content || [];
+      const users = data?.data?.content || [];
 
-      // Fetch representative badges for each user
-      const usersWithBadges = await Promise.all(users.map(async (user) => {
+      // 각 사용자 대표뱃지 취득
+      const withBadges = await Promise.all(users.map(async (u) => {
         try {
-          const badgeRes = await fetch(`/api/badges/users/${user.userId}/featured`, {
+          const r = await fetch(`/api/badges/users/${u.userId}/featured`, {
             headers: getAuthHeaders(),
             credentials: 'include',
           });
-          if (badgeRes.ok) {
-            const badgeData = await badgeRes.json();
-            if (badgeData.data && badgeData.data.length > 0) {
-              return { ...user, representativeBadge: badgeData.data[0] };
-            }
+          if (r.ok) {
+            const j = await r.json();
+            if (j?.data?.length) return { ...u, representativeBadge: j.data[0] };
           }
-        } catch (err) {
-          console.error(`Failed to fetch featured badge for user ${user.userId}:`, err);
-        }
-        return user; // Return user even if badge fetch fails
+        } catch (e) { /* ignore */ }
+        return u;
       }));
 
-      setRankingData(usersWithBadges);
-      setTotalPages(data.data.totalPages || 0);
-
+      setRankingData(withBadges);
+      setTotalPages(data?.data?.totalPages || 0);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || '에러');
     } finally {
       setLoading(false);
     }
   }, [getAuthHeaders, page, size]);
 
-  useEffect(() => {
-    fetchRanking();
-  }, [fetchRanking]);
-
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
+  useEffect(() => { fetchRanking(); }, [fetchRanking]);
 
   if (loading) return <div className="loading-message">랭킹 정보를 불러오는 중...</div>;
-  if (error) return <div className="error-message">오류: {error}</div>;
+  if (error)   return <div className="error-message">오류: {error}</div>;
 
   return (
     <div className="ranking-page">
@@ -95,16 +75,15 @@ function Ranking() {
             </tr>
           </thead>
           <tbody>
-            {rankingData.map((user, index) => (
-              <tr key={user.userId}>
-                <td>{user.rank || (page * size) + index + 1}</td>
-                <td className="nickname-cell" onClick={() => navigate(`/users/${user.userId}`)}>
-                  {/* Use the new UserBadgeAndNickname component */}
-                  <UserBadgeAndNickname user={user} showLink={false} className="level-badge-ranking" />
-                  {user.nickname}
+            {rankingData.map((u, idx) => (
+              <tr key={u.userId}>
+                <td>{u.rank || page * size + idx + 1}</td>
+                <td className="nickname-cell" onClick={() => navigate(`/users/${u.userId}`)}>
+                  {/* 닉네임 중복 출력 금지 — 이 컴포넌트가 뱃지+닉네임 모두 렌더 */}
+                  <UserBadgeAndNickname user={u} showLink={false} />
                 </td>
-                <td>{user.currentLevel}</td>
-                <td>{user.currentPoints} P</td>
+                <td>{u.currentLevel}</td>
+                <td>{u.currentPoints} P</td>
               </tr>
             ))}
           </tbody>
@@ -112,9 +91,9 @@ function Ranking() {
       )}
 
       <div className="pagination-controls">
-        <button onClick={() => handlePageChange(page - 1)} disabled={page === 0}>이전</button>
+        <button onClick={() => setPage((p) => p - 1)} disabled={page === 0}>이전</button>
         <span>페이지 {page + 1} / {totalPages}</span>
-        <button onClick={() => handlePageChange(page + 1)} disabled={page + 1 >= totalPages}>다음</button>
+        <button onClick={() => setPage((p) => p + 1)} disabled={page + 1 >= totalPages}>다음</button>
       </div>
     </div>
   );
