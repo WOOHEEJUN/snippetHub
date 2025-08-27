@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -31,6 +33,8 @@ public class NotificationService {
 
     // 실시간 알림 생성 (WebSocket 포함)
     public void createNotification(User user, String message, NotificationType type, String targetType, Long targetId, Long parentId) {
+        log.info("알림 생성 시작 - 사용자: {}, 메시지: {}", user.getEmail(), message);
+        
         Notification notification = Notification.builder()
                 .user(user)
                 .message(message)
@@ -42,6 +46,7 @@ public class NotificationService {
                 .build();
         
         Notification savedNotification = notificationRepository.save(notification);
+        log.info("알림 저장 완료 - ID: {}", savedNotification.getId());
         
         // WebSocket을 통해 실시간 알림 전송
         WebSocketNotificationDto wsNotification = WebSocketNotificationDto.builder()
@@ -55,11 +60,16 @@ public class NotificationService {
                 .isRead(savedNotification.getIsRead())
                 .build();
         
-        messagingTemplate.convertAndSendToUser(
-            user.getEmail(),
-            "/queue/notifications",
-            wsNotification
-        );
+        try {
+            messagingTemplate.convertAndSendToUser(
+                user.getEmail(),
+                "/queue/notifications",
+                wsNotification
+            );
+            log.info("WebSocket 알림 전송 완료 - 사용자: {}, 메시지: {}", user.getEmail(), message);
+        } catch (Exception e) {
+            log.error("WebSocket 알림 전송 실패 - 사용자: {}, 오류: {}", user.getEmail(), e.getMessage(), e);
+        }
     }
 
     // 간단한 테스트 알림 생성 (WebSocket 없이)

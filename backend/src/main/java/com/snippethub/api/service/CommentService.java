@@ -17,10 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class CommentService {
 
     private final CommentRepository commentRepository;
@@ -83,6 +85,7 @@ public class CommentService {
             // 대댓글인 경우 부모 댓글 작성자에게 알림
             if (!parentComment.getAuthor().getId().equals(user.getId())) {
                 String message = user.getNickname() + "님이 회원님의 댓글에 답글을 남겼습니다.";
+                log.info("대댓글 알림 생성 - 대상: {}, 메시지: {}", parentComment.getAuthor().getEmail(), message);
                 notificationService.createNotification(
                     parentComment.getAuthor(), 
                     message,
@@ -91,11 +94,14 @@ public class CommentService {
                     comment.getId(), // 댓글 ID
                     post.getId()     // 게시글 ID (부모)
                 );
+            } else {
+                log.info("자기 자신에게는 알림을 보내지 않음 - 사용자: {}", user.getEmail());
             }
         } else {
             // 원댓글인 경우 게시글 작성자에게 알림
             if (!post.getAuthor().getId().equals(user.getId())) {
                 String message = user.getNickname() + "님이 회원님의 게시글에 댓글을 남겼습니다: " + post.getTitle();
+                log.info("원댓글 알림 생성 - 대상: {}, 메시지: {}", post.getAuthor().getEmail(), message);
                 notificationService.createNotification(
                     post.getAuthor(), 
                     message,
@@ -104,6 +110,8 @@ public class CommentService {
                     post.getId(),    // 게시글 ID
                     null            // 부모 ID 없음
                 );
+            } else {
+                log.info("자기 자신에게는 알림을 보내지 않음 - 사용자: {}", user.getEmail());
             }
         }
 
