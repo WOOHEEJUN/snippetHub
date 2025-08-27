@@ -3,9 +3,30 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
 import { getBadgeImagePath } from '../utils/badgeUtils';
-
-
 import '../css/Header.css';
+
+/* 대표 뱃지 작은 코인(휘장 링 포함) */
+const RepBadgeCoin = ({ badge }) => {
+  const [failed, setFailed] = useState(false);
+
+  // tierLetter가 있으면 S/A/B/C/D/F 중앙 PNG 사용
+  const byTier = badge?.tierLetter ? `/badges/badge_${badge.tierLetter}.png` : null;
+  // 이름 기반 파일이 있으면 사용 (없으면 onError로 F 폴백)
+  const byName = badge?.name ? getBadgeImagePath(badge.name) : null;
+
+  const src = failed ? '/badges/badge_f.png' : (byTier || byName || '/badges/badge_f.png');
+
+  return (
+    <span className="rep-coin" title={badge?.name || '대표 뱃지'}>
+      <img
+        src={src}
+        alt={badge?.name || '대표 뱃지'}
+        onError={() => setFailed(true)}
+        draggable="false"
+      />
+    </span>
+  );
+};
 
 const Header = () => {
   const navigate = useNavigate();
@@ -92,18 +113,11 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  안녕하세요,{' '}
+                  {/* ✅ 닉네임 앞에 대표 뱃지(휘장 코인) */}
                   {user?.representativeBadge && (
-                    <img
-                      src={getBadgeImagePath(user.representativeBadge.name)}
-                      alt={user.representativeBadge.name}
-                      className="representative-badge-header"
-                      width={24}
-                      height={24}
-                      style={{ marginRight: '8px', verticalAlign: 'middle' }}
-                    />
+                    <RepBadgeCoin badge={user.representativeBadge} />
                   )}
-                  {user?.nickname || user?.email}님!
+                  안녕하세요, {user?.nickname || user?.email}님!
                 </span>
                 <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
                 <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>

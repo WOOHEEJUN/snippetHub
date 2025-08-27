@@ -180,4 +180,66 @@
     max-height:20px !important;
     flex:0 0 20px !important;
   }
+  /* 대표 뱃지(닉네임 옆 미니 코인) */
+.rep-coin{
+  --size: 24px;
+  --ring: 2.4px;              /* 링 두께 */
+  position: relative;
+  display: inline-flex;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  background:
+    radial-gradient(60% 60% at 35% 30%, rgba(255,255,255,.06), transparent 70%) padding-box,
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.1)) padding-box;
+  border: 1px solid #222;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.35),
+    0 2px 8px rgba(0,0,0,.35);
+  overflow: visible;
+  vertical-align: middle;
+}
+
+/* 무지개 링 (작게, 은은하게 회전) */
+.rep-coin::before{
+  content:"";
+  position:absolute; inset:-5px; border-radius:50%;
+  -webkit-mask:
+    radial-gradient(circle,
+      transparent calc(50% - var(--ring)),
+      #000 calc(50% - var(--ring) + 0.5px),
+      #000 calc(50% + var(--ring) - 0.5px),
+      transparent calc(50% + var(--ring)));
+          mask:
+    radial-gradient(circle,
+      transparent calc(50% - var(--ring)),
+      #000 calc(50% - var(--ring) + 0.5px),
+      #000 calc(50% + var(--ring) - 0.5px),
+      transparent calc(50% + var(--ring)));
+  background: conic-gradient(#9b87f5, #67e8f9, #86efac, #9b87f5);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.45));
+  opacity:.8;
+  animation: repSpin 12s linear infinite;
+}
+
+.rep-coin img{
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* 모션 최소화 존중 */
+@media (prefers-reduced-motion: reduce){
+  .rep-coin::before{ animation: none; }
+}
+
+@keyframes repSpin { to { transform: rotate(360deg); } }
+
 }
