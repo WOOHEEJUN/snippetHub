@@ -15,16 +15,9 @@ class WebSocketService {
       return 'http://localhost:8080/ws';
     }
     
-    // 환경 변수에서 WebSocket URL 가져오기
-    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL;
-    if (wsUrl) {
-      return wsUrl;
-    }
-    
     // AWS 서버의 경우 직접 IP 주소 사용
     if (window.location.hostname === 'snippethub.co.kr') {
-      // 임시로 같은 도메인 사용 (프록시를 통해)
-      return 'https://snippethub.co.kr/ws';
+      return 'http://10.0.3.74:8080/ws';
     }
     
     // 기본 설정

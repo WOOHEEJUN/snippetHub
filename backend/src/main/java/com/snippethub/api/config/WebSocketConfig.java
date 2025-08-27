@@ -29,7 +29,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         "http://localhost:3000",
                         "https://snippethub-frontend.s3-website.ap-northeast-2.amazonaws.com",
                         "https://d3vxt1w788wnw4.cloudfront.net",
-                        "https://snippethub.co.kr"
+                        "https://snippethub.co.kr",
+                        "http://10.0.3.74:8080",
+                        "http://10.0.3.74"
                     )
                 .withSockJS()
                 .setHeartbeatTime(25000)
