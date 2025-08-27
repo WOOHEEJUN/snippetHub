@@ -5,8 +5,9 @@ import {
   FaComment, FaEye, FaUser, FaCalendarAlt, FaEdit, FaTrash, FaThumbsUp, FaTag,
   FaHeart, FaRegHeart
 } from 'react-icons/fa';
-import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils';
+
 import '../css/BoardDetail.css';
+import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const MOCK_ENABLED = false;
 

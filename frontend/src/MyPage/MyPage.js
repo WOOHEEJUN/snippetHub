@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import LevelProgress from '../components/LevelProgress';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
+
 import '../css/Mypage.css';
 
 function MyPage() {

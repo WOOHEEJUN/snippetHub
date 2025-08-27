@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
-import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils';
+import { getBadgeImagePath } from '../utils/badgeUtils';
+
 
 import '../css/Header.css';
 

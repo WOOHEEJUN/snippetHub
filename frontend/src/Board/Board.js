@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
+
 import '../css/Board.css';
 
 const Board = () => {

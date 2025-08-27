@@ -1,7 +1,37 @@
-// src/pages/BadgeGuide.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
+
+const SERVER_FILTER = false;
+const DEBUG = false;
+
+const CATEGORY_ORDER = ['CREATION', 'ENGAGEMENT', 'ACHIEVEMENT', 'MILESTONE', 'COMMUNITY', 'SPECIAL', 'EVENT', 'ACTIVITY'];
+
+const categoryLabel = (cat) => {
+  const map = {
+    ALL: '전체',
+    CREATION: '창작',
+    ENGAGEMENT: '참여',
+    ACHIEVEMENT: '업적',
+    MILESTONE: '이정표',
+    COMMUNITY: '커뮤니티',
+    SPECIAL: '특별',
+    EVENT: '이벤트',
+    ACTIVITY: '활동',
+    OTHER: '기타',
+  };
+  return map[cat] || cat;
+};
+
+const fetchJsonReport = async (url, options) => {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const error = new Error('HTTP error');
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+};
 
 /* ===== 공용 유틸 ===== */
 const parseJsonSafe = async (res) => {

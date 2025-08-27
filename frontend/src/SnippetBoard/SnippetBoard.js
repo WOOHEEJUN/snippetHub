@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
+
 import '../css/SnippetBoard.css';
 
 const LANGUAGE_OPTIONS = ['C', 'Python', 'Java', 'JavaScript', 'CSS', 'HTML'];

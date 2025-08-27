@@ -33,7 +33,7 @@ import SavedProblems from './MyPage/SavedProblems';
 import NotificationBell from './components/NotificationBell';
 import Header from './components/Header';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { getLevelBadgeImage } from './utils/badgeUtils';
+
 import './css/App.css';
 
 

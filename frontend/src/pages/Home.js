@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../css/Home.css';
-import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils'; // 뱃지 유틸리티 임포트
+
 
 import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
+import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const Home = () => {
   const navigate = useNavigate();

@@ -8,8 +8,9 @@ import {
   FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy
 } from 'react-icons/fa';
 import AICodeEvaluation from '../components/AICodeEvaluation';
-import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils';
+
 import '../css/SnippetDetail.css';
+import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const API_BASE = '/api';
 const ENDPOINTS = {

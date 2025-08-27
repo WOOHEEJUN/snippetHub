@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLevelBadgeImage } from '../utils/badgeUtils'; 
+import { getLevelBadgeImage } from '../utils/badgeUtils';
+ 
 import '../css/Ranking.css';
 
 function Ranking() {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
-import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils'; 
+ 
 import '../css/UserProfile.css';
+import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const UserProfile = () => {
   const { userId } = useParams();
