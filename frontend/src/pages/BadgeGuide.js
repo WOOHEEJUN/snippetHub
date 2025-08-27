@@ -43,23 +43,34 @@ const CATEGORY_DEFAULT = {
   COMMUNITY:'#32CD32', SPECIAL:'#9C27B0', EVENT:'#1E90FF', ACTIVITY:'#8A2BE2', OTHER:'#8ab0d1',
 };
 
-/* ===== 희귀도 계산 (기존 로직 유지) ===== */
+/* =========================================================
+   희귀도 계산 (더 빡세게)
+   - rc: 요구 횟수 / pts: 포인트 보상
+   - 아래 임계치 중 하나라도 만족하면 상위 희귀도로 승급
+   - 이름 키워드도 힌트로 사용
+   ========================================================= */
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
   const pts = Number(b.points_reward ?? b.pointsReward ?? 0) || 0;
-  const explicit = b.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
-  if (explicit || rc >= 1000 || pts >= 1000) return 'legendary';
-  if (rc >= 500   || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
-  if (rc >= 100   || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
-  if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
-  return 'common';
+
+  const isLegendName = /LEGEND|GRANDMASTER|DIAMOND|MYTHIC|GOD|CHALLENGER|10000|365/.test(name);
+  const isEpicName    = /MASTER|PLATINUM|TOP_?100|STREAK_?180/.test(name);
+  const isRareName    = /GOLD|500\b|STREAK_?90/.test(name);
+  const isUncommonNm  = /SILVER|100\b|STREAK_?30/.test(name);
+
+  if (b.isRare === true || isLegendName || rc >= 2000 || pts >= 2000) return 'legendary';
+  if (isEpicName   || rc >= 800  || pts >= 1200) return 'epic';
+  if (isRareName   || rc >= 300  || pts >= 400 ) return 'rare';
+  if (isUncommonNm || rc >= 80   || pts >= 120 ) return 'uncommon';
+  return 'common'; // 가장 쉬운 구간 (D/F는 아래 티어에서 분기)
 };
 
-/* ===== 티어(S/A/B/C/D/F) 계산 ===== */
-// rarity -> 기본 티어
+/* ===== 티어(S/A/B/C/D/F) 계산 (더 빡세게) ===== */
+// rarity -> 기본 티어 매핑 (fallback)
 const RARITY_TO_TIER = { legendary:'s', epic:'a', rare:'b', uncommon:'c', common:'d' };
-// 이름 안에 S/A/B/C/D/F 단서가 있으면 우선 사용 (예: "..._F", "F_TIER")
+
+// 이름 안에 S/A/B/C/D/F 단서가 있으면 우선 사용
 const tierHintFromName = (name) => {
   const s = norm(name);
   if (/\bS(\b|_RANK|_TIER)/.test(s)) return 's';
@@ -70,14 +81,28 @@ const tierHintFromName = (name) => {
   if (/\bF(\b|_RANK|_TIER|_BADGE)?\b/.test(s)) return 'f';
   return null;
 };
-// 최종 티어: 1) 서버필드 tier/grade 2) 이름 힌트 3) rarity 매핑 4) 실패 시 'f'
+
+// 최종 티어: 1) 직접(tier/grade) 2) 강화된 수치/키워드 3) 이름 힌트 4) rarity 매핑 5) F
 const computeTierLetter = (b) => {
   const direct = (b?.tier ?? b?.grade ?? '').toString().trim().toLowerCase();
   if (['s','a','b','c','d','f'].includes(direct)) return direct;
+
+  const name = norm(b?.name ?? '');
+  const rc = Number(b?.required_count ?? b?.requiredCount ?? b?.goal ?? 0) || 0;
+  const pts = Number(b?.points_reward  ?? b?.pointsReward ?? 0) || 0;
+
+  // 강화 임계치 (C부터 확실히 어렵게)
+  if (/LEGEND|GRANDMASTER|DIAMOND|MYTHIC|GOD/.test(name) || rc >= 2000 || pts >= 2000) return 's';
+  if (/MASTER|PLATINUM|TOP_?100|STREAK_?180/.test(name) || rc >= 1000 || pts >= 1200) return 'a';
+  if (/GOLD|500\b|STREAK_?120/.test(name)      || rc >= 400  || pts >= 600 ) return 'b';
+  if (/SILVER|100\b|STREAK_?60/.test(name)     || rc >= 150  || pts >= 250 ) return 'c';
+  if (/BRONZE|25\b|STREAK_?14/.test(name)      || rc >= 40   || pts >= 80  ) return 'd';
+
   const hinted = tierHintFromName(b?.name ?? '');
   if (hinted) return hinted;
+
   const viaRarity = RARITY_TO_TIER[(b?.rarity ?? '').toLowerCase()];
-  return viaRarity || 'f';
+  return viaRarity || 'f'; // 나머지는 전부 F
 };
 
 /* ===== 정규화 ===== */
