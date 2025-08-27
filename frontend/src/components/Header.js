@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +10,7 @@ import {
 } from '../utils/badgeUtils';
 import '../css/Header.css';
 
-/** 닉네임 옆에 붙는 대표뱃지 칩 (고정 크기 + 소형 링/오라) */
+/* 대표뱃지(무지개 휘장 + 코어 PNG) */
 const RepBadge = ({ badge, size = 22 }) => {
   if (!badge) return null;
   const src = getRepresentativeBadgeImage(badge);
@@ -41,17 +40,17 @@ const Header = () => {
     alert('로그아웃 되었습니다.');
     navigate('/');
   };
-  const toggleHamburger = () => setIsHamburgerOpen(v => !v);
+  const toggleHamburger = () => setIsHamburgerOpen((v) => !v);
 
   if (loading) return <p>Loading...</p>;
 
-  // 대표뱃지 / 레벨 폴백
+  /* 대표뱃지/레벨 결정 */
   const repBadge = user?.representativeBadge ?? user?.data?.representativeBadge ?? null;
   const userLevel = getUserLevel(user);
   const levelImg = !repBadge ? getLevelBadgeImage(userLevel) : '';
 
   return (
-    <header className="header no-rep-bg">
+    <header className="header">
       <div className="header-container">
         {/* LEFT */}
         <div className="header-left">
@@ -62,10 +61,12 @@ const Header = () => {
           <nav className="main-nav">
             <ul className="nav-menu-horizontal">
               <li className="nav-item">
-                <span className="nav-link-main">게시판</span>
+                <span className="nav-link-main">자유게시판</span>
                 <ul className="submenu">
                   <li><Link to="/board">자유게시판</Link></li>
-                  <li><Link to="/snippets">스니펫게시판</Link></li>
+                  <li><Link to="/board?category=GENERAL">자유</Link></li>
+                  <li><Link to="/board?category=QNA">Q&A</Link></li>
+                  <li><Link to="/board?category=INFO">정보</Link></li>
                 </ul>
               </li>
 
@@ -82,6 +83,7 @@ const Header = () => {
               <li className="nav-item">
                 <span className="nav-link-main">스니펫</span>
                 <ul className="submenu">
+                  <li><Link to="/snippets">스니펫게시판</Link></li>
                   <li><Link to="/snippets?language=C&sort=LATEST&page=0">C</Link></li>
                   <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0">JavaScript</Link></li>
                   <li><Link to="/snippets?language=Python&sort=LATEST&page=0">Python</Link></li>
@@ -120,9 +122,9 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  {/* 1) 대표뱃지 있으면 → 휘장 포함 칩 */}
+                  {/* 1) 대표뱃지 있으면 → 휘장 포함 chip */}
                   {repBadge && <RepBadge badge={repBadge} size={22} />}
-                  {/* 2) 없으면 → 등급 PNG 폴백 */}
+                  {/* 2) 없으면 → 등급 PNG로 대체 */}
                   {!repBadge && levelImg && (
                     <img
                       src={levelImg}
@@ -151,10 +153,12 @@ const Header = () => {
             {isHamburgerOpen && (
               <div className="hamburger-dropdown">
                 <div className="hamburger-menu-section">
-                  <h4>게시판</h4>
+                  <h4>자유게시판</h4>
                   <ul>
                     <li><Link to="/board" onClick={toggleHamburger}>자유게시판</Link></li>
-                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
+                    <li><Link to="/board?category=GENERAL" onClick={toggleHamburger}>자유</Link></li>
+                    <li><Link to="/board?category=QNA" onClick={toggleHamburger}>Q&A</Link></li>
+                    <li><Link to="/board?category=INFO" onClick={toggleHamburger}>정보</Link></li>
                   </ul>
                 </div>
 
@@ -171,6 +175,7 @@ const Header = () => {
                 <div className="hamburger-menu-section">
                   <h4>스니펫</h4>
                   <ul>
+                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
                     <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
                     <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
                     <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>
@@ -191,8 +196,15 @@ const Header = () => {
                       <li><Link to="/mypage/submission-history" onClick={toggleHamburger}>제출 이력</Link></li>
                       <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
                       <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
-                      <li><Link to="/mypage/saved-problems" onClick={toggleHamburger}>저장한 문제보기</Link></li>
-                      <li><button onClick={() => { handleLogout(); toggleHamburger(); }} className="btn btn-primary">로그아웃</button></li>
+                      <li><Link to="/mypage/saved-problems">저장한 문제보기</Link></li>
+                      <li>
+                        <button
+                          onClick={() => { handleLogout(); toggleHamburger(); }}
+                          className="btn btn-primary"
+                        >
+                          로그아웃
+                        </button>
+                      </li>
                     </ul>
                   </div>
                 ) : (
