@@ -169,7 +169,7 @@ const Header = () => {
                     />
                   )}
                   {/* 닉네임 */}
-                  안녕하세요, <UserBadgeAndNickname user={user} showLink={false} />님!
+                  안녕하세요, <UserBadgeAndNickname user={user} showLink={false} showBadge={false} />님!
                 </span>
                 <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
                 <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
