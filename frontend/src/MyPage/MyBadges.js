@@ -2,10 +2,9 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaCrown, FaCoins } from 'react-icons/fa';
-import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
 import '../css/MyBadges.css';
 
-/* ---------- 유틸 ---------- */
+/* ===== 공통 유틸 (가이드와 동일) ===== */
 const parseJsonSafe = async (res) => {
   try {
     const ct = res.headers.get('content-type') || '';
@@ -22,20 +21,56 @@ const extractArray = (data) => {
 };
 const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/* 희귀도(휘장 오라용 – 단순판) */
+/* ===== 희귀도/티어 계산 (뱃지 가이드와 동일 로직) ===== */
 const computeRarity = (b) => {
-  const name = norm(b?.name);
-  const rc = Number(b?.required_count ?? b?.requiredCount ?? b?.goal ?? 0) || 0;
-  const pts = Number(b?.points_reward ?? b?.pointsReward ?? 0) || 0;
-  const explicit = b?.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
-  if (explicit || rc >= 1000 || pts >= 1000) return 'legendary';
-  if (rc >= 500   || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
-  if (rc >= 100   || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
-  if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
+  const name = norm(b.name);
+  const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
+  const pts = Number(b.points_reward ?? b.pointsReward ?? 0) || 0;
+
+  const isLegendName = /LEGEND|GRANDMASTER|DIAMOND|MYTHIC|GOD|CHALLENGER|10000|365/.test(name);
+  const isEpicName    = /MASTER|PLATINUM|TOP_?100|STREAK_?180/.test(name);
+  const isRareName    = /GOLD|500\b|STREAK_?90/.test(name);
+  const isUncommonNm  = /SILVER|100\b|STREAK_?30/.test(name);
+
+  if (b.isRare === true || isLegendName || rc >= 2000 || pts >= 2000) return 'legendary';
+  if (isEpicName   || rc >= 800  || pts >= 1200) return 'epic';
+  if (isRareName   || rc >= 300  || pts >= 400 ) return 'rare';
+  if (isUncommonNm || rc >= 80   || pts >= 120 ) return 'uncommon';
   return 'common';
 };
+const RARITY_TO_TIER = { legendary:'s', epic:'a', rare:'b', uncommon:'c', common:'d' };
+const tierHintFromName = (name) => {
+  const s = norm(name);
+  if (/\bS(\b|_RANK|_TIER)/.test(s)) return 's';
+  if (/\bA(\b|_RANK|_TIER)/.test(s)) return 'a';
+  if (/\bB(\b|_RANK|_TIER)/.test(s)) return 'b';
+  if (/\bC(\b|_RANK|_TIER)/.test(s)) return 'c';
+  if (/\bD(\b|_RANK|_TIER)/.test(s)) return 'd';
+  if (/\bF(\b|_RANK|_TIER|_BADGE)?\b/.test(s)) return 'f';
+  return null;
+};
+const computeTierLetter = (b) => {
+  const direct = (b?.tier ?? b?.grade ?? '').toString().trim().toLowerCase();
+  if (['s','a','b','c','d','f'].includes(direct)) return direct;
 
-/* 정규화 */
+  const name = norm(b?.name ?? '');
+  const rc = Number(b?.required_count ?? b?.requiredCount ?? b?.goal ?? 0) || 0;
+  const pts = Number(b?.points_reward  ?? b?.pointsReward ?? 0) || 0;
+
+  if (/LEGEND|GRANDMASTER|DIAMOND|MYTHIC|GOD/.test(name) || rc >= 2000 || pts >= 2000) return 's';
+  if (/MASTER|PLATINUM|TOP_?100|STREAK_?180/.test(name) || rc >= 1000 || pts >= 1200) return 'a';
+  if (/GOLD|500\b|STREAK_?120/.test(name)      || rc >= 400  || pts >= 600 ) return 'b';
+  if (/SILVER|100\b|STREAK_?60/.test(name)     || rc >= 150  || pts >= 250 ) return 'c';
+  if (/BRONZE|25\b|STREAK_?14/.test(name)      || rc >= 40   || pts >= 80  ) return 'd';
+
+  const hinted = tierHintFromName(b?.name ?? '');
+  if (hinted) return hinted;
+
+  const viaRarity = RARITY_TO_TIER[(b?.rarity ?? '').toLowerCase()];
+  return viaRarity || 'f';
+};
+
+/* ===== 정규화 (가이드와 동일 골격) ===== */
 const normalizeBadge = (b, idx = 0) => {
   const n = {
     badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
@@ -46,122 +81,35 @@ const normalizeBadge = (b, idx = 0) => {
     currentProgress: b?.currentProgress ?? b?.progress ?? 0,
     requirements: b?.requirements ?? b?.requirementList ?? [],
     rewards: b?.rewards ?? b?.rewardList ?? [],
+    pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
     owned: b?.owned ?? b?.isOwned ?? true,
-    icon: b?.icon ?? '🏅',
-    color: b?.color ?? '#FFD700',
-    imageUrl: b?.imageUrl ?? b?.image ?? b?.iconUrl ?? null,
-    earnedAt: b?.earnedAt ?? b?.awarded_at ?? null,
-    isFeatured: b?.isFeatured ?? false
   };
   n.rarity = computeRarity({ ...b, ...n });
+  n.tierLetter = computeTierLetter({ ...b, ...n });
   return n;
 };
 
-/* ===== 등급 → 파일명 매핑(정적 폴더) ===== */
-const LEVEL_IMG_MAP = {
-  BRONZE: '/badges/bronze.png',
-  SILVER: '/badges/silver.png',
-  GOLD: '/badges/gold.png',
-  PLATINUM: '/badges/platinum.png',
-  DIAMOND: '/badges/diamond.png',
-  MASTER: '/badges/master.png',
-  GRANDMASTER: '/badges/grandmaster.png',
-  LEGEND: '/badges/legend.png'
-};
+/* ===== 가이드와 동일한 중앙 PNG 컴포넌트 ===== */
+const badgePngSrc = (t) => `/badges/badge_${t || 'f'}.png`;
+const CenterBadge = ({ tier = 'f', alt }) => (
+  <div className="badge-icon-container">
+    <img
+      src={badgePngSrc(tier)}
+      alt={alt}
+      className="badge-core-img"
+      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+    />
+  </div>
+);
 
-/* ---------- 이미지 후보 빌더 ---------- */
-const buildBadgeImageCandidates = (badge) => {
-  const list = [];
-
-  // 1) 대표 배지 유틸(있다면 최우선)
-  try {
-    if (typeof getRepresentativeBadgeImage === 'function') {
-      const fromUtil = getRepresentativeBadgeImage(badge);
-      if (fromUtil) list.push(fromUtil);
-    }
-  } catch (_) {}
-
-  // 2) 서버/객체에서 온 직접 경로
-  if (badge?.imageUrl) list.push(badge.imageUrl);
-
-  // 3) 배지 객체에 등급 정보가 있으면 등급 이미지 후보들 추가
-  const levelName = norm(badge?.levelName ?? badge?.level ?? '');
-  if (levelName) {
-    try {
-      const fromLevelUtil = getLevelBadgeImage?.(levelName);
-      if (fromLevelUtil) list.push(fromLevelUtil);
-    } catch (_) {}
-    if (LEVEL_IMG_MAP[levelName]) list.push(LEVEL_IMG_MAP[levelName]);
-    list.push(`/badges/${levelName.toLowerCase()}.png`); // 관용형
-  }
-
-  // 4) 마지막 안전망(프로젝트 공통 더미가 있다면 남겨두세요)
-  list.push(
-    '/badges/badge_a.png',
-    '/badges/badge_b.png',
-    '/badges/badge_c.png'
-  );
-
-  // 중복 제거
-  return Array.from(new Set(list.filter(Boolean)));
-};
-
-/* ---------- 배지 비주얼 (무한 로드 방지 + 폴백) ---------- */
-const BadgeVisual = ({ badge }) => {
-  const candidates = useMemo(() => buildBadgeImageCandidates(badge), [badge]);
-  const [idx, setIdx] = useState(0);
-
-  const outOfCandidates = idx >= candidates.length;
-  const src = outOfCandidates ? null : candidates[idx];
-
-  return (
-    <div className="badge-icon-container" data-rarity={badge.rarity}>
-      {!outOfCandidates && src ? (
-        <img
-          key={src}
-          src={src}
-          alt={badge.name}
-          className="badge-core-img"
-          loading="lazy"
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-          onError={() => setIdx((i) => i + 1)}
-        />
-      ) : (
-        <span className="badge-fallback" aria-hidden="true">
-          {norm(badge?.name).slice(0, 1) || '🏅'}
-        </span>
-      )}
-    </div>
-  );
-};
-
-/* 등급 배지를 ‘가짜 배지’ 객체로 만들어서 BadgeVisual에 그대로 사용 */
-const makeLevelBadge = (levelNameRaw) => {
-  const levelName = norm(levelNameRaw || 'BRONZE');
-  const n = {
-    badgeId: `level-${levelName}`,
-    name: `${levelName} 등급`,
-    description: '대표 뱃지 미장착 시 노출되는 등급 배지',
-    category: 'LEVEL',
-    owned: true,
-    imageUrl: null,
-    levelName,      // 후보 이미지 빌더가 이 값을 사용
-    level: levelName
-  };
-  n.rarity = computeRarity({ name: levelName }); // 링 효과도 등급에 맞게
-  return n;
-};
-
+/* ===== MyBadges ===== */
 export default function MyBadges() {
   const { user, getAuthHeaders, updateRepresentativeBadge } = useAuth();
 
   const [level, setLevel] = useState(null);
   const [points, setPoints] = useState(null);
-
   const [badges, setBadges] = useState([]);
   const [featuredBadges, setFeaturedBadges] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -192,7 +140,6 @@ export default function MyBadges() {
 
         setBadges(extractArray(badgesData).map((b, i) => normalizeBadge(b, i)));
 
-        // 서버가 여러 개 보내도 화면은 1개만 유지
         const incoming = extractArray(featuredData).map((b, i) => normalizeBadge(b, i));
         setFeaturedBadges(incoming.length ? [incoming[0]] : []);
       } catch (e) {
@@ -204,15 +151,10 @@ export default function MyBadges() {
     })();
   }, [user, getAuthHeaders]);
 
-  /* 현재 단 하나의 대표(theFeatured) */
+  /* 대표는 항상 1개만 유지 */
   const theFeatured = useMemo(() => featuredBadges[0] ?? null, [featuredBadges]);
   const hasFeatured = !!theFeatured;
 
-  /* 대표 없을 때 보여줄 등급 배지 */
-  const levelNameUpper = norm(level?.levelName ?? user?.level ?? user?.userLevel ?? 'BRONZE');
-  const levelFallbackBadge = useMemo(() => makeLevelBadge(levelNameUpper), [levelNameUpper]);
-
-  /* 항상 1개만 대표로 유지 */
   const handleToggleFeatured = useCallback(
     async (badge) => {
       try {
@@ -271,30 +213,25 @@ export default function MyBadges() {
         </Link>
       </div>
 
-      {/* 대표 뱃지: 가운데 1개 (없으면 등급 배지) */}
+      {/* 대표 뱃지 (가이드와 동일한 센터 PNG 사용) */}
       <div className="badge-section">
         <h3>대표 뱃지</h3>
-
-        <div className="featured-grid">
-          <div
-            className="badge-item featured"
-            data-rarity={(hasFeatured ? theFeatured : levelFallbackBadge).rarity}
-          >
-            <BadgeVisual badge={hasFeatured ? theFeatured : levelFallbackBadge} />
-            <div className="badge-name" title={hasFeatured ? theFeatured.name : levelFallbackBadge.name}>
-              {hasFeatured ? theFeatured.name : levelFallbackBadge.name}
-            </div>
-
-            {hasFeatured ? (
+        {!hasFeatured ? (
+          <div className="no-badges">대표 뱃지가 없습니다.</div>
+        ) : (
+          <div className="featured-grid">
+            <div className="badge-item featured" data-rarity={theFeatured.rarity}>
+              <CenterBadge tier={theFeatured.tierLetter} alt={theFeatured.name} />
+              <div className="badge-name" title={theFeatured.name}>{theFeatured.name}</div>
               <button className="equip-button danger" onClick={() => handleToggleFeatured(theFeatured)}>
                 대표 뱃지 해제
               </button>
-            ) : null}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* 내 모든 뱃지 */}
+      {/* 내 모든 뱃지 (가이드와 동일하게 표시) */}
       <div className="badge-section">
         <h3>내 모든 뱃지</h3>
         {badges.length === 0 ? (
@@ -309,7 +246,7 @@ export default function MyBadges() {
                   className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
                   data-rarity={badge.rarity}
                 >
-                  <BadgeVisual badge={badge} />
+                  <CenterBadge tier={badge.tierLetter} alt={badge.name} />
                   <div className="badge-name" title={badge.name}>{badge.name}</div>
 
                   {badge.owned && (
