@@ -1,6 +1,6 @@
 // frontend/src/Board/Board.js
-import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getLevelBadgeImage } from '../utils/badgeUtils';
 
@@ -8,6 +8,7 @@ import '../css/Board.css';
 
 const Board = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const [posts, setPosts] = useState([]);
@@ -19,7 +20,7 @@ const Board = () => {
   const [sortOrder, setSortOrder] = useState('LATEST');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const fetchPosts = (page = 0, term = '', sort = 'LATEST', category = '') => {
+  const fetchPosts = useCallback((page = 0, term = '', sort = 'LATEST', category = '') => {
     setLoading(true);
     setError(null);
 
@@ -43,16 +44,37 @@ const Board = () => {
         setPosts([]); // 오류 시 빈 배열
       })
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
-    fetchPosts(0, searchTerm, sortOrder, selectedCategory);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, sortOrder, selectedCategory]);
+    const params = new URLSearchParams(location.search);
+    const page = parseInt(params.get('page') || '0', 10);
+    const term = params.get('search') || '';
+    const sort = params.get('sort') || 'LATEST';
+    const category = params.get('category') || '';
 
+    setSearchTerm(term);
+    setSortOrder(sort);
+    setSelectedCategory(category);
+    
+    fetchPosts(page, term, sort, category);
+  }, [location.search, fetchPosts]);
+
+  const handleNavigation = (newParams) => {
+    const params = new URLSearchParams(location.search);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+    navigate({ search: params.toString() });
+  };
+  
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchPosts(0, searchTerm, sortOrder, selectedCategory);
+    handleNavigation({ search: searchTerm, page: 0 });
   };
 
   const handleWrite = () => {
@@ -65,7 +87,7 @@ const Board = () => {
   };
 
   const renderCategory = (cat) => {
-    const map = { GENERAL: '일반', QNA: 'Q&A', INFO: '정보' };
+    const map = { GENERAL: '자유', QNA: 'Q&A', INFO: '정보' };
     return map[cat] || cat || '-';
   };
 
@@ -90,10 +112,10 @@ const Board = () => {
           <select
             className="form-select"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => handleNavigation({ category: e.target.value, page: 0 })}
           >
             <option value="">모든 카테고리</option>
-            <option value="GENERAL">일반</option>
+            <option value="GENERAL">자유</option>
             <option value="QNA">Q&A</option>
             <option value="INFO">정보</option>
           </select>
@@ -101,7 +123,7 @@ const Board = () => {
           <select
             className="form-select"
             value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
+            onChange={(e) => handleNavigation({ sort: e.target.value, page: 0 })}
           >
             <option value="LATEST">최신순</option>
             <option value="POPULAR">인기순</option>
@@ -192,7 +214,7 @@ const Board = () => {
                   >
                     <button
                       className="page-link"
-                      onClick={() => fetchPosts(page, searchTerm, sortOrder, selectedCategory)}
+                      onClick={() => handleNavigation({ page })}
                     >
                       {page + 1}
                     </button>
