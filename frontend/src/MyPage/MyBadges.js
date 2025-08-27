@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { FaCrown, FaCoins } from 'react-icons/fa';
 import '../css/MyBadges.css';
 
-/* ===== 공통 유틸 (가이드와 동일) ===== */
+/* ===== 공통 유틸 ===== */
 const parseJsonSafe = async (res) => {
   try {
     const ct = res.headers.get('content-type') || '';
@@ -21,7 +21,7 @@ const extractArray = (data) => {
 };
 const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/* ===== 희귀도/티어 계산 (뱃지 가이드와 동일 로직) ===== */
+/* ===== 희귀도/티어 (가이드 규칙) ===== */
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -70,7 +70,7 @@ const computeTierLetter = (b) => {
   return viaRarity || 'f';
 };
 
-/* ===== 정규화 (가이드와 동일 골격) ===== */
+/* ===== 정규화 ===== */
 const normalizeBadge = (b, idx = 0) => {
   const n = {
     badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
@@ -83,24 +83,68 @@ const normalizeBadge = (b, idx = 0) => {
     rewards: b?.rewards ?? b?.rewardList ?? [],
     pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
     owned: b?.owned ?? b?.isOwned ?? true,
+    // 원본 이미지 관련 필드도 보존
+    imageUrl: b?.imageUrl ?? b?.image ?? b?.iconUrl ?? null,
+    code: b?.code ?? b?.badgeCode ?? null,
+    raw: b,
   };
   n.rarity = computeRarity({ ...b, ...n });
   n.tierLetter = computeTierLetter({ ...b, ...n });
   return n;
 };
 
-/* ===== 가이드와 동일한 중앙 PNG 컴포넌트 ===== */
-const badgePngSrc = (t) => `/badges/badge_${t || 'f'}.png`;
-const CenterBadge = ({ tier = 'f', alt }) => (
-  <div className="badge-icon-container">
-    <img
-      src={badgePngSrc(tier)}
-      alt={alt}
-      className="badge-core-img"
-      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
-    />
-  </div>
-);
+/* ===== 실제 배지 PNG 우선, 없으면 티어 PNG 폴백 ===== */
+import { useState as useStateReact, useMemo as useMemoReact } from 'react';
+const toSlug = (x) =>
+  String(x ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-]+/g, '_')
+    .replace(/[^a-z0-9_]/g, '');
+
+const buildImgCandidates = (badge) => {
+  const cand = [];
+
+  // 1) 서버가 준 절대/상대 경로
+  if (badge?.imageUrl) cand.push(badge.imageUrl);
+
+  // 2) code / name으로 추정 파일명
+  const code = badge?.code || badge?.raw?.code;
+  const name = badge?.name || badge?.raw?.name;
+  const slugs = [code, name].filter(Boolean).map(toSlug);
+
+  for (const s of slugs) {
+    cand.push(`/badges/${s}.png`);
+    cand.push(`/badges/${s}.webp`);
+  }
+
+  // 3) 최종 폴백: 티어 PNG(가이드 스타일) → placeholder
+  cand.push(`/badges/badge_${badge?.tierLetter || 'f'}.png`);
+  cand.push('/badges/placeholder.png');
+
+  // 중복 제거
+  return [...new Set(cand.filter(Boolean))];
+};
+
+const CoreBadgeImg = ({ badge, alt }) => {
+  const candidates = useMemoReact(() => buildImgCandidates(badge), [badge]);
+  const [idx, setIdx] = useStateReact(0);
+  const src = candidates[idx] || '/badges/placeholder.png';
+
+  return (
+    <div className="badge-icon-container" data-rarity={badge?.rarity}>
+      <img
+        src={src}
+        alt={alt}
+        className="badge-image-actual"
+        onError={() => {
+          // 다음 후보로 자동 폴백
+          if (idx < candidates.length - 1) setIdx(idx + 1);
+        }}
+      />
+    </div>
+  );
+};
 
 /* ===== MyBadges ===== */
 export default function MyBadges() {
@@ -158,9 +202,9 @@ export default function MyBadges() {
   const handleToggleFeatured = useCallback(
     async (badge) => {
       try {
-        const isCurrentlyFeatured = theFeatured?.badgeId === badge.badgeId;
+        const isSame = String(theFeatured?.badgeId) === String(badge.badgeId);
 
-        if (isCurrentlyFeatured) {
+        if (isSame) {
           await fetch(`/api/badges/${badge.badgeId}/feature?featured=false`, {
             method: 'PUT', headers: getAuthHeaders(), credentials: 'include',
           });
@@ -178,7 +222,8 @@ export default function MyBadges() {
           method: 'PUT', headers: getAuthHeaders(), credentials: 'include',
         });
 
-        updateRepresentativeBadge(badge);
+        // 컨텍스트에도 동일한(실제 이미지 정보 포함) 객체를 전달
+        updateRepresentativeBadge(badge.raw || badge);
         setFeaturedBadges([badge]);
       } catch (err) {
         alert(err.message || '대표 뱃지 설정/해제 실패');
@@ -213,7 +258,7 @@ export default function MyBadges() {
         </Link>
       </div>
 
-      {/* 대표 뱃지 (가이드와 동일한 센터 PNG 사용) */}
+      {/* 대표 뱃지 */}
       <div className="badge-section">
         <h3>대표 뱃지</h3>
         {!hasFeatured ? (
@@ -221,7 +266,7 @@ export default function MyBadges() {
         ) : (
           <div className="featured-grid">
             <div className="badge-item featured" data-rarity={theFeatured.rarity}>
-              <CenterBadge tier={theFeatured.tierLetter} alt={theFeatured.name} />
+              <CoreBadgeImg badge={theFeatured} alt={theFeatured.name} />
               <div className="badge-name" title={theFeatured.name}>{theFeatured.name}</div>
               <button className="equip-button danger" onClick={() => handleToggleFeatured(theFeatured)}>
                 대표 뱃지 해제
@@ -231,7 +276,7 @@ export default function MyBadges() {
         )}
       </div>
 
-      {/* 내 모든 뱃지 (가이드와 동일하게 표시) */}
+      {/* 내 모든 뱃지 */}
       <div className="badge-section">
         <h3>내 모든 뱃지</h3>
         {badges.length === 0 ? (
@@ -239,14 +284,14 @@ export default function MyBadges() {
         ) : (
           <div className="badge-grid">
             {badges.map((badge) => {
-              const isFeatured = theFeatured?.badgeId === badge.badgeId;
+              const isFeatured = String(theFeatured?.badgeId) === String(badge.badgeId);
               return (
                 <div
                   key={badge.badgeId}
                   className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
                   data-rarity={badge.rarity}
                 >
-                  <CenterBadge tier={badge.tierLetter} alt={badge.name} />
+                  <CoreBadgeImg badge={badge} alt={badge.name} />
                   <div className="badge-name" title={badge.name}>{badge.name}</div>
 
                   {badge.owned && (
