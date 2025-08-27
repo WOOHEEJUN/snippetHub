@@ -1,10 +1,12 @@
-// src/components/Header.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
-import UserBadgeAndNickname from './UserBadgeAndNickname';
+import UserBadgeAndNickname from './UserBadgeAndNickname'; // Correct import
+
 import '../css/Header.css';
+
+// RepBadge component definition removed
 
 const Header = () => {
   const navigate = useNavigate();
@@ -18,7 +20,8 @@ const Header = () => {
   };
   const toggleHamburger = () => setIsHamburgerOpen((v) => !v);
 
-  if (loading) return <p>Loading...</p>;
+  // Move conditional rendering after all hooks
+  // if (loading) return <p>Loading...</p>; // This line should be moved or removed if not needed
 
   return (
     <header className="header">
@@ -36,7 +39,7 @@ const Header = () => {
                 <ul className="submenu">
                   <li><Link to="/board">게시판 모아보기</Link></li>
                   <li><Link to="/board?category=GENERAL">자유 게시판</Link></li>
-                  <li><Link to="/board?category=QNA">Q&amp;A 게시판</Link></li>
+                  <li><Link to="/board?category=QNA">Q&A 게시판</Link></li>
                   <li><Link to="/board?category=INFO">정보 게시판</Link></li>
                 </ul>
               </li>
@@ -93,9 +96,7 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  안녕하세요,&nbsp;
-                  <UserBadgeAndNickname user={user} showLink={false} />
-                  님!
+                  안녕하세요, <UserBadgeAndNickname user={user} showLink={false} />님!
                 </span>
                 <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
                 <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
@@ -114,7 +115,70 @@ const Header = () => {
 
             {isHamburgerOpen && (
               <div className="hamburger-dropdown">
-                {/* 필요 메뉴 동일하게 유지 */}
+                <div className="hamburger-menu-section">
+                  <h4>게시판</h4>
+                  <ul>
+                    <li><Link to="/board" onClick={toggleHamburger}>게시판 모아보기</Link></li>
+                    <li><Link to="/board?category=GENERAL" onClick={toggleHamburger}>자유 게시판</Link></li>
+                    <li><Link to="/board?category=QNA" onClick={toggleHamburger}>Q&A 게시판</Link></li>
+                    <li><Link to="/board?category=INFO" onClick={toggleHamburger}>정보 게시판</Link></li>
+                  </ul>
+                </div>
+
+                <div className="hamburger-menu-section">
+                  <h4>문제풀이</h4>
+                  <ul>
+                    <li><Link to="/problems" onClick={toggleHamburger}>코딩문제</Link></li>
+                    <li><Link to="/daily-problems" onClick={toggleHamburger}>일일문제</Link></li>
+                    <li><Link to="/ai-problem-generation" onClick={toggleHamburger}>AI 문제 생성</Link></li>
+                    <li><Link to="/ai-code-evaluation" onClick={toggleHamburger}>AI 코드 평가</Link></li>
+                  </ul>
+                </div>
+
+                <div className="hamburger-menu-section">
+                  <h4>스니펫</h4>
+                  <ul>
+                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫 모아보기</Link></li>
+                    <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
+                    <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
+                    <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>
+                    <li><Link to="/snippets?language=HTML&sort=LATEST&page=0" onClick={toggleHamburger}>HTML</Link></li>
+                    <li><Link to="/snippets?language=Java&sort=LATEST&page=0" onClick={toggleHamburger}>Java</Link></li>
+                  </ul>
+                </div>
+
+                {isAuthenticated ? (
+                  <div className="hamburger-menu-section">
+                    <h4>마이페이지</h4>
+                    <ul>
+                      <li><Link to="/mypage" onClick={toggleHamburger}>마이페이지</Link></li>
+                      <li><Link to="/mypage/badges" onClick={toggleHamburger}>등급보기</Link></li>
+                      <li><Link to="/mypage/edit" onClick={toggleHamburger}>개인정보수정</Link></li>
+                      <li><Link to="/mypage/ranking" onClick={toggleHamburger}>랭킹보기</Link></li>
+                      <li><Link to="/mypage/badge-guide" onClick={toggleHamburger}>뱃지 가이드</Link></li>
+                      <li><Link to="/mypage/submission-history" onClick={toggleHamburger}>제출 이력</Link></li>
+                      <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
+                      <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
+                      <li><Link to="/mypage/saved-problems">저장한 문제보기</Link></li>
+                      <li>
+                        <button
+                          onClick={() => { handleLogout(); toggleHamburger(); }}
+                          className="btn btn-primary"
+                        >
+                          로그아웃
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="hamburger-menu-section">
+                    <h4>계정</h4>
+                    <ul>
+                      <li><Link to="/login" onClick={toggleHamburger}>로그인</Link></li>
+                      <li><Link to="/register" onClick={toggleHamburger}>회원가입</Link></li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
