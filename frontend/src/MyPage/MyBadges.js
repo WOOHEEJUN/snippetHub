@@ -1,8 +1,9 @@
+// src/pages/MyBadges.jsx
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaCrown, FaCoins } from 'react-icons/fa';
-import { getBadgeImagePath } from '../utils/badgeUtils';
+import { getBadgeImageCandidates } from '../utils/badgeUtils';
 import '../css/MyBadges.css';
 
 /* ---------- 유틸 ---------- */
@@ -57,17 +58,19 @@ const normalizeBadge = (b, idx = 0) => {
   return n;
 };
 
-/* 배지 코어 + 휘장(링/오라) */
+/* 배지 코어 + 휘장(링/오라) — PNG 후보를 순차 시도 */
 const BadgeVisual = ({ badge }) => {
-  const [failed, setFailed] = useState(false);
-  const src = getBadgeImagePath(badge);
+  const candidates = getBadgeImageCandidates(badge);
+  const [idx, setIdx] = useState(0);
+  const src = candidates[Math.min(idx, candidates.length - 1)];
+
   return (
     <div className="badge-icon-container" data-rarity={badge.rarity}>
       <img
-        src={failed ? '/badges/placeholder.png' : src}
+        src={src}
         alt={badge.name}
         className="badge-image-actual"
-        onError={() => setFailed(true)}
+        onError={() => setIdx(i => (i + 1 < candidates.length ? i + 1 : i))}
       />
     </div>
   );
@@ -80,7 +83,7 @@ export default function MyBadges() {
   const [points, setPoints] = useState(null);
 
   const [badges, setBadges] = useState([]);
-  const [featuredBadges, setFeaturedBadges] = useState([]); // 서버 원본이 여러 개여도 OK
+  const [featuredBadges, setFeaturedBadges] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -112,7 +115,7 @@ export default function MyBadges() {
 
         setBadges(extractArray(badgesData).map((b, i) => normalizeBadge(b, i)));
 
-        // ✅ 서버가 여러 개를 보내도 화면 상태는 “하나만” 유지
+        // 서버가 여러 개 보내도 화면은 1개만 유지
         const incoming = extractArray(featuredData).map((b, i) => normalizeBadge(b, i));
         setFeaturedBadges(incoming.length ? [incoming[0]] : []);
       } catch (e) {
@@ -135,16 +138,14 @@ export default function MyBadges() {
         const isCurrentlyFeatured = theFeatured?.badgeId === badge.badgeId;
 
         if (isCurrentlyFeatured) {
-          // 해제
           await fetch(`/api/badges/${badge.badgeId}/feature?featured=false`, {
             method: 'PUT', headers: getAuthHeaders(), credentials: 'include',
           });
           updateRepresentativeBadge(null);
-          setFeaturedBadges([]);                 // 상태도 0개
+          setFeaturedBadges([]);
           return;
         }
 
-        // 설정: 기존 대표가 있으면 먼저 해제 → 새 대표 설정
         if (theFeatured) {
           await fetch(`/api/badges/${theFeatured.badgeId}/feature?featured=false`, {
             method: 'PUT', headers: getAuthHeaders(), credentials: 'include',
@@ -155,7 +156,7 @@ export default function MyBadges() {
         });
 
         updateRepresentativeBadge(badge);
-        setFeaturedBadges([badge]);              // 상태를 단 하나로 고정
+        setFeaturedBadges([badge]);
       } catch (err) {
         alert(err.message || '대표 뱃지 설정/해제 실패');
         console.error(err);
@@ -182,12 +183,14 @@ export default function MyBadges() {
         <Link to="/mypage/point-history" className="info-card-link">
           <div className="info-card">
             <div className="label"><FaCoins /> 포인트</div>
-            <div className="value">{points ? <><strong>{points.point}</strong><small>&nbsp;P</small></> : '정보 없음'}</div>
+            <div className="value">
+              {points ? (<><strong>{points.point}</strong><small>&nbsp;P</small></>) : '정보 없음'}
+            </div>
           </div>
         </Link>
       </div>
 
-      {/* 대표 뱃지: 항상 가운데 1개 */}
+      {/* 대표 뱃지: 가운데 1개 */}
       <div className="badge-section">
         <h3>대표 뱃지</h3>
         {!hasFeatured ? (

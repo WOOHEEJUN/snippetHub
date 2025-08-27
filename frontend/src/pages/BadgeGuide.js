@@ -1,46 +1,31 @@
+// src/pages/BadgeGuide.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
-const SERVER_FILTER = false;
+/* ===== 옵션 ===== */
+const SERVER_FILTER = false;     // true면 카테고리 바뀔 때 서버에 쿼리
 const DEBUG = false;
 
-const CATEGORY_ORDER = ['CREATION', 'ENGAGEMENT', 'ACHIEVEMENT', 'MILESTONE', 'COMMUNITY', 'SPECIAL', 'EVENT', 'ACTIVITY'];
+/* ===== 카테고리 표시 순서 & 라벨 ===== */
+const CATEGORY_ORDER = ['CREATION','ENGAGEMENT','ACHIEVEMENT','MILESTONE','COMMUNITY','SPECIAL','EVENT','ACTIVITY'];
+const categoryLabel = (cat) => ({
+  ALL:'전체', CREATION:'창작', ENGAGEMENT:'참여', ACHIEVEMENT:'업적', MILESTONE:'이정표',
+  COMMUNITY:'커뮤니티', SPECIAL:'특별', EVENT:'이벤트', ACTIVITY:'활동', OTHER:'기타',
+}[cat] || cat);
 
-const categoryLabel = (cat) => {
-  const map = {
-    ALL: '전체',
-    CREATION: '창작',
-    ENGAGEMENT: '참여',
-    ACHIEVEMENT: '업적',
-    MILESTONE: '이정표',
-    COMMUNITY: '커뮤니티',
-    SPECIAL: '특별',
-    EVENT: '이벤트',
-    ACTIVITY: '활동',
-    OTHER: '기타',
-  };
-  return map[cat] || cat;
-};
-
+/* ===== 공용 fetch ===== */
 const fetchJsonReport = async (url, options) => {
   const res = await fetch(url, options);
   if (!res.ok) {
-    const error = new Error('HTTP error');
-    error.status = res.status;
-    throw error;
+    const err = new Error('HTTP error');
+    err.status = res.status;
+    throw err;
   }
   return res.json();
 };
 
-/* ===== 공용 유틸 ===== */
-const parseJsonSafe = async (res) => {
-  try {
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) return await res.json();
-  } catch (_) {}
-  return null;
-};
+/* ===== 유틸 ===== */
 const extractArray = (data) => {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.data)) return data.data;
@@ -52,20 +37,13 @@ const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
 const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/* 카테고리 기본 색(없을 때 액센트로 사용) */
+/* 기본 색상(없을 때 액센트용) */
 const CATEGORY_DEFAULT = {
-  CREATION:   '#4CAF50',
-  ENGAGEMENT: '#E91E63',
-  ACHIEVEMENT:'#FFD54F',
-  MILESTONE:  '#FFD700',
-  COMMUNITY:  '#32CD32',
-  SPECIAL:    '#9C27B0',
-  EVENT:      '#1E90FF',
-  ACTIVITY:   '#8A2BE2',
-  OTHER:      '#8ab0d1',
+  CREATION:'#4CAF50', ENGAGEMENT:'#E91E63', ACHIEVEMENT:'#FFD54F', MILESTONE:'#FFD700',
+  COMMUNITY:'#32CD32', SPECIAL:'#9C27B0', EVENT:'#1E90FF', ACTIVITY:'#8A2BE2', OTHER:'#8ab0d1',
 };
 
-/* 희귀도 계산(이전 로직 유지) */
+/* ===== 희귀도 계산 (기존 로직 유지) ===== */
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -78,7 +56,31 @@ const computeRarity = (b) => {
   return 'common';
 };
 
-/* 응답 정규화 */
+/* ===== 티어(S/A/B/C/D/F) 계산 ===== */
+// rarity -> 기본 티어
+const RARITY_TO_TIER = { legendary:'s', epic:'a', rare:'b', uncommon:'c', common:'d' };
+// 이름 안에 S/A/B/C/D/F 단서가 있으면 우선 사용 (예: "..._F", "F_TIER")
+const tierHintFromName = (name) => {
+  const s = norm(name);
+  if (/\bS(\b|_RANK|_TIER)/.test(s)) return 's';
+  if (/\bA(\b|_RANK|_TIER)/.test(s)) return 'a';
+  if (/\bB(\b|_RANK|_TIER)/.test(s)) return 'b';
+  if (/\bC(\b|_RANK|_TIER)/.test(s)) return 'c';
+  if (/\bD(\b|_RANK|_TIER)/.test(s)) return 'd';
+  if (/\bF(\b|_RANK|_TIER|_BADGE)?\b/.test(s)) return 'f';
+  return null;
+};
+// 최종 티어: 1) 서버필드 tier/grade 2) 이름 힌트 3) rarity 매핑 4) 실패 시 'f'
+const computeTierLetter = (b) => {
+  const direct = (b?.tier ?? b?.grade ?? '').toString().trim().toLowerCase();
+  if (['s','a','b','c','d','f'].includes(direct)) return direct;
+  const hinted = tierHintFromName(b?.name ?? '');
+  if (hinted) return hinted;
+  const viaRarity = RARITY_TO_TIER[(b?.rarity ?? '').toLowerCase()];
+  return viaRarity || 'f';
+};
+
+/* ===== 정규화 ===== */
 const normalizeBadge = (b, idx = 0) => {
   const category = norm(b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER');
   const name = b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음';
@@ -98,44 +100,36 @@ const normalizeBadge = (b, idx = 0) => {
     color,
   };
   n.rarity = computeRarity({ ...b, ...n });
+  n.tierLetter = computeTierLetter({ ...b, ...n });
   return n;
 };
 
-/* 희귀도 → 파일 접미사(S>A>B>C>D>F) + 정렬 우선순위 */
-const rarityToTier = { legendary: 's', epic: 'a', rare: 'b', uncommon: 'c', common: 'd' };
-const rarityRank = (r) => ({ legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 }[r] ?? 5);
-const sortByRarityDesc = (arr) =>
-  [...arr].sort((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity) || a.name.localeCompare(b.name));
-
-/* 중앙 PNG 뱃지 */
-const CenterBadge = ({ rarity, alt }) => {
-  const tier = rarityToTier[rarity] || 'f';
-  const src = `/badges/badge_${tier}.png`;
-  return (
-    <div className={`badge-icon-container rarity-${rarity}`}>
-      <img
-        src={src}
-        alt={alt}
-        className="badge-core-img"
-        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
-        /* 자리 정확히 가운데 고정 + 컨테이너 안에 맞춤 */
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%,-50%)',
-          width: '66%',
-          height: '66%',
-          objectFit: 'contain',
-          pointerEvents: 'none',
-          userSelect: 'none'
-        }}
-      />
-    </div>
+/* ===== 정렬: S→A→B→C→D→F ===== */
+const TIER_ORDER = { s:0, a:1, b:2, c:3, d:4, f:5 };
+const sortByTierDesc = (arr) =>
+  [...arr].sort((a, b) =>
+    (TIER_ORDER[a.tierLetter] ?? 99) - (TIER_ORDER[b.tierLetter] ?? 99) ||
+    a.name.localeCompare(b.name)
   );
-};
 
-/* ===== 본문 ===== */
+/* ===== 중앙 PNG 출력 ===== */
+const badgePngSrc = (t) => `/badges/badge_${t || 'f'}.png`;
+const CenterBadge = ({ tier = 'f', alt }) => (
+  <div className="badge-icon-container">
+    <img
+      src={badgePngSrc(tier)}
+      alt={alt}
+      className="badge-core-img"
+      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+      style={{
+        position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)',
+        width:'66%', height:'66%', objectFit:'contain', pointerEvents:'none', userSelect:'none'
+      }}
+    />
+  </div>
+);
+
+/* ===== 메인 컴포넌트 ===== */
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 
@@ -145,14 +139,12 @@ function BadgeGuide() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
-  // 데이터 로딩 (카테고리 바뀌어도 서버로 다시 안 가고, 클라 필터가 기본)
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       setError(null);
       try {
-        // 1) 전체(또는 서버필터) 목록
         const listUrl =
           SERVER_FILTER && norm(selectedCategory) !== 'ALL'
             ? `/api/badges?category=${encodeURIComponent(selectedCategory)}`
@@ -163,24 +155,22 @@ function BadgeGuide() {
           credentials: 'include',
           cache: 'no-store',
         });
-        const rawList = extractArray(all.data);
+        const rawList = extractArray(all?.data ?? all);
         const normalized = rawList.map((b, i) => normalizeBadge(b, i));
-        if (!cancelled) setBadges(sortByRarityDesc(normalized));
+        if (!cancelled) setBadges(sortByTierDesc(normalized));
 
-        // 2) 내 뱃지
         const mine = await fetchJsonReport('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
           cache: 'no-store',
         });
-        const rawMine = extractArray(mine.data);
+        const rawMine = extractArray(mine?.data ?? mine);
         const normalizedMine = rawMine.map((b, i) => normalizeBadge(b, i));
-        if (!cancelled) setUserBadges(sortByRarityDesc(normalizedMine));
+        if (!cancelled) setUserBadges(sortByTierDesc(normalizedMine));
 
-        // 디버그: 데이터가 비면 바로 힌트
         if (DEBUG && !cancelled) {
-          if (normalized.length === 0) console.warn('[BadgeGuide] 서버에서 뱃지 0개 반환');
-          if (normalizedMine.length === 0) console.warn('[BadgeGuide] 내 뱃지 0개 반환');
+          if (normalized.length === 0) console.warn('[BadgeGuide] 서버 뱃지 0개');
+          if (normalizedMine.length === 0) console.warn('[BadgeGuide] 내 뱃지 0개');
         }
       } catch (e) {
         if (!cancelled) {
@@ -194,10 +184,9 @@ function BadgeGuide() {
     };
     load();
     return () => { cancelled = true; };
-    // ⚠️ 클라 필터 기본이라 selectedCategory 변경 시 재요청 필요 없음
-  }, [getAuthHeaders]); // (원한다면 SERVER_FILTER가 true일 때만 selectedCategory를 deps로 추가)
+  }, [getAuthHeaders]); // SERVER_FILTER를 true로 쓰면 selectedCategory도 deps에 넣어주세요.
 
-  // 데이터에 실제 있는 카테고리만 버튼으로
+  /* 버튼 목록: 실제 데이터에 존재하는 카테고리만 노출 */
   const categoriesFromData = useMemo(() => {
     const set = new Set();
     badges.forEach(b => set.add(norm(b.category || 'OTHER')));
@@ -205,7 +194,7 @@ function BadgeGuide() {
     return ['ALL', ...ordered, ...[...set].filter(c => !CATEGORY_ORDER.includes(c) && c !== 'ALL')];
   }, [badges]);
 
-  // 클라이언트 필터
+  /* 클라 필터 */
   const filteredBadges = useMemo(() => {
     if (SERVER_FILTER || norm(selectedCategory) === 'ALL') return badges;
     const target = norm(selectedCategory);
@@ -270,6 +259,7 @@ function BadgeGuide() {
           {filteredBadges.map((badge) => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
+
             return (
               <div
                 key={badge.badgeId}
@@ -278,7 +268,8 @@ function BadgeGuide() {
                 data-rarity={badge.rarity}
               >
                 <div className="badge-image">
-                  <CenterBadge rarity={badge.rarity} alt={badge.name} />
+                  {/* 중앙 PNG는 S/A/B/C/D/F로 표시, 테두리 효과는 rarity로 유지 */}
+                  <CenterBadge tier={badge.tierLetter} alt={badge.name} />
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
 
@@ -330,7 +321,7 @@ function BadgeGuide() {
           <div className="no-badges">
             <p>해당 카테고리의 뱃지가 없습니다.</p>
             {DEBUG && (
-              <p style={{marginTop:8,opacity:.7,fontSize:'.9rem'}}>
+              <p style={{ marginTop: 8, opacity: .7, fontSize: '.9rem' }}>
                 디버그: 전체 {badges.length}개 / 선택 카테고리 {selectedCategory}
               </p>
             )}
