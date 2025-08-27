@@ -94,7 +94,6 @@ const normalizeBadge = (b, idx = 0) => {
 };
 
 /* ===== 실제 배지 PNG 우선, 없으면 티어 PNG 폴백 ===== */
-import { useState as useStateReact, useMemo as useMemoReact } from 'react';
 const toSlug = (x) =>
   String(x ?? '')
     .trim()
@@ -127,8 +126,8 @@ const buildImgCandidates = (badge) => {
 };
 
 const CoreBadgeImg = ({ badge, alt }) => {
-  const candidates = useMemoReact(() => buildImgCandidates(badge), [badge]);
-  const [idx, setIdx] = useStateReact(0);
+  const candidates = useMemo(() => buildImgCandidates(badge), [badge]);
+  const [idx, setIdx] = useState(0);
   const src = candidates[idx] || '/badges/placeholder.png';
 
   return (
@@ -138,7 +137,6 @@ const CoreBadgeImg = ({ badge, alt }) => {
         alt={alt}
         className="badge-image-actual"
         onError={() => {
-          // 다음 후보로 자동 폴백
           if (idx < candidates.length - 1) setIdx(idx + 1);
         }}
       />
