@@ -263,4 +263,60 @@ public class SecurityTestUtils {
         
         return report.toString();
     }
+
+    /**
+     * 특정 코드의 보안 검증 테스트
+     */
+    public String testCodeExecutionSecurity(CodeExecutionSecurityFilter securityFilter, String testCode, String language) {
+        log.info("코드 실행 보안 테스트 시작 - 언어: {}", language);
+        
+        StringBuilder result = new StringBuilder();
+        result.append("=== 코드 실행 보안 테스트 결과 ===\n\n");
+        result.append("테스트 언어: ").append(language).append("\n");
+        result.append("코드 길이: ").append(testCode.length()).append(" 문자\n\n");
+        
+        // 코드 검증
+        boolean isValid = securityFilter.validateCodeContent(testCode, language);
+        
+        result.append("보안 검증 결과: ").append(isValid ? "안전함" : "위험함").append("\n\n");
+        
+        if (!isValid) {
+            result.append("이 코드는 보안 정책에 위배됩니다.\n");
+            result.append("차단 사유: 악성 코드 패턴이 감지되었습니다.\n\n");
+        } else {
+            result.append("이 코드는 보안 정책을 준수합니다.\n\n");
+        }
+        
+        // 코드 분석
+        result.append("=== 코드 분석 ===\n");
+        result.append("코드 미리보기: ").append(testCode.substring(0, Math.min(100, testCode.length()))).append("...\n");
+        
+        // 언어별 특성 분석
+        result.append("언어별 보안 특성:\n");
+        switch (language.toLowerCase()) {
+            case "java":
+                result.append("- 클래스 기반 보안 검증\n");
+                result.append("- 리플렉션 API 사용 제한\n");
+                result.append("- 시스템 명령어 실행 차단\n");
+                break;
+            case "python":
+                result.append("- eval(), exec() 함수 차단\n");
+                result.append("- os.system() 명령어 차단\n");
+                result.append("- 파일 시스템 접근 제한\n");
+                break;
+            case "javascript":
+                result.append("- eval() 함수 차단\n");
+                result.append("- Function 생성자 차단\n");
+                result.append("- 브라우저 API 접근 제한\n");
+                break;
+            default:
+                result.append("- 일반적인 보안 패턴 검증\n");
+        }
+        
+        result.append("\n테스트 완료 시간: ").append(java.time.LocalDateTime.now()).append("\n");
+        
+        log.info("코드 실행 보안 테스트 완료 - 결과: {}", isValid ? "안전" : "위험");
+        
+        return result.toString();
+    }
 }
