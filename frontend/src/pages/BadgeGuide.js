@@ -1,6 +1,10 @@
+// src/pages/BadgeGuide.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
+
+/* ===== 설정: 서버 필터를 쓰고 싶으면 true 로 ===== */
+const SERVER_FILTER = false;
 
 /* ===== 공용 유틸 ===== */
 const parseJsonSafe = async (res) => {
@@ -21,7 +25,7 @@ const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
 const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/* 카테고리 기본 색(없을 때 액센트로 사용) */
+/* 카테고리 기본 색 */
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
@@ -34,7 +38,7 @@ const CATEGORY_DEFAULT = {
   OTHER:      '#8ab0d1',
 };
 
-/* 희귀도 계산(이전 로직 유지) */
+/* 희귀도 계산 */
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -87,7 +91,6 @@ const CenterBadge = ({ rarity, alt }) => {
         alt={alt}
         className="badge-core-img"
         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
-        /* 자리 정확히 가운데 고정 + 컨테이너 안에 맞춤 */
         style={{
           position: 'absolute',
           left: '50%',
@@ -104,7 +107,23 @@ const CenterBadge = ({ rarity, alt }) => {
   );
 };
 
-/* ===== 본문 ===== */
+/* 카테고리 한글 매핑 */
+const categoryLabel = (cat) => ({
+  ALL: '전체',
+  CREATION: '창작',
+  ENGAGEMENT: '참여',
+  ACHIEVEMENT: '업적',
+  MILESTONE: '이정표',
+  COMMUNITY: '커뮤니티',
+  SPECIAL: '특별',
+  EVENT: '이벤트',
+  ACTIVITY: '활동',
+  OTHER: '기타',
+}[norm(cat)] || cat);
+
+/* 버튼 표시는 이 순서로 정렬 */
+const CATEGORY_ORDER = ['CREATION','ENGAGEMENT','ACHIEVEMENT','MILESTONE','COMMUNITY','SPECIAL','EVENT','ACTIVITY','OTHER'];
+
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 
@@ -114,25 +133,19 @@ function BadgeGuide() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
-  const categories = [
-    { value: 'ALL',        label: '전체' },
-    { value: 'CREATION',   label: '창작' },
-    { value: 'ENGAGEMENT', label: '참여' },
-    { value: 'ACHIEVEMENT',label: '업적' },
-    { value: 'MILESTONE',  label: '이정표' },
-    { value: 'COMMUNITY',  label: '커뮤니티' },
-    { value: 'SPECIAL',    label: '특별' },
-    { value: 'EVENT',      label: '이벤트' },
-    { value: 'ACTIVITY',   label: '활동' },
-  ];
-
+  /* ===== 데이터 로딩 ===== */
   useEffect(() => {
-    const fetchBadgesAndUser = async () => {
+    const fetchAll = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const resAll = await fetch('/api/badges', {
+        // 전체 목록 (또는 선택 카테고리 서버 필터)
+        const listUrl = SERVER_FILTER && norm(selectedCategory) !== 'ALL'
+          ? `/api/badges?category=${encodeURIComponent(selectedCategory)}`
+          : '/api/badges';
+
+        const resAll = await fetch(listUrl, {
           headers: getAuthHeaders(),
           credentials: 'include',
           cache: 'no-store',
@@ -142,6 +155,7 @@ function BadgeGuide() {
         const normalized = extractArray(jsonAll).map((b, i) => normalizeBadge(b, i));
         setBadges(sortByRarityDesc(normalized));
 
+        // 내 뱃지
         const resMine = await fetch('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
@@ -163,11 +177,22 @@ function BadgeGuide() {
         setLoading(false);
       }
     };
-    fetchBadgesAndUser();
-  }, [getAuthHeaders]);
+    fetchAll();
+    // 서버 필터를 켜면 카테고리 바뀔 때마다 API 재호출
+  }, [getAuthHeaders, selectedCategory]);
 
+  /* ===== 동적 카테고리: 데이터에 실제 있는 것만 버튼으로 ===== */
+  const categoriesFromData = useMemo(() => {
+    const set = new Set();
+    badges.forEach(b => set.add(norm(b.category || 'OTHER')));
+    // 순서 기준으로 소팅 + ALL 맨 앞
+    const ordered = CATEGORY_ORDER.filter(c => set.has(c));
+    return ['ALL', ...ordered, ...[...set].filter(c => !CATEGORY_ORDER.includes(c) && c !== 'ALL')];
+  }, [badges]);
+
+  /* ===== 클라이언트 필터 (SERVER_FILTER=false일 때 동작) ===== */
   const filteredBadges = useMemo(() => {
-    if (norm(selectedCategory) === 'ALL') return badges;
+    if (SERVER_FILTER || norm(selectedCategory) === 'ALL') return badges;
     const target = norm(selectedCategory);
     return badges.filter((b) => norm(b.category) === target);
   }, [badges, selectedCategory]);
@@ -185,18 +210,6 @@ function BadgeGuide() {
   if (loading) return <div className="loading-message">뱃지 정보를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
 
-  const categoryKorean = (cat) => ({
-    ALL: '전체',
-    CREATION: '창작',
-    ENGAGEMENT: '참여',
-    ACHIEVEMENT: '업적',
-    MILESTONE: '이정표',
-    COMMUNITY: '커뮤니티',
-    SPECIAL: '특별',
-    EVENT: '이벤트',
-    ACTIVITY: '활동',
-  }[norm(cat)] || cat);
-
   return (
     <div className="badge-guide-page modern-badges">
       <div className="container">
@@ -212,7 +225,7 @@ function BadgeGuide() {
           </div>
           <div className="stats-card">
             <div className="stats-number">{badges.length}</div>
-            <div className="stats-label">전체 뱃지</div>
+            <div className="stats-label">현재 목록</div>
           </div>
           <div className="stats-card">
             <div className="stats-number">
@@ -222,18 +235,19 @@ function BadgeGuide() {
           </div>
         </div>
 
+        {/* 동적 카테고리 버튼 */}
         <div className="filter-section">
           <h3>카테고리별 필터</h3>
           <div className="category-filters">
-            {categories.map((c) => (
+            {categoriesFromData.map((cat) => (
               <button
-                key={c.value}
+                key={cat}
                 type="button"
-                onClick={() => setSelectedCategory(c.value)}
-                className={`category-filter ${norm(selectedCategory) === norm(c.value) ? 'active' : ''}`}
-                aria-pressed={norm(selectedCategory) === norm(c.value)}
+                onClick={() => setSelectedCategory(cat)}
+                className={`category-filter ${norm(selectedCategory) === norm(cat) ? 'active' : ''}`}
+                aria-pressed={norm(selectedCategory) === norm(cat)}
               >
-                {c.label}
+                {categoryLabel(cat)}
               </button>
             ))}
           </div>
@@ -243,7 +257,6 @@ function BadgeGuide() {
           {filteredBadges.map((badge) => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
-
             return (
               <div
                 key={badge.badgeId}
@@ -252,7 +265,7 @@ function BadgeGuide() {
                 data-rarity={badge.rarity}
               >
                 <div className="badge-image">
-                  {/* 중앙 PNG + 희귀도 오라(테두리는 CSS가 처리) */}
+                  {/* 중앙 PNG + 희귀도 오라 */}
                   <CenterBadge rarity={badge.rarity} alt={badge.name} />
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
@@ -262,7 +275,7 @@ function BadgeGuide() {
                   <p className="badge-description">{badge.description}</p>
 
                   <div className="badge-category">
-                    <span className="category-tag use-accent">{categoryKorean(badge.category)}</span>
+                    <span className="category-tag use-accent">{categoryLabel(badge.category)}</span>
                   </div>
 
                   {badge.requiredCount > 1 && (
@@ -286,9 +299,7 @@ function BadgeGuide() {
                     <div className="badge-requirements">
                       <h5>획득 조건:</h5>
                       <ul>
-                        {badge.requirements.map((req, i) => (
-                          <li key={i}>{req}</li>
-                        ))}
+                        {badge.requirements.map((req, i) => <li key={i}>{req}</li>)}
                       </ul>
                     </div>
                   )}
@@ -297,9 +308,7 @@ function BadgeGuide() {
                     <div className="badge-rewards">
                       <h5>보상:</h5>
                       <ul>
-                        {badge.rewards.map((rw, i) => (
-                          <li key={i}>{rw}</li>
-                        ))}
+                        {badge.rewards.map((rw, i) => <li key={i}>{rw}</li>)}
                       </ul>
                     </div>
                   )}
