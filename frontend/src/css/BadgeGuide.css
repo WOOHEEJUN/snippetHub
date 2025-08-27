@@ -57,8 +57,8 @@
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.08)) padding-box;
 
   /* 링은 border-image로 그립니다 (항상 보임) */
-  border:3px solid transparent;             /* 굵기 */
-  border-image-slice:1;                      /* gradient 전체 사용 */
+  border:3px solid transparent;
+  border-image-slice:1;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.08),
     inset 0 -1px 0 rgba(0,0,0,.28),
@@ -67,15 +67,20 @@
 }
 .badge-icon-container:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 8px 18px rgba(0,0,0,.35);}
 
-/* 중앙 레이어 */
+/* 중앙 레이어 (PNG/Iconify 공용) */
 .icon-layer{position:relative;width:100%;height:100%;}
 .iconify-img{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   display:block;width:64px;height:64px;z-index:2;opacity:.98;
 }
-.badge-emoji{ /* 폴백: 아이콘 실패/로딩 때만 보이게 (JS에서 opacity 제어) */
+.badge-emoji{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   font-size:28px;line-height:1;color:#fff;z-index:1;transition:opacity .2s;
+}
+/* 중앙 PNG용(예: /public/badges/badge_*.png) */
+.rarity-coin{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:block;width:64px;height:64px;z-index:2;image-rendering:auto;
 }
 
 /* =====================
@@ -83,9 +88,7 @@
    ===================== */
 /* 공통: 각 카드가 data-rarity를 가집니다. 해당 값에 맞춰 링을 채웁니다. */
 [data-rarity="common"] .badge-icon-container{
-  border-image: conic-gradient(
-    #3a3a3a, #343434, #3a3a3a
-  ) 1;
+  border-image: conic-gradient(#3a3a3a, #343434, #3a3a3a) 1;
 }
 
 [data-rarity="uncommon"] .badge-icon-container{
@@ -192,4 +195,133 @@
   .badges-grid{grid-template-columns:1fr;}
   .category-filters{justify-content:center;}
   .badge-card{padding:20px;}
+}
+
+/* =========================================================
+   ✨ Rarity Aura & Animation (add-on)
+   - 희귀도별 오라/회전/스파클 강화
+   - 기존 border-image 링은 유지 + 여기에 오라 레이어만 추가
+   ========================================================= */
+
+/* 공통 키프레임 */
+@keyframes spin360 { to { transform: rotate(360deg); } }
+@keyframes glowPulse { 0%,100% { opacity:.35; transform:scale(1);} 50% { opacity:.9; transform:scale(1.06);} }
+@keyframes twinkle   { 0%,100% { opacity:.15; } 50% { opacity:.85; } }
+@keyframes sweepShine{
+  0%   { transform: translate(-120%, -120%) rotate(35deg); }
+  100% { transform: translate(120%, 120%) rotate(35deg); }
+}
+
+/* 오라 레이어 준비 */
+.badge-icon-container{ position:relative; isolation:isolate; z-index:0; }
+.badge-icon-container::before,
+.badge-icon-container::after{
+  content:""; position:absolute; inset:-7px; border-radius:50%;
+  pointer-events:none; z-index:-1;
+}
+
+/* ::before = 회전 링(얇은 고리)  — 실제 border-image 위에 얇게 겹침 */
+.badge-icon-container::before{
+  /* 안쪽은 비우고 바깥쪽 고리만 보이도록 마스크 */
+  -webkit-mask:
+    radial-gradient(circle at center, transparent 58%, #000 60%),
+    linear-gradient(#000, #000);
+  -webkit-mask-composite: source-out;
+          mask-composite: exclude;
+  opacity:.0; /* 각 희귀도에서 조절 */
+}
+
+/* ::after = 외곽 오라 + 스파클 + 스윕 하이라이트 */
+.badge-icon-container::after{
+  inset:-18px;
+  background:
+    radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.18), transparent 70%),
+    radial-gradient(3px 3px at 20% 30%, rgba(255,255,255,.85), transparent 40%),
+    radial-gradient(2.5px 2.5px at 70% 60%, rgba(255,255,255,.75), transparent 42%),
+    radial-gradient(2.5px 2.5px at 35% 75%, rgba(255,255,255,.7), transparent 42%),
+    radial-gradient(2px 2px at 80% 25%, rgba(255,255,255,.75), transparent 45%);
+  mix-blend-mode: screen;
+  filter: blur(1px);
+  opacity:.0; /* 각 희귀도에서 조절 */
+}
+
+/* 중앙 PNG에 은은한 틸트/광택 */
+.rarity-coin{ animation: glowPulse 8s ease-in-out infinite; }
+
+/* ===== 희귀도별 세팅 ===== */
+
+/* D/F : 거의 정적인 가벼운 오라 */
+[data-rarity="common"] .badge-icon-container::after{
+  opacity:.18; filter: blur(2px);
+  animation: glowPulse 4.5s ease-in-out infinite;
+}
+
+/* C : 아주 느린 회전 + 살짝 더 밝은 오라 */
+[data-rarity="uncommon"] .badge-icon-container::before{
+  background: conic-gradient(from 0deg,
+    color-mix(in oklab, var(--accent,#8ab0d1) 32%, #111),
+    transparent 35%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 32%, #111));
+  opacity:.35; animation: spin360 16s linear infinite;
+}
+[data-rarity="uncommon"] .badge-icon-container::after{
+  opacity:.25; filter: blur(3px);
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+/* B : 느린 멀티톤 회전 + 스윕 하이라이트 */
+[data-rarity="rare"] .badge-icon-container::before{
+  background: conic-gradient(from 0deg,
+    color-mix(in oklab, var(--accent,#8ab0d1) 55%, #0f0f0f),
+    color-mix(in oklab, #b5d4ea 40%, #0f0f0f) 50%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 55%, #0f0f0f));
+  opacity:.55; animation: spin360 12s linear infinite;
+}
+[data-rarity="rare"] .badge-icon-container::after{
+  opacity:.35; filter: blur(4px);
+  animation: glowPulse 3.6s ease-in-out infinite;
+}
+[data-rarity="rare"] .badge-icon-container::after{
+  /* 스윕 하이라이트 */
+  mask: linear-gradient(90deg, transparent 35%, #000 50%, transparent 65%);
+  animation: sweepShine 3.8s linear infinite, glowPulse 3.6s ease-in-out infinite;
+  opacity:.25;
+}
+
+/* A : 화려한 파스텔 무지개 회전 + 더 강한 오라/트윙클 */
+[data-rarity="epic"] .badge-icon-container::before{
+  background: conic-gradient(from 0deg,#9b87f5,#67e8f9,#86efac,#ffd54f,#ff7aa2,#9b87f5);
+  opacity:.8; animation: spin360 7s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,.3));
+}
+[data-rarity="epic"] .badge-icon-container::after{
+  opacity:.55; filter: blur(5px);
+  animation: glowPulse 2.6s ease-in-out infinite, twinkle 1.8s ease-in-out infinite;
+}
+
+/* S : 강한 무지개 링 + 이중 회전 + 오라/트윙클 최대로 */
+[data-rarity="legendary"] .badge-icon-container::before{
+  inset:-9px;
+  background: conic-gradient(from 0deg,#ff0040,#ff7a00,#ffd400,#3be000,#00e5ff,#0066ff,#b400ff,#ff0040);
+  opacity:.95; animation: spin360 4.2s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.4));
+}
+[data-rarity="legendary"] .badge-icon-container::after{
+  inset:-22px;
+  background:
+    radial-gradient(65% 65% at 50% 50%, rgba(255,255,255,.26), transparent 70%),
+    radial-gradient(3px 3px at 22% 28%, rgba(255,255,255,.95), transparent 45%),
+    radial-gradient(2.5px 2.5px at 78% 58%, rgba(255,255,255,.85), transparent 42%),
+    radial-gradient(2.5px 2.5px at 38% 76%, rgba(255,255,255,.8), transparent 42%),
+    radial-gradient(2px 2px at 84% 22%, rgba(255,255,255,.85), transparent 45%);
+  mix-blend-mode: screen;
+  opacity:.85; filter: blur(6px);
+  animation: glowPulse 2.2s ease-in-out infinite, twinkle 1.6s ease-in-out infinite, spin360 9s linear infinite;
+}
+
+/* 모션 민감 사용자 보호 */
+@media (prefers-reduced-motion: reduce){
+  .badge-icon-container::before,
+  .badge-icon-container::after,
+  .rarity-coin{ animation: none !important; }
 }
