@@ -137,12 +137,17 @@
   width:66%; height:66%; object-fit:contain; pointer-events:none; user-select:none; z-index:2; opacity:.98;
 }
 
-/* 희귀도 별 링 색/속도 */
-.badge-icon-container[data-rarity="common"]{--accent:#666;--spin-speed:20s;}
-.badge-icon-container[data-rarity="common"]::before{background: conic-gradient(#3d3d3d, #353535, #3d3d3d); opacity:.6;}
-.badge-icon-container[data-rarity="common"]::after{opacity:.2}
+/* ===== 희귀도 링/오라 – 카드나 컨테이너 어디에 data-rarity가 붙어도 동작 ===== */
+.badge-item[data-rarity="common"] .badge-icon-container,
+.badge-icon-container[data-rarity="common"]{ --accent:#666; --spin-speed:20s; }
+.badge-item[data-rarity="common"] .badge-icon-container::before,
+.badge-icon-container[data-rarity="common"]::before{ background: conic-gradient(#3d3d3d, #353535, #3d3d3d); opacity:.6; }
+.badge-item[data-rarity="common"] .badge-icon-container::after,
+.badge-icon-container[data-rarity="common"]::after{ opacity:.2; }
 
-.badge-icon-container[data-rarity="uncommon"]{--accent:#79a9c9;--spin-speed:18s;}
+.badge-item[data-rarity="uncommon"] .badge-icon-container,
+.badge-icon-container[data-rarity="uncommon"]{ --accent:#79a9c9; --spin-speed:18s; }
+.badge-item[data-rarity="uncommon"] .badge-icon-container::before,
 .badge-icon-container[data-rarity="uncommon"]::before{
   background: conic-gradient(
     color-mix(in oklab, var(--accent) 30%, #1a1a1a),
@@ -151,7 +156,9 @@
   );
 }
 
-.badge-icon-container[data-rarity="rare"]{--accent:#8ab0d1;--spin-speed:16s;}
+.badge-item[data-rarity="rare"] .badge-icon-container,
+.badge-icon-container[data-rarity="rare"]{ --accent:#8ab0d1; --spin-speed:16s; }
+.badge-item[data-rarity="rare"] .badge-icon-container::before,
 .badge-icon-container[data-rarity="rare"]::before{
   background: conic-gradient(
     color-mix(in oklab, var(--accent) 45%, #111),
@@ -160,17 +167,32 @@
   );
 }
 
-.badge-icon-container[data-rarity="epic"]{--accent:#9b87f5;--spin-speed:14s;}
-.badge-icon-container[data-rarity="epic"]::before{ background: conic-gradient(#9b87f5, #67e8f9, #86efac, #9b87f5); box-shadow: 0 0 14px rgba(155,135,245,.35); }
-.badge-icon-container[data-rarity="epic"]::after{ background: radial-gradient(60% 60% at 50% 50%, rgba(155,135,245,.55) 0%, transparent 70%); filter: blur(8px); opacity:.6; }
+.badge-item[data-rarity="epic"] .badge-icon-container,
+.badge-icon-container[data-rarity="epic"]{ --accent:#9b87f5; --spin-speed:14s; }
+.badge-item[data-rarity="epic"] .badge-icon-container::before,
+.badge-icon-container[data-rarity="epic"]::before{
+  background: conic-gradient(#9b87f5, #67e8f9, #86efac, #9b87f5);
+  box-shadow: 0 0 14px rgba(155,135,245,.35);
+}
+.badge-item[data-rarity="epic"] .badge-icon-container::after,
+.badge-icon-container[data-rarity="epic"]::after{
+  background: radial-gradient(60% 60% at 50% 50%, rgba(155,135,245,.55) 0%, transparent 70%);
+  filter: blur(8px); opacity:.6;
+}
 
-.badge-icon-container[data-rarity="legendary"]{--accent:#ffd400;--spin-speed:10s;}
+.badge-item[data-rarity="legendary"] .badge-icon-container,
+.badge-icon-container[data-rarity="legendary"]{ --accent:#ffd400; --spin-speed:10s; }
+.badge-item[data-rarity="legendary"] .badge-icon-container::before,
 .badge-icon-container[data-rarity="legendary"]::before{
   background: conic-gradient(#ff7a00, #ffd400, #64ffda, #8a2be2, #00e5ff, #ff7a00);
   box-shadow: 0 0 18px rgba(255,180,70,.45), 0 0 26px rgba(140,80,255,.25);
   animation: spin var(--spin-speed) linear infinite, twinkle 2.6s ease-in-out infinite;
 }
-.badge-icon-container[data-rarity="legendary"]::after{ background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,180,.65) 0%, transparent 70%); filter: blur(9px); opacity:.75; }
+.badge-item[data-rarity="legendary"] .badge-icon-container::after,
+.badge-icon-container[data-rarity="legendary"]::after{
+  background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,180,.65) 0%, transparent 70%);
+  filter: blur(9px); opacity:.75;
+}
 
 /* ========== 텍스트 ========== */
 .badge-name{
@@ -191,34 +213,52 @@
 .badge-item:hover .badge-action-overlay{ display:flex; }
 /* 소유하지 않은 뱃지는 버튼 숨김 유지 */
 .badge-item.not-owned .badge-action-overlay{ display:none !important; }
-
 /* 터치 환경에서는 항상 노출 */
 @media (hover: none){ .badge-action-overlay{ display:flex; } }
 
-/* 버튼(항상 한 줄) */
+/* ========== 버튼 (등록/해제) – 다크 테마 톤 ========== */
 .overlay-btn,
 .equip-button{
-  white-space: nowrap;       /* 줄바꿈 방지 */
-  padding:8px 12px;
-  border-radius:10px;
-  font-weight:800;
-  font-size:.9rem;
-  border:1px solid #4b84ff;
-  background: linear-gradient(180deg, #5a94ff, #3b6eea);
-  color:#fff;
-  cursor:pointer;
-  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
-  box-shadow: 0 4px 12px rgba(64,123,255,.35);
+  position: relative;
+  appearance: none;
+  border: 1px solid #3a3f4c;
+  background: linear-gradient(180deg, #2a2e39, #1c2029);
+  color: #e9edf7;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: .85rem;
+  letter-spacing: .2px;
+  cursor: pointer;
+  white-space: nowrap;      /* 한 줄 고정 */
+  text-overflow: ellipsis;
+  overflow: hidden;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease, filter .15s ease;
+}
+.overlay-btn::before,
+.equip-button::before{
+  content:"";
+  position:absolute; inset:0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(70% 70% at 50% 0%, rgba(255,255,255,.06), transparent 60%);
+  opacity: .75;
 }
 .overlay-btn:hover,
-.equip-button:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(64,123,255,.45); }
-/* 대표 섹션 해제 버튼 컬러 */
-.equip-button.danger,
-.overlay-btn.danger{
-  border-color:#ff6b6b;
-  background: linear-gradient(180deg, #ff7b7b, #e74c3c);
-  box-shadow: 0 4px 12px rgba(231, 76, 60, .35);
+.equip-button:hover{ transform: translateY(-1px); border-color: #58627a; box-shadow: 0 10px 24px rgba(0,0,0,.5); filter: brightness(1.08); }
+.overlay-btn:active,
+.equip-button:active{ transform: translateY(0); filter: brightness(.98); }
+
+/* 해제(위험) 버튼 – 어두운 레드 톤 */
+.overlay-btn.danger,
+.equip-button.danger{
+  border-color: #5b3232;
+  background: linear-gradient(180deg, #3a2323, #271717);
+  color: #ffd7d7;
+  box-shadow: 0 6px 18px rgba(85,16,16,.35), inset 0 1px 0 rgba(255,255,255,.04);
 }
+.overlay-btn.danger:hover,
+.equip-button.danger:hover{ border-color: #7a4040; filter: brightness(1.06); }
 
 /* ========== 유틸 메시지 ========== */
 .loading-message, .error-message, .no-badges{
