@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLevelBadgeImage } from '../utils/badgeUtils';
+// import { getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
 
 import '../css/SnippetBoard.css';
 
@@ -27,11 +28,7 @@ const SnippetBoard = () => {
     setLoading(true);
     setError(null);
 
-    const params = new URLSearchParams({
-      page,
-      size: 10,
-      sort,
-    });
+    const params = new URLSearchParams({ page, size: 10, sort });
     if (term) params.append('search', term);
     if (lang) params.append('language', lang);
 
@@ -183,20 +180,8 @@ const SnippetBoard = () => {
                       <span className={getLanguageBadgeClass(snippet.language)}>{snippet.language}</span>
                     </td>
                     <td>
-                      {snippet.author?.userId ? (
-                        <Link to={`/users/${snippet.author.userId}`}>
-                          {snippet.author?.level && (
-                            <img
-                              src={getLevelBadgeImage(snippet.author.level)}
-                              alt={snippet.author.level}
-                              className="level-badge-inline"
-                            />
-                          )}
-                          {snippet.author?.nickname || '-'}
-                        </Link>
-                      ) : (
-                        <span>{snippet.author?.nickname || '-'}</span>
-                      )}
+                      {/* Replaced with UserBadgeAndNickname */}
+                      <UserBadgeAndNickname user={snippet.author} />
                     </td>
                     <td>{new Date(snippet.createdAt).toLocaleDateString()}</td>
                   </tr>

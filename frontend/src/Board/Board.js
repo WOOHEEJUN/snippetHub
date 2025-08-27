@@ -2,7 +2,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLevelBadgeImage } from '../utils/badgeUtils';
+// import { getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
 
 import '../css/Board.css';
 
@@ -174,20 +175,8 @@ const Board = () => {
                       </Link>
                     </td>
                     <td>
-                      {post.author?.userId ? (
-                        <Link to={`/users/${post.author.userId}`} className="author-link">
-                          {post.author?.level && (
-                            <img
-                              src={getLevelBadgeImage(post.author.level)}
-                              alt={post.author.level}
-                              className="level-badge-inline"
-                            />
-                          )}
-                          {post.author?.nickname || '-'}
-                        </Link>
-                      ) : (
-                        <span>{post.author?.nickname || '-'}</span>
-                      )}
+                      {/* Replaced with UserBadgeAndNickname */}
+                      <UserBadgeAndNickname user={post.author} />
                     </td>
                     <td>{new Date(post.createdAt).toLocaleDateString()}</td>
                   </tr>

@@ -10,7 +10,8 @@ import {
 import AICodeEvaluation from '../components/AICodeEvaluation';
 
 import '../css/SnippetDetail.css';
-import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
+// import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
 
 const API_BASE = '/api';
 const ENDPOINTS = {
@@ -79,22 +80,9 @@ function SnippetDetail() {
   const [isAIExpanded, setIsAIExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [authorLevels, setAuthorLevels] = useState({}); // 랭킹에서 가져온 레벨 맵
+  // const [authorLevels, setAuthorLevels] = useState({}); // Removed
 
-  const fetchRankingData = useCallback(async () => {
-    try {
-      const res = await apiFetch(`/api/users/ranking?size=1000`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
-      const data = await parseJsonSafe(res);
-      const levelMap = {};
-      (data?.data?.content || []).forEach((u) => {
-        levelMap[u.userId] = u.currentLevel;
-      });
-      setAuthorLevels(levelMap);
-    } catch (err) {
-      console.error('Failed to fetch ranking data:', err);
-    }
-  }, [getAuthHeaders]);
+  // fetchRankingData removed
 
   const fetchSnippet = useCallback(async () => {
     try {
@@ -124,8 +112,8 @@ function SnippetDetail() {
   useEffect(() => {
     fetchSnippet();
     fetchComments();
-    fetchRankingData();
-  }, [fetchSnippet, fetchComments, fetchRankingData, snippetId]);
+    // fetchRankingData(); // Removed
+  }, [fetchSnippet, fetchComments, snippetId]); // Removed fetchRankingData from dependencies
 
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
@@ -306,6 +294,8 @@ function SnippetDetail() {
               outline: 'none',
               cursor: 'pointer',
               fontSize: 24,
+              display: 'flex',
+              alignItems: 'center',
               color: snippet.isLiked ? '#e74c3c' : '#aaa',
               transition: 'color 0.2s'
             }}
@@ -367,25 +357,8 @@ function SnippetDetail() {
             {comments.map((comment) => (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                  {(() => {
-                    const authorId = comment.author?.userId ?? comment.authorId;
-                    const displayLevel = authorLevels[authorId] || comment.author?.level;
-                    return authorId ? (
-                      <Link to={`/users/${authorId}`} className="author-link">
-                        {comment.author?.representativeBadge ? (
-                          <img src={getRepresentativeBadgeImage(comment.author.representativeBadge)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                        ) : (
-                          displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                        )}
-                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
-                      </Link>
-                    ) : (
-                      <span className="author-link">
-                        {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
-                        {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
-                      </span>
-                    );
-                  })()}
+                  {/* Replaced with UserBadgeAndNickname */}
+                  <UserBadgeAndNickname user={comment.author} />
                 </div>
 
                 {editCommentId === comment.commentId ? (
@@ -435,25 +408,8 @@ function SnippetDetail() {
                             style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
                           >
                             <div className="comment-author">
-                              {(() => {
-                                const rAuthorId = reply.author?.userId ?? reply.authorId;
-                                const displayLevel = authorLevels[rAuthorId] || reply.author?.level;
-                                return reply.author?.userId ? (
-                                  <Link to={`/users/${reply.author.userId}`} className="author-link">
-                                    {reply.author?.representativeBadge ? (
-                                      <img src={getRepresentativeBadgeImage(reply.author.representativeBadge)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                                    ) : (
-                                      displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                                    )}
-                                    {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
-                                  </Link>
-                                ) : (
-                                  <span className="author-link">
-                                    {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
-                                    {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
-                                  </span>
-                                );
-                              })()}
+                              {/* Replaced with UserBadgeAndNickname */}
+                              <UserBadgeAndNickname user={reply.author} />
                             </div>
 
                             <p className="comment-content">{reply.content}</p>
@@ -488,28 +444,8 @@ function SnippetDetail() {
             </span>
 
             <div className="meta-value">
-              {(() => {
-                const displayLevel = authorLevels[snippet.author?.userId] || snippet.author?.level;
-                const Nick = (
-                  <>
-                    {snippet.author?.representativeBadge ? (
-                      <img src={getRepresentativeBadgeImage(snippet.author.representativeBadge)} alt={snippet.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                    ) : (
-                      displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                    )}
-                    <span className="nickname" title={snippet.author?.nickname}>
-                      {snippet.author?.nickname}
-                    </span>
-                  </>
-                );
-                return snippet.author?.userId ? (
-                  <Link to={`/users/${snippet.author.userId}`} className="author-link">
-                    {Nick}
-                  </Link>
-                ) : (
-                  <span className="author-link">{Nick}</span>
-                );
-              })()}
+              {/* Replaced with UserBadgeAndNickname */}
+              <UserBadgeAndNickname user={snippet.author} />
             </div>
           </div>
         </div>

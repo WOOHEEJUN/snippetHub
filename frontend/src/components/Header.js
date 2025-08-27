@@ -2,35 +2,17 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
-import {
-  getRepresentativeBadgeImage,
-  getBadgeRarity,
-  getLevelBadgeImage,
-  getUserLevel,
-} from '../utils/badgeUtils';
+// import {
+//   getBadgeImageCandidates,
+//   getBadgeRarity,
+//   getLevelBadgeImage,
+//   getUserLevel,
+// } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from './UserBadgeAndNickname'; // Added
+
 import '../css/Header.css';
 
-/* 대표뱃지(무지개 휘장 + 코어 PNG) */
-const RepBadge = ({ badge, size = 22 }) => {
-  if (!badge) return null;
-  const src = getRepresentativeBadgeImage(badge);
-  const rarity = getBadgeRarity(badge);
-
-  return (
-    <span
-      className={`rep-badge-chip rarity-${rarity}`}
-      style={{ '--rep-size': `${size}px` }}
-      title={badge?.name || '대표 뱃지'}
-      aria-label={badge?.name || '대표 뱃지'}
-    >
-      <img
-        src={src}
-        alt={badge?.name || 'badge'}
-        onError={(e) => { e.currentTarget.src = '/badges/placeholder.png'; }}
-      />
-    </span>
-  );
-};
+// RepBadge component removed
 
 const Header = () => {
   const navigate = useNavigate();
@@ -42,15 +24,11 @@ const Header = () => {
     alert('로그아웃 되었습니다.');
     navigate('/');
   };
-
   const toggleHamburger = () => setIsHamburgerOpen((v) => !v);
 
   if (loading) return <p>Loading...</p>;
 
-  /* 대표뱃지/레벨 결정 */
-  const repBadge = user?.representativeBadge ?? user?.data?.representativeBadge ?? null;
-  const userLevel = getUserLevel(user);
-  const levelImg = !repBadge ? getLevelBadgeImage(userLevel) : '';
+  // repBadge, userLevel, levelImg variables removed
 
   return (
     <header className="header">
@@ -125,18 +103,7 @@ const Header = () => {
               <>
                 <NotificationBell />
                 <span className="user-info">
-                  {/* 1) 대표뱃지 있으면 → 휘장 포함 chip */}
-                  {repBadge && <RepBadge badge={repBadge} size={22} />}
-                  {/* 2) 없으면 → 등급 PNG로 대체 */}
-                  {!repBadge && levelImg && (
-                    <img
-                      src={levelImg}
-                      alt={`${userLevel ?? ''} 등급`}
-                      className="level-badge-header"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                  )}
-                  안녕하세요, {user?.nickname || user?.email}님!
+                  안녕하세요, <UserBadgeAndNickname user={user} showLink={false} />님!
                 </span>
                 <Link to="/mypage" className="btn btn-outline-primary">마이페이지</Link>
                 <button onClick={handleLogout} className="btn btn-primary">로그아웃</button>
@@ -199,7 +166,7 @@ const Header = () => {
                       <li><Link to="/mypage/submission-history" onClick={toggleHamburger}>제출 이력</Link></li>
                       <li><Link to="/mypage/posts" onClick={toggleHamburger}>게시물 목록 보기</Link></li>
                       <li><Link to="/mypage/snippets" onClick={toggleHamburger}>스니펫 목록 보기</Link></li>
-                      <li><Link to="/mypage/saved-problems" onClick={toggleHamburger}>저장한 문제보기</Link></li>
+                      <li><Link to="/mypage/saved-problems">저장한 문제보기</Link></li>
                       <li>
                         <button
                           onClick={() => { handleLogout(); toggleHamburger(); }}

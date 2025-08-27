@@ -7,7 +7,8 @@ import {
 } from 'react-icons/fa';
 
 import '../css/BoardDetail.css';
-import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
+// import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
 
 const MOCK_ENABLED = false;
 
@@ -20,18 +21,7 @@ const normalizeComments = (payload) => {
   return [];
 };
 
-// 레벨 배지 컴포넌트(숫자/영문/한글 level 모두 허용)
-const LevelBadgeImg = ({ level, className = 'level-badge-inline' }) => {
-  const src = getLevelBadgeImage(level);
-  if (!src) return null;
-  return (
-    <img
-      src={src}
-      alt={typeof level === 'string' ? level : 'level-badge'}
-      className={className}
-    />
-  );
-};
+// LevelBadgeImg component removed
 
 function BoardDetail() {
   const { postId } = useParams();
@@ -186,8 +176,6 @@ function BoardDetail() {
 
       if (created) {
         setComments(prev => [...prev, created]);
-      } else {
-        fetchPostData();
       }
       setNewComment('');
     } catch (err) {
@@ -324,29 +312,8 @@ return (
 
           <span className="author-info-inline">
             <FaUser />
-            {(() => {
-              const displayLevel =
-                authorLevels[post.author?.userId] || post.author?.level;
-              return post.author?.userId ? (
-                <Link to={`/users/${post.author.userId}`} className="author-link">
-                  {post.author?.representativeBadge ? (
-                    <img src={getRepresentativeBadgeImage(post.author.representativeBadge)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                  ) : (
-                    displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                  )}
-                  {post.author?.nickname}
-                </Link>
-              ) : (
-                <>
-                  {post.author?.representativeBadge ? (
-                    <img src={getRepresentativeBadgeImage(post.author.representativeBadge)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                  ) : (
-                    displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                  )}
-                  {post.author?.nickname}
-                </>
-              );
-            })()}
+            {/* Replaced with UserBadgeAndNickname */}
+            <UserBadgeAndNickname user={post.author} />
           </span>
 
           <span className="date-info-inline">
@@ -418,31 +385,8 @@ return (
             return (
               <div key={comment.commentId} className="comment-item">
                 <div className="comment-author">
-                  {(() => {
-                    const displayLevel =
-                      authorLevels[authorId] || comment.author?.level;
-                    return authorId ? (
-                      <Link to={`/users/${authorId}`} className="author-link">
-                        {comment.author?.representativeBadge ? (
-                          <img src={getRepresentativeBadgeImage(comment.author.representativeBadge)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                        ) : (
-                          displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                        )}
-                        {authorName}
-                      </Link>
-                    ) : (
-                      <span className="author-link">
-                        {displayLevel && (
-                          <img
-                            src={getLevelBadgeImage(displayLevel)}
-                            alt={displayLevel}
-                            className="level-badge-inline"
-                          />
-                        )}
-                        {authorName}
-                      </span>
-                    );
-                  })()}
+                  {/* Replaced with UserBadgeAndNickname */}
+                  <UserBadgeAndNickname user={comment.author} />
                 </div>
 
                 {editingCommentId === comment.commentId ? (
@@ -510,31 +454,8 @@ return (
                               }}
                             >
                               <div className="comment-author">
-                                {(() => {
-                                  const displayLevel =
-                                    authorLevels[rAuthorId] || reply.author?.level;
-                                  return rAuthorId ? (
-                                    <Link to={`/users/${rAuthorId}`} className="author-link">
-                                      {reply.author?.representativeBadge ? (
-                                        <img src={getRepresentativeBadgeImage(reply.author.representativeBadge)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                                      ) : (
-                                        displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
-                                      )}
-                                      {rAuthorName}
-                                    </Link>
-                                  ) : (
-                                    <span className="author-link">
-                                      {displayLevel && (
-                                        <img
-                                          src={getLevelBadgeImage(displayLevel)}
-                                          alt={displayLevel}
-                                          className="level-badge-inline"
-                                        />
-                                      )}
-                                      {rAuthorName}
-                                    </span>
-                                  );
-                                })()}
+                                {/* Replaced with UserBadgeAndNickname */}
+                                <UserBadgeAndNickname user={reply.author} />
                               </div>
 
                               <p className="comment-content">{reply.content}</p>
@@ -568,33 +489,8 @@ return (
       <div className="sidebar-card author-card">
         <h4><FaUser /> 작성자</h4>
         <div className="author-info">
-          {(() => {
-            const displayLevel =
-              authorLevels[post.author?.userId] || post.author?.level;
-            return post.author?.userId ? (
-              <Link to={`/users/${post.author.userId}`} className="author-link">
-                {displayLevel && (
-                  <img
-                    src={getLevelBadgeImage(displayLevel)}
-                    alt={displayLevel}
-                    className="level-badge-inline"
-                  />
-                )}
-                <span className="nickname">{post.author?.nickname}</span>
-              </Link>
-            ) : (
-              <>
-                {displayLevel && (
-                  <img
-                    src={getLevelBadgeImage(displayLevel)}
-                    alt={displayLevel}
-                    className="level-badge-inline"
-                  />
-                )}
-                <span className="nickname">{post.author?.nickname}</span>
-              </>
-            );
-          })()}
+          {/* Replaced with UserBadgeAndNickname */}
+          <UserBadgeAndNickname user={post.author} />
         </div>
       </div>
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getLevelBadgeImage } from '../utils/badgeUtils';
- 
+// Removed getLevelBadgeImage as UserBadgeAndNickname will handle it
+// import { getLevelBadgeImage } from '../utils/badgeUtils';
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Import the new component
+
 import '../css/Ranking.css';
 
 function Ranking() {
@@ -12,7 +14,7 @@ function Ranking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
-  const [size] = useState(10); 
+  const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
 
   const fetchRanking = useCallback(async () => {
@@ -34,11 +36,31 @@ function Ranking() {
       }
 
       const data = await response.json();
-      setRankingData(data.data.content || []);
+      let users = data.data.content || [];
+
+      // Fetch representative badges for each user
+      const usersWithBadges = await Promise.all(users.map(async (user) => {
+        try {
+          const badgeRes = await fetch(`/api/badges/users/${user.userId}/featured`, {
+            headers: getAuthHeaders(),
+            credentials: 'include',
+          });
+          if (badgeRes.ok) {
+            const badgeData = await badgeRes.json();
+            if (badgeData.data && badgeData.data.length > 0) {
+              return { ...user, representativeBadge: badgeData.data[0] };
+            }
+          }
+        } catch (err) {
+          console.error(`Failed to fetch featured badge for user ${user.userId}:`, err);
+        }
+        return user; // Return user even if badge fetch fails
+      }));
+
+      setRankingData(usersWithBadges);
       setTotalPages(data.data.totalPages || 0);
 
     } catch (err) {
-      
       setError(err.message);
     } finally {
       setLoading(false);
@@ -77,7 +99,8 @@ function Ranking() {
               <tr key={user.userId}>
                 <td>{user.rank || (page * size) + index + 1}</td>
                 <td className="nickname-cell" onClick={() => navigate(`/users/${user.userId}`)}>
-                  {user.currentLevel && <img src={getLevelBadgeImage(user.currentLevel)} alt={user.currentLevel} className="level-badge-ranking" />}
+                  {/* Use the new UserBadgeAndNickname component */}
+                  <UserBadgeAndNickname user={user} showLink={false} className="level-badge-ranking" />
                   {user.nickname}
                 </td>
                 <td>{user.currentLevel}</td>

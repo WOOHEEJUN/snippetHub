@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import LevelProgress from '../components/LevelProgress';
-import { getLevelBadgeImage } from '../utils/badgeUtils';
+// import { getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
 
 import '../css/Mypage.css';
 
@@ -36,14 +37,8 @@ function MyPage() {
           <p><strong>이메일:</strong> {userInfo.email}</p>
           <p>
             <strong>닉네임:</strong>{' '}
-            {userInfo.level && (
-              <img
-                src={getLevelBadgeImage(userInfo.level)}
-                alt={userInfo.level}
-                className="level-badge-mypage"
-              />
-            )}
-            {userInfo.nickname}
+            {/* Replaced with UserBadgeAndNickname */}
+            <UserBadgeAndNickname user={userInfo} showLink={false} className="level-badge-mypage" />
           </p>
           <p><strong>가입일:</strong> {new Date(userInfo.joinDate).toLocaleDateString()}</p>
         </div>

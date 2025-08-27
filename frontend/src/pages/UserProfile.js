@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
  
 import '../css/UserProfile.css';
-import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
+// import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -69,21 +70,8 @@ const UserProfile = () => {
     <div className="user-profile-container">
       <div className="profile-header">
         <div className="profile-level-display">
-          {user.representativeBadge ? (
-            <img
-              src={getRepresentativeBadgeImage(user.representativeBadge)}
-              alt={user.representativeBadge.name}
-              className="profile-level-badge-large"
-            />
-          ) : (
-            user.level && (
-              <img
-                src={getLevelBadgeImage(user.level)}
-                alt={user.level}
-                className="profile-level-badge-large"
-              />
-            )
-          )}
+          {/* Replaced with UserBadgeAndNickname */}
+          <UserBadgeAndNickname user={user} showLink={false} className="profile-level-badge-large" />
         </div>
         <div className="profile-info">
           <h1 className="profile-nickname">{user.nickname}</h1>
