@@ -15,9 +15,9 @@ class WebSocketService {
       return 'http://localhost:8080/ws';
     }
     
-    // AWS 서버의 경우 같은 도메인 사용 (프록시를 통해)
+    // AWS 서버의 경우 직접 IP 주소 사용
     if (window.location.hostname === 'snippethub.co.kr') {
-      return 'https://snippethub.co.kr/ws';
+      return 'http://10.0.3.74:8080/ws';
     }
     
     // 기본 설정
