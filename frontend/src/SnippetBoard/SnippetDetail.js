@@ -10,7 +10,7 @@ import {
 import AICodeEvaluation from '../components/AICodeEvaluation';
 
 import '../css/SnippetDetail.css';
-import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
+import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const API_BASE = '/api';
 const ENDPOINTS = {
@@ -373,7 +373,7 @@ function SnippetDetail() {
                     return authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
                         {comment.author?.representativeBadge ? (
-                          <img src={getBadgeImagePath(comment.author.representativeBadge.name)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                          <img src={getRepresentativeBadgeImage(comment.author.representativeBadge)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                         ) : (
                           displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                         )}
@@ -441,7 +441,7 @@ function SnippetDetail() {
                                 return reply.author?.userId ? (
                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
                                     {reply.author?.representativeBadge ? (
-                                      <img src={getBadgeImagePath(reply.author.representativeBadge.name)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                                      <img src={getRepresentativeBadgeImage(reply.author.representativeBadge)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                                     ) : (
                                       displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                                     )}
@@ -493,7 +493,7 @@ function SnippetDetail() {
                 const Nick = (
                   <>
                     {snippet.author?.representativeBadge ? (
-                      <img src={getBadgeImagePath(snippet.author.representativeBadge.name)} alt={snippet.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                      <img src={getRepresentativeBadgeImage(snippet.author.representativeBadge)} alt={snippet.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                     ) : (
                       displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                     )}

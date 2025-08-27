@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
  
 import '../css/UserProfile.css';
-import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
+import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -71,7 +71,7 @@ const UserProfile = () => {
         <div className="profile-level-display">
           {user.representativeBadge ? (
             <img
-              src={getBadgeImagePath(user.representativeBadge.name)}
+              src={getRepresentativeBadgeImage(user.representativeBadge)}
               alt={user.representativeBadge.name}
               className="profile-level-badge-large"
             />

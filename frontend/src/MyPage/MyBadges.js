@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaCrown, FaCoins } from 'react-icons/fa';
-import { getBadgeImageCandidates } from '../utils/badgeUtils';
+import { getRepresentativeBadgeImage } from '../utils/badgeUtils';
 import '../css/MyBadges.css';
 
 /* ---------- 유틸 ---------- */
@@ -60,9 +60,7 @@ const normalizeBadge = (b, idx = 0) => {
 
 /* 배지 코어 + 휘장(링/오라) — PNG 후보를 순차 시도 */
 const BadgeVisual = ({ badge }) => {
-  const candidates = getBadgeImageCandidates(badge);
-  const [idx, setIdx] = useState(0);
-  const src = candidates[Math.min(idx, candidates.length - 1)];
+  const src = getRepresentativeBadgeImage(badge);
 
   return (
     <div className="badge-icon-container" data-rarity={badge.rarity}>
@@ -70,7 +68,6 @@ const BadgeVisual = ({ badge }) => {
         src={src}
         alt={badge.name}
         className="badge-image-actual"
-        onError={() => setIdx(i => (i + 1 < candidates.length ? i + 1 : i))}
       />
     </div>
   );

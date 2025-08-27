@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 
 import '../css/BoardDetail.css';
-import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
+import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const MOCK_ENABLED = false;
 
@@ -330,7 +330,7 @@ return (
               return post.author?.userId ? (
                 <Link to={`/users/${post.author.userId}`} className="author-link">
                   {post.author?.representativeBadge ? (
-                    <img src={getBadgeImagePath(post.author.representativeBadge.name)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                    <img src={getRepresentativeBadgeImage(post.author.representativeBadge)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                   ) : (
                     displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                   )}
@@ -339,7 +339,7 @@ return (
               ) : (
                 <>
                   {post.author?.representativeBadge ? (
-                    <img src={getBadgeImagePath(post.author.representativeBadge.name)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                    <img src={getRepresentativeBadgeImage(post.author.representativeBadge)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                   ) : (
                     displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                   )}
@@ -424,7 +424,7 @@ return (
                     return authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
                         {comment.author?.representativeBadge ? (
-                          <img src={getBadgeImagePath(comment.author.representativeBadge.name)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                          <img src={getRepresentativeBadgeImage(comment.author.representativeBadge)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                         ) : (
                           displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                         )}
@@ -516,7 +516,7 @@ return (
                                   return rAuthorId ? (
                                     <Link to={`/users/${rAuthorId}`} className="author-link">
                                       {reply.author?.representativeBadge ? (
-                                        <img src={getBadgeImagePath(reply.author.representativeBadge.name)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                                        <img src={getRepresentativeBadgeImage(reply.author.representativeBadge)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                                       ) : (
                                         displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                                       )}

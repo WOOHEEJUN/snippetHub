@@ -4,7 +4,7 @@ import '../css/Home.css';
 
 
 import { useAuth } from '../context/AuthContext'; // AuthContext import 추가
-import { getBadgeImagePath, getLevelBadgeImage } from '../utils/badgeUtils';
+import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -158,7 +158,7 @@ const Home = () => {
                           by {snippet.author?.userId ? (
                             <Link to={`/users/${snippet.author.userId}`}>
                               {snippet.author?.representativeBadge ? (
-                                <img src={getBadgeImagePath(snippet.author.representativeBadge.name)} alt={snippet.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                                <img src={getRepresentativeBadgeImage(snippet.author.representativeBadge)} alt={snippet.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                               ) : (
                                 snippet.author?.level && <img src={getLevelBadgeImage(snippet.author.level)} alt={snippet.author.level} className="level-badge-inline" style={{ marginRight: '4px' }} />
                               )}
@@ -218,7 +218,7 @@ const Home = () => {
                         by {post.author?.userId ? (
                           <span onClick={(e) => { e.stopPropagation(); navigate(`/users/${post.author.userId}`); }} style={{ cursor: 'pointer' }}>
                             {post.author?.representativeBadge ? (
-                              <img src={getBadgeImagePath(post.author.representativeBadge.name)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                              <img src={getRepresentativeBadgeImage(post.author.representativeBadge)} alt={post.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
                             ) : (
                               post.author?.level && <img src={getLevelBadgeImage(post.author.level)} alt={post.author.level} className="level-badge-inline" style={{ marginRight: '4px' }} />
                             )}
