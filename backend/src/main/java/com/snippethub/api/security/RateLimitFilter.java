@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.HashMap;
 
 @Component
 @Slf4j
@@ -278,5 +280,90 @@ public class RateLimitFilter extends OncePerRequestFilter {
         public int decrementAndGet() {
             return remainingTokens.decrementAndGet();
         }
+
+        public int getRemainingTokens() {
+            return remainingTokens.get();
+        }
+
+        public long getWindowEnd() {
+            return windowStart + 60000; // 60초 윈도우 (기본값)
+        }
+    }
+
+    // Rate Limit 모니터링을 위한 메서드들
+    public Map<String, Object> getCurrentBucketsStatus() {
+        Map<String, Object> status = new HashMap<>();
+        
+        status.put("totalBuckets", rateLimitMap.size());
+        status.put("timestamp", System.currentTimeMillis());
+        
+        Map<String, Object> bucketDetails = new HashMap<>();
+        for (Map.Entry<String, RateLimitInfo> entry : rateLimitMap.entrySet()) {
+            String key = entry.getKey();
+            RateLimitInfo info = entry.getValue();
+            
+            String[] parts = key.split(":");
+            String ip = parts[0];
+            String path = parts[1];
+            String method = parts[2];
+            
+            Map<String, Object> bucketInfo = new HashMap<>();
+            bucketInfo.put("remainingTokens", info.getRemainingTokens());
+            bucketInfo.put("windowStart", info.getWindowStart());
+            bucketInfo.put("windowEnd", info.getWindowEnd());
+            bucketInfo.put("path", path);
+            bucketInfo.put("method", method);
+            
+            bucketDetails.put(ip, bucketInfo);
+        }
+        
+        status.put("buckets", bucketDetails);
+        return status;
+    }
+
+    public Map<String, Object> getRateLimitStatusForIp(String ipAddress) {
+        Map<String, Object> status = new HashMap<>();
+        status.put("ipAddress", ipAddress);
+        status.put("timestamp", System.currentTimeMillis());
+        
+        Map<String, Object> ipBuckets = new HashMap<>();
+        int totalBuckets = 0;
+        
+        for (Map.Entry<String, RateLimitInfo> entry : rateLimitMap.entrySet()) {
+            String key = entry.getKey();
+            RateLimitInfo info = entry.getValue();
+            
+            if (key.startsWith(ipAddress + ":")) {
+                totalBuckets++;
+                String[] parts = key.split(":");
+                String path = parts[1];
+                String method = parts[2];
+                
+                Map<String, Object> bucketInfo = new HashMap<>();
+                bucketInfo.put("remainingTokens", info.getRemainingTokens());
+                bucketInfo.put("windowStart", info.getWindowStart());
+                bucketInfo.put("windowEnd", info.getWindowEnd());
+                bucketInfo.put("limit", getLimit(path));
+                bucketInfo.put("windowSeconds", getWindowMs(path) / 1000);
+                
+                ipBuckets.put(path + ":" + method, bucketInfo);
+            }
+        }
+        
+        status.put("totalBuckets", totalBuckets);
+        status.put("buckets", ipBuckets);
+        return status;
+    }
+
+    public void resetRateLimitForIp(String ipAddress) {
+        rateLimitMap.entrySet().removeIf(entry -> entry.getKey().startsWith(ipAddress + ":"));
+        log.info("Rate limit reset for IP: {}", ipAddress);
+    }
+
+    public int resetAllRateLimits() {
+        int size = rateLimitMap.size();
+        rateLimitMap.clear();
+        log.info("All rate limits reset. Cleared {} buckets.", size);
+        return size;
     }
 }

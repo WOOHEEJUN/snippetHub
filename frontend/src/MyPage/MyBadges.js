@@ -38,7 +38,11 @@ const normalizeBadge = (b, idx = 0) => {
     requirements: b.requirements ?? b.requirementList ?? [],
     rewards: b.rewards ?? b.rewardList ?? [],
     currentProgress: b.currentProgress ?? b.progress ?? 0,
-    owned: b.owned ?? b.isOwned ?? false,
+    owned: b.owned ?? b.isOwned ?? true, // 사용자가 가진 뱃지는 owned = true
+    icon: b.icon ?? '🏆',
+    color: b.color ?? '#FFD700',
+    earnedAt: b.earnedAt ?? new Date().toISOString(),
+    isFeatured: b.isFeatured ?? false
   };
 };
 
@@ -68,15 +72,29 @@ function MyBadges() {
       setLoading(true);
       setError(null);
       try {
+        console.log('뱃지 데이터 조회 시작...');
+        
         const [profileRes, badgesRes, featuredRes] = await Promise.all([
           fetch('/api/users/profile', { headers: getAuthHeaders(), credentials: 'include' }),
           fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include' }),
           fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include' }),
         ]);
 
+        console.log('API 응답 상태:', {
+          profile: profileRes.status,
+          badges: badgesRes.status,
+          featured: featuredRes.status
+        });
+
         const profileData = await profileRes.json().catch(() => ({}));
         const badgesData = await parseJsonSafe(badgesRes);
         const featuredData = await parseJsonSafe(featuredRes);
+
+        console.log('API 응답 데이터:', {
+          profile: profileData,
+          badges: badgesData,
+          featured: featuredData
+        });
 
         if (profileData?.data) {
           setLevel({
@@ -89,8 +107,29 @@ function MyBadges() {
           setPoints(null);
         }
 
-        const rawBadges = extractArray(badgesData); const normalizedBadges = rawBadges.map((b, i) => normalizeBadge(b, i)); setBadges(normalizedBadges);
-        const rawFeatured = extractArray(featuredData); const normalizedFeatured = rawFeatured.map((b, i) => normalizeBadge(b, i)); setFeaturedBadges(normalizedFeatured);
+        // 뱃지 데이터 처리 - ApiResponse 구조에 맞게 수정
+        let rawBadges = [];
+        if (badgesData?.success && badgesData?.data) {
+          rawBadges = Array.isArray(badgesData.data) ? badgesData.data : [];
+        } else if (Array.isArray(badgesData)) {
+          rawBadges = badgesData;
+        }
+        
+        console.log('처리된 뱃지 데이터:', rawBadges);
+        const normalizedBadges = rawBadges.map((b, i) => normalizeBadge(b, i));
+        setBadges(normalizedBadges);
+
+        // 대표 뱃지 데이터 처리
+        let rawFeatured = [];
+        if (featuredData?.success && featuredData?.data) {
+          rawFeatured = Array.isArray(featuredData.data) ? featuredData.data : [];
+        } else if (Array.isArray(featuredData)) {
+          rawFeatured = featuredData;
+        }
+        
+        console.log('처리된 대표 뱃지 데이터:', rawFeatured);
+        const normalizedFeatured = rawFeatured.map((b, i) => normalizeBadge(b, i));
+        setFeaturedBadges(normalizedFeatured);
 
         // 통계 API가 있으면 여기에 setBadgeStats로 넣어 쓰세요
         // setBadgeStats(statsData?.data)
