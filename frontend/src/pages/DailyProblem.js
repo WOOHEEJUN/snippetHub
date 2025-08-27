@@ -330,7 +330,7 @@ function DailyProblem() {
                         </>
                       )}
                     </button>
-                    <Link to="/problems" className="btn btn-outline-primary">
+                    <Link to="/problems" className="btn btn-outline-primary ms-3">
                       <i className="fas fa-list me-2"></i>
                       전체 문제 목록
                     </Link>

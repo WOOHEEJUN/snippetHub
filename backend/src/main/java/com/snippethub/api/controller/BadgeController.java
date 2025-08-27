@@ -10,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/badges")
@@ -23,9 +22,20 @@ public class BadgeController {
      * 전체 뱃지 목록 조회 (모든 사용자 공통)
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<BadgeInfoDto>>> getAllBadges() {
+    public ResponseEntity<ApiResponse<List<BadgeInfoDto>>> getAllBadges(@RequestParam(required = false) String category) {
         try {
-            List<Badge> badges = badgeService.getAllBadges();
+            List<Badge> badges;
+            if (category != null && !category.isEmpty()) {
+                com.snippethub.api.domain.BadgeCategory cat;
+                try {
+                    cat = com.snippethub.api.domain.BadgeCategory.valueOf(category.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.ok(ApiResponse.success("전체 뱃지 목록을 조회했습니다.", new java.util.ArrayList<>()));
+                }
+                badges = badgeService.getBadgesByCategory(cat);
+            } else {
+                badges = badgeService.getAllBadges();
+            }
             List<BadgeInfoDto> badgeInfoList = new java.util.ArrayList<>();
             for (Badge badge : badges) {
                 badgeInfoList.add(convertToBadgeInfoDto(badge));

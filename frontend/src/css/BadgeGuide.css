@@ -1,290 +1,195 @@
-.badge-guide-page {
-  padding: 40px 0;
-  background-color: #1a1a1a;
-  min-height: 100vh;
+/* =====================
+   Layout
+   ===================== */
+.badge-guide-page{padding:40px 0;background:#1a1a1a;min-height:100vh;}
+.page-header{text-align:center;margin-bottom:40px;color:#e0e0e0;}
+.page-header h1{font-size:2.5rem;margin-bottom:10px;font-weight:700;}
+.page-header p{font-size:1.1rem;opacity:.9;}
+
+/* =====================
+   Stats
+   ===================== */
+.stats-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:40px;}
+.stats-card{background:#222;border-radius:12px;padding:25px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:.25s;}
+.stats-card:hover{transform:translateY(-4px);}
+.stats-number{font-size:2.5rem;font-weight:700;color:#8ab0d1;margin-bottom:8px;}
+.stats-label{color:#b0b0b0;font-weight:500;}
+
+/* =====================
+   Category filter
+   ===================== */
+.filter-section{background:#222;border-radius:12px;padding:25px;margin-bottom:30px;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.filter-section h3{color:#e0e0e0;margin-bottom:20px;font-weight:600;}
+.category-filters{display:flex;flex-wrap:wrap;gap:12px;}
+.category-filter{background:#333;border:2px solid #444;color:#e0e0e0;padding:10px 20px;border-radius:25px;cursor:pointer;font-weight:500;transition:.2s;}
+.category-filter:hover{background:#444;border-color:#666;}
+.category-filter.active{background:#8ab0d1;border-color:#8ab0d1;color:#333;}
+
+/* =====================
+   Grid / Card
+   ===================== */
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:25px;}
+.badge-card{
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)) #181818;
+  border-radius:12px;padding:25px;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:.25s;position:relative;overflow:hidden;
+}
+.badge-card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 14px 28px rgba(0,0,0,.45);}
+.badge-card.owned{outline:0;}
+.badge-card.not-owned{filter:saturate(.65) contrast(.98) brightness(.96);}
+
+/* =====================
+   Badge coin (icon circle)
+   ===================== */
+.badge-image{position:relative;text-align:center;margin-bottom:20px;}
+
+.badge-icon-container{
+  --coin-size:78px;
+  width:var(--coin-size);height:var(--coin-size);
+  margin:0 auto;border-radius:50%;position:relative;isolation:isolate;
+
+  /* 내부 표면(절제된 입체감) */
+  background:
+    radial-gradient(120px 120px at 35% 30%, rgba(255,255,255,.06), transparent 60%) padding-box,
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.08)) padding-box;
+
+  /* 링은 border-image로 그립니다 (항상 보임) */
+  border:3px solid transparent;             /* 굵기 */
+  border-image-slice:1;                      /* gradient 전체 사용 */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.28),
+    0 6px 18px rgba(0,0,0,.35);
+  transition:.2s;
+}
+.badge-icon-container:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 8px 18px rgba(0,0,0,.35);}
+
+/* 중앙 레이어 */
+.icon-layer{position:relative;width:100%;height:100%;}
+.iconify-img{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:block;width:64px;height:64px;z-index:2;opacity:.98;
+}
+.badge-emoji{ /* 폴백: 아이콘 실패/로딩 때만 보이게 (JS에서 opacity 제어) */
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:28px;line-height:1;color:#fff;z-index:1;transition:opacity .2s;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
-  color: #e0e0e0;
+/* =====================
+   Rarity ring (border-image)
+   ===================== */
+/* 공통: 각 카드가 data-rarity를 가집니다. 해당 값에 맞춰 링을 채웁니다. */
+[data-rarity="common"] .badge-icon-container{
+  border-image: conic-gradient(
+    #3a3a3a, #343434, #3a3a3a
+  ) 1;
 }
 
-.page-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  font-weight: 700;
+[data-rarity="uncommon"] .badge-icon-container{
+  border-image: conic-gradient(
+    color-mix(in oklab, var(--accent,#8ab0d1) 30%, #202020),
+    color-mix(in oklab, var(--accent,#8ab0d1) 15%, #202020) 55%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 30%, #202020)
+  ) 1;
 }
 
-.page-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
+[data-rarity="rare"] .badge-icon-container{
+  border-image: conic-gradient(
+    color-mix(in oklab, var(--accent,#8ab0d1) 45%, #1a1a1a),
+    color-mix(in oklab, var(--accent,#8ab0d1) 22%, #1a1a1a) 50%,
+    color-mix(in oklab, var(--accent,#8ab0d1) 45%, #1a1a1a)
+  ) 1;
 }
 
-.stats-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
+[data-rarity="epic"] .badge-icon-container{
+  border-image: conic-gradient(
+    /* 파스텔 멀티톤 */
+    color-mix(in oklab, #9b87f5 38%, #141414),
+    color-mix(in oklab, #67e8f9 32%, #141414) 33%,
+    color-mix(in oklab, #86efac 32%, #141414) 66%,
+    color-mix(in oklab, #9b87f5 38%, #141414)
+  ) 1;
 }
 
-.stats-card {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
+[data-rarity="legendary"] .badge-icon-container{
+  border-image: conic-gradient(
+    color-mix(in oklab, #ff7a00 36%, #111),
+    color-mix(in oklab, #ffd400 36%, #111) 20%,
+    color-mix(in oklab, #64ffda 32%, #111) 40%,
+    color-mix(in oklab, #8a2be2 36%, #111) 60%,
+    color-mix(in oklab, #00e5ff 32%, #111) 80%,
+    color-mix(in oklab, #ff7a00 36%, #111)
+  ) 1;
 }
 
-.stats-card:hover {
-  transform: translateY(-5px);
+/* color-mix 미지원 브라우저를 위한 안전 팔레트 */
+@supports not (color-mix(in oklab, black 50%, white 50%)){
+  [data-rarity="uncommon"] .badge-icon-container{
+    border-image: conic-gradient(#79a9c9, #3b5668, #79a9c9) 1;
+  }
+  [data-rarity="rare"] .badge-icon-container{
+    border-image: conic-gradient(#8ab0d1, #486275, #8ab0d1) 1;
+  }
+  [data-rarity="epic"] .badge-icon-container{
+    border-image: conic-gradient(#9b87f5, #67e8f9, #86efac, #9b87f5) 1;
+  }
+  [data-rarity="legendary"] .badge-icon-container{
+    border-image: conic-gradient(#ff7a00, #ffd400, #64ffda, #8a2be2, #00e5ff, #ff7a00) 1;
+  }
 }
 
-.stats-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #8ab0d1;
-  margin-bottom: 8px;
+/* =====================
+   Owned check
+   ===================== */
+.owned-badge{
+  position:absolute;top:-6px;right:50%;transform:translateX(50%);
+  background:linear-gradient(180deg,#9be58c,#3cb371);
+  color:#091207;width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
 }
 
-.stats-label {
-  color: #b0b0b0;
-  font-weight: 500;
+/* =====================
+   Info / Text
+   ===================== */
+.badge-info{text-align:center;}
+.badge-name{color:#e0e0e0;margin-bottom:10px;font-weight:600;font-size:1.2rem;}
+.badge-description{color:#b0b0b0;margin-bottom:15px;line-height:1.5;}
+.badge-category{margin-bottom:15px;}
+.category-tag{display:inline-block;padding:5px 12px;border-radius:15px;font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.category-tag.use-accent{color:var(--accent,#8ab0d1);border:1px solid var(--accent,#8ab0d1);background:#333;}
+
+/* =====================
+   Progress
+   ===================== */
+.progress-section{margin-bottom:15px;}
+.progress-bar{width:100%;height:10px;background:#2d2d2d;border-radius:999px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{
+  height:100%;border-radius:999px;
+  background:linear-gradient(90deg,color-mix(in oklab,var(--accent,#8ab0d1) 55%,#fff) 0%,color-mix(in oklab,var(--accent,#8ab0d1) 25%,#fff) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
 }
+.progress-text{font-size:.9rem;color:#b0b0b0;font-weight:500;}
 
-.filter-section {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
+/* =====================
+   Empty / states
+   ===================== */
+.no-badges,.loading-message,.error-message{text-align:center;background:#222;border-radius:12px;padding:40px;color:#b0b0b0;margin:20px 0;}
+.error-message{color:#dc3545;background:#3a2a3a;border:1px solid #5a3a3a;}
 
-.filter-section h3 {
-  color: #e0e0e0;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-.category-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.category-filter {
-  background-color: #333333;
-  border: 2px solid #444444;
-  color: #e0e0e0;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.category-filter:hover {
-  background-color: #444444;
-  border-color: #666666;
-}
-
-.category-filter.active {
-  background-color: #8ab0d1;
-  border-color: #8ab0d1;
-  color: #333333;
-}
-
-.badges-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 25px;
-}
-
-.badge-card {
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.badge-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-}
-
-.badge-card.owned {
-  border: 2px solid #4CAF50;
-}
-
-.badge-card.not-owned {
-  opacity: 0.5;
-}
-
-.badge-image {
-  position: relative;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.badge-icon-container {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: #333;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-
-.badge-image-actual {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.owned-badge {
-  position: absolute;
-  top: -5px;
-  right: 50%;
-  transform: translateX(50%);
-  background: #4CAF50;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 12px;
-}
-
-.badge-info {
-  text-align: center;
-}
-
-.badge-name {
-  color: #e0e0e0;
-  margin-bottom: 10px;
-  font-weight: 600;
-  font-size: 1.2rem;
-}
-
-.badge-description {
-  color: #b0b0b0;
-  margin-bottom: 15px;
-  line-height: 1.5;
-}
-
-.badge-category {
-  margin-bottom: 15px;
-}
-
-.category-tag {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.category-activity { background-color: #333333; color: #8ab0d1; }
-.category-achievement { background-color: #333333; color: #FF9800; }
-.category-special { background-color: #333333; color: #9C27B0; }
-.category-event { background-color: #333333; color: #4CAF50; }
-
-.progress-section { margin-bottom: 15px; }
-
-.progress-bar {
-  width: 100%;
-  height: 24px;
-  background-color: #444444;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #444444 0%, #666666 100%);
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  font-size: 0.9rem;
-  color: #b0b0b0;
-  font-weight: 500;
-}
-
-.badge-requirements,
-.badge-rewards {
-  text-align: left;
-  margin-bottom: 15px;
-}
-
-.badge-requirements h5,
-.badge-rewards h5 {
-  color: #e0e0e0;
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.badge-requirements ul,
-.badge-rewards ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.badge-requirements li,
-.badge-rewards li {
-  color: #b0b0b0;
-  font-size: 0.85rem;
-  margin-bottom: 5px;
-  padding-left: 15px;
-  position: relative;
-}
-
-.badge-requirements li:before,
-.badge-rewards li:before {
-  content: "•";
-  color: #8ab0d1;
-  font-weight: bold;
-  position: absolute;
-  left: 0;
-}
-
-.no-badges,
-.loading-message,
-.error-message {
-  text-align: center;
-  background-color: #222222;
-  border-radius: 12px;
-  padding: 40px;
-  color: #b0b0b0;
-  margin: 20px 0;
-}
-
-.error-message {
-  color: #dc3545;
-  background-color: #3a2a2a;
-  border: 1px solid #5a3a3a;
-}
-
-@media (max-width: 768px) {
-  .badge-guide-page { padding: 20px 0; }
-  .page-header h1 { font-size: 2rem; }
-  .stats-section { grid-template-columns: 1fr; }
-  .badges-grid { grid-template-columns: 1fr; }
-  .category-filters { justify-content: center; }
-  .badge-card { padding: 20px; }
+/* =====================
+   Responsive
+   ===================== */
+@media (max-width:768px){
+  .badge-guide-page{padding:20px 0;}
+  .page-header h1{font-size:2rem;}
+  .stats-section{grid-template-columns:1fr;}
+  .badges-grid{grid-template-columns:1fr;}
+  .category-filters{justify-content:center;}
+  .badge-card{padding:20px;}
 }

@@ -8,7 +8,7 @@ import {
   FaCalendarAlt, FaCode, FaEdit, FaTrash, FaCopy
 } from 'react-icons/fa';
 import AICodeEvaluation from '../components/AICodeEvaluation';
-import { getLevelBadgeImage } from '../utils/badgeUtils';
+import { getLevelBadgeImage, getBadgeImagePath } from '../utils/badgeUtils';
 import '../css/SnippetDetail.css';
 
 const API_BASE = '/api';
@@ -371,7 +371,11 @@ function SnippetDetail() {
                     const displayLevel = authorLevels[authorId] || comment.author?.level;
                     return authorId ? (
                       <Link to={`/users/${authorId}`} className="author-link">
-                        {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                        {comment.author?.representativeBadge ? (
+                          <img src={getBadgeImagePath(comment.author.representativeBadge.name)} alt={comment.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                        ) : (
+                          displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                        )}
                         {comment.author?.nickname || comment.authorNickname || '알 수 없는 사용자'}
                       </Link>
                     ) : (
@@ -435,7 +439,11 @@ function SnippetDetail() {
                                 const displayLevel = authorLevels[rAuthorId] || reply.author?.level;
                                 return reply.author?.userId ? (
                                   <Link to={`/users/${reply.author.userId}`} className="author-link">
-                                    {displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" />}
+                                    {reply.author?.representativeBadge ? (
+                                      <img src={getBadgeImagePath(reply.author.representativeBadge.name)} alt={reply.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                                    ) : (
+                                      displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                                    )}
                                     {reply.author?.nickname || reply.authorNickname || '알 수 없는 사용자'}
                                   </Link>
                                 ) : (
@@ -483,12 +491,10 @@ function SnippetDetail() {
                 const displayLevel = authorLevels[snippet.author?.userId] || snippet.author?.level;
                 const Nick = (
                   <>
-                    {displayLevel && (
-                      <img
-                        src={getLevelBadgeImage(displayLevel)}
-                        alt={displayLevel}
-                        className="level-badge-inline"
-                      />
+                    {snippet.author?.representativeBadge ? (
+                      <img src={getBadgeImagePath(snippet.author.representativeBadge.name)} alt={snippet.author.representativeBadge.name} className="level-badge-inline" style={{ marginRight: '4px' }} />
+                    ) : (
+                      displayLevel && <img src={getLevelBadgeImage(displayLevel)} alt={displayLevel} className="level-badge-inline" style={{ marginRight: '4px' }} />
                     )}
                     <span className="nickname" title={snippet.author?.nickname}>
                       {snippet.author?.nickname}

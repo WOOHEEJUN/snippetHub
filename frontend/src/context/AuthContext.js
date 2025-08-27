@@ -52,25 +52,9 @@ export const AuthProvider = ({ children }) => {
 
         const userData = await userDataRes.json();
 
-        const representativeBadgeRes = await fetch('/api/users/me/representative-badge', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        let representativeBadge = null;
-        if (representativeBadgeRes.ok) {
-          const representativeBadgeData = await representativeBadgeRes.json();
-          representativeBadge = representativeBadgeData.data;
-        }
-
-        const combinedUserData = { ...userData.data, representativeBadge };
-
-        console.log("combinedUserData:", combinedUserData);
-        setUser(combinedUserData);
-        localStorage.setItem('user', JSON.stringify(combinedUserData));
+        console.log("userData.data:", userData.data);
+        setUser(userData.data);
+        localStorage.setItem('user', JSON.stringify(userData.data));
         localStorage.setItem('userEmail', userData.data.email);
         localStorage.setItem('userId', userData.data.userId);
       } catch (err) {

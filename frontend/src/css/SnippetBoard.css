@@ -74,9 +74,9 @@
 .board-container .search-form .btn{
   flex: 0 0 var(--btn-w);
   width: var(--btn-w);
-  background:#000; color:#fff; border:1px solid #000;
+  background:#000; color:#fff; border:1px solid #fff;
 }
-.board-container .search-form .btn:hover{ background:#222; border-color:#222; }
+.board-container .search-form .btn:hover{ background:#222; border-color:#fff; }
 
 /* 글쓰기 버튼(오른쪽) */
 .board-container .btn-primary{
@@ -84,7 +84,13 @@
   width: var(--write-w);
   background:#000; color:#fff; border:1px solid #fff;
 }
-.board-container .btn-primary:hover{ background:#333; border-color:#fff; }
+.board-container .btn-primary:hover{
+  background:#333; /* Gray background on hover */
+  color:#fff;      /* Keep text white on hover */
+  border-color:#fff;
+  transform: none; /* Remove any lifting effect */
+  box-shadow: none; /* Remove any shadow effect */
+}
 
 /* 폼 내부 간격 */
 .board-container .search-form{ gap: var(--gap); }
