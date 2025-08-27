@@ -3,16 +3,26 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
-/* === 필요 시 켜서 원인 바로 찾기 === */
-const DEBUG = true;
-/* === 서버에 ?category=로 필터 시도하려면 true === */
-const SERVER_FILTER = false;
-
-/* -------- 유틸 -------- */
-const norm = (s) => String(s ?? '').trim().toUpperCase();
+/* ===== 공용 유틸 ===== */
+const parseJsonSafe = async (res) => {
+  try {
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return await res.json();
+  } catch (_) {}
+  return null;
+};
+const extractArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  return [];
+};
 const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
+const norm = (s) => String(s ?? '').trim().toUpperCase();
 
+/* 카테고리 기본 색(없을 때 액센트로 사용) */
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
@@ -24,6 +34,8 @@ const CATEGORY_DEFAULT = {
   ACTIVITY:   '#8A2BE2',
   OTHER:      '#8ab0d1',
 };
+
+/* 희귀도 계산(이전 로직 유지) */
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -35,17 +47,13 @@ const computeRarity = (b) => {
   if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
   return 'common';
 };
-const extractArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  return [];
-};
+
+/* 응답 정규화 */
 const normalizeBadge = (b, idx = 0) => {
   const category = norm(b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER');
   const name = b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음';
   const color = sanitizeHex(b?.color ?? b?.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
+
   const n = {
     badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
     name,
@@ -62,35 +70,14 @@ const normalizeBadge = (b, idx = 0) => {
   n.rarity = computeRarity({ ...b, ...n });
   return n;
 };
+
+/* 희귀도 → 파일 접미사(S>A>B>C>D>F) + 정렬 우선순위 */
 const rarityToTier = { legendary: 's', epic: 'a', rare: 'b', uncommon: 'c', common: 'd' };
 const rarityRank = (r) => ({ legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 }[r] ?? 5);
 const sortByRarityDesc = (arr) =>
   [...arr].sort((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity) || a.name.localeCompare(b.name));
 
-/* fetch + 상세디버그 */
-const fetchJsonReport = async (url, init) => {
-  try {
-    const res = await fetch(url, init);
-    const text = await res.clone().text().catch(() => '');
-    let data = null;
-    try { data = JSON.parse(text); } catch { /* not json */ }
-    if (DEBUG) {
-      // 개발자도구 콘솔에서 원인 바로 확인
-      console.info('[BadgeGuide] GET', url, {
-        status: res.status,
-        ok: res.ok,
-        headers: Object.fromEntries([...res.headers.entries()]),
-        preview: text.slice(0, 300),
-      });
-    }
-    return { ok: res.ok, status: res.status, data, text };
-  } catch (e) {
-    if (DEBUG) console.error('[BadgeGuide] fetch error', url, e);
-    return { ok: false, status: 0, data: null, text: String(e?.message || e) };
-  }
-};
-
-/* 중앙 PNG */
+/* 중앙 PNG 뱃지 */
 const CenterBadge = ({ rarity, alt }) => {
   const tier = rarityToTier[rarity] || 'f';
   const src = `/badges/badge_${tier}.png`;
@@ -101,6 +88,7 @@ const CenterBadge = ({ rarity, alt }) => {
         alt={alt}
         className="badge-core-img"
         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+        /* 자리 정확히 가운데 고정 + 컨테이너 안에 맞춤 */
         style={{
           position: 'absolute',
           left: '50%',
@@ -117,20 +105,7 @@ const CenterBadge = ({ rarity, alt }) => {
   );
 };
 
-const categoryLabel = (cat) => ({
-  ALL: '전체',
-  CREATION: '창작',
-  ENGAGEMENT: '참여',
-  ACHIEVEMENT: '업적',
-  MILESTONE: '이정표',
-  COMMUNITY: '커뮤니티',
-  SPECIAL: '특별',
-  EVENT: '이벤트',
-  ACTIVITY: '활동',
-  OTHER: '기타',
-}[norm(cat)] || cat);
-const CATEGORY_ORDER = ['CREATION','ENGAGEMENT','ACHIEVEMENT','MILESTONE','COMMUNITY','SPECIAL','EVENT','ACTIVITY','OTHER'];
-
+/* ===== 본문 ===== */
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 

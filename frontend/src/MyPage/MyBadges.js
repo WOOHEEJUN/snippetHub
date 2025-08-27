@@ -1,11 +1,11 @@
+// src/pages/MyBadges.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaCrown, FaCoins, FaAward, FaChartBar } from 'react-icons/fa';
-import { getBadgeImagePath } from '../utils/badgeUtils';
 import '../css/MyBadges.css';
 
-/** 안전 JSON 파서 */
+/* ---------------- 공용 유틸 ---------------- */
 const parseJsonSafe = async (res) => {
   try {
     const ct = res.headers.get('content-type') || '';
@@ -13,8 +13,6 @@ const parseJsonSafe = async (res) => {
   } catch (_) {}
   return null;
 };
-
-/** 여러 응답 스키마에서 배열을 뽑아내기 */
 const extractArray = (data) => {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.data)) return data.data;
@@ -22,30 +20,64 @@ const extractArray = (data) => {
   if (Array.isArray(data?.data?.content)) return data.data.content;
   return [];
 };
+const norm = (s) => String(s ?? '').trim().toUpperCase();
 
-/** 뱃지 객체 정규화 */
+/* ---------- 희귀도 계산(가이드와 동일 기준) ---------- */
+const computeRarity = (b) => {
+  const name = norm(b?.name);
+  const rc = Number(b?.required_count ?? b?.requiredCount ?? b?.goal ?? 0) || 0;
+  const pts = Number(b?.points_reward ?? b?.pointsReward ?? 0) || 0;
+  const explicit = b?.isRare === true || /LEGEND|GRANDMASTER|DIAMOND|10000|365/.test(name);
+  if (explicit || rc >= 1000 || pts >= 1000) return 'legendary';
+  if (rc >= 500   || /MASTER|5000|LOGIN_STREAK_365/.test(name) || pts >= 500) return 'epic';
+  if (rc >= 100   || /PLATINUM|100\b/.test(name) || pts >= 200) return 'rare';
+  if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
+  return 'common';
+};
+const rarityToTier = { legendary: 's', epic: 'a', rare: 'b', uncommon: 'c', common: 'd' };
+
+/* ---------- 중앙 코어 이미지(가이드와 동일) ---------- */
+const CenterBadge = ({ rarity, alt }) => {
+  const tier = rarityToTier[rarity] || 'f';
+  const src = `/badges/badge_${tier}.png`;
+  return (
+    <div className="badge-icon-container">
+      <img
+        src={src}
+        alt={alt}
+        className="badge-image-actual"
+        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+      />
+    </div>
+  );
+};
+
+/* ---------------- 뱃지 정규화 ---------------- */
 const normalizeBadge = (b, idx = 0) => {
-  const category = (b.category ?? b.badgeCategory ?? b.type ?? 'OTHER')
+  const category = (b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER')
     .toString()
     .toUpperCase();
 
-  return {
-    badgeId: b.badgeId ?? b.id ?? b.badge_id ?? `badge-${idx}`,
-    name: b.name ?? b.title ?? b.badgeName ?? '이름 없음',
-    description: b.description ?? b.desc ?? '',
+  const n = {
+    badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
+    name: b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음',
+    description: b?.description ?? b?.desc ?? '',
     category,
-    requiredCount: b.requiredCount ?? b.requirementCount ?? b.goal ?? 1,
-    requirements: b.requirements ?? b.requirementList ?? [],
-    rewards: b.rewards ?? b.rewardList ?? [],
-    currentProgress: b.currentProgress ?? b.progress ?? 0,
-    owned: b.owned ?? b.isOwned ?? true, // 사용자가 가진 뱃지는 owned = true
-    icon: b.icon ?? '🏆',
-    color: b.color ?? '#FFD700',
-    earnedAt: b.earnedAt ?? new Date().toISOString(),
-    isFeatured: b.isFeatured ?? false
+    requiredCount: b?.requiredCount ?? b?.requirementCount ?? b?.goal ?? 1,
+    currentProgress: b?.currentProgress ?? b?.progress ?? 0,
+    requirements: b?.requirements ?? b?.requirementList ?? [],
+    rewards: b?.rewards ?? b?.rewardList ?? [],
+    pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
+    owned: b?.owned ?? b?.isOwned ?? true,
+    color: b?.color ?? '#8ab0d1',
+    earnedAt: b?.earnedAt ?? b?.awarded_at ?? null,
+    isFeatured: b?.isFeatured ?? false,
   };
+  n.rarity = computeRarity(n);
+  return n;
 };
 
+/* ===================================================== */
 function MyBadges() {
   const { user, getAuthHeaders, updateRepresentativeBadge } = useAuth();
 
@@ -55,9 +87,7 @@ function MyBadges() {
   const [badges, setBadges] = useState([]);
   const [featuredBadges, setFeaturedBadges] = useState([]);
 
-  // 선택 사항(통계가 API에 있으면 노출)
   const [badgeStats, setBadgeStats] = useState(null);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -72,29 +102,15 @@ function MyBadges() {
       setLoading(true);
       setError(null);
       try {
-        console.log('뱃지 데이터 조회 시작...');
-        
         const [profileRes, badgesRes, featuredRes] = await Promise.all([
-          fetch('/api/users/profile', { headers: getAuthHeaders(), credentials: 'include' }),
-          fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include' }),
-          fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include' }),
+          fetch('/api/users/profile', { headers: getAuthHeaders(), credentials: 'include', cache: 'no-store' }),
+          fetch('/api/badges/my', { headers: getAuthHeaders(), credentials: 'include', cache: 'no-store' }),
+          fetch('/api/badges/my/featured', { headers: getAuthHeaders(), credentials: 'include', cache: 'no-store' }),
         ]);
-
-        console.log('API 응답 상태:', {
-          profile: profileRes.status,
-          badges: badgesRes.status,
-          featured: featuredRes.status
-        });
 
         const profileData = await profileRes.json().catch(() => ({}));
         const badgesData = await parseJsonSafe(badgesRes);
         const featuredData = await parseJsonSafe(featuredRes);
-
-        console.log('API 응답 데이터:', {
-          profile: profileData,
-          badges: badgesData,
-          featured: featuredData
-        });
 
         if (profileData?.data) {
           setLevel({
@@ -107,31 +123,21 @@ function MyBadges() {
           setPoints(null);
         }
 
-        // 뱃지 데이터 처리 - ApiResponse 구조에 맞게 수정
+        // 내 뱃지
         let rawBadges = [];
-        if (badgesData?.success && badgesData?.data) {
-          rawBadges = Array.isArray(badgesData.data) ? badgesData.data : [];
-        } else if (Array.isArray(badgesData)) {
-          rawBadges = badgesData;
-        }
-        
-        console.log('처리된 뱃지 데이터:', rawBadges);
-        const normalizedBadges = rawBadges.map((b, i) => normalizeBadge(b, i));
-        setBadges(normalizedBadges);
+        if (badgesData?.success && badgesData?.data) rawBadges = Array.isArray(badgesData.data) ? badgesData.data : [];
+        else if (Array.isArray(badgesData)) rawBadges = badgesData;
+        const normBadges = rawBadges.map((b, i) => normalizeBadge(b, i));
+        setBadges(normBadges);
 
-        // 대표 뱃지 데이터 처리
+        // 대표 뱃지
         let rawFeatured = [];
-        if (featuredData?.success && featuredData?.data) {
-          rawFeatured = Array.isArray(featuredData.data) ? featuredData.data : [];
-        } else if (Array.isArray(featuredData)) {
-          rawFeatured = featuredData;
-        }
-        
-        console.log('처리된 대표 뱃지 데이터:', rawFeatured);
-        const normalizedFeatured = rawFeatured.map((b, i) => normalizeBadge(b, i));
-        setFeaturedBadges(normalizedFeatured);
+        if (featuredData?.success && featuredData?.data) rawFeatured = Array.isArray(featuredData.data) ? featuredData.data : [];
+        else if (Array.isArray(featuredData)) rawFeatured = featuredData;
+        const normFeatured = rawFeatured.map((b, i) => normalizeBadge(b, i));
+        setFeaturedBadges(normFeatured);
 
-        // 통계 API가 있으면 여기에 setBadgeStats로 넣어 쓰세요
+        // 선택: 통계
         // setBadgeStats(statsData?.data)
       } catch (err) {
         console.error('데이터 불러오기 실패:', err);
@@ -183,6 +189,8 @@ function MyBadges() {
     [getAuthHeaders, badges, featuredBadges, updateRepresentativeBadge]
   );
 
+  const isFeatured = (badgeId) => featuredBadges.some((b) => b.badgeId === badgeId);
+
   if (loading) return <div className="loading-message">데이터를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
 
@@ -231,17 +239,26 @@ function MyBadges() {
           <div className="no-badges">대표 뱃지가 없습니다.</div>
         ) : (
           <div className="badge-grid">
-            {featuredBadges.map((badge) => (
-              <div key={badge.badgeId} className="badge-item featured">
-                <div className="badge-icon-container">
-                  <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
+            {featuredBadges.map((badge) => {
+              const rarity = badge.rarity ?? computeRarity(badge);
+              return (
+                <div
+                  key={badge.badgeId}
+                  className="badge-item featured"
+                  data-rarity={rarity}               /* ✅ 휘장(오라) CSS 적용 */
+                >
+                  <CenterBadge rarity={rarity} alt={badge.name} />
+                  <div className="badge-name">{badge.name}</div>
+
+                  {/* 대표는 '해제하기'만 노출(hover 시 보이게) */}
+                  <div className="badge-actions">
+                    <button className="equip-button" onClick={() => handleToggleFeatured(badge.badgeId)}>
+                      대표 뱃지 해제
+                    </button>
+                  </div>
                 </div>
-                <div className="badge-name">{badge.name}</div>
-                <button className="equip-button" onClick={() => handleToggleFeatured(badge.badgeId)}>
-                  대표 뱃지 해제
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -254,20 +271,30 @@ function MyBadges() {
         ) : (
           <div className="badge-grid">
             {badges.map((badge) => {
-              const isFeatured = featuredBadges.some((fb) => fb.badgeId === badge.badgeId);
+              const rarity = badge.rarity ?? computeRarity(badge);
+              const featured = isFeatured(badge.badgeId);
               return (
                 <div
                   key={badge.badgeId}
-                  className={`badge-item ${isFeatured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
+                  className={`badge-item ${featured ? 'featured' : ''} ${badge.owned ? '' : 'not-owned'}`}
+                  data-rarity={rarity}               /* ✅ 휘장(오라) CSS 적용 */
                 >
-                  <div className="badge-icon-container">
-                    <img src={getBadgeImagePath(badge.name)} alt={badge.name} className="badge-image-actual" />
-                  </div>
+                  <CenterBadge rarity={rarity} alt={badge.name} />
                   <div className="badge-name">{badge.name}</div>
+
+                  {/* hover 시만 버튼 노출: CSS에서 .badge-item:hover .badge-actions {opacity:1;pointer-events:auto;} */}
                   {badge.owned && (
-                    <button className="equip-button" onClick={() => handleToggleFeatured(badge.badgeId)}>
-                      {isFeatured ? '대표 뱃지 해제' : '대표 뱃지 설정'}
-                    </button>
+                    <div className="badge-actions">
+                      {featured ? (
+                        <button className="equip-button" onClick={() => handleToggleFeatured(badge.badgeId)}>
+                          대표 뱃지 해제
+                        </button>
+                      ) : (
+                        <button className="equip-button" onClick={() => handleToggleFeatured(badge.badgeId)}>
+                          대표 뱃지 설정
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               );
