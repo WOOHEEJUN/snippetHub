@@ -81,7 +81,7 @@ const Header = () => {
               </li>
 
               <li className="nav-item">
-                <span className="nav-link-main">스니펫</span>
+                <span className="nav-link-main">스니펫 모아보기</span>
                 <ul className="submenu">
                   <li><Link to="/snippets">스니펫게시판</Link></li>
                   <li><Link to="/snippets?language=C&sort=LATEST&page=0">C</Link></li>
@@ -173,7 +173,7 @@ const Header = () => {
                 </div>
 
                 <div className="hamburger-menu-section">
-                  <h4>스니펫</h4>
+                  <h4>스니펫 모아보기</h4>
                   <ul>
                     <li><Link to="/snippets" onClick={toggleHamburger}>스니펫게시판</Link></li>
                     <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
