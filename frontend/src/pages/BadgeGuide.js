@@ -3,28 +3,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../css/BadgeGuide.css';
 
-/* ===== 유틸 ===== */
-const parseJsonSafe = async (res) => {
-  try {
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) return await res.json();
-  } catch (_) {}
-  return null;
-};
-const extractArray = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.content)) return data.content;
-  if (Array.isArray(data?.data?.content)) return data.data.content;
-  return [];
-};
+/* === 필요 시 켜서 원인 바로 찾기 === */
+const DEBUG = true;
+/* === 서버에 ?category=로 필터 시도하려면 true === */
+const SERVER_FILTER = false;
+
+/* -------- 유틸 -------- */
+const norm = (s) => String(s ?? '').trim().toUpperCase();
 const sanitizeHex = (c) =>
   typeof c === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(c?.trim?.() ?? '') ? c.trim() : null;
 
-/* 문자열 정규화(공백/대소문자 안전) */
-const norm = (s) => String(s ?? '').trim().toUpperCase();
-
-/* 기본 색상 */
 const CATEGORY_DEFAULT = {
   CREATION:   '#4CAF50',
   ENGAGEMENT: '#E91E63',
@@ -36,53 +24,6 @@ const CATEGORY_DEFAULT = {
   ACTIVITY:   '#8A2BE2',
   OTHER:      '#8ab0d1',
 };
-
-/* 폴백 이모지 */
-const CATEGORY_EMOJI = {
-  CREATION:   '💻',
-  ENGAGEMENT: '💬',
-  ACHIEVEMENT:'🏆',
-  MILESTONE:  '🚩',
-  COMMUNITY:  '👥',
-  ACTIVITY:   '⚡',
-  SPECIAL:    '✨',
-  EVENT:      '🎉',
-  OTHER:      '⭐',
-};
-
-/* 아이콘 후보(채움/두툼 계열) */
-const ICON_POOLS = {
-  CREATION:   ['solar:code-square-bold-duotone','ph:code-bold','material-symbols:laptop','mdi:laptop'],
-  ENGAGEMENT: ['solar:chat-round-like-bold-duotone','ph:chat-circle-dots-bold','mdi:message-badge'],
-  ACHIEVEMENT:['solar:trophy-bold-duotone','ph:trophy-bold','mdi:trophy'],
-  MILESTONE:  ['solar:flag-bold-duotone','ph:flag-banner-bold','mdi:flag'],
-  COMMUNITY:  ['solar:users-group-rounded-bold-duotone','ph:users-three-bold','mdi:account-group'],
-  ACTIVITY:   ['solar:activity-bold-duotone','ph:lightning-bold','mdi:lightning-bolt'],
-  SPECIAL:    ['solar:sparkles-bold-duotone','ph:sparkle-bold','mdi:sparkles'],
-  EVENT:      ['solar:calendar-bold-duotone','ph:ticket-bold','mdi:ticket-confirmation'],
-  OTHER:      ['solar:star-bold-duotone','ph:star-four-bold','mdi:star'],
-};
-
-const hashStr = (s) => {
-  const str = String(s ?? '');
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return h >>> 0;
-};
-const pickNames = (category, seed) => {
-  const pool = ICON_POOLS[category] || ICON_POOLS.OTHER;
-  const start = pool.length ? hashStr(seed) % pool.length : 0;
-  return [0,1,2].map(i => pool[(start + i) % pool.length]);
-};
-
-const iconUrl = (iconName, color, size = 64) => {
-  const qs = new URLSearchParams();
-  qs.set('height', String(size));
-  if (color) qs.set('color', color.replace('#','%23'));
-  qs.set('stroke', '1.6');
-  return `https://api.iconify.design/${iconName}.svg?${qs.toString()}`;
-};
-
 const computeRarity = (b) => {
   const name = norm(b.name);
   const rc = Number(b.required_count ?? b.requiredCount ?? b.goal ?? 0) || 0;
@@ -94,62 +35,102 @@ const computeRarity = (b) => {
   if (rc >= 25    || /GOLD|25\b/.test(name) || pts >= 50)       return 'uncommon';
   return 'common';
 };
-
+const extractArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  return [];
+};
 const normalizeBadge = (b, idx = 0) => {
   const category = norm(b?.category ?? b?.badgeCategory ?? b?.type ?? 'OTHER');
   const name = b?.name ?? b?.title ?? b?.badgeName ?? '이름 없음';
   const color = sanitizeHex(b?.color ?? b?.hexColor) || CATEGORY_DEFAULT[category] || CATEGORY_DEFAULT.OTHER;
-
   const n = {
     badgeId: b?.badgeId ?? b?.id ?? b?.badge_id ?? `badge-${idx}`,
     name,
     description: b?.description ?? b?.desc ?? '',
     category,
     requiredCount: b?.requiredCount ?? b?.requirementCount ?? b?.goal ?? 1,
+    currentProgress: b?.currentProgress ?? b?.progress ?? 0,
     requirements: b?.requirements ?? b?.requirementList ?? [],
     rewards: b?.rewards ?? b?.rewardList ?? [],
-    currentProgress: b?.currentProgress ?? b?.progress ?? 0,
-    owned: b?.owned ?? b?.isOwned ?? false,
     pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
-    emoji: (b?.icon ?? CATEGORY_EMOJI[category] ?? '✨'),
+    owned: b?.owned ?? b?.isOwned ?? false,
     color,
   };
   n.rarity = computeRarity({ ...b, ...n });
-  n.iconCandidates = pickNames(n.category, n.name || n.badgeId);
   return n;
 };
+const rarityToTier = { legendary: 's', epic: 'a', rare: 'b', uncommon: 'c', common: 'd' };
+const rarityRank = (r) => ({ legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 }[r] ?? 5);
+const sortByRarityDesc = (arr) =>
+  [...arr].sort((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity) || a.name.localeCompare(b.name));
 
-/* 외부 아이콘(실패 시 이모지 폴백) */
-const IconifyWithSureFallback = ({ badge, size = 64, useIconify = true }) => {
-  const [idx, setIdx] = useState(0);
-  const [imgOk, setImgOk] = useState(false);
-  const names = badge.iconCandidates || [];
-  const hasMore = idx < names.length;
-  const src = hasMore ? iconUrl(names[idx], badge.color, size) : null;
+/* fetch + 상세디버그 */
+const fetchJsonReport = async (url, init) => {
+  try {
+    const res = await fetch(url, init);
+    const text = await res.clone().text().catch(() => '');
+    let data = null;
+    try { data = JSON.parse(text); } catch { /* not json */ }
+    if (DEBUG) {
+      // 개발자도구 콘솔에서 원인 바로 확인
+      console.info('[BadgeGuide] GET', url, {
+        status: res.status,
+        ok: res.ok,
+        headers: Object.fromEntries([...res.headers.entries()]),
+        preview: text.slice(0, 300),
+      });
+    }
+    return { ok: res.ok, status: res.status, data, text };
+  } catch (e) {
+    if (DEBUG) console.error('[BadgeGuide] fetch error', url, e);
+    return { ok: false, status: 0, data: null, text: String(e?.message || e) };
+  }
+};
 
+/* 중앙 PNG */
+const CenterBadge = ({ rarity, alt }) => {
+  const tier = rarityToTier[rarity] || 'f';
+  const src = `/badges/badge_${tier}.png`;
   return (
-    <div className="icon-layer">
-      <span className="badge-emoji" style={{ opacity: imgOk ? 0 : 1 }} aria-hidden="true">
-        {badge.emoji}
-      </span>
-      {useIconify && hasMore && (
-        <img
-          src={src}
-          alt=""
-          width={size}
-          height={size}
-          loading="lazy"
-          className="iconify-img"
-          style={{ opacity: imgOk ? 1 : 0 }}
-          onLoad={() => setImgOk(true)}
-          onError={() => setIdx(i => i + 1)}
-        />
-      )}
+    <div className={`badge-icon-container rarity-${rarity}`}>
+      <img
+        src={src}
+        alt={alt}
+        className="badge-core-img"
+        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/badges/badge_f.png'; }}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%,-50%)',
+          width: '66%',
+          height: '66%',
+          objectFit: 'contain',
+          pointerEvents: 'none',
+          userSelect: 'none'
+        }}
+      />
     </div>
   );
 };
 
-/* ===== 메인 컴포넌트 ===== */
+const categoryLabel = (cat) => ({
+  ALL: '전체',
+  CREATION: '창작',
+  ENGAGEMENT: '참여',
+  ACHIEVEMENT: '업적',
+  MILESTONE: '이정표',
+  COMMUNITY: '커뮤니티',
+  SPECIAL: '특별',
+  EVENT: '이벤트',
+  ACTIVITY: '활동',
+  OTHER: '기타',
+}[norm(cat)] || cat);
+const CATEGORY_ORDER = ['CREATION','ENGAGEMENT','ACHIEVEMENT','MILESTONE','COMMUNITY','SPECIAL','EVENT','ACTIVITY','OTHER'];
+
 function BadgeGuide() {
   const { getAuthHeaders } = useAuth();
 
@@ -159,67 +140,74 @@ function BadgeGuide() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
-  const categories = [
-    { value: 'ALL',        label: '전체' },
-    { value: 'CREATION',   label: '창작' },
-    { value: 'ENGAGEMENT', label: '참여' },
-    { value: 'ACHIEVEMENT',label: '업적' },
-    { value: 'MILESTONE',  label: '이정표' },
-    { value: 'COMMUNITY',  label: '커뮤니티' },
-    { value: 'SPECIAL',    label: '특별' },
-    { value: 'EVENT',      label: '이벤트' },
-    { value: 'ACTIVITY',   label: '활동' },
-  ];
-
+  // 데이터 로딩 (카테고리 바뀌어도 서버로 다시 안 가고, 클라 필터가 기본)
   useEffect(() => {
-    const fetchBadgesAndUser = async () => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        setError(null);
+        // 1) 전체(또는 서버필터) 목록
+        const listUrl =
+          SERVER_FILTER && norm(selectedCategory) !== 'ALL'
+            ? `/api/badges?category=${encodeURIComponent(selectedCategory)}`
+            : '/api/badges';
 
-        const categoryNorm = norm(selectedCategory);
-        const url = categoryNorm && categoryNorm !== 'ALL'
-          ? `/api/badges?category=${encodeURIComponent(categoryNorm)}`
-          : '/api/badges';
-
-        const resAll = await fetch(url, {
+        const all = await fetchJsonReport(listUrl, {
           headers: getAuthHeaders(),
           credentials: 'include',
+          cache: 'no-store',
         });
-        if (!resAll.ok) throw new Error('뱃지 목록 조회 실패');
-        const jsonAll = await parseJsonSafe(resAll);
-        const rawBadges = extractArray(jsonAll);
-        const normalized = rawBadges.map((b, i) => normalizeBadge(b, i));
-        setBadges(normalized);
+        const rawList = extractArray(all.data);
+        const normalized = rawList.map((b, i) => normalizeBadge(b, i));
+        if (!cancelled) setBadges(sortByRarityDesc(normalized));
 
-        const resMine = await fetch('/api/badges/my', {
+        // 2) 내 뱃지
+        const mine = await fetchJsonReport('/api/badges/my', {
           headers: getAuthHeaders(),
           credentials: 'include',
+          cache: 'no-store',
         });
-        if (resMine.ok) {
-          const jsonMine = await parseJsonSafe(resMine);
-          const mine = extractArray(jsonMine).map((b, i) => normalizeBadge(b, i, true));
-          setUserBadges(mine);
-        } else {
-          setUserBadges([]);
+        const rawMine = extractArray(mine.data);
+        const normalizedMine = rawMine.map((b, i) => normalizeBadge(b, i));
+        if (!cancelled) setUserBadges(sortByRarityDesc(normalizedMine));
+
+        // 디버그: 데이터가 비면 바로 힌트
+        if (DEBUG && !cancelled) {
+          if (normalized.length === 0) console.warn('[BadgeGuide] 서버에서 뱃지 0개 반환');
+          if (normalizedMine.length === 0) console.warn('[BadgeGuide] 내 뱃지 0개 반환');
         }
-      } catch (err) {
-        console.error(err);
-        setBadges([]);
-        setUserBadges([]);
-        setError('뱃지 정보를 불러오는 중 오류가 발생했습니다.');
+      } catch (e) {
+        if (!cancelled) {
+          setBadges([]);
+          setUserBadges([]);
+          setError('뱃지 정보를 불러오는 중 오류가 발생했습니다.');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+    load();
+    return () => { cancelled = true; };
+    // ⚠️ 클라 필터 기본이라 selectedCategory 변경 시 재요청 필요 없음
+  }, [getAuthHeaders]); // (원한다면 SERVER_FILTER가 true일 때만 selectedCategory를 deps로 추가)
 
-    fetchBadgesAndUser();
-  }, [getAuthHeaders, selectedCategory]);
+  // 데이터에 실제 있는 카테고리만 버튼으로
+  const categoriesFromData = useMemo(() => {
+    const set = new Set();
+    badges.forEach(b => set.add(norm(b.category || 'OTHER')));
+    const ordered = CATEGORY_ORDER.filter(c => set.has(c));
+    return ['ALL', ...ordered, ...[...set].filter(c => !CATEGORY_ORDER.includes(c) && c !== 'ALL')];
+  }, [badges]);
 
-  const filteredBadges = useMemo(() => badges, [badges]);
+  // 클라이언트 필터
+  const filteredBadges = useMemo(() => {
+    if (SERVER_FILTER || norm(selectedCategory) === 'ALL') return badges;
+    const target = norm(selectedCategory);
+    return badges.filter((b) => norm(b.category) === target);
+  }, [badges, selectedCategory]);
 
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
-
   const getProgressInfo = (badge) => {
     const ub = userBadges.find((x) => x.badgeId === badge.badgeId);
     if (!ub) return null;
@@ -230,18 +218,6 @@ function BadgeGuide() {
 
   if (loading) return <div className="loading-message">뱃지 정보를 불러오는 중...</div>;
   if (error) return <div className="error-message">오류: {error}</div>;
-
-  const categoryKorean = (cat) => ({
-    ALL: '전체',
-    CREATION: '창작',
-    ENGAGEMENT: '참여',
-    ACHIEVEMENT: '업적',
-    MILESTONE: '이정표',
-    COMMUNITY: '커뮤니티',
-    SPECIAL: '특별',
-    EVENT: '이벤트',
-    ACTIVITY: '활동',
-  }[norm(cat)] || cat);
 
   return (
     <div className="badge-guide-page modern-badges">
@@ -258,7 +234,7 @@ function BadgeGuide() {
           </div>
           <div className="stats-card">
             <div className="stats-number">{badges.length}</div>
-            <div className="stats-label">전체 뱃지</div>
+            <div className="stats-label">현재 목록</div>
           </div>
           <div className="stats-card">
             <div className="stats-number">
@@ -271,15 +247,15 @@ function BadgeGuide() {
         <div className="filter-section">
           <h3>카테고리별 필터</h3>
           <div className="category-filters">
-            {categories.map((c) => (
+            {categoriesFromData.map((cat) => (
               <button
-                key={c.value}
-                type="button" /* ✅ 폼 submit 방지 */
-                onClick={(e) => { e.preventDefault(); setSelectedCategory(c.value); }}
-                className={`category-filter ${norm(selectedCategory) === norm(c.value) ? 'active' : ''}`}
-                aria-pressed={norm(selectedCategory) === norm(c.value)}
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`category-filter ${norm(selectedCategory) === norm(cat) ? 'active' : ''}`}
+                aria-pressed={norm(selectedCategory) === norm(cat)}
               >
-                {c.label}
+                {categoryLabel(cat)}
               </button>
             ))}
           </div>
@@ -289,7 +265,6 @@ function BadgeGuide() {
           {filteredBadges.map((badge) => {
             const owned = isOwned(badge.badgeId);
             const progress = getProgressInfo(badge);
-
             return (
               <div
                 key={badge.badgeId}
@@ -298,9 +273,7 @@ function BadgeGuide() {
                 data-rarity={badge.rarity}
               >
                 <div className="badge-image">
-                  <div className={`badge-icon-container rarity-${badge.rarity}`}>
-                    <IconifyWithSureFallback badge={badge} size={64} useIconify />
-                  </div>
+                  <CenterBadge rarity={badge.rarity} alt={badge.name} />
                   {owned && <div className="owned-badge">✓</div>}
                 </div>
 
@@ -309,7 +282,7 @@ function BadgeGuide() {
                   <p className="badge-description">{badge.description}</p>
 
                   <div className="badge-category">
-                    <span className="category-tag use-accent">{categoryKorean(badge.category)}</span>
+                    <span className="category-tag use-accent">{categoryLabel(badge.category)}</span>
                   </div>
 
                   {badge.requiredCount > 1 && (
@@ -332,22 +305,14 @@ function BadgeGuide() {
                   {(badge.requirements?.length ?? 0) > 0 && (
                     <div className="badge-requirements">
                       <h5>획득 조건:</h5>
-                      <ul>
-                        {badge.requirements.map((req, i) => (
-                          <li key={i}>{req}</li>
-                        ))}
-                      </ul>
+                      <ul>{badge.requirements.map((req, i) => <li key={i}>{req}</li>)}</ul>
                     </div>
                   )}
 
                   {(badge.rewards?.length ?? 0) > 0 && (
                     <div className="badge-rewards">
                       <h5>보상:</h5>
-                      <ul>
-                        {badge.rewards.map((rw, i) => (
-                          <li key={i}>{rw}</li>
-                        ))}
-                      </ul>
+                      <ul>{badge.rewards.map((rw, i) => <li key={i}>{rw}</li>)}</ul>
                     </div>
                   )}
                 </div>
@@ -359,6 +324,11 @@ function BadgeGuide() {
         {filteredBadges.length === 0 && (
           <div className="no-badges">
             <p>해당 카테고리의 뱃지가 없습니다.</p>
+            {DEBUG && (
+              <p style={{marginTop:8,opacity:.7,fontSize:'.9rem'}}>
+                디버그: 전체 {badges.length}개 / 선택 카테고리 {selectedCategory}
+              </p>
+            )}
           </div>
         )}
       </div>
