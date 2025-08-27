@@ -177,7 +177,12 @@ function BadgeGuide() {
         setLoading(true);
         setError(null);
 
-        const resAll = await fetch('/api/badges', {
+        const categoryNorm = norm(selectedCategory);
+        const url = categoryNorm && categoryNorm !== 'ALL'
+          ? `/api/badges?category=${encodeURIComponent(categoryNorm)}`
+          : '/api/badges';
+
+        const resAll = await fetch(url, {
           headers: getAuthHeaders(),
           credentials: 'include',
         });
@@ -209,13 +214,9 @@ function BadgeGuide() {
     };
 
     fetchBadgesAndUser();
-  }, [getAuthHeaders]);
+  }, [getAuthHeaders, selectedCategory]);
 
-  const filteredBadges = useMemo(() => {
-    if (norm(selectedCategory) === 'ALL') return badges;
-    const target = norm(selectedCategory);
-    return badges.filter((b) => norm(b.category) === target);
-  }, [badges, selectedCategory]);
+  const filteredBadges = useMemo(() => badges, [badges]);
 
   const isOwned = (badgeId) => userBadges.some((ub) => ub.badgeId === badgeId);
 

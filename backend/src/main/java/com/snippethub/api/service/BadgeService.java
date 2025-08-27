@@ -98,6 +98,9 @@ public class BadgeService {
         // 등급별 이정표 뱃지
         UserLevel level = user.getCurrentLevel();
         switch (level) {
+            case BRONZE:
+                // 브론즈는 별도 뱃지 없음
+                break;
             case SILVER:
                 awardBadge(user, "SILVER_ACHIEVER");
                 break;
@@ -183,6 +186,14 @@ public class BadgeService {
     @Transactional(readOnly = true)
     public List<Badge> getAllBadges() {
         return badgeRepository.findAll();
+    }
+
+    /**
+     * 카테고리별 뱃지 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<Badge> getBadgesByCategory(BadgeCategory category) {
+        return badgeRepository.findByCategory(category);
     }
 
     /**
