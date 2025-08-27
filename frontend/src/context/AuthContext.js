@@ -51,12 +51,38 @@ export const AuthProvider = ({ children }) => {
         if (!userDataRes.ok) throw new Error(`HTTP error! status: ${userDataRes.status}`);
 
         const userData = await userDataRes.json();
+        let fetchedUser = userData.data; // Store fetched user data
 
-        console.log("userData.data:", userData.data);
-        setUser(userData.data);
-        localStorage.setItem('user', JSON.stringify(userData.data));
-        localStorage.setItem('userEmail', userData.data.email);
-        localStorage.setItem('userId', userData.data.userId);
+        // --- NEW CODE START ---
+        // Fetch representative badge
+        try {
+          const featuredBadgeRes = await fetch('/api/badges/my/featured', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+
+          if (featuredBadgeRes.ok) {
+            const featuredBadgeData = await featuredBadgeRes.json();
+            // Assuming the API returns an array of featured badges, take the first one
+            if (featuredBadgeData.data && featuredBadgeData.data.length > 0) {
+              fetchedUser = { ...fetchedUser, representativeBadge: featuredBadgeData.data[0] };
+            }
+          } else {
+            console.warn('Failed to fetch featured badge:', featuredBadgeRes.status);
+          }
+        } catch (badgeErr) {
+          console.error('Error fetching featured badge:', badgeErr);
+        }
+        // --- NEW CODE END ---
+
+        console.log("userData.data:", fetchedUser); // Log the updated user data
+        setUser(fetchedUser);
+        localStorage.setItem('user', JSON.stringify(fetchedUser));
+        localStorage.setItem('userEmail', fetchedUser.email);
+        localStorage.setItem('userId', fetchedUser.userId);
       } catch (err) {
         logout();
       } finally {
