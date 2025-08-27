@@ -247,7 +247,7 @@ public class CodeExecutionSecurityFilter extends OncePerRequestFilter {
         }
 
         // 코드 길이 체크
-        if (code.length() > 10000) { // 10KB 제한
+        if (code.length() > 50000) { // 50KB 제한
             log.warn("Code too long: {} characters", code.length());
             return false;
         }
