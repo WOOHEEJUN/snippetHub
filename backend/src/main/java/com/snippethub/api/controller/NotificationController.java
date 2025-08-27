@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.snippethub.api.dto.ApiResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/v1/notifications")
@@ -34,6 +36,26 @@ public class NotificationController {
             @AuthenticationPrincipal UserDetails userDetails) {
         notificationService.markAsRead(notificationId, userDetails.getUsername());
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 테스트용 알림 생성 (개발용)
+     */
+    @PostMapping("/test")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<String>> createTestNotification(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            String userEmail = userDetails.getUsername();
+            String testMessage = "테스트 알림입니다! " + java.time.LocalDateTime.now();
+            
+            notificationService.createSimpleNotification(userEmail, testMessage);
+            
+            return ResponseEntity.ok(ApiResponse.success("테스트 알림이 생성되었습니다.", testMessage));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("테스트 알림 생성 실패: " + e.getMessage()));
+        }
     }
 }
 

@@ -204,6 +204,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
         
         // IPv4 검증
         if (IPV4_PATTERN.matcher(ip).matches()) {
+            // 개발/테스트 환경에서는 localhost 허용
+            if (ip.equals("127.0.0.1") || ip.equals("localhost")) {
+                return true;
+            }
+            
             // 특정 IP 범위 차단 (내부 네트워크, 루프백 등)
             if (ip.startsWith("127.") || ip.startsWith("10.") || 
                 ip.startsWith("192.168.") || ip.startsWith("172.")) {
@@ -214,6 +219,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
         
         // IPv6 검증
         if (IPV6_PATTERN.matcher(ip).matches()) {
+            // 개발/테스트 환경에서는 localhost 허용
+            if (ip.equals("::1") || ip.equals("::")) {
+                return true;
+            }
+            
             // IPv6 루프백 및 내부 주소 차단
             if (ip.equals("::1") || ip.equals("::") || 
                 ip.startsWith("fe80:") || ip.startsWith("fc00:") || ip.startsWith("fd00:")) {
