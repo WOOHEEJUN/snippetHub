@@ -132,6 +132,19 @@ const Header = () => {
                   </ul>
                 </div>
 
+                {/* ★ 추가: 스니펫 섹션 */}
+                <div className="hamburger-menu-section">
+                  <h4>스니펫</h4>
+                  <ul>
+                    <li><Link to="/snippets" onClick={toggleHamburger}>스니펫 모아보기</Link></li>
+                    <li><Link to="/snippets?language=C&sort=LATEST&page=0" onClick={toggleHamburger}>C</Link></li>
+                    <li><Link to="/snippets?language=JavaScript&sort=LATEST&page=0" onClick={toggleHamburger}>JavaScript</Link></li>
+                    <li><Link to="/snippets?language=Python&sort=LATEST&page=0" onClick={toggleHamburger}>Python</Link></li>
+                    <li><Link to="/snippets?language=HTML&sort=LATEST&page=0" onClick={toggleHamburger}>HTML</Link></li>
+                    <li><Link to="/snippets?language=Java&sort=LATEST&page=0" onClick={toggleHamburger}>Java</Link></li>
+                  </ul>
+                </div>
+
                 {isAuthenticated ? (
                   <div className="hamburger-menu-section">
                     <h4>마이페이지</h4>

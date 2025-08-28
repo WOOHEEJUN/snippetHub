@@ -36,6 +36,8 @@
   justify-content: flex-end;
   position: relative;
   z-index: 101;
+  min-width: 0;             /* 수축 허용 */
+  white-space: nowrap;       /* 기본적으로 줄바꿈 방지 */
 }
 
 .logo {
@@ -78,7 +80,7 @@
 .submenu a:hover{ background:#333; color:#fff; }
 
 /* 버튼들 */
-.auth-buttons{ display:flex; align-items:center; gap:.75rem; order:1; }
+.auth-buttons{ display:flex; align-items:center; gap:.75rem; order:1; flex-wrap: nowrap; }
 
 .btn{
   font-weight:500; padding:.45rem .9rem; font-size:.9rem; border-radius:.5rem;
@@ -118,7 +120,7 @@
 }
 .hamburger-menu-section a:hover{ background:#333; color:#fff; transform:translateX(4px); }
 
-/* 반응형 */
+/* 반응형 – 기본 동작 */
 @media (max-width: 991px) {
   .main-nav { display: none; }
   .hamburger-container { display: block; }
@@ -127,7 +129,7 @@
 }
 @media (min-width: 992px) {
   .main-nav { display: flex; }
-  .hamburger-container { display: none; }
+  /* (원래는 햄버거 hide였지만, 아래 “항상 보이기” 섹션에서 덮어씀) */
   .header-container { padding: 0 2.5rem; }
   .logo { font-size: 2rem; }
   .nav-menu-horizontal { gap: 1.5rem; }
@@ -143,6 +145,7 @@
   display:inline-flex;
   align-items:center;
   gap:8px;
+  white-space: nowrap;  /* 인사말 줄바꿈 방지 */
 }
 
 /* 등급 PNG (대표뱃지 없을 때) */
@@ -155,10 +158,9 @@
 }
 .header img.level-badge-header{ max-width:none !important; }
 
-/* 대표뱃지 칩(크기 고정 + 휘장 링) */
+/* 대표뱃지 칩(링 최소화: 회전링 제거, 은은한 글로우만) */
 .rep-badge-chip{
   --rep-size: 22px;
-  --ring-width: 4px;
   --accent: #8ab0d1;
 
   position: relative;
@@ -184,11 +186,11 @@
 .rep-badge-chip::after{
   content:"";
   position:absolute;
-  inset: -6px;
   border-radius:50%;
   pointer-events:none;
 }
 .rep-badge-chip::after{
+  inset: -6px;
   background: radial-gradient(60% 60% at 50% 50%, var(--accent) 0%, transparent 70%);
   filter: blur(4px); opacity:.45; animation: rep-pulse 3.2s ease-in-out infinite;
 }
@@ -219,8 +221,50 @@
 }
 
 /* 애니메이션 */
-@keyframes rep-spin{ to{ transform: rotate(360deg); } }
 @keyframes rep-pulse{
   0%,100%{ transform: scale(1); opacity:.45; }
   50%{ transform: scale(1.06); opacity:.75; }
+}
+
+/* ===== 헤더: 우측 영역/인사말 절대 1줄 고정 ===== */
+.header-right,
+.auth-buttons {
+  flex-wrap: nowrap !important;          /* flex 줄바꿈 금지 */
+}
+
+.user-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap !important;        /* 내부 텍스트 줄바꿈 금지 */
+}
+
+/* UserBadgeAndNickname 안쪽까지 모두 no-wrap */
+.user-info .author-link,
+.user-info .nickname,
+.user-info .rep-badge-chip,
+.user-info * {
+  white-space: nowrap !important;
+}
+
+/* 극단적 좁은 화면에서도 한 줄 유지(버튼만 살짝 줄임) */
+@media (max-width: 1200px) {
+  .auth-buttons { gap: .5rem; }
+  .btn { min-width: 72px; padding: .4rem .6rem; }
+}
+
+/* ===== 항상 햄버거 버튼 보이기 + 오른쪽에 나란히 배치 ===== */
+.hamburger-container{
+  display: inline-flex !important;
+  align-items: center;
+  margin-left: .25rem;
+  position: relative;
+  z-index: 1002;
+}
+.hamburger-btn{ width: 28px; height: 28px; }
+
+/* 데스크톱에서도 내비게이션은 보이고, 햄버거도 항상 노출 */
+@media (min-width: 992px){
+  .main-nav{ display: flex; }
+  .hamburger-container{ display: inline-flex !important; }
 }
