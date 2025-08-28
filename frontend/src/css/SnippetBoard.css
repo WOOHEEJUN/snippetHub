@@ -389,3 +389,22 @@
   --bs-link-color: #d3d3d3;
   --bs-link-hover-color: #d3d3d3;
 }
+/* ===== Snippet Board: 작성자(4번째 열) 링크 완전 무력화 ===== */
+.snippet-board-container .table > tbody > tr > td:nth-child(4) a,
+.snippet-board-container .table > tbody > tr > td:nth-child(4) a:link,
+.snippet-board-container .table > tbody > tr > td:nth-child(4) a:visited,
+.snippet-board-container .table > tbody > tr > td:nth-child(4) a:hover,
+.snippet-board-container .table > tbody > tr > td:nth-child(4) a:active {
+  color: #d3d3d3 !important;         /* 회색 고정 */
+  text-decoration: none !important;   /* 밑줄 제거 */
+  cursor: default !important;         /* 손가락 커서 방지 */
+  pointer-events: none !important;    /* 클릭 자체 불가 */
+}
+
+/* 내부에 span/이미지 등이 있어도 전부 회색으로 */
+.snippet-board-container .table > tbody > tr > td:nth-child(4) a *,
+.snippet-board-container .table > tbody > tr > td:nth-child(4) .nickname,
+.snippet-board-container .table > tbody > tr > td:nth-child(4) .author-link {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}
