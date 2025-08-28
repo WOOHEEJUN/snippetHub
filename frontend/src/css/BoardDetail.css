@@ -331,3 +331,21 @@
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
 }
+/* ===========================
+   작성자 / 댓글 닉네임 색상 고정
+   =========================== */
+.author-card .nickname,
+.comment-author .nickname,
+.author-link,
+.author-link:visited {
+  color: #d3d3d3 !important;   /* 밝은 회색 고정 */
+  font-weight: 800;
+  font-size: 0.9rem;           /* 필요하면 크기 조절 */
+  text-decoration: none !important;
+}
+
+/* hover 시에도 색상 고정 (변경 없음) */
+.author-link:hover {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}

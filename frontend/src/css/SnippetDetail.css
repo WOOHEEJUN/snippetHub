@@ -1,7 +1,6 @@
 /* ===========================
-   SnippetDetail.css (FULL)
-   - 작성자 카드: 레이블 위 / 값 아래(2줄)
-   - 닉네임 폰트 살짝 축소
+   SnippetDetail.css (FIXED)
+   작성자 카드 + 댓글 닉네임 색상 회색 고정
    =========================== */
 
 /* Page Layout */
@@ -71,12 +70,10 @@
   color: #d3d3d3;
 }
 
-/* ---------------------------
-   작성자 카드 (2줄 레이아웃)
-   --------------------------- */
+/* 작성자 카드 (2줄 레이아웃) */
 .author-card .meta-row{
   display: flex;
-  flex-direction: column;   /* 라벨 위 / 값 아래 */
+  flex-direction: column;
   align-items: flex-start;
   row-gap: .5rem;
   min-width: 0;
@@ -103,31 +100,23 @@
   object-fit: contain;
 }
 
-/* 닉네임: 살짝 줄임 */
-.author-card .nickname{
+/* 닉네임: 폰트 줄이고 회색 고정 */
+.author-card .nickname,
+.comment-author .nickname,
+.author-link,
+.author-link:visited {
   font-weight: 800;
-  color: #f1f1f1;
-  font-size: 0.85rem;      /* ← 이전보다 작게 */
+  color: #d3d3d3 !important;
+  font-size: 0.85rem;
   letter-spacing: 0.2px;
   line-height: 1.15;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: none !important;
 }
 
-.author-card .author-link{
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: inherit;
-  text-decoration: none;
-}
-.author-card .author-link:hover{
-  color: #8ab0d1;
-  text-decoration: underline;
-}
-
-/* Info (generic) */
+/* Info */
 .author-card span { font-weight: 500; color: #d3d3d3; }
 .info-card ul {
   list-style: none; padding: 0; margin: 0;
@@ -157,23 +146,16 @@
 .action-button:hover { background-color: #333; }
 .edit-button, .delete-button { background-color: #000; color: #e0e0e0; border-color: #000; }
 
+/* Like */
 .actions-card .like-button {
   align-self: flex-end;
   width: auto;
   padding: 0.5rem 0.75rem;
   gap: 0.4rem;
 }
-
-/* Like */
 .like-button.liked { background-color: #bf3636; color: #fff; border-color: #bf3636; }
 .like-button.liked svg { animation: pop 0.2s; }
 @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
-
-/* Info card compact */
-.sidebar-card.info-card { padding: 0.5rem 1rem !important; }
-.sidebar-card.info-card h4 { font-size: 1rem !important; margin-bottom: 0.5rem !important; }
-.info-card ul { gap: 0.4rem !important; }
-.info-card li { font-size: 0.85rem !important; }
 
 /* Comment Section */
 .comment-section { margin-top: 3rem; }
@@ -189,16 +171,12 @@
 .comment-form button {
   padding: 0.75rem 1.5rem; background-color: #000; color: #e0e0e0; border: none; border-radius: 5px; cursor: pointer; align-self: flex-start;
 }
-
 .comment-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .comment-item {
   background-color: #1a1a1a; padding: 1.5rem; border-radius: 8px; border: 1px solid #333;
 }
 .comment-author { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
 .comment-author span { font-weight: 600; color: #d3d3d3; }
-
-.author-link { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
-.author-link:hover { color: #8ab0d1; text-decoration: underline; }
 
 .level-badge-inline { width: 30px; height: 30px; object-fit: contain; vertical-align: middle; }
 .nickname { line-height: 1; }
@@ -237,11 +215,8 @@
 }
 .reply-form button { padding: 0.5rem 1rem; background-color: #000; color: #e0e0e0; border: none; border-radius: 5px; cursor: pointer; margin-right: 0.5rem; }
 .reply-form button[type="button"] { background-color: #000; color: #e0e0e0; }
-/* ============================
-   AI 평가 섹션 & 버튼 스타일 업
-   ============================ */
 
-/* 섹션 자체를 카드처럼 */
+/* AI 평가 섹션 */
 .ai-evaluation-section{
   background:#171717;
   border:1px solid #2a2a2a;
@@ -250,27 +225,14 @@
   box-shadow:0 8px 20px rgba(0,0,0,.35);
   margin:2rem 0;
 }
-.ai-evaluation-section.expanded{
-  padding:1.25rem 1.25rem 1rem;
-}
-
-/* 접힌 상태 헤더 배치 */
+.ai-evaluation-section.expanded{ padding:1.25rem 1.25rem 1rem; }
 .ai-evaluation-collapsed{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:1rem;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
 }
-.ai-evaluation-collapsed h4{
-  margin:0;
-  font-weight:700;
-  color:#d8dee5;
-  letter-spacing:.2px;
-}
+.ai-evaluation-collapsed h4{ margin:0; font-weight:700; color:#d8dee5; letter-spacing:.2px; }
 
-/* ── 핵심: 평가 시작하기 버튼 ───────────────────────── */
 :root{
-  --ai-accent:#8ab0d1;            /* 사이트 액센트와 맞춤 */
+  --ai-accent:#8ab0d1;
   --ai-accent-soft:#6d96b6;
 }
 
@@ -281,96 +243,27 @@
   gap:.6rem;
   padding:.85rem 1.15rem;
   border-radius:12px;
-
-  /* 바탕 */
   color:#e9f0f7;
   background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.08));
   border:1px solid rgba(138,176,209,.25);
-
-  font-weight:700;
-  letter-spacing:.2px;
-  text-shadow:0 1px 0 rgba(0,0,0,.35);
-
-  /* 깊이감 */
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    inset 0 -1px 0 rgba(0,0,0,.35),
-    0 10px 22px rgba(0,0,0,.38);
-
+  font-weight:700; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -1px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.38);
   cursor:pointer;
-  transition:
-    transform .18s ease,
-    box-shadow .18s ease,
-    background .18s ease,
-    border-color .18s ease,
-    filter .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, filter .18s ease;
 }
-
-
-/* 외곽 링(은은한 그라디언트) */
 .expand-ai-btn::after{
-  content:"";
-  position:absolute; inset:-2px;
-  border-radius:14px;
-  background: conic-gradient(
-    from 180deg,
-    color-mix(in oklab, var(--ai-accent) 38%, #0f0f10),
-    color-mix(in oklab, var(--ai-accent) 16%, #0f0f10) 50%,
-    color-mix(in oklab, var(--ai-accent) 38%, #0f0f10)
-  );
-  /* 테두리처럼만 보이게 마스크 */
-  -webkit-mask: 
-    linear-gradient(#000 0 0) content-box, 
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask: 
-    linear-gradient(#000 0 0) content-box, 
-    linear-gradient(#000 0 0);
-          mask-composite: exclude;
-
-  padding:2px;          /* 경계 두께 */
-  opacity:.45;
-  filter: blur(6px) saturate(1.1);
-  pointer-events:none;
-  transition:opacity .18s ease, filter .18s ease;
+  content:""; position:absolute; inset:-2px; border-radius:14px;
+  background: conic-gradient(from 180deg, color-mix(in oklab, var(--ai-accent) 38%, #0f0f10), color-mix(in oklab, var(--ai-accent) 16%, #0f0f10) 50%, color-mix(in oklab, var(--ai-accent) 38%, #0f0f10));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding:2px; opacity:.45; filter: blur(6px) saturate(1.1);
+  pointer-events:none; transition:opacity .18s ease, filter .18s ease;
 }
+.expand-ai-btn:hover{ transform: translateY(-2px); }
+.expand-ai-btn:active{ transform: translateY(0); filter: brightness(.98); }
+.expand-ai-btn:focus-visible{ outline: none; box-shadow: 0 0 0 3px rgba(138,176,209,.25), 0 10px 22px rgba(0,0,0,.38); }
 
-.expand-ai-btn:hover{
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    inset 0 -1px 0 rgba(0,0,0,.4),
-    0 14px 28px rgba(0,0,0,.45);
-  border-color: rgba(138,176,209,.38);
-}
-.expand-ai-btn:hover::after{
-  opacity:.75; filter: blur(8px) saturate(1.25);
-}
-
-/* 눌렀을 때 */
-.expand-ai-btn:active{
-  transform: translateY(0);
-  filter: brightness(.98);
-}
-
-/* 키보드 포커스 접근성 */
-.expand-ai-btn:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(138,176,209,.25), 0 10px 22px rgba(0,0,0,.38);
-}
-
-/* 접기 버튼은 고스트 스타일 */
 .collapse-ai-btn{
-  background:transparent;
-  color:#cdd6dd;
-  border:1px solid #2b2f34;
-  border-radius:10px;
-  padding:.5rem .75rem;
-  cursor:pointer;
-  transition: border-color .18s ease, color .18s ease, background .18s ease;
-}
-.collapse-ai-btn:hover{
-  border-color:#3b4249;
-  background:#1a1c1f;
-  color:#e6edf5;
+  background:transparent; color:#cdd6dd; border:1px solid #2b2f34; border-radius:10px; padding:.5rem .75rem; cursor:pointer;
 }
