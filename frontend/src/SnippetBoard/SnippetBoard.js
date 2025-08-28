@@ -24,27 +24,58 @@ const SnippetBoard = () => {
   const [sortOrder, setSortOrder] = useState('LATEST');
 
   
-  const fetchSnippets = useCallback((page = 0, term = '', lang = '', sort = 'LATEST') => {
+  const fetchSnippets = useCallback(async (page = 0, term = '', lang = '', sort = 'LATEST') => {
     setLoading(true);
     setError(null);
 
-    const params = new URLSearchParams({ page, size: 10, sort });
-    if (term) params.append('search', term);
-    if (lang) params.append('language', lang);
+    try {
+      const params = new URLSearchParams({ page, size: 10, sort });
+      if (term) params.append('search', term);
+      if (lang) params.append('language', lang);
 
-    fetch(`/api/snippets?${params.toString()}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
-        return res.json();
-      })
-      .then((data) => {
-        const pageData = data.data;
-        setSnippets(pageData.content || []);
-        setCurrentPage(pageData.currentPage);
-        setTotalPages(pageData.totalPages);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      const res = await fetch(`/api/snippets?${params.toString()}`);
+      if (!res.ok) throw new Error('데이터를 불러오는 데 실패했습니다.');
+
+      const result = await res.json();
+      const { content = [], currentPage = 0, totalPages = 1 } = result?.data || {};
+
+      // 작성자 대표뱃지 병합
+      const snippetsWithBadges = await Promise.all(
+        content.map(async (snippet) => {
+          try {
+            const userId = snippet?.author?.userId;
+            if (!userId) return snippet;
+
+            const r = await fetch(`/api/badges/users/${userId}/featured`, {
+              credentials: 'include',
+            });
+
+            if (r.ok) {
+              const j = await r.json().catch(() => null);
+              const badge = j?.data?.[0];
+              if (badge) {
+                return {
+                  ...snippet,
+                  author: { ...snippet.author, representativeBadge: badge },
+                };
+              }
+            }
+          } catch (_) {
+            // 뱃지 조회 실패는 무시하고 원본 스니펫 유지
+          }
+          return snippet;
+        })
+      );
+
+      setSnippets(snippetsWithBadges);
+      setCurrentPage(currentPage);
+      setTotalPages(totalPages);
+    } catch (err) {
+      setError(err.message || '에러');
+      setSnippets([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

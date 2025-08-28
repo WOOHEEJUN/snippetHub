@@ -21,30 +21,58 @@ const Board = () => {
   const [sortOrder, setSortOrder] = useState('LATEST');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const fetchPosts = useCallback((page = 0, term = '', sort = 'LATEST', category = '') => {
+  const fetchPosts = useCallback(async (page = 0, term = '', sort = 'LATEST', category = '') => {
     setLoading(true);
     setError(null);
 
-    const params = new URLSearchParams({ page, size: 10, sort });
-    if (term) params.append('search', term);
-    if (category) params.append('category', category);
+    try {
+      const params = new URLSearchParams({ page, size: 10, sort });
+      if (term) params.append('search', term);
+      if (category) params.append('category', category);
 
-    fetch(`/api/posts?${params.toString()}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
-        return res.json();
-      })
-      .then((result) => {
-        const { content, currentPage, totalPages } = result.data || {};
-        setPosts(content || []);
-        setCurrentPage(currentPage ?? 0);
-        setTotalPages(totalPages ?? 1);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setPosts([]); // 오류 시 빈 배열
-      })
-      .finally(() => setLoading(false));
+      const res = await fetch(`/api/posts?${params.toString()}`);
+      if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
+
+      const result = await res.json();
+      const { content = [], currentPage = 0, totalPages = 1 } = result?.data || {};
+
+      // 작성자 대표뱃지 병합
+      const postsWithBadges = await Promise.all(
+        content.map(async (post) => {
+          try {
+            const userId = post?.author?.userId;
+            if (!userId) return post;
+
+            const r = await fetch(`/api/badges/users/${userId}/featured`, {
+              credentials: 'include',
+            });
+
+            if (r.ok) {
+              const j = await r.json().catch(() => null);
+              const badge = j?.data?.[0];
+              if (badge) {
+                return {
+                  ...post,
+                  author: { ...post.author, representativeBadge: badge },
+                };
+              }
+            }
+          } catch (_) {
+            // 뱃지 조회 실패는 무시하고 원본 포스트 유지
+          }
+          return post;
+        })
+      );
+
+      setPosts(postsWithBadges);
+      setCurrentPage(currentPage);
+      setTotalPages(totalPages);
+    } catch (err) {
+      setError(err.message || '에러');
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
