@@ -322,14 +322,20 @@
   height: 18px;
 }
 
-.author-info a {
-  color: #b0b0b0;
-  text-decoration: none;
-  transition: color 0.2s;
+/* 기본 링크 스타일 제거 및 클릭 비활성화 (작성자) */
+.snippet-board-container .author-info a,
+.snippet-board-container .author-info a:link,
+.snippet-board-container .author-info a:visited,
+.snippet-board-container .author-info a:hover,
+.snippet-board-container .author-info a:active {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+  cursor: default !important;
+  pointer-events: none !important;  /* 클릭 막기 */
 }
-
-.author-info a:hover {
-  color: #fff;
+.snippet-board-container .author-info a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
 }
 
 .stats-info {
@@ -345,6 +351,7 @@
   align-items: center;
   gap: 0.25rem;
 }
+
 /* ===============================
    Board Table – 제목/작성자 링크 색상 고정
    =============================== */
