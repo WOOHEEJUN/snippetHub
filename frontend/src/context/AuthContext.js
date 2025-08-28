@@ -165,6 +165,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateRepresentativeBadge = (badgeOrNull) => {
     setRepresentativeBadge(badgeOrNull || null);
+    console.log('AuthContext: representativeBadge state updated to:', badgeOrNull || null); // DEBUG
     if (badgeOrNull) {
       localStorage.setItem('representativeBadge', JSON.stringify(badgeOrNull));
     } else {
