@@ -44,40 +44,14 @@ export const AuthProvider = ({ children }) => {
         if (profileRes.status === 401) {
           const newAccessToken = await reissueToken();
           if (newAccessToken) {
-            return fetchUser(newAccessToken); 
+            return fetchUser(newAccessToken); // 재귀 호출이지만 새 토큰으로 다시 시도
           }
           throw new Error('Token refresh failed');
         }
         if (!profileRes.ok) throw new Error(`HTTP error! status: ${profileRes.status}`);
 
         const userData = await profileRes.json();
-        let fetchedUser = userData.data || {};
-
-        // Fetch representative badge and attach to user object
-        try {
-          const res = await fetch('/api/badges/my/featured', {
-            headers: getAuthHeaders(),
-            credentials: 'include',
-            cache: 'no-store',
-          });
-          const json = await res.json().catch(() => ({}));
-          const arr = Array.isArray(json?.data) ? json.data : (Array.isArray(json) ? json : []);
-          const featuredBadge = arr[0] || null;
-          fetchedUser = { ...fetchedUser, representativeBadge: featuredBadge };
-          
-          // Also update the separate representativeBadge state
-          setRepresentativeBadge(featuredBadge);
-          if (featuredBadge) {
-            localStorage.setItem('representativeBadge', JSON.stringify(featuredBadge));
-          } else {
-            localStorage.removeItem('representativeBadge');
-          }
-
-        } catch (e) {
-          console.warn("Could not fetch representative badge for user.", e.message);
-          setRepresentativeBadge(null);
-          localStorage.removeItem('representativeBadge');
-        }
+        const fetchedUser = userData.data || {};
 
         setUser(fetchedUser);
         localStorage.setItem('user', JSON.stringify(fetchedUser));
@@ -85,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         if (fetchedUser?.userId) localStorage.setItem('userId', fetchedUser.userId);
       } catch (err) {
         console.error("Failed to fetch user, logging out.", err);
-        logout();
+        logout(); // 실패 시 로그아웃 처리
       } finally {
         setLoading(false);
       }
@@ -94,19 +68,41 @@ export const AuthProvider = ({ children }) => {
     fetchUserPromise.current = promise;
     await promise;
     fetchUserPromise.current = null;
-  }, [reissueToken, getAuthHeaders, logout]);
+  }, []);
+
+  const fetchRepresentativeBadge = useCallback(async () => {
+    try {
+      const res = await fetch('/api/badges/my/featured', {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Failed to fetch featured badge');
+      const json = await res.json().catch(() => ({}));
+      const arr = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+      const first = arr[0] || null;
+      
+      updateRepresentativeBadge(first);
+
+    } catch (e) {
+      console.warn("Could not fetch representative badge.", e.message);
+      updateRepresentativeBadge(null);
+    }
+  }, [getAuthHeaders]);
+
 
   useEffect(() => {
     const storedAccessToken = localStorage.getItem('accessToken');
     if (storedAccessToken) {
       setLoading(true);
       fetchUser(storedAccessToken);
+      fetchRepresentativeBadge();
     } else {
       setLoading(false);
     }
-  }, [fetchUser]);
+  }, [fetchUser, fetchRepresentativeBadge]);
 
-  const reissueToken = useCallback(async () => {
+  const reissueToken = async () => {
     const storedRefreshToken = refreshToken || localStorage.getItem('refreshToken');
     if (!storedRefreshToken) {
       logout();
@@ -125,6 +121,7 @@ export const AuthProvider = ({ children }) => {
       const newRefreshToken = data.data.refreshToken;
 
       localStorage.setItem('accessToken', newAccessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
       setAccessToken(newAccessToken);
       setRefreshToken(newRefreshToken);
 
@@ -133,9 +130,9 @@ export const AuthProvider = ({ children }) => {
       logout();
       return null;
     }
-  }, [refreshToken, logout]);
+  };
 
-  const login = useCallback(async (tokens) => {
+  const login = async (tokens) => {
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = tokens.token;
     localStorage.setItem('accessToken', newAccessToken);
     localStorage.setItem('refreshToken', newRefreshToken);
@@ -149,9 +146,10 @@ export const AuthProvider = ({ children }) => {
 
     setLoading(true);
     await fetchUser(newAccessToken);
-  }, [fetchUser]);
+    await fetchRepresentativeBadge();
+  };
 
-  const logout = useCallback(() => {
+  const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
@@ -163,19 +161,17 @@ export const AuthProvider = ({ children }) => {
     setRepresentativeBadge(null);
     setLoading(false);
     fetchUserPromise.current = null;
-  }, []);
+  };
 
-  const updateRepresentativeBadge = useCallback((badgeOrNull) => {
+  const updateRepresentativeBadge = (badgeOrNull) => {
     setRepresentativeBadge(badgeOrNull || null);
+    console.log('AuthContext: representativeBadge state updated to:', badgeOrNull || null); // DEBUG
     if (badgeOrNull) {
       localStorage.setItem('representativeBadge', JSON.stringify(badgeOrNull));
     } else {
       localStorage.removeItem('representativeBadge');
     }
-    // Also update the user object in state
-    setUser(prevUser => ({ ...prevUser, representativeBadge: badgeOrNull || null }));
-    localStorage.setItem('user', JSON.stringify({ ...user, representativeBadge: badgeOrNull || null }));
-  }, [user]);
+  };
 
   const value = useMemo(() => ({
     accessToken,
@@ -187,7 +183,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     getAuthHeaders,
     updateRepresentativeBadge,
-  }), [user, accessToken, representativeBadge, loading, login, logout, getAuthHeaders, updateRepresentativeBadge]);
+  }), [user, accessToken, representativeBadge, loading, getAuthHeaders]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
