@@ -188,25 +188,6 @@
   border-radius:50%;
   pointer-events:none;
 }
-.rep-badge-chip::before{
-  /* 도넛형 회전 링 */
-  -webkit-mask:
-    radial-gradient(circle,
-      transparent calc(50% - var(--ring-width)),
-      #000 calc(50% - var(--ring-width) + 1px),
-      #000 calc(50% + var(--ring-width) - 1px),
-      transparent calc(50% + var(--ring-width)));
-          mask:
-    radial-gradient(circle,
-      transparent calc(50% - var(--ring-width)),
-      #000 calc(50% - var(--ring-width) + 1px),
-      #000 calc(50% + var(--ring-width) - 1px),
-      transparent calc(50% + var(--ring-width)));
-  background: conic-gradient(#6aa7d8, #86f7a5, #6aa7d8);
-  animation: rep-spin 14s linear infinite;
-  opacity:.9;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,.45));
-}
 .rep-badge-chip::after{
   background: radial-gradient(60% 60% at 50% 50%, var(--accent) 0%, transparent 70%);
   filter: blur(4px); opacity:.45; animation: rep-pulse 3.2s ease-in-out infinite;
