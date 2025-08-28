@@ -267,3 +267,39 @@
 .collapse-ai-btn{
   background:transparent; color:#cdd6dd; border:1px solid #2b2f34; border-radius:10px; padding:.5rem .75rem; cursor:pointer;
 }
+/* ===========================
+   작성자 / 댓글 닉네임 링크색 고정
+   =========================== */
+.snippet-detail-page .author-link,
+.snippet-detail-page .author-link:link,
+.snippet-detail-page .author-link:visited,
+.snippet-detail-page .author-link:hover,
+.snippet-detail-page .author-link:active,
+.snippet-detail-page .comment-author a,
+.snippet-detail-page .comment-author a:link,
+.snippet-detail-page .comment-author a:visited,
+.snippet-detail-page .comment-author a:hover,
+.snippet-detail-page .comment-author a:active,
+.snippet-detail-page .author-card a,
+.snippet-detail-page .author-card a:link,
+.snippet-detail-page .author-card a:visited,
+.snippet-detail-page .author-card a:hover,
+.snippet-detail-page .author-card a:active {
+  color: #d3d3d3 !important;   /* 밝은 회색 고정 */
+  text-decoration: none !important;
+  font-weight: 800;
+}
+
+/* 링크 내부의 아이콘/텍스트도 상속받도록 */
+.snippet-detail-page .author-link *,
+.snippet-detail-page .comment-author a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
+}
+
+/* (선택) 부트스트랩 변수 오버라이드 */
+.snippet-detail-page {
+  --bs-link-color: #d3d3d3;
+  --bs-link-hover-color: #d3d3d3;
+}
+

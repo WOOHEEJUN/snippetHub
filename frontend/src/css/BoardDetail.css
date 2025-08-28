@@ -349,3 +349,35 @@
   color: #d3d3d3 !important;
   text-decoration: none !important;
 }
+/* === 링크 파란색 강제 무력화 (BoardDetail 전용) === */
+.board-detail-page .author-link,
+.board-detail-page .author-link:link,
+.board-detail-page .author-link:visited,
+.board-detail-page .author-link:hover,
+.board-detail-page .author-link:active,
+.board-detail-page .comment-author a,
+.board-detail-page .comment-author a:link,
+.board-detail-page .comment-author a:visited,
+.board-detail-page .comment-author a:hover,
+.board-detail-page .comment-author a:active,
+.board-detail-page .author-card a,
+.board-detail-page .author-card a:link,
+.board-detail-page .author-card a:visited,
+.board-detail-page .author-card a:hover,
+.board-detail-page .author-card a:active {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}
+
+/* 링크 내부 텍스트(아이콘/닉네임)가 상속받도록 */
+.board-detail-page .author-link *,
+.board-detail-page .comment-author a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
+}
+
+/* (선택) 부트스트랩 5를 쓰면 CSS 변수까지 잠그면 더 확실 */
+.board-detail-page {
+  --bs-link-color: #d3d3d3;
+  --bs-link-hover-color: #d3d3d3;
+}
