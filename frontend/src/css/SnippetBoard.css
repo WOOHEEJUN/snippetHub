@@ -345,3 +345,40 @@
   align-items: center;
   gap: 0.25rem;
 }
+/* ===============================
+   Board Table – 제목/작성자 링크 색상 고정
+   =============================== */
+
+/* 제목 링크 (3번째 열) */
+.board-container .board-table td:nth-child(3) a,
+.board-container .board-table td:nth-child(3) a:link,
+.board-container .board-table td:nth-child(3) a:visited,
+.board-container .board-table td:nth-child(3) a:hover,
+.board-container .board-table td:nth-child(3) a:active {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}
+.board-container .board-table td:nth-child(3) a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
+}
+
+/* 작성자 링크 (4번째 열) */
+.board-container .board-table td:nth-child(4) a,
+.board-container .board-table td:nth-child(4) a:link,
+.board-container .board-table td:nth-child(4) a:visited,
+.board-container .board-table td:nth-child(4) a:hover,
+.board-container .board-table td:nth-child(4) a:active {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}
+.board-container .board-table td:nth-child(4) a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
+}
+
+/* 테마 변수도 잠궈서 Bootstrap 기본값 무효화 */
+.board-container {
+  --bs-link-color: #d3d3d3;
+  --bs-link-hover-color: #d3d3d3;
+}
