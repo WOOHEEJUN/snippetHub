@@ -54,6 +54,7 @@ export default function UserBadgeAndNickname({
   size = 22,
   className = '',
 }) {
+  console.log('UserBadgeAndNickname: received user prop:', user); // DEBUG
   const { representativeBadge: authUserRepresentativeBadge, user: authUser } = useAuth();
   const nick = user?.nickname || user?.name || '알 수 없는 사용자';
 

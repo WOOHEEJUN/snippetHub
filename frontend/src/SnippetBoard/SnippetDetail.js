@@ -100,6 +100,7 @@ function SnippetDetail() {
       });
 
       setAuthorProfiles(profiles);
+      console.log('SnippetDetail: authorProfiles updated:', profiles); // DEBUG
     } catch (err) {
       console.error('Failed to fetch user profiles:', err);
     }

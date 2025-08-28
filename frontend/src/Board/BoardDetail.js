@@ -69,6 +69,7 @@ function BoardDetail() {
       });
 
       setAuthorProfiles(profiles);
+      console.log('BoardDetail: authorProfiles updated:', profiles); // DEBUG
     } catch (err) {
       console.error('Failed to fetch user profiles:', err);
     }
