@@ -1,4 +1,4 @@
-/* frontend/src/css/Ranking.css */
+/* src/css/Ranking.css */
 
 .ranking-page {
   max-width: 900px;
@@ -21,7 +21,7 @@
 /* 테이블 */
 .ranking-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse; /* ✅ 줄(경계) 합치기 */
   margin-bottom: 1.5rem;
 }
 
@@ -46,17 +46,26 @@
   color: #b0b0b0;
 }
 
-/* 닉네임 셀에서 아이콘과 텍스트 정렬 */
-.nickname-cell {
+/* ✅ td는 table-cell 유지, 클릭 커서만 */
+.nickname-cell-td { cursor: pointer; }
+
+/* ✅ flex는 td 내부 래퍼에만 적용 */
+.ranking-table td .nickname-cell {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  white-space: nowrap;
 }
 
-/* UserBadgeAndNickname 기본 크기 조정(랭킹 표용) */
-.nickname-cell .ubn-icon,
-.nickname-cell .level-badge-header {
+/* 이미지 하단 공백 제거로 행 높이 균일 */
+.ranking-table td .nickname-cell img {
+  display: block;
+  vertical-align: middle;
+}
+
+/* 랭킹 표용 아이콘 크기 */
+.ranking-table td .nickname-cell .ubn-icon,
+.ranking-table td .nickname-cell .level-badge-header {
   width: 20px !important;
   height: 20px !important;
   min-width: 20px !important;
@@ -134,8 +143,8 @@
     font-size: 1rem;
   }
 
-  .nickname-cell .ubn-icon,
-  .nickname-cell .level-badge-header {
+  .ranking-table td .nickname-cell .ubn-icon,
+  .ranking-table td .nickname-cell .level-badge-header {
     width: 18px !important;
     height: 18px !important;
     min-width: 18px !important;

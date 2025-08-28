@@ -30,19 +30,20 @@ function Ranking() {
       const users = data?.data?.content || [];
 
       // 각 사용자 대표뱃지 취득
-      const withBadges = await Promise.all(users.map(async (u) => {
-        try {
-          const r = await fetch(`/api/badges/users/${u.userId}/featured`, {
-            // headers: getAuthHeaders(), // 대표뱃지 없는 유저가 다른 유저 뱃지 조회 못하는 버그 수정
-            credentials: 'include',
-          });
-          if (r.ok) {
-            const j = await r.json();
-            if (j?.data?.length) return { ...u, representativeBadge: j.data[0] };
-          }
-        } catch (e) { /* ignore */ }
-        return u;
-      }));
+      const withBadges = await Promise.all(
+        users.map(async (u) => {
+          try {
+            const r = await fetch(`/api/badges/users/${u.userId}/featured`, {
+              credentials: 'include',
+            });
+            if (r.ok) {
+              const j = await r.json();
+              if (j?.data?.length) return { ...u, representativeBadge: j.data[0] };
+            }
+          } catch (_) {}
+          return u;
+        })
+      );
 
       setRankingData(withBadges);
       setTotalPages(data?.data?.totalPages || 0);
@@ -78,9 +79,15 @@ function Ranking() {
             {rankingData.map((u, idx) => (
               <tr key={u.userId}>
                 <td>{u.rank || page * size + idx + 1}</td>
-                <td className="nickname-cell" onClick={() => navigate(`/users/${u.userId}`)}>
-                  {/* 닉네임 중복 출력 금지 — 이 컴포넌트가 뱃지+닉네임 모두 렌더 */}
-                  <UserBadgeAndNickname user={u} showLink={false} />
+                {/* ✅ td는 table-cell 그대로 유지 */}
+                <td
+                  className="nickname-cell-td"
+                  onClick={() => navigate(`/users/${u.userId}`)}
+                >
+                  {/* ✅ td 안쪽에만 flex 래퍼 */}
+                  <div className="nickname-cell">
+                    <UserBadgeAndNickname user={u} showLink={false} />
+                  </div>
                 </td>
                 <td>{u.currentLevel}</td>
                 <td>{u.currentPoints} P</td>
