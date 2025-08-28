@@ -81,7 +81,6 @@ export const AuthProvider = ({ children }) => {
       const json = await res.json().catch(() => ({}));
       const arr = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
       const first = arr[0] || null;
-      
       updateRepresentativeBadge(first);
 
     } catch (e) {
