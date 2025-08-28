@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FaFileAlt, FaCode, FaComment, FaHeart, FaEye } from 'react-icons/fa';
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added import
 
 import '../css/UserProfile.css';
 import { getBadgeRarity, getLevelBadgeImage, getUserLevel } from '../utils/badgeUtils';
