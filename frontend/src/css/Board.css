@@ -240,3 +240,11 @@
 .empty-board-message {
   color: #fff !important; /* Use !important to override text-muted */
 }
+.board-container a.nickname,
+.board-container a.nickname:link,
+.board-container a.nickname:visited,
+.board-container a.nickname:hover,
+.board-container a.nickname:active {
+  color: #d3d3d3 !important;   /* 회색으로 고정 */
+  text-decoration: none !important;
+}

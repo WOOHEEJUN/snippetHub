@@ -381,3 +381,11 @@
   --bs-link-color: #d3d3d3;
   --bs-link-hover-color: #d3d3d3;
 }
+.board-detail-page a.nickname,
+.board-detail-page a.nickname:link,
+.board-detail-page a.nickname:visited,
+.board-detail-page a.nickname:hover,
+.board-detail-page a.nickname:active {
+  color: #d3d3d3 !important;   /* 밝은 회색 */
+  text-decoration: none !important;
+}
