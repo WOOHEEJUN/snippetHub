@@ -86,7 +86,7 @@ function Ranking() {
                 >
                   {/* ✅ td 안쪽에만 flex 래퍼 */}
                   <div className="nickname-cell">
-                    <UserBadgeAndNickname user={u} showLink={false} />
+                    <UserBadgeAndNickname user={u} showLink={false} mode="level" />
                   </div>
                 </td>
                 <td>{u.currentLevel}</td>
