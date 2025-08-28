@@ -184,6 +184,8 @@ export default function MyBadges() {
 
         const incoming = extractArray(featuredData).map((b, i) => normalizeBadge(b, i));
         setFeaturedBadges(incoming.length ? [incoming[0]] : []);
+        // ✅ 로드된 대표 뱃지 정보를 컨텍스트에 즉시 반영
+        updateRepresentativeBadge(incoming[0] ? (incoming[0].raw || incoming[0]) : null);
       } catch (e) {
         console.error(e);
         setError('데이터를 불러오는 중 오류가 발생했습니다.');

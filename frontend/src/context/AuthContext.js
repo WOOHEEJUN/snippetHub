@@ -1,102 +1,117 @@
 // src/context/AuthContext.js
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState(null);
-  const [refreshToken, setRefreshToken] = useState(null);
-  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('accessToken'));
+  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refreshToken'));
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [representativeBadge, setRepresentativeBadge] = useState(() => {
+    try {
+      const raw = localStorage.getItem('representativeBadge');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [loading, setLoading] = useState(true);
   const fetchUserPromise = useRef(null);
 
-  useEffect(() => {
-    const storedAccessToken = localStorage.getItem('accessToken');
-    const storedRefreshToken = localStorage.getItem('refreshToken');
-    const storedUser = localStorage.getItem('user');
+  const getAuthHeaders = useMemo(() => () => {
+    const token = accessToken || localStorage.getItem('accessToken');
+    return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
+  }, [accessToken]);
 
-    if (storedAccessToken && storedRefreshToken) {
-      setAccessToken(storedAccessToken);
-      setRefreshToken(storedRefreshToken);
-      if (storedUser) setUser(JSON.parse(storedUser));
-      fetchUser(storedAccessToken);
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const getAuthHeaders = () =>
-    accessToken
-      ? { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }
-      : {};
-
-  const fetchUser = async (token) => {
+  const fetchUser = useCallback(async (token) => {
     if (fetchUserPromise.current) {
-      try { await fetchUserPromise.current; return; } catch {}
+      return fetchUserPromise.current;
     }
 
-    fetchUserPromise.current = (async () => {
+    const promise = (async () => {
       try {
-        // 1) 프로필
-        const userDataRes = await fetch('/api/users/profile', {
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
+        const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+        const profileRes = await fetch('/api/users/profile', { headers, credentials: 'include' });
 
-        if (userDataRes.status === 401) {
+        if (profileRes.status === 401) {
           const newAccessToken = await reissueToken();
-          await fetchUser(newAccessToken);
-          return;
-        }
-        if (!userDataRes.ok) throw new Error(`HTTP error! status: ${userDataRes.status}`);
-
-        const userData = await userDataRes.json();
-        let fetchedUser = userData.data || {};
-
-        // 2) 대표 뱃지
-        try {
-          const featuredBadgeRes = await fetch('/api/badges/my/featured', {
-            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-            credentials: 'include',
-          });
-          if (featuredBadgeRes.ok) {
-            const featuredBadgeData = await featuredBadgeRes.json();
-            const arr = Array.isArray(featuredBadgeData?.data)
-              ? featuredBadgeData.data
-              : (Array.isArray(featuredBadgeData) ? featuredBadgeData : []);
-            fetchedUser = { ...fetchedUser, representativeBadge: arr[0] || null };
-          } else {
-            console.warn('Failed to fetch featured badge:', featuredBadgeRes.status);
+          if (newAccessToken) {
+            return fetchUser(newAccessToken); // 재귀 호출이지만 새 토큰으로 다시 시도
           }
-        } catch (e) {
-          console.error('Error fetching featured badge:', e);
+          throw new Error('Token refresh failed');
         }
+        if (!profileRes.ok) throw new Error(`HTTP error! status: ${profileRes.status}`);
+
+        const userData = await profileRes.json();
+        const fetchedUser = userData.data || {};
 
         setUser(fetchedUser);
         localStorage.setItem('user', JSON.stringify(fetchedUser));
-        if (fetchedUser?.representativeBadge) {
-          try { localStorage.setItem('repBadge', JSON.stringify(fetchedUser.representativeBadge)); } catch {}
-        } else {
-          localStorage.removeItem('repBadge');
-        }
         if (fetchedUser?.email) localStorage.setItem('userEmail', fetchedUser.email);
         if (fetchedUser?.userId) localStorage.setItem('userId', fetchedUser.userId);
       } catch (err) {
-        logout();
+        console.error("Failed to fetch user, logging out.", err);
+        logout(); // 실패 시 로그아웃 처리
       } finally {
         setLoading(false);
       }
     })();
 
-    await fetchUserPromise.current;
+    fetchUserPromise.current = promise;
+    await promise;
     fetchUserPromise.current = null;
-  };
+  }, []);
+
+  const fetchRepresentativeBadge = useCallback(async () => {
+    try {
+      const res = await fetch('/api/badges/my/featured', {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Failed to fetch featured badge');
+      const json = await res.json().catch(() => ({}));
+      const arr = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+      const first = arr[0] || null;
+      
+      updateRepresentativeBadge(first);
+
+    } catch (e) {
+      console.warn("Could not fetch representative badge.", e.message);
+      updateRepresentativeBadge(null);
+    }
+  }, [getAuthHeaders]);
+
+
+  useEffect(() => {
+    const storedAccessToken = localStorage.getItem('accessToken');
+    if (storedAccessToken) {
+      setLoading(true);
+      fetchUser(storedAccessToken);
+      fetchRepresentativeBadge();
+    } else {
+      setLoading(false);
+    }
+  }, [fetchUser, fetchRepresentativeBadge]);
 
   const reissueToken = async () => {
+    const storedRefreshToken = refreshToken || localStorage.getItem('refreshToken');
+    if (!storedRefreshToken) {
+      logout();
+      return null;
+    }
     try {
       const res = await fetch('/api/auth/reissue', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${refreshToken}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${storedRefreshToken}` },
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Failed to reissue token');
@@ -113,26 +128,25 @@ export const AuthProvider = ({ children }) => {
       return newAccessToken;
     } catch (error) {
       logout();
-      throw error;
+      return null;
     }
   };
 
   const login = async (tokens) => {
-    if (!tokens || !tokens.token || !tokens.token.accessToken) {
-      throw new Error('Invalid tokens structure');
-    }
-    localStorage.setItem('accessToken', tokens.token.accessToken);
-    localStorage.setItem('refreshToken', tokens.token.refreshToken);
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = tokens.token;
+    localStorage.setItem('accessToken', newAccessToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
     if (tokens.user) {
       localStorage.setItem('user', JSON.stringify(tokens.user));
       if (tokens.user.userId) localStorage.setItem('userId', tokens.user.userId);
     }
-    setAccessToken(tokens.token.accessToken);
-    setRefreshToken(tokens.token.refreshToken);
+    setAccessToken(newAccessToken);
+    setRefreshToken(newRefreshToken);
     setUser(tokens.user);
 
     setLoading(true);
-    await fetchUser(tokens.token.accessToken);
+    await fetchUser(newAccessToken);
+    await fetchRepresentativeBadge();
   };
 
   const logout = () => {
@@ -140,52 +154,43 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     localStorage.removeItem('userId');
-    localStorage.removeItem('repBadge');
+    localStorage.removeItem('representativeBadge');
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
+    setRepresentativeBadge(null);
     setLoading(false);
     fetchUserPromise.current = null;
   };
 
-  const refetchUser = async () => {
-    if (accessToken) {
-      setLoading(true);
-      await fetchUser(accessToken);
+  const updateRepresentativeBadge = (badgeOrNull) => {
+    setRepresentativeBadge(badgeOrNull || null);
+    if (badgeOrNull) {
+      localStorage.setItem('representativeBadge', JSON.stringify(badgeOrNull));
+    } else {
+      localStorage.removeItem('representativeBadge');
     }
   };
 
-  /** 대표 뱃지 바꿀 때 헤더 즉시 반영 + 캐시 업데이트 */
-  const updateRepresentativeBadge = (badge) => {
-    setUser((prevUser) => {
-      const updatedUser = { ...(prevUser || {}), representativeBadge: badge || null };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      try {
-        if (badge) localStorage.setItem('repBadge', JSON.stringify(badge));
-        else localStorage.removeItem('repBadge');
-      } catch {}
-      return updatedUser;
-    });
-  };
+  const value = useMemo(() => ({
+    accessToken,
+    user,
+    isAuthenticated: !!user && !!accessToken,
+    representativeBadge,
+    loading,
+    login,
+    logout,
+    getAuthHeaders,
+    updateRepresentativeBadge,
+  }), [user, accessToken, representativeBadge, loading, getAuthHeaders]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        accessToken,
-        refreshToken,
-        user,
-        isAuthenticated: !!user && !!accessToken,
-        login,
-        logout,
-        getAuthHeaders,
-        loading,
-        refetchUser,
-        updateRepresentativeBadge,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

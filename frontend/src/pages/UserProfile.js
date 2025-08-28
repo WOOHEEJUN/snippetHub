@@ -141,7 +141,7 @@ const levelImgSrc =
         </div>
 
         <div className="profile-info">
-          <h1 className="profile-nickname">{user.nickname}</h1>
+            <UserBadgeAndNickname user={user} showLink={false} />
           {user.levelName && user.level && (
             <p className="profile-level">등급: {user.levelName} (Lv.{user.level})</p>
           )}
