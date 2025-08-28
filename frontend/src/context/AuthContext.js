@@ -79,8 +79,10 @@ export const AuthProvider = ({ children }) => {
       });
       if (!res.ok) throw new Error('Failed to fetch featured badge');
       const json = await res.json().catch(() => ({}));
+      console.log('Fetched representative badge data:', json); // DEBUG
       const arr = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
       const first = arr[0] || null;
+      console.log('Processed representative badge:', first); // DEBUG
       
       updateRepresentativeBadge(first);
 

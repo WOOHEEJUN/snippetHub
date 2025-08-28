@@ -20,11 +20,13 @@ export default function UserBadgeAndNickname({
   className = '',
 }) {
   const { representativeBadge } = useAuth();
+  console.log('UserBadgeAndNickname received badge from context:', representativeBadge); // DEBUG
   const nick = user?.nickname || user?.name || '알 수 없는 사용자';
 
   // 컨텍스트의 대표 뱃지를 우선 사용하되, user 객체에 직접 주입된 경우도 폴백으로 고려
   const badgeToDisplay = representativeBadge ?? user?.representativeBadge;
   const repSrc = pickBadgeSrc(badgeToDisplay);
+  console.log('Generated badge source URL:', repSrc); // DEBUG
 
   const inner = (
     <span className={`author-display ${className}`}>
