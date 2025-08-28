@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/UserBadgeAndNickname.css';
@@ -54,12 +54,39 @@ export default function UserBadgeAndNickname({
   size = 22,
   className = '',
 }) {
-  const { representativeBadge } = useAuth();
+  const { representativeBadge: authUserRepresentativeBadge, user: authUser } = useAuth();
   const nick = user?.nickname || user?.name || '알 수 없는 사용자';
 
-  const badgeToDisplay = representativeBadge ?? user?.representativeBadge;
-  const repSrcs = pickRepSrcs(badgeToDisplay);
-  const primarySrc = repSrcs[0] || null;
+  let badgeToRender = null;
+  let badgeType = 'none'; // 'rep' or 'level'
+
+  const isCurrentUser = user?.userId && authUser?.userId && user.userId === authUser.userId;
+  const userPropRepresentativeBadge = user?.representativeBadge;
+
+  if (userPropRepresentativeBadge) {
+    badgeToRender = userPropRepresentativeBadge;
+    badgeType = 'rep';
+  } else if (isCurrentUser && authUserRepresentativeBadge) {
+    badgeToRender = authUserRepresentativeBadge;
+    badgeType = 'rep';
+  } else if (user?.currentLevel) {
+    badgeToRender = { name: user.currentLevel };
+    badgeType = 'level';
+  }
+
+  const getBadgeSrc = (badge, type) => {
+    if (!badge) return null;
+    if (type === 'rep') {
+      const srcs = pickRepSrcs(badge);
+      return srcs.length > 0 ? srcs[0] : null;
+    } else if (type === 'level') {
+      const levelFileName = levelKey(badge.name);
+      return levelFileName ? `/badges/${levelFileName}.png` : null;
+    }
+    return null;
+  };
+
+  const primarySrc = getBadgeSrc(badgeToRender, badgeType);
 
   const inner = (
     <span className={`author-display ${className}`}>
@@ -67,11 +94,11 @@ export default function UserBadgeAndNickname({
         <img
           className="rep-badge-chip"
           src={primarySrc}
-          alt="대표 뱃지"
+          alt={badgeToRender?.name || "뱃지"}
           style={{ width: size, height: size, marginRight: 6 }}
-          onError={(e) => { 
-            e.currentTarget.onerror = null; 
-            e.currentTarget.src = '/badges/gold.png'; 
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = '/badges/badge_f.png'; // Generic fallback
           }}
         />
       )}
