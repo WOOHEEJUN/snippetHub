@@ -84,7 +84,7 @@ const normalizeBadge = (b, idx = 0) => {
     pointsReward: b?.points_reward ?? b?.pointsReward ?? 0,
     owned: b?.owned ?? b?.isOwned ?? true,
     // 원본 이미지 관련 필드도 보존
-    imageUrl: b?.imageUrl ?? b?.image ?? b?.iconUrl ?? null,
+    imageUrl: b?.imageUrl ?? b?.image ?? b?.icon ?? null,
     code: b?.code ?? b?.badgeCode ?? null,
     raw: b,
   };

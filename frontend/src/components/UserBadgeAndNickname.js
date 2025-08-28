@@ -38,7 +38,7 @@ const pickRepSrcs = (rep) => {
   if (!rep) return [];
   const cand = [];
   if (rep.imageUrl) cand.push(rep.imageUrl);
-  if (rep.icon) cand.push(rep.icon); // Use rep.icon instead of rep.iconUrl
+  if (rep.icon && rep.icon !== '') cand.push(rep.icon); // Only push if not empty
   if (rep.code)     cand.push(`/badges/${String(rep.code).toLowerCase()}.png`);
   if (rep.name) {
     const slug = String(rep.name).trim().toLowerCase().replace(/\s+/g, '_');
