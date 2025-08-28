@@ -48,77 +48,44 @@ const pickRepSrcs = (rep) => {
   return [...new Set(cand)];
 };
 
-/**
- * props
- * - user: { userId, nickname, currentLevel, representativeBadge? }
- * - showLink: boolean
- * - size: number
- * - className: string
- * - mode: 'auto' | 'level' | 'rep'
- *    auto  = 대표 있으면 대표, 없으면 등급 PNG
- *    level = 항상 등급 PNG (/badges/{level}.png)
- *    rep   = 대표뱃지 이미지만 (없으면 아이콘 없음)
- */
 export default function UserBadgeAndNickname({
   user,
   showLink = true,
   size = 22,
   className = '',
-  mode = 'auto',
 }) {
-  const { user: me, representativeBadge: myRep } = useAuth();
-
+  const { representativeBadge } = useAuth();
   const nick = user?.nickname || user?.name || '알 수 없는 사용자';
-  const isMe = me?.userId && user?.userId && String(me.userId) === String(user.userId);
 
-  // 1) 대표뱃지 후보 (그 유저의 것만; 내 프로필이면 컨텍스트 폴백 허용)
-  const rep = user?.representativeBadge ?? (isMe ? myRep : null);
-  const repCandidates = useMemo(() => pickRepSrcs(rep), [rep]);
-  const [repIdx, setRepIdx] = useState(0);
-  const repSrc = repCandidates[repIdx] || null;
-
-  // 2) 등급 PNG 경로
-  const levelSrc = (() => {
-    const key = levelKey(user?.currentLevel);
-    return key ? `/badges/${key}.png` : null;
-  })();
-
-  // 3) 어떤 이미지를 쓸지 결정
-  let imgSrc = null;
-  if (mode === 'rep') imgSrc = repSrc || null;
-  else if (mode === 'level') imgSrc = levelSrc || null;
-  else /* auto */ imgSrc = repSrc || levelSrc || null;
-
-  const Img = imgSrc ? (
-    <img
-      className="ubn-icon"
-      src={imgSrc}
-      alt="icon"
-      style={{ width: size, height: size, marginRight: 6 }}
-      onError={(e) => {
-        // 더 이상 'gold.png'로 떨어지지 않게, 실패 시 숨김
-        if (repSrc && repIdx < repCandidates.length - 1) {
-          // 대표뱃지 후보가 더 있으면 다음 후보 시도
-          setRepIdx(repIdx + 1);
-        } else {
-          e.currentTarget.style.display = 'none';
-        }
-      }}
-    />
-  ) : null;
+  const badgeToDisplay = representativeBadge ?? user?.representativeBadge;
+  const repSrcs = pickRepSrcs(badgeToDisplay);
+  const primarySrc = repSrcs[0] || null;
 
   const inner = (
     <span className={`author-display ${className}`}>
-      {Img}
+      {primarySrc && (
+        <img
+          className="rep-badge-chip"
+          src={primarySrc}
+          alt="대표 뱃지"
+          style={{ width: size, height: size, marginRight: 6 }}
+          onError={(e) => { 
+            e.currentTarget.onerror = null; 
+            e.currentTarget.src = '/badges/gold.png'; 
+          }}
+        />
+      )}
       <span className="nickname">{nick}</span>
     </span>
   );
 
-  return showLink && user?.userId ? (
-    <Link to={`/users/${user.userId}`} className="author-link" style={{ textDecoration: 'none' }}>
-      {inner}
-    </Link>
-  ) : (
-    inner
-  );
+  if (showLink && user?.userId) {
+    return (
+      <Link to={`/users/${user.userId}`} className="author-link" style={{ textDecoration: 'none' }}>
+        {inner}
+      </Link>
+    );
+  }
+  
+  return inner;
 }

@@ -10,8 +10,7 @@ import {
 import AICodeEvaluation from '../components/AICodeEvaluation';
 
 import '../css/SnippetDetail.css';
-// import { getRepresentativeBadgeImage, getLevelBadgeImage } from '../utils/badgeUtils'; // Removed
-import UserBadgeAndNickname from '../components/UserBadgeAndNickname'; // Added
+import UserBadgeAndNickname from '../components/UserBadgeAndNickname';
 
 const API_BASE = '/api';
 const ENDPOINTS = {
@@ -40,7 +39,6 @@ const parseJsonSafe = async (res) => {
   return null;
 };
 
-// 유틸
 const removeCommentFromTree = (list, targetId) =>
   list
     .filter((c) => c.commentId !== targetId)
@@ -68,7 +66,6 @@ function SnippetDetail() {
   const navigate = useNavigate();
   const { user, getAuthHeaders } = useAuth();
 
-  // 상태
   const [snippet, setSnippet] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -80,40 +77,65 @@ function SnippetDetail() {
   const [isAIExpanded, setIsAIExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  // const [authorLevels, setAuthorLevels] = useState({}); // Removed
+  const [authorProfiles, setAuthorProfiles] = useState({});
 
-  // fetchRankingData removed
-
-  const fetchSnippet = useCallback(async () => {
+  const fetchUserProfiles = useCallback(async () => {
     try {
-      const res = await apiFetch(ENDPOINTS.snippet(snippetId), { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error('스니펫 불러오기 실패');
-      const data = await parseJsonSafe(res);
-      setSnippet(data?.data ?? data);
+      const [allBadgesRes, rankingRes] = await Promise.all([
+        fetch(`/api/v1/badges/users/featured`, { headers: getAuthHeaders(), credentials: 'include' }),
+        fetch(`/api/users/ranking?size=2000`, { headers: getAuthHeaders(), credentials: 'include' })
+      ]);
+
+      const allBadges = allBadgesRes.ok ? await allBadgesRes.json().then(data => data.data || []) : [];
+      const badgeMap = new Map(allBadges.map(b => [b.userId, b]));
+
+      const usersFromRanking = rankingRes.ok ? await rankingRes.json().then(data => data.data?.content || []) : [];
+
+      const profiles = {};
+      usersFromRanking.forEach(user => {
+        profiles[user.userId] = {
+          ...user,
+          representativeBadge: badgeMap.get(user.userId) || null,
+        };
+      });
+
+      setAuthorProfiles(profiles);
+    } catch (err) {
+      console.error('Failed to fetch user profiles:', err);
+    }
+  }, [getAuthHeaders]);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [snippetRes, commentsRes] = await Promise.all([
+        apiFetch(ENDPOINTS.snippet(snippetId), { headers: getAuthHeaders() }),
+        apiFetch(ENDPOINTS.commentsAllBySnippet(snippetId), { headers: getAuthHeaders() })
+      ]);
+
+      if (!snippetRes.ok) throw new Error('스니펫 불러오기 실패');
+      const snippetData = await parseJsonSafe(snippetRes);
+      const finalSnippet = snippetData?.data ?? snippetData;
+      setSnippet(finalSnippet);
+
+      let commentsData = [];
+      if (commentsRes.ok) {
+        const commentsJson = await parseJsonSafe(commentsRes);
+        commentsData = Array.isArray(commentsJson) ? commentsJson : (Array.isArray(commentsJson?.data) ? commentsJson.data : []);
+        setComments(commentsData);
+      }
     } catch (err) {
       console.error(err);
-      setError('스니펫을 불러오는 중 오류가 발생했습니다.');
+      setError('데이터를 불러오는 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   }, [snippetId, getAuthHeaders]);
 
-  const fetchComments = useCallback(async () => {
-    try {
-      const res = await apiFetch(ENDPOINTS.commentsAllBySnippet(snippetId), { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error('댓글 불러오기 실패');
-      const data = await parseJsonSafe(res);
-      setComments(Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []));
-    } catch (err) {
-      console.error(err);
-    }
-  }, [snippetId, getAuthHeaders]);
-
   useEffect(() => {
-    fetchSnippet();
-    fetchComments();
-    // fetchRankingData(); // Removed
-  }, [fetchSnippet, fetchComments, snippetId]); // Removed fetchRankingData from dependencies
+    fetchData();
+    fetchUserProfiles();
+  }, [fetchData, fetchUserProfiles]);
 
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
@@ -195,7 +217,7 @@ function SnippetDetail() {
       if (!res.ok || body?.success === false) throw new Error(body?.message || '댓글 작성 실패');
 
       setNewComment('');
-      await fetchComments();
+      await fetchData();
     } catch (err) {
       console.error(err);
       alert(err.message || '댓글 작성 중 오류가 발생했습니다.');
@@ -216,7 +238,7 @@ function SnippetDetail() {
 
       setEditCommentId(null);
       setEditContent('');
-      await fetchComments();
+      await fetchData();
     } catch (err) {
       console.error(err);
       alert(err.message || '댓글 수정 중 오류가 발생했습니다.');
@@ -232,7 +254,7 @@ function SnippetDetail() {
       return;
     }
     setComments((prev) => removeCommentFromTree(prev, commentId));
-    await fetchComments();
+    await fetchData();
   };
 
   const handleReplySubmit = async (e, parentCommentId) => {
@@ -250,7 +272,7 @@ function SnippetDetail() {
 
       setReplyContent('');
       setReplyingToCommentId(null);
-      await fetchComments();
+      await fetchData();
     } catch (err) {
       console.error(err);
       alert(err.message || '답글 작성 중 오류가 발생했습니다.');
@@ -354,98 +376,98 @@ function SnippetDetail() {
           </form>
 
           <div className="comment-list">
-            {comments.map((comment) => (
-              <div key={comment.commentId} className="comment-item">
-                <div className="comment-author">
-                  {/* Replaced with UserBadgeAndNickname */}
-                  <UserBadgeAndNickname user={comment.author} />
-                </div>
-
-                {editCommentId === comment.commentId ? (
-                  <div className="comment-edit-form">
-                    <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
-                    <button onClick={() => handleCommentEdit(comment.commentId)}>저장</button>
-                    <button onClick={() => setEditCommentId(null)}>취소</button>
+            {comments.map((comment) => {
+              const finalAuthor = { ...comment.author, ...(authorProfiles[comment.author?.userId] || {}) };
+              return (
+                <div key={comment.commentId} className="comment-item">
+                  <div className="comment-author">
+                    <UserBadgeAndNickname user={finalAuthor} />
                   </div>
-                ) : (
-                  <>
-                    <p className="comment-content">{comment.content}</p>
-                    <div className="comment-meta">
-                      <span>{new Date(comment.createdAt).toLocaleString()}</span>
-                      <div className="comment-actions">
-                        <button onClick={() => setReplyingToCommentId(comment.commentId)}>답글</button>
-                        {(user?.userId === comment.author?.userId || user?.userId === comment.authorId) && (
-                          <>
-                            <button onClick={() => { setEditCommentId(comment.commentId); setEditContent(comment.content); }}>
-                              <FaEdit /> 수정
-                            </button>
-                            <button onClick={() => handleCommentDelete(comment.commentId)}><FaTrash /> 삭제</button>
-                          </>
-                        )}
-                      </div>
+
+                  {editCommentId === comment.commentId ? (
+                    <div className="comment-edit-form">
+                      <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+                      <button onClick={() => handleCommentEdit(comment.commentId)}>저장</button>
+                      <button onClick={() => setEditCommentId(null)}>취소</button>
                     </div>
-
-                    {replyingToCommentId === comment.commentId && (
-                      <div className="reply-form">
-                        <form onSubmit={(e) => handleReplySubmit(e, comment.commentId)}>
-                          <textarea
-                            value={replyContent}
-                            onChange={(e) => setReplyContent(e.target.value)}
-                            placeholder="답글을 입력하세요..."
-                          />
-                          <button type="submit">답글 작성</button>
-                          <button type="button" onClick={() => { setReplyingToCommentId(null); setReplyContent(''); }}>취소</button>
-                        </form>
+                  ) : (
+                    <>
+                      <p className="comment-content">{comment.content}</p>
+                      <div className="comment-meta">
+                        <span>{new Date(comment.createdAt).toLocaleString()}</span>
+                        <div className="comment-actions">
+                          <button onClick={() => setReplyingToCommentId(comment.commentId)}>답글</button>
+                          {(user?.userId === comment.author?.userId || user?.userId === comment.authorId) && (
+                            <>
+                              <button onClick={() => { setEditCommentId(comment.commentId); setEditContent(comment.content); }}>
+                                <FaEdit /> 수정
+                              </button>
+                              <button onClick={() => handleCommentDelete(comment.commentId)}><FaTrash /> 삭제</button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    )}
 
-                    {comment.replies && comment.replies.length > 0 && (
-                      <div className="replies-container">
-                        {comment.replies.map((reply) => (
-                          <div
-                            key={reply.commentId}
-                            className="reply-item"
-                            style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
-                          >
-                            <div className="comment-author">
-                              {/* Replaced with UserBadgeAndNickname */}
-                              <UserBadgeAndNickname user={reply.author} />
-                            </div>
+                      {replyingToCommentId === comment.commentId && (
+                        <div className="reply-form">
+                          <form onSubmit={(e) => handleReplySubmit(e, comment.commentId)}>
+                            <textarea
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                              placeholder="답글을 입력하세요..."
+                            />
+                            <button type="submit">답글 작성</button>
+                            <button type="button" onClick={() => { setReplyingToCommentId(null); setReplyContent(''); }}>취소</button>
+                          </form>
+                        </div>
+                      )}
 
-                            <p className="comment-content">{reply.content}</p>
-                            <div className="comment-meta">
-                              <span>{new Date(reply.createdAt).toLocaleString()}</span>
-                              {(user?.userId === reply.author?.userId || user?.userId === reply.authorId) && (
-                                <div className="comment-actions">
-                                  <button onClick={() => handleCommentDelete(reply.commentId)}><FaTrash /> 삭제</button>
+                      {comment.replies && comment.replies.length > 0 && (
+                        <div className="replies-container">
+                          {comment.replies.map((reply) => {
+                            const finalReplyAuthor = { ...reply.author, ...(authorProfiles[reply.author?.userId] || {}) };
+                            return (
+                              <div
+                                key={reply.commentId}
+                                className="reply-item"
+                                style={{ marginLeft: '20px', borderLeft: '2px solid #e0e0e0', paddingLeft: '10px' }}
+                              >
+                                <div className="comment-author">
+                                  <UserBadgeAndNickname user={finalReplyAuthor} />
                                 </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
+
+                                <p className="comment-content">{reply.content}</p>
+                                <div className="comment-meta">
+                                  <span>{new Date(reply.createdAt).toLocaleString()}</span>
+                                  {(user?.userId === reply.author?.userId || user?.userId === reply.authorId) && (
+                                    <div className="comment-actions">
+                                      <button onClick={() => handleCommentDelete(reply.commentId)}><FaTrash /> 삭제</button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* ===== 사이드바 ===== */}
       <div className="snippet-sidebar">
-        {/* 작성자 카드: 레이블 고정폭 + 값 가변폭 */}
         <div className="sidebar-card author-card">
           <div className="meta-row">
             <span className="meta-label">
               <FaUser style={{ marginRight: 6 }} />
               작성자
             </span>
-
             <div className="meta-value">
-              {/* Replaced with UserBadgeAndNickname */}
-              <UserBadgeAndNickname user={snippet.author} />
+              <UserBadgeAndNickname user={{ ...snippet.author, ...(authorProfiles[snippet.author?.userId] || {}) }} />
             </div>
           </div>
         </div>

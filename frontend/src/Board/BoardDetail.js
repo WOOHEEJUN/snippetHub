@@ -41,29 +41,36 @@ function BoardDetail() {
   const [replyContent, setReplyContent] = useState('');
   const [replyingToCommentId, setReplyingToCommentId] = useState(null);
 
-  // 랭킹에서 받은 userId -> level 매핑
-  const [authorLevels, setAuthorLevels] = useState({});
+  const [authorProfiles, setAuthorProfiles] = useState({});
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  const fetchRankingData = useCallback(async () => {
+  const fetchUserProfiles = useCallback(async () => {
     try {
-      const res = await fetch(`/api/users/ranking?size=1000`, {
-        headers: getAuthHeaders(),
-        credentials: 'include',
+      const [allBadgesRes, rankingRes] = await Promise.all([
+        fetch(`/api/v1/badges/users/featured`, { headers: getAuthHeaders(), credentials: 'include' }),
+        fetch(`/api/users/ranking?size=2000`, { headers: getAuthHeaders(), credentials: 'include' })
+      ]);
+
+      const allBadges = allBadgesRes.ok ? await allBadgesRes.json().then(data => data.data || []) : [];
+      const badgeMap = new Map(allBadges.map(b => [b.userId, b]));
+
+      const usersFromRanking = rankingRes.ok ? await rankingRes.json().then(data => data.data?.content || []) : [];
+
+      const profiles = {};
+      usersFromRanking.forEach(user => {
+        profiles[user.userId] = {
+          ...user,
+          representativeBadge: badgeMap.get(user.userId) || null,
+        };
       });
-      if (!res.ok) throw new Error('랭킹 정보를 불러올 수 없습니다.');
-      const data = await res.json();
-      const levelMap = {};
-      (data?.data?.content || []).forEach((u) => {
-        levelMap[u.userId] = u.currentLevel;
-      });
-      setAuthorLevels(levelMap);
+
+      setAuthorProfiles(profiles);
     } catch (err) {
-      console.error('Failed to fetch ranking data:', err);
+      console.error('Failed to fetch user profiles:', err);
     }
   }, []);
 
@@ -92,8 +99,8 @@ function BoardDetail() {
 
   useEffect(() => {
     fetchPostData();
-    fetchRankingData();
-  }, [fetchPostData, fetchRankingData, postId]);
+    fetchUserProfiles();
+  }, [fetchPostData, fetchUserProfiles]);
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 
@@ -176,6 +183,7 @@ function BoardDetail() {
 
       if (created) {
         setComments(prev => [...prev, created]);
+        fetchUserProfiles(); // 새 댓글 작성자 정보 로드
       }
       setNewComment('');
     } catch (err) {
@@ -489,8 +497,7 @@ return (
       <div className="sidebar-card author-card">
         <h4><FaUser /> 작성자</h4>
         <div className="author-info">
-          {/* Replaced with UserBadgeAndNickname */}
-          <UserBadgeAndNickname user={post.author} />
+          <UserBadgeAndNickname user={{ ...post.author, ...(authorProfiles[post.author?.userId] || {}) }} />
         </div>
       </div>
 
