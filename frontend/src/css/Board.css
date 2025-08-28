@@ -248,3 +248,24 @@
   color: #d3d3d3 !important;   /* 회색으로 고정 */
   text-decoration: none !important;
 }
+/* ===== 작성자(4번째 열) 링크색 강제 고정 ===== */
+.board-container .board-table td:nth-child(4) a,
+.board-container .board-table td:nth-child(4) a:link,
+.board-container .board-table td:nth-child(4) a:visited,
+.board-container .board-table td:nth-child(4) a:hover,
+.board-container .board-table td:nth-child(4) a:active {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}
+
+/* 링크 내부 아이콘/텍스트도 상속받도록 */
+.board-container .board-table td:nth-child(4) a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
+}
+
+/* (보너스) 이 화면 전체에서 부트스트랩 링크 변수도 잠금 */
+.board-container {
+  --bs-link-color: #d3d3d3;
+  --bs-link-hover-color: #d3d3d3;
+}
