@@ -41,40 +41,6 @@ function BoardDetail() {
   const [replyContent, setReplyContent] = useState('');
   const [replyingToCommentId, setReplyingToCommentId] = useState(null);
 
-  const [authorProfiles, setAuthorProfiles] = useState({});
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
-  const fetchUserProfiles = useCallback(async () => {
-    try {
-      const [allBadgesRes, rankingRes] = await Promise.all([
-        fetch(`/api/v1/badges/users/featured`, { headers: getAuthHeaders(), credentials: 'include' }),
-        fetch(`/api/users/ranking?size=2000`, { headers: getAuthHeaders(), credentials: 'include' })
-      ]);
-
-      const allBadges = allBadgesRes.ok ? await allBadgesRes.json().then(data => data.data || []) : [];
-      const badgeMap = new Map(allBadges.map(b => [b.userId, b]));
-
-      const usersFromRanking = rankingRes.ok ? await rankingRes.json().then(data => data.data?.content || []) : [];
-
-      const profiles = {};
-      usersFromRanking.forEach(user => {
-        profiles[user.userId] = {
-          ...user,
-          representativeBadge: badgeMap.get(user.userId) || null,
-        };
-      });
-
-      setAuthorProfiles(profiles);
-      console.log('BoardDetail: authorProfiles updated:', profiles); // DEBUG
-    } catch (err) {
-      console.error('Failed to fetch user profiles:', err);
-    }
-  }, []);
-
   const fetchPostData = useCallback(async () => {
     try {
       const [postRes, commentsRes] = await Promise.all([
@@ -85,11 +51,65 @@ function BoardDetail() {
       if (!postRes.ok) throw new Error('게시글 정보를 불러올 수 없습니다.');
 
       const postJson = await postRes.json().catch(() => null);
-      setPost(postJson?.data ?? postJson ?? null);
+      let fetchedPost = postJson?.data ?? postJson ?? null;
+
+      // Fetch representative badge for post author
+      if (fetchedPost && fetchedPost.author && fetchedPost.author.userId) {
+        try {
+          const badgeRes = await fetch(`/api/badges/users/${fetchedPost.author.userId}/featured`, {
+            credentials: 'include',
+          });
+          if (badgeRes.ok) {
+            const badgeData = await badgeRes.json();
+            if (badgeData?.data?.length) {
+              fetchedPost = {
+                ...fetchedPost,
+                author: {
+                  ...fetchedPost.author,
+                  representativeBadge: badgeData.data[0],
+                },
+              };
+            }
+          }
+        } catch (badgeErr) {
+          console.error(`Failed to fetch badge for post author ${fetchedPost.author.userId}:`, badgeErr);
+        }
+      }
+
+      setPost(fetchedPost);
 
       if (commentsRes.ok) {
         const commentsJson = await commentsRes.json().catch(() => null);
-        setComments(normalizeComments(commentsJson));
+        let fetchedComments = normalizeComments(commentsJson);
+
+        // Fetch representative badges for comment authors
+        fetchedComments = await Promise.all(
+          fetchedComments.map(async (comment) => {
+            if (comment.author && comment.author.userId) {
+              try {
+                const badgeRes = await fetch(`/api/badges/users/${comment.author.userId}/featured`, {
+                  credentials: 'include',
+                });
+                if (badgeRes.ok) {
+                  const badgeData = await badgeRes.json();
+                  if (badgeData?.data?.length) {
+                    return {
+                      ...comment,
+                      author: {
+                        ...comment.author,
+                        representativeBadge: badgeData.data[0],
+                      },
+                    };
+                  }
+                }
+              } catch (badgeErr) {
+                console.error(`Failed to fetch badge for comment author ${comment.author.userId}:`, badgeErr);
+              }
+            }
+            return comment;
+          })
+        );
+        setComments(fetchedComments);
       } else {
         setComments([]);
       }
@@ -100,8 +120,7 @@ function BoardDetail() {
 
   useEffect(() => {
     fetchPostData();
-    fetchUserProfiles();
-  }, [fetchPostData, fetchUserProfiles]);
+  }, [fetchPostData]);
 
   const handleEdit = () => navigate(`/board/edit/${postId}`);
 

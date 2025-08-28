@@ -77,35 +77,6 @@ function SnippetDetail() {
   const [isAIExpanded, setIsAIExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [authorProfiles, setAuthorProfiles] = useState({});
-
-  const fetchUserProfiles = useCallback(async () => {
-    try {
-      const [allBadgesRes, rankingRes] = await Promise.all([
-        fetch(`/api/v1/badges/users/featured`, { headers: getAuthHeaders(), credentials: 'include' }),
-        fetch(`/api/users/ranking?size=2000`, { headers: getAuthHeaders(), credentials: 'include' })
-      ]);
-
-      const allBadges = allBadgesRes.ok ? await allBadgesRes.json().then(data => data.data || []) : [];
-      const badgeMap = new Map(allBadges.map(b => [b.userId, b]));
-
-      const usersFromRanking = rankingRes.ok ? await rankingRes.json().then(data => data.data?.content || []) : [];
-
-      const profiles = {};
-      usersFromRanking.forEach(user => {
-        profiles[user.userId] = {
-          ...user,
-          representativeBadge: badgeMap.get(user.userId) || null,
-        };
-      });
-
-      setAuthorProfiles(profiles);
-      console.log('SnippetDetail: authorProfiles updated:', profiles); // DEBUG
-    } catch (err) {
-      console.error('Failed to fetch user profiles:', err);
-    }
-  }, [getAuthHeaders]);
-
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -116,13 +87,64 @@ function SnippetDetail() {
 
       if (!snippetRes.ok) throw new Error('스니펫 불러오기 실패');
       const snippetData = await parseJsonSafe(snippetRes);
-      const finalSnippet = snippetData?.data ?? snippetData;
+      let finalSnippet = snippetData?.data ?? snippetData;
+
+      // Fetch representative badge for snippet author
+      if (finalSnippet && finalSnippet.author && finalSnippet.author.userId) {
+        try {
+          const badgeRes = await fetch(`/api/badges/users/${finalSnippet.author.userId}/featured`, {
+            credentials: 'include',
+          });
+          if (badgeRes.ok) {
+            const badgeData = await badgeRes.json();
+            if (badgeData?.data?.length) {
+              finalSnippet = {
+                ...finalSnippet,
+                author: {
+                  ...finalSnippet.author,
+                  representativeBadge: badgeData.data[0],
+                },
+              };
+            }
+          }
+        } catch (badgeErr) {
+          console.error(`Failed to fetch badge for snippet author ${finalSnippet.author.userId}:`, badgeErr);
+        }
+      }
       setSnippet(finalSnippet);
 
       let commentsData = [];
       if (commentsRes.ok) {
         const commentsJson = await parseJsonSafe(commentsRes);
         commentsData = Array.isArray(commentsJson) ? commentsJson : (Array.isArray(commentsJson?.data) ? commentsJson.data : []);
+
+        // Fetch representative badges for comment authors
+        commentsData = await Promise.all(
+          commentsData.map(async (comment) => {
+            if (comment.author && comment.author.userId) {
+              try {
+                const badgeRes = await fetch(`/api/badges/users/${comment.author.userId}/featured`, {
+                  credentials: 'include',
+                });
+                if (badgeRes.ok) {
+                  const badgeData = await badgeRes.json();
+                  if (badgeData?.data?.length) {
+                    return {
+                      ...comment,
+                      author: {
+                        ...comment.author,
+                        representativeBadge: badgeData.data[0],
+                      },
+                    };
+                  }
+                }
+              } catch (badgeErr) {
+                console.error(`Failed to fetch badge for comment author ${comment.author.userId}:`, badgeErr);
+              }
+            }
+            return comment;
+          })
+        );
         setComments(commentsData);
       }
     } catch (err) {
@@ -135,8 +157,7 @@ function SnippetDetail() {
 
   useEffect(() => {
     fetchData();
-    fetchUserProfiles();
-  }, [fetchData, fetchUserProfiles]);
+  }, [fetchData]);
 
   const handleEdit = () => navigate(`/snippets/edit/${snippetId}`);
 
