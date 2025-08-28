@@ -3,6 +3,51 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/UserBadgeAndNickname.css';
 
+/** 등급 문자열 → 파일명 매핑 (한/영 모두 허용) */
+const levelKey = (lv) => {
+  const s = String(lv ?? '').trim().toLowerCase();
+  if (!s) return null;
+  const map = {
+    골드: 'gold',
+    금장: 'gold',
+    실버: 'silver',
+    은장: 'silver',
+    브론즈: 'bronze',
+    동장: 'bronze',
+    플래티넘: 'platinum',
+    플레티넘: 'platinum',
+    다이아: 'diamond',
+    다이아몬드: 'diamond',
+    마스터: 'master',
+    그랜드마스터: 'grandmaster',
+    레전드: 'legend',
+    // 영문/대소문자
+    gold: 'gold',
+    silver: 'silver',
+    bronze: 'bronze',
+    platinum: 'platinum',
+    diamond: 'diamond',
+    master: 'master',
+    grandmaster: 'grandmaster',
+    legend: 'legend',
+  };
+  return map[s] || null;
+};
+
+const pickRepSrcs = (rep) => {
+  if (!rep) return [];
+  const cand = [];
+  if (rep.imageUrl) cand.push(rep.imageUrl);
+  if (rep.iconUrl) cand.push(rep.iconUrl);
+  if (rep.code)     cand.push(`/badges/${String(rep.code).toLowerCase()}.png`);
+  if (rep.name) {
+    const slug = String(rep.name).trim().toLowerCase().replace(/\s+/g, '_');
+    cand.push(`/badges/${slug}.png`);
+  }
+  // 중복 제거
+  return [...new Set(cand)];
+};
+
 /**
  * props
  * - user: { userId, nickname, currentLevel, representativeBadge? }
@@ -10,9 +55,9 @@ import '../css/UserBadgeAndNickname.css';
  * - size: number
  * - className: string
  * - mode: 'auto' | 'level' | 'rep'
- *    auto  = 대표뱃지 있으면 대표, 없으면 등급
- *    level = 항상 등급 아이콘
- *    rep   = 대표뱃지만 (없으면 아이콘 표시 안 함)
+ *    auto  = 대표 있으면 대표, 없으면 등급 PNG
+ *    level = 항상 등급 PNG (/badges/{level}.png)
+ *    rep   = 대표뱃지 이미지만 (없으면 아이콘 없음)
  */
 export default function UserBadgeAndNickname({
   user,
@@ -22,79 +67,58 @@ export default function UserBadgeAndNickname({
   mode = 'auto',
 }) {
   const { user: me, representativeBadge: myRep } = useAuth();
+
   const nick = user?.nickname || user?.name || '알 수 없는 사용자';
   const isMe = me?.userId && user?.userId && String(me.userId) === String(user.userId);
 
-  /** 1) 대표뱃지: 해당 유저의 것만 사용 (나일 때만 컨텍스트 폴백) */
+  // 1) 대표뱃지 후보 (그 유저의 것만; 내 프로필이면 컨텍스트 폴백 허용)
   const rep = user?.representativeBadge ?? (isMe ? myRep : null);
+  const repCandidates = useMemo(() => pickRepSrcs(rep), [rep]);
+  const [repIdx, setRepIdx] = useState(0);
+  const repSrc = repCandidates[repIdx] || null;
 
-  const repSrcs = useMemo(() => {
-    const s = [];
-    if (rep?.imageUrl) s.push(rep.imageUrl);
-    if (rep?.iconUrl) s.push(rep.iconUrl);
-    if (rep?.code) s.push(`/badges/${String(rep.code).toLowerCase()}.png`);
-    if (rep?.name) s.push(`/badges/${String(rep.name).trim().toLowerCase().replace(/\s+/g, '_')}.png`);
-    if (rep?.tierLetter) s.push(`/badges/badge_${rep.tierLetter}.png`);
-    s.push('/badges/placeholder.png');
-    return [...new Set(s)];
-  }, [rep]);
+  // 2) 등급 PNG 경로
+  const levelSrc = (() => {
+    const key = levelKey(user?.currentLevel);
+    return key ? `/badges/${key}.png` : null;
+  })();
 
-  /** 2) 등급 아이콘 (프로젝트 경로 맞춰주세요) */
-  const levelSlug = useMemo(() => {
-    const raw = (user?.currentLevel ?? '').toString().toLowerCase();
-    if (!raw) return null;
-    if (/gold|골드/.test(raw)) return 'gold';
-    if (/silver|실버/.test(raw)) return 'silver';
-    if (/bronze|브론즈/.test(raw)) return 'bronze';
-    if (/platinum|플래티넘/.test(raw)) return 'platinum';
-    if (/diamond|다이아/.test(raw)) return 'diamond';
-    if (/master|마스터/.test(raw)) return 'master';
-    return raw.replace(/\s+/g, '');
-  }, [user?.currentLevel]);
+  // 3) 어떤 이미지를 쓸지 결정
+  let imgSrc = null;
+  if (mode === 'rep') imgSrc = repSrc || null;
+  else if (mode === 'level') imgSrc = levelSrc || null;
+  else /* auto */ imgSrc = repSrc || levelSrc || null;
 
-  const levelSrcs = useMemo(() => {
-    const s = [];
-    if (levelSlug) {
-      s.push(`/levels/${levelSlug}.png`);
-      s.push(`/badges/level_${levelSlug}.png`);
-      s.push(`/assets/levels/${levelSlug}.png`);
-    }
-    s.push('/badges/placeholder-level.png');
-    return [...new Set(s)];
-  }, [levelSlug]);
-
-  /** 3) 어떤 아이콘을 쓸지 결정 */
-  const wantRep = mode === 'rep' || (mode === 'auto' && rep);
-  const candidates = wantRep ? repSrcs : levelSrcs;
-
-  const [imgIdx, setImgIdx] = useState(0);
-  const imgSrc = candidates[imgIdx];
-
-  const icon = (
+  const Img = imgSrc ? (
     <img
       className="ubn-icon"
       src={imgSrc}
-      alt={wantRep ? '대표 뱃지' : `등급: ${user?.currentLevel ?? ''}`}
-      style={{ width: size, height: size, objectFit: 'contain', flex: `0 0 ${size}px` }}
+      alt="icon"
+      style={{ width: size, height: size, marginRight: 6 }}
       onError={(e) => {
-        if (imgIdx < candidates.length - 1) setImgIdx(imgIdx + 1);
+        // 더 이상 'gold.png'로 떨어지지 않게, 실패 시 숨김
+        if (repSrc && repIdx < repCandidates.length - 1) {
+          // 대표뱃지 후보가 더 있으면 다음 후보 시도
+          setRepIdx(repIdx + 1);
+        } else {
+          e.currentTarget.style.display = 'none';
+        }
       }}
     />
-  );
+  ) : null;
 
   const inner = (
-    <span className={`author-display ${className}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      { (mode !== 'rep' || rep) && icon /* rep 모드인데 rep 없으면 아이콘 숨김 */ }
-      <span className="nickname" style={{ lineHeight: 1 }}>{nick}</span>
+    <span className={`author-display ${className}`}>
+      {Img}
+      <span className="nickname">{nick}</span>
     </span>
   );
 
-  if (showLink && user?.userId) {
-    return (
-      <Link to={`/users/${user.userId}`} className="author-link" style={{ textDecoration: 'none' }}>
-        {inner}
-      </Link>
-    );
-  }
-  return inner;
+  return showLink && user?.userId ? (
+    <Link to={`/users/${user.userId}`} className="author-link" style={{ textDecoration: 'none' }}>
+      {inner}
+    </Link>
+  ) : (
+    inner
+  );
 }

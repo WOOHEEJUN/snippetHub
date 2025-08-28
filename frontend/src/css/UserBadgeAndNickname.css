@@ -24,3 +24,23 @@
   border-radius: 50%; /* 원형 뱃지 */
   background-color: rgba(255, 255, 255, 0.1); /* 이미지 로딩 전 배경 */
 }
+.author-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+}
+.author-link, .author-link:visited { color: inherit; text-decoration: none; }
+.author-link:hover { color: #8ab0d1; text-decoration: underline; }
+
+.ubn-icon {
+  display: inline-block;
+  object-fit: contain;
+  vertical-align: middle;
+}
+.nickname {
+  white-space: nowrap;
+  font-weight: 700;
+  color: #d3d3d3;
+  line-height: 1;
+}

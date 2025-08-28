@@ -85,9 +85,9 @@ function Ranking() {
                   onClick={() => navigate(`/users/${u.userId}`)}
                 >
                   {/* ✅ td 안쪽에만 flex 래퍼 */}
-                  <div className="nickname-cell">
-                    <UserBadgeAndNickname user={u} showLink={false} mode="level" />
-                  </div>
+                  <td className="nickname-cell" onClick={() => navigate(`/users/${u.userId}`)}>
+  <UserBadgeAndNickname user={u} showLink={false} size={20} mode="level" />
+                  </td>
                 </td>
                 <td>{u.currentLevel}</td>
                 <td>{u.currentPoints} P</td>
