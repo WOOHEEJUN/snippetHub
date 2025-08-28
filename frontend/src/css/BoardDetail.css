@@ -211,7 +211,7 @@
 
 /* 닉네임만 크게 */
 .author-card .nickname {
-  font-size: 1.6rem;           /* ← 더 키우고 싶으면 1.8rem 등으로 */
+  font-size: 0.85rem;           /* ← 더 키우고 싶으면 1.8rem 등으로 */
   font-weight: 800;
   color: #f1f1f1;
   line-height: 1.1;
