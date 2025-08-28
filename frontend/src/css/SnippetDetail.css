@@ -302,4 +302,11 @@
   --bs-link-color: #d3d3d3;
   --bs-link-hover-color: #d3d3d3;
 }
-
+.snippet-detail-page a.nickname,
+.snippet-detail-page a.nickname:link,
+.snippet-detail-page a.nickname:visited,
+.snippet-detail-page a.nickname:hover,
+.snippet-detail-page a.nickname:active {
+  color: #d3d3d3 !important;   /* 밝은 회색 */
+  text-decoration: none !important;
+}
