@@ -269,3 +269,21 @@
   --bs-link-color: #d3d3d3;
   --bs-link-hover-color: #d3d3d3;
 }
+.board-container .board-table td:nth-child(3) a,
+.board-container .board-table td:nth-child(3) a:link,
+.board-container .board-table td:nth-child(3) a:visited,
+.board-container .board-table td:nth-child(3) a:hover,
+.board-container .board-table td:nth-child(3) a:active {
+  color: #d3d3d3 !important;
+  text-decoration: none !important;
+}
+.board-container .board-table td:nth-child(3) a * {
+  color: inherit !important;
+  text-decoration: inherit !important;
+}
+
+/* 부트스트랩 링크 변수도 전체적으로 회색 고정 */
+.board-container {
+  --bs-link-color: #d3d3d3;
+  --bs-link-hover-color: #d3d3d3;
+}
