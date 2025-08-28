@@ -103,10 +103,10 @@ const UserProfile = () => {
   const repRarity = repBadge ? (getBadgeRarity(repBadge) || 'rare').toLowerCase() : null;
 
   // 3) 대표뱃지가 없을 때는 표준화된 등급키로 이미지 선택 (한글 → 영문 매핑 포함)
-  const levelKey = getUserLevel(user); // e.g. 'GOLD', 'PLATINUM' ...
-  const levelImgSrc =
-    getLevelBadgeImage(levelKey) ||
-    `/badges/${String(levelKey || 'bronze').toLowerCase()}.png`;
+const levelKey = (getUserLevel(user) || 'BRONZE').toUpperCase(); // e.g. 'GOLD'
+const levelImgSrc =
+  getLevelBadgeImage(levelKey) ||
+  `/badges/${levelKey.toLowerCase()}.png`;
 
   return (
     <div className="user-profile-container">
